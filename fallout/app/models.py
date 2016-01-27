@@ -7,6 +7,23 @@ class Character(models.Model):
     """
     Character
     """
+    SPECIAL_STRENGTH = 'strength'
+    SPECIAL_PERCEPTION = 'perception'
+    SPECIAL_ENDURANCE = 'endurance'
+    SPECIAL_CHARISMA = 'charisma'
+    SPECIAL_INTELLIGENCE = 'intelligence'
+    SPECIAL_AGILITY = 'agility'
+    SPECIAL_LUCK = 'luck'
+    SPECIALS = (
+        (SPECIAL_STRENGTH, _("force")),
+        (SPECIAL_PERCEPTION, _("perception")),
+        (SPECIAL_ENDURANCE, _("endurance")),
+        (SPECIAL_CHARISMA, _("charisme")),
+        (SPECIAL_INTELLIGENCE, _("intelligence")),
+        (SPECIAL_AGILITY, _("agilité")),
+        (SPECIAL_LUCK, _("chance")),
+    )
+
     SKILL_SMALL_GUNS = 'small_guns'
     SKILL_BIG_GUNS = 'big_guns'
     SKILL_ENERGY_WEAPONS = 'energy_weapons'
@@ -48,6 +65,39 @@ class Character(models.Model):
         (SKILL_SURVIVAL, _("survie")),
     )
 
+    STAT_MAX_HEALTH = 'max_health'
+    STAT_MAX_ACTION_POINTS = 'max_action_points'
+    STAT_DAMAGE_RESISTANCE = 'damage_resistance'
+    STAT_DAMAGE_THRESHOLD = 'damage_threashold'
+    STAT_ARMOR_CLASS = 'armor_class'
+    STAT_CARRY_WEIGHT = 'carry_weight'
+    STAT_MELEE_DAMAGE = 'melee_damage'
+    STAT_POISON_RESISTANCE = 'poison_resistance'
+    STAT_RADIATION_RESISTANCE = 'radiation_resistance'
+    STAT_GAS_RESISTANCE = 'gas_resistance'
+    STAT_FIRE_RESISTANCE = 'fire_resistance'
+    STAT_ELECTRICITY_RESISTANCE = 'electricity_resistance'
+    STAT_SEQUENCE = 'sequence'
+    STAT_HEALING_RATE = 'healing_rate'
+    STAT_CRITICAL_CHANCE = 'critical_chance'
+    STATS = (
+        (STAT_MAX_HEALTH, "santé maximale"),
+        (STAT_MAX_ACTION_POINTS, "points d'action max."),
+        (STAT_DAMAGE_RESISTANCE, "résistance aux dégâts"),
+        (STAT_DAMAGE_THRESHOLD, "seuil de dégâts"),
+        (STAT_ARMOR_CLASS, "armure"),
+        (STAT_CARRY_WEIGHT, "charge maximale"),
+        (STAT_MELEE_DAMAGE, "attaque en mélée"),
+        (STAT_POISON_RESISTANCE, "résistance aux poisons"),
+        (STAT_RADIATION_RESISTANCE, "résistance aux radiations"),
+        (STAT_GAS_RESISTANCE, "résistance aux gaz"),
+        (STAT_FIRE_RESISTANCE, "résistance au feu"),
+        (STAT_ELECTRICITY_RESISTANCE, "résistance à l'électricité"),
+        (STAT_SEQUENCE, "initiative"),
+        (STAT_HEALING_RATE, "taux de regénération"),
+        (STAT_CRITICAL_CHANCE, "chance de critique"),
+    )
+
     # General informations
     is_player = models.BooleanField(default=False, verbose_name=_("joueur ?"))
     name = models.CharField(max_length=100, verbose_name=_("nom"))
@@ -56,7 +106,9 @@ class Character(models.Model):
     level = models.PositiveSmallIntegerField(default=1, verbose_name=_("niveau"))
     experience = models.PositiveIntegerField(default=0, verbose_name=_("expérience"))
     karma = models.SmallIntegerField(default=0, verbose_name=_("karma"))
-    health = models.SmallIntegerField(default=1, verbose_name=_("santé"))
+    health = models.SmallIntegerField(default=0, verbose_name=_("santé"))
+    action_points = models.SmallIntegerField(default=0, verbose_name=_("points d'action"))
+    irradiation = models.SmallIntegerField(default=0, verbose_name=_("irradiation"))
     skill_points = models.PositiveSmallIntegerField(default=0, verbose_name=_("points de compétences"))
     # S.P.E.C.I.A.L.
     strength = models.PositiveSmallIntegerField(default=5, verbose_name=_("force"))
@@ -67,12 +119,12 @@ class Character(models.Model):
     agility = models.PositiveSmallIntegerField(default=5, verbose_name=_("agilité"))
     luck = models.PositiveSmallIntegerField(default=5, verbose_name=_("chance"))
     # Secondary statistics
-    hit_points = models.SmallIntegerField(default=0, verbose_name=_("points de dégâts"))
+    max_health = models.SmallIntegerField(default=0, verbose_name=_("santé maximale"))
+    max_action_points = models.SmallIntegerField(default=0, verbose_name=_("points d'action max."))
     damage_resistance = models.SmallIntegerField(default=0, verbose_name=_("résistance aux dégâts"))
     damage_threshold = models.SmallIntegerField(default=0, verbose_name=_("seuil de dégâts"))
     armor_class = models.SmallIntegerField(default=0, verbose_name=_("armure"))
-    action_points = models.SmallIntegerField(default=0, verbose_name=_("points d'action"))
-    carry_weight = models.SmallIntegerField(default=0, verbose_name=_("encombrement"))
+    carry_weight = models.SmallIntegerField(default=0, verbose_name=_("charge maximale"))
     melee_damage = models.SmallIntegerField(default=0, verbose_name=_("attaque en mélée"))
     poison_resistance = models.SmallIntegerField(default=0, verbose_name=_("résistance aux poisons"))
     radiation_resistance = models.SmallIntegerField(default=0, verbose_name=_("résistance aux radiations"))
@@ -108,7 +160,7 @@ class Character(models.Model):
     tag_3 = models.CharField(max_length=20, choices=SKILLS, verbose_name=_("tag 3"))
     tag_4 = models.CharField(max_length=20, choices=SKILLS, blank=True, null=True, verbose_name=_("tag 4"))
     # Per level
-    hit_points_per_level = models.SmallIntegerField(default=0, verbose_name=_("points de dégâts par niveau"))
+    hit_points_per_level = models.SmallIntegerField(default=0, verbose_name=_("points de santé par niveau"))
     skill_points_per_level = models.SmallIntegerField(default=0, verbose_name=_("points de compétence par niveau"))
     # Local variables
     _stats = None
@@ -122,11 +174,12 @@ class Character(models.Model):
             self.hit_points_per_level = character.hit_points_per_level + int(3 + 0.5 * character.endurance)
             self.skill_points_per_level = character.skill_points_per_level + 5 + (2 * character.intelligence)
 
-            self.hit_points = character.hit_points + 15 + (character.strength + (2 * character.endurance)) + ((character.level - 1) * self.hit_points_per_level)
+            self.max_health = character.max_health + 15 + (character.strength + (2 * character.endurance)) + \
+                              ((character.level - 1) * self.hit_points_per_level)
+            self.max_action_points = character.max_action_points + 5 + int(0.5 * character.agility)
             self.damage_resistance = character.damage_resistance
             self.damage_threshold = character.damage_threshold
             self.armor_class = character.armor_class + character.agility
-            self.action_points = character.action_points + 5 + int(0.5 * character.agility)
             self.carry_weight = character.carry_weight + 25 + (25 * character.strength)
             self.melee_damage = character.melee_damage + max(0, character.strength - 5)
             self.poison_resistance = character.poison_resistance + 5 * character.endurance
