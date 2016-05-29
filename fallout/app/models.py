@@ -1,11 +1,12 @@
 # encoding: utf-8
+from django.conf import settings
 from django.db import models
 from django.utils.translation import ugettext as _
 
 
 class Character(models.Model):
     """
-    Character
+    Personnage
     """
     SPECIAL_STRENGTH = 'strength'
     SPECIAL_PERCEPTION = 'perception'
@@ -47,7 +48,7 @@ class Character(models.Model):
         (SKILL_SMALL_GUNS, _("armes à feu légères")),
         (SKILL_BIG_GUNS, _("armes à feu lourdes")),
         (SKILL_ENERGY_WEAPONS, _("armes à énergie")),
-        (SKILL_UNARMED, _("sans arme")),
+        (SKILL_UNARMED, _("à mains nues")),
         (SKILL_MELEE_WEAPONS, _("armes de mélée")),
         (SKILL_THROWING, _("armes de lancer")),
         (SKILL_FIRST_AID, _("premiers secours")),
@@ -99,6 +100,7 @@ class Character(models.Model):
     )
 
     # General informations
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name=_("utilisateur"))
     is_player = models.BooleanField(default=False, verbose_name=_("joueur ?"))
     name = models.CharField(max_length=100, verbose_name=_("nom"))
     title = models.CharField(max_length=200, blank=True, null=True, verbose_name=_("titre"))
@@ -138,7 +140,7 @@ class Character(models.Model):
     small_guns = models.SmallIntegerField(default=0, verbose_name=_("armes à feu légères"))
     big_guns = models.SmallIntegerField(default=0, verbose_name=_("armes à feu lourdes"))
     energy_weapons = models.SmallIntegerField(default=0, verbose_name=_("armes à énergie"))
-    unarmed = models.SmallIntegerField(default=0, verbose_name=_("sans arme"))
+    unarmed = models.SmallIntegerField(default=0, verbose_name=_("à mains nues"))
     melee_weapons = models.SmallIntegerField(default=0, verbose_name=_("armes de mélée"))
     throwing = models.SmallIntegerField(default=0, verbose_name=_("armes de lancer"))
     first_aid = models.SmallIntegerField(default=0, verbose_name=_("premiers secours"))
@@ -162,21 +164,22 @@ class Character(models.Model):
     # Per level
     hit_points_per_level = models.SmallIntegerField(default=0, verbose_name=_("points de santé par niveau"))
     skill_points_per_level = models.SmallIntegerField(default=0, verbose_name=_("points de compétence par niveau"))
-    # Local variables
-    _stats = None
 
     class Meta:
         verbose_name = _("personnage")
         verbose_name_plural = _("personnages")
 
     class Statistics:
+        """
+        Statistiques du personnage
+        """
         def __init__(self, character: Character):
-            self.hit_points_per_level = character.hit_points_per_level + int(3 + 0.5 * character.endurance)
+            self.hit_points_per_level = character.hit_points_per_level + 3 + (character.endurance // 2)
             self.skill_points_per_level = character.skill_points_per_level + 5 + (2 * character.intelligence)
 
-            self.max_health = character.max_health + 15 + (character.strength + (2 * character.endurance)) + \
-                              ((character.level - 1) * self.hit_points_per_level)
-            self.max_action_points = character.max_action_points + 5 + int(0.5 * character.agility)
+            self.max_health = (character.max_health + 15 + (character.strength + (2 * character.endurance)) +
+                               ((character.level - 1) * self.hit_points_per_level))
+            self.max_action_points = character.max_action_points + 5 + (character.agility // 2)
             self.damage_resistance = character.damage_resistance
             self.damage_threshold = character.damage_threshold
             self.armor_class = character.armor_class + character.agility
@@ -188,7 +191,7 @@ class Character(models.Model):
             self.fire_resistance = character.fire_resistance
             self.electricity_resistance = character.electricity_resistance
             self.sequence = character.sequence + 2 * character.perception
-            self.healing_rate = character.healing_rate + int(character.endurance / 3)
+            self.healing_rate = character.healing_rate + (character.endurance // 3)
             self.critical_chance = character.critical_chance + character.luck
 
             self.small_guns = character.small_guns + 5 + (4 * character.agility)
@@ -218,15 +221,17 @@ class Character(models.Model):
 
     @property
     def stats(self) -> Statistics:
-        self._stats = self._stats or Character.Statistics(self)
-        return self._stats
+        return Character.Statistics(self)
 
     def save(self, *args, **kwargs):
         self.check_level()
-        self._stats = self.stats
         super().save(*args, **kwargs)
 
-    def check_level(self):
+    def check_level(self) -> int:
+        """
+        Vérification du niveau en fonction de l'expérience
+        :return: Niveau actuel
+        """
         needed_xp = 0
         level = 2
         while True:
