@@ -1,4 +1,5 @@
 # encoding: utf-8
+from random import randint
 from typing import List
 
 from django.conf import settings
@@ -60,6 +61,7 @@ class Character(models.Model):
     SKILL_BARTER = 'barter'
     SKILL_GAMBLING = 'gambling'
     SKILL_SURVIVAL = 'survival'
+    SKILL_KNOWLEDGE = 'knowledge'
     SKILLS = (
         (SKILL_SMALL_GUNS, _("armes à feu légères")),
         (SKILL_BIG_GUNS, _("armes à feu lourdes")),
@@ -80,6 +82,7 @@ class Character(models.Model):
         (SKILL_BARTER, _("marchandage")),
         (SKILL_GAMBLING, _("hasard")),
         (SKILL_SURVIVAL, _("survie")),
+        (SKILL_LORE, _("connaissance")),
     )
 
     STAT_MAX_HEALTH = 'max_health'
@@ -115,6 +118,37 @@ class Character(models.Model):
         (STAT_CRITICAL_CHANCE, _("chance de critique")),
     )
 
+    RACE_HUMAN = 'human'
+    RACE_GHOUL = 'ghoul'
+    RACE_SUPER_MUTANT = 'mutant'
+    RACE_DEATHCLAW = 'deathclaw'
+    RACE_ROBOT = 'robot'
+    RACES = (
+        (RACE_HUMAN, _("humain")),
+        (RACE_GHOUL, _("ghoul")),
+        (RACE_SUPER_MUTANT, _("super-mutant")),
+        (RACE_DEATHCLAW, _("écorcheur")),
+        (RACE_ROBOT, _("robot")),
+    )
+
+    RACES_STATS = {
+        RACE_HUMAN: {
+
+        },
+        RACE_GHOUL: {
+
+        },
+        RACE_SUPER_MUTANT: {
+
+        },
+        RACE_DEATHCLAW: {
+
+        },
+        RACE_ROBOT: {
+
+        },
+    }
+
     # Statistics cache
     STATISTICS = {}
 
@@ -125,6 +159,7 @@ class Character(models.Model):
     name = models.CharField(max_length=100, verbose_name=_("nom"))
     title = models.CharField(max_length=200, blank=True, null=True, verbose_name=_("titre"))
     description = models.TextField(blank=True, null=True, verbose_name=_("description"))
+    race = models.CharField(max_length=10, choices=RACES, default=RACE_HUMAN, verbose_name=_("race"))
     level = models.PositiveSmallIntegerField(default=1, verbose_name=_("niveau"))
     experience = models.PositiveIntegerField(default=0, verbose_name=_("expérience"))
     karma = models.SmallIntegerField(default=0, verbose_name=_("karma"))
@@ -176,6 +211,7 @@ class Character(models.Model):
     barter = models.SmallIntegerField(default=0, verbose_name=_("marchandage"))
     gambling = models.SmallIntegerField(default=0, verbose_name=_("hasard"))
     survival = models.SmallIntegerField(default=0, verbose_name=_("survie"))
+    knowledge = models.SmallIntegerField(default=0, verbose_name=_("connaissance"))
     # Tag skills
     tag_1 = models.CharField(max_length=20, choices=SKILLS, verbose_name=_("spécialité 1"))
     tag_2 = models.CharField(max_length=20, choices=SKILLS, verbose_name=_("spécialité 2"))
@@ -185,6 +221,8 @@ class Character(models.Model):
     # Per level
     hit_points_per_level = models.SmallIntegerField(default=0, verbose_name=_("points de santé par niveau"))
     skill_points_per_level = models.SmallIntegerField(default=0, verbose_name=_("points de compétence par niveau"))
+    # Others
+    equipement = models.ManyToManyField('Item', blank=True, through=Equipment, verbose_name=_("inventaire"))
 
     class Meta:
         verbose_name = _("personnage")
@@ -235,6 +273,7 @@ class Character(models.Model):
             self.barter = character.barter + 4 * character.charisma
             self.gambling = character.gambling + 5 * character.luck
             self.survival = character.survival + 2 * (character.endurance + character.intelligence)
+            self.knowledge = character.knowledge + 5 * character.intelligence
 
             for tag in character.tags:
                 setattr(self, tag, getattr(self, tag, 0) + 20)
@@ -277,6 +316,9 @@ class Character(models.Model):
             level += 1
         return level
 
+    def roll(self, skill, malus=0):
+        pass
+
 
 class Item(models.Model):
     """
@@ -297,37 +339,6 @@ class Item(models.Model):
         (TYPE_MISC, _("autre")),
     )
 
-    name = models.CharField(max_length=100, verbose_name=_("nom"))
-    image = models.ImageField(blank=True, null=True, verbose_name=_("image"))
-    type = models.CharField(max_length=7, choices=TYPES, verbose_name=_("type"))
-    value = models.PositiveIntegerField(default=0, verbose_name=_("valeur"))
-    weight = models.PositiveSmallIntegerField(default=0, verbose_name=_("poids"))
-    effects_wear = models.ManyToManyField('Effect', blank=True, related_name='+', verbose_name=_("effets quand porté"))
-    effects_use = models.ManyToManyField('Effect', blank=True, related_name='+', verbose_name=_("effets quand utilisé"))
-    effects_target = models.ManyToManyField('Effect', blank=True, related_name='+', verbose_name=_("effets sur cible"))
-
-    class Meta:
-        verbose_name = _("objet")
-        verbose_name_plural = _("objets")
-
-
-class Ammo(Item):
-    """
-    Munition
-    """
-    evasion_modifier = models.SmallIntegerField(default=0, verbose_name=_("modificateur d'esquive"))
-    damage_modifier = models.SmallIntegerField(default=0, verbose_name=_("modificateur de dégâts"))
-    resistance_modifier = models.SmallIntegerField(default=0, verbose_name=_("modificateur de résistance"))
-
-    class Meta:
-        verbose_name = _("munition")
-        verbose_name_plural = _("munitions")
-
-
-class Weapon(Item):
-    """
-    Arme
-    """
     DAMAGE_NORMAL = 'normal'
     DAMAGE_FIRE = 'fire'
     DAMAGE_LASER = 'laser'
@@ -341,8 +352,18 @@ class Weapon(Item):
         (DAMAGE_EXPLOSIVE, _("explosif")),
     )
 
-    ammo = models.ManyToManyField('Ammo', blank=True, verbose_name=_("type de munition"))
-    damage_type = models.CharField(max_length=10, choices=DAMAGE_TYPES, verbose_name=_("type de dégâts"))
+    name = models.CharField(max_length=100, verbose_name=_("nom"))
+    image = models.ImageField(blank=True, null=True, verbose_name=_("image"))
+    type = models.CharField(max_length=7, choices=TYPES, verbose_name=_("type"))
+    value = models.PositiveIntegerField(default=0, verbose_name=_("valeur"))
+    quest = models.BooleanField(default=False, verbose_name=_("quête ?"))
+    weight = models.PositiveSmallIntegerField(default=0, verbose_name=_("poids"))
+    effects_wear = models.ManyToManyField('Effect', blank=True, related_name='+', verbose_name=_("effets quand porté"))
+    effects_use = models.ManyToManyField('Effect', blank=True, related_name='+', verbose_name=_("effets quand utilisé"))
+    effects_target = models.ManyToManyField('Effect', blank=True, related_name='+', verbose_name=_("effets sur cible"))
+    # Weapon
+    ammo = models.ManyToManyField('Item', blank=True, verbose_name=_("type de munition"))
+    damage_type = models.CharField(max_length=10, choices=DAMAGE_TYPES, default=DAMAGE_NORMAL, verbose_name=_("type de dégâts"))
     damage_dice_count = models.PositiveSmallIntegerField(default=0, verbose_name=_("nombre de dés"))
     damage_dice_value = models.PositiveSmallIntegerField(default=0, verbose_name=_("valeur de dé"))
     damage_bonus = models.PositiveSmallIntegerField(default=0, verbose_name=_("dégâts bonus"))
@@ -353,16 +374,11 @@ class Weapon(Item):
     ap_cost_burst = models.PositiveSmallIntegerField(blank=True, null=True, verbose_name=_("coût PA rafale"))
     burst_count = models.PositiveSmallIntegerField(blank=True, null=True, verbose_name=_("munitions en rafale"))
     min_stength = models.PositiveSmallIntegerField(blank=True, null=True, verbose_name=_("force minimum"))
-
-    class Meta:
-        verbose_name = _("arme")
-        verbose_name_plural = _("armes")
-
-
-class Apparel(Item):
-    """
-    Vêtement
-    """
+    # Ammo
+    evasion_modifier = models.SmallIntegerField(default=0, verbose_name=_("modificateur d'esquive"))
+    damage_modifier = models.SmallIntegerField(default=0, verbose_name=_("modificateur de dégâts"))
+    resistance_modifier = models.SmallIntegerField(default=0, verbose_name=_("modificateur de résistance"))
+    # Apparel
     evade = models.SmallIntegerField(default=0, verbose_name=_("esquive"))
     resistance_normal = models.PositiveSmallIntegerField(default=0, verbose_name=_("résistance dégâts normaux"))
     resistance_fire = models.PositiveSmallIntegerField(default=0, verbose_name=_("résistance dégâts feu"))
@@ -371,14 +387,20 @@ class Apparel(Item):
     resistance_explosive = models.PositiveSmallIntegerField(default=0, verbose_name=_("résistance dégâts explosifs"))
 
     class Meta:
-        verbose_name = _("vêtement")
-        verbose_name_plural = _("vêtements")
+        verbose_name = _("objet")
+        verbose_name_plural = _("objets")
 
 
-class Effect(models.Model):
+class Equipment(models.Model):
     """
-    Effet
+    Equipement
     """
+    character = models.ForeignKey('Character', verbose_name=_("personnage"))
+    item = models.ForeignKey('Item', verbose_name=_("objet"))
+    count = models.PositiveIntegerField(default=0, verbose_name=_("nombre"))
+    equiped = models.BooleanField(default=False, verbose_name=_("équipé ?"))
+    condition = models.PositiveSmallIntegerField(blank=True, null=True, verbose_name=_("état"))
+
     class Meta:
-        verbose_name = _("effet")
-        verbose_name_plural = _("effets")
+        verbose_name = _("équipement")
+        verbose_name_plural = _("équipements")
