@@ -1,10 +1,14 @@
-backports.shutil-get-terminal-size==1.0.0
-decorator==4.0.10
-Django==1.9.7
-ipython==4.2.0
-ipython-genutils==0.1.0
-pickleshare==0.7.2
-Pillow==3.2.0
-pyreadline==2.1
-simplegeneric==0.8.1
-traitlets==4.2.1
+Django==1.10.1
+Pillow==3.3.1
+celery==3.1.23
+coverage==4.2
+djangorestframework==3.4.6
+flake8<3.0.0
+model_mommy==1.2.6
+python-dateutil==2.5.3
+pip==8.1.2
+pytz==2016.6.1
+requests==2.11.1
+setuptools==26.1.1
+wheel==0.29.0
+-e git+https://git-web.sa-cim.fr/nouvelleoffre/common-framework.git#egg=common-framework
