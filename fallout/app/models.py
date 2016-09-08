@@ -1,8 +1,9 @@
 # encoding: utf-8
 import logging
+from random import randint
 from typing import List
 
-from common.models import Entity
+from common.models import CommonModel, Entity
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -128,18 +129,43 @@ RESISTANCE_LASER_DAMAGE = 'laser_damage_resistance'
 RESISTANCE_PLASMA_DAMAGE = 'plasma_damage_resistance'
 RESISTANCE_EXPLOSIVE_DAMAGE = 'explosive_damage_resistance'
 RESISTANCES = (
-    (RESISTANCE_RADIATION, _("radiations")),
-    (RESISTANCE_POISON, _("poisons")),
-    (RESISTANCE_FIRE, _("feu")),
-    (RESISTANCE_ELECTRICITY, _("électricité")),
-    (RESISTANCE_GAZ_CONTACT, _("gaz (contact)")),
-    (RESISTANCE_GAZ_INHALED, _("gaz (inhalé)")),
-    (RESISTANCE_NORMAL_DAMAGE, _("dégâts normaux")),
-    (RESISTANCE_LASER_DAMAGE, _("dégâts de laser")),
-    (RESISTANCE_PLASMA_DAMAGE, _("dégâts de plasma")),
-    (RESISTANCE_EXPLOSIVE_DAMAGE, _("dégâts explosifs")),
+    (RESISTANCE_RADIATION, _("résistance aux radiations")),
+    (RESISTANCE_POISON, _("résistance aux poisons")),
+    (RESISTANCE_FIRE, _("résistance au feu")),
+    (RESISTANCE_ELECTRICITY, _("résistance à l'électricité")),
+    (RESISTANCE_GAZ_CONTACT, _("résistance au gaz (contact)")),
+    (RESISTANCE_GAZ_INHALED, _("résistance au gaz (inhalé)")),
+    (RESISTANCE_NORMAL_DAMAGE, _("résistance aux dégâts normaux")),
+    (RESISTANCE_LASER_DAMAGE, _("résistance aux dégâts de laser")),
+    (RESISTANCE_PLASMA_DAMAGE, _("résistance aux dégâts de plasma")),
+    (RESISTANCE_EXPLOSIVE_DAMAGE, _("résistance aux dégâts explosifs")),
 )
 LIST_RESISTANCES = [a for a, *_ in RESISTANCES]
+
+# Damage
+DAMAGE_NORMAL = 'normal'
+DAMAGE_LASER = 'laser'
+DAMAGE_PLASMA = 'plasma'
+DAMAGE_EXPLOSIVE = 'explosive'
+DAMAGE_RADIATION = 'radiation'
+DAMAGE_POISON = 'poison'
+DAMAGE_FIRE = 'fire'
+DAMAGE_ELECTRICITY = 'electricity'
+DAMAGE_GAZ_CONTACT = 'gas_contact'
+DAMAGE_GAZ_INHALED = 'gas_inhaled'
+DAMAGES = (
+    (DAMAGE_NORMAL, _("dégâts normaux")),
+    (DAMAGE_LASER, _("dégâts de laser")),
+    (DAMAGE_PLASMA, _("dégâts de plasma")),
+    (DAMAGE_EXPLOSIVE, _("dégâts explosifs")),
+    (DAMAGE_RADIATION, _("dégâts de radiations")),
+    (DAMAGE_POISON, _("dégâts de poison")),
+    (DAMAGE_FIRE, _("dégâts de feu")),
+    (DAMAGE_ELECTRICITY, _("dégâts d'électricité")),
+    (DAMAGE_GAZ_CONTACT, _("dégâts de gaz (contact)")),
+    (DAMAGE_GAZ_INHALED, _("dégâts de gaz (inhalé)")),
+)
+LIST_DAMAGES = [a for a, *_ in DAMAGES]
 
 # Leveled stats
 HIT_POINTS_PER_LEVEL = 'hit_points_per_level'
@@ -154,12 +180,22 @@ LIST_LEVELED_STATS = [a for a, *_ in LEVELED_STATS]
 LIST_EDITABLE_STATS = LIST_SECONDARY_STATS + LIST_RESISTANCES + LIST_LEVELED_STATS
 LIST_ALL_STATS = LIST_SPECIALS + LIST_GENERAL_STATS + LIST_EDITABLE_STATS
 
-# All statistics
-ALL_STATS = (
+# Rollable statistics
+ROLL_STATS = (
     (_("S.P.E.C.I.A.L."), SPECIALS),
+    (_("Compétences"), SKILLS),
+)
+
+# Maximum roll
+ROLLS = (
+    (LIST_SPECIALS, 10),
+    (LIST_SKILLS, 100),
+)
+
+# All statistics
+ALL_STATS = ROLL_STATS + (
     (_("Statistiques générales"), GENERAL_STATS),
     (_("Statistiques secondaires"), SECONDARY_STATS),
-    (_("Compétences"), SKILLS),
     (_("Résistances"), RESISTANCES),
 )
 
@@ -193,7 +229,19 @@ RACES = (
     (RACE_ROBOT, _("robot")),
 )
 
-# Racial trait (bonus, min, max)
+# Inventory slots
+SLOT_HEAD = 'head'
+SLOT_ARMOR = 'armor'
+SLOT_HAND_1 = 'hand1'
+SLOT_HAND_2 = 'hand2'
+SLOTS = (
+    (SLOT_HEAD, _("tête")),
+    (SLOT_ARMOR, _("armure")),
+    (SLOT_HAND_1, _("main principale")),
+    (SLOT_HAND_2, _("main secondaire")),
+)
+
+# Racial traits (bonus, min, max)
 RACES_STATS = {
     RACE_HUMAN: {
         SPECIAL_STRENGTH: (0, 1, 10),
@@ -279,7 +327,12 @@ class Adventure(Entity):
     """
     name = models.CharField(max_length=200, verbose_name=_("nom"))
     date = models.DateTimeField(verbose_name=_("date"))
+    characters = models.ManyToManyField('Character', blank=True, related_name='adventures', verbose_name=_("personnages"))
     current = models.ForeignKey('Character', blank=True, null=True, on_delete=models.SET_NULL, verbose_name=_("personnage actif"))
+
+    class Meta:
+        verbose_name = _("aventure")
+        verbose_name_plural = _("aventures")
 
 
 class Character(Entity):
@@ -288,7 +341,6 @@ class Character(Entity):
     """
     # General informations
     user = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True, on_delete=models.SET_NULL, verbose_name=_("utilisateur"))
-    adventure = models.ForeignKey('Adventure', on_delete=models.CASCADE, verbose_name=_("aventure"))
     image = models.ImageField(blank=True, null=True, verbose_name=_("image"))
     is_player = models.BooleanField(default=False, verbose_name=_("joueur ?"))
     name = models.CharField(max_length=100, verbose_name=_("nom"))
@@ -474,16 +526,52 @@ class Character(Entity):
             self.level += 1
             self.max_health += self.hit_points_per_level
             self.skill_points += self.skill_points_per_level
-            if not self.level % 3:
+            if not self.level % 5:
                 self.perk_points += 1
             level += 1
         return level
 
-    def roll(self, skill, malus=0):
-        pass
+    def roll(self, name, malus=0):
+        for names, maximum in ROLLS:
+            if name in names:
+                value = getattr(self.stats, name, 0)
+                roll = randint(0, maximum) + malus
+                result = roll < value
+                logger.info("[{}] roll {} ({}) => {} ({})".format(
+                    self, name, value, roll, 'SUCCESS' if result else 'FAIL'))
+                return result
+        return None
 
 
-class Statistic(models.Model):
+class History(CommonModel):
+    """
+    Historique
+    """
+    TYPE_ROLL = 'roll'
+    TYPE_FIGHT = 'fight'
+    TYPE_LEVEL = 'level'
+    TYPE_EVENT = 'event'
+    TYPES = (
+        (TYPE_ROLL, _("jet")),
+        (TYPE_FIGHT, _("combat")),
+        (TYPE_LEVEL, _("niveau")),
+        (TYPE_EVENT, _("événement")),
+    )
+
+    date = models.DateTimeField(verbose_name=_("date"))
+    real_date = models.DateTimeField(auto_now_add=True, verbose_name=_("date réelle"))
+    type = models.CharField(max_length=5, choices=TYPES, verbose_name=_("type"))
+    character = models.ForeignKey('Character', on_delete=models.CASCADE, verbose_name=_("personnage"))
+    adventure = models.ForeignKey('Adventure', on_delete=models.CASCADE, verbose_name=_("aventure"))
+    # Roll / Hit chance
+    stats = models.CharField(max_length=10, blank=True, null=True, choices=ROLL_STATS, verbose_name=_("statistique"))
+    value = models.PositiveSmallIntegerField(default=0, verbose_name=_("valeur"))
+    roll = models.PositiveIntegerField(default=0, verbose_name=_("jet"))
+    success = models.BooleanField(default=False, verbose_name=_("succès ?"))
+    # TODO: à terminer
+
+
+class Statistic(CommonModel):
     """
     Statistique
     """
@@ -495,7 +583,7 @@ class Statistic(models.Model):
         verbose_name_plural = _("statistiques")
 
 
-class Condition(models.Model):
+class Condition(CommonModel):
     """
     Condition
     """
@@ -533,7 +621,7 @@ class Effect(Entity):
     chance = models.PositiveSmallIntegerField(default=100, verbose_name=_("chance"))
     # Damage
     damage_tick = models.DurationField(blank=True, null=True, verbose_name=_("intervalle"))
-    damage_type = models.CharField(max_length=30, blank=True, null=True, choices=RESISTANCES, verbose_name=_("type de dégâts"))
+    damage_type = models.CharField(max_length=10, blank=True, null=True, choices=DAMAGES, verbose_name=_("type de dégâts"))
     damage_dice_count = models.PositiveSmallIntegerField(default=0, verbose_name=_("nombre de dés"))
     damage_dice_value = models.PositiveSmallIntegerField(default=0, verbose_name=_("valeur de dé"))
     damage_bonus = models.PositiveSmallIntegerField(default=0, verbose_name=_("dégâts bonus"))
@@ -551,8 +639,7 @@ class RunningEffect(Entity):
     effect = models.ForeignKey('Effect', on_delete=models.CASCADE, verbose_name=_("effet"))
     start_date = models.DateTimeField(verbose_name=_("date d'effet"))
     end_date = models.DateTimeField(blank=True, null=True, verbose_name=_("date d'arrêt"))
-    last_update = models.DateTimeField(verbose_name=_("dernière mise à jour"))
-    # TODO: calculer les effets appliqués et à appliquer
+    hits = models.PositiveIntegerField(default=0, verbose_name=_("coups"))
 
     class Meta:
         verbose_name = _("effet en cours")
@@ -569,9 +656,10 @@ class Item(Entity):
     value = models.PositiveIntegerField(default=0, verbose_name=_("valeur"))
     quest = models.BooleanField(default=False, verbose_name=_("quête ?"))
     weight = models.PositiveSmallIntegerField(default=0, verbose_name=_("poids"))
+    throwable = models.BooleanField(default=False, verbose_name=_("jetable ?"))
     # Specific
     melee = models.BooleanField(default=False, verbose_name=_("arme de mêlée"))
-    damage_type = models.CharField(max_length=30, blank=True, null=True, choices=RESISTANCES, verbose_name=_("type de dégâts"))
+    damage_type = models.CharField(max_length=10, blank=True, null=True, choices=DAMAGES, verbose_name=_("type de dégâts"))
     damage_dice_count = models.PositiveSmallIntegerField(default=0, verbose_name=_("nombre de dés"))
     damage_dice_value = models.PositiveSmallIntegerField(default=0, verbose_name=_("valeur de dé"))
     damage_bonus = models.PositiveSmallIntegerField(default=0, verbose_name=_("dégâts bonus"))
@@ -582,11 +670,12 @@ class Item(Entity):
     ap_cost_burst = models.PositiveSmallIntegerField(blank=True, null=True, verbose_name=_("coût PA rafale"))
     burst_count = models.PositiveSmallIntegerField(blank=True, null=True, verbose_name=_("munitions en rafale"))
     min_stength = models.PositiveSmallIntegerField(blank=True, null=True, verbose_name=_("force minimum"))
-    ammo = models.ManyToManyField('Item', blank=True, verbose_name=_("type de munition"))
+    skill = models.CharField(max_length=10, blank=True, null=True, choices=SKILLS, verbose_name=_("compétence"))
+    ammunition = models.ManyToManyField('Item', blank=True, verbose_name=_("type de munition"))
     evasion_modifier = models.SmallIntegerField(default=0, verbose_name=_("modificateur d'esquive"))
     damage_modifier = models.SmallIntegerField(default=0, verbose_name=_("modificateur de dégâts"))
     resistance_modifier = models.SmallIntegerField(default=0, verbose_name=_("modificateur de résistance"))
-    critical_modifier = models.FloatField(default=0.0, verbose_name=_("modificateur de coup critique"))
+    critical_modifier = models.FloatField(default=1.0, verbose_name=_("modificateur de coup critique"))
     # Effets
     effects_on_hit = models.ManyToManyField('Effect', blank=True, related_name='+', verbose_name=_("effets à l'impact"))
     effects_on_use = models.ManyToManyField('Effect', blank=True, related_name='+', verbose_name=_("effets à l'usage"))
@@ -602,12 +691,13 @@ class Equipment(Entity):
     Equipement
     """
     character = models.ForeignKey('Character', on_delete=models.CASCADE, verbose_name=_("personnage"))
-    item = models.ForeignKey('Item', on_delete=models.CASCADE, verbose_name=_("objet"))
+    item = models.ForeignKey('Item', on_delete=models.CASCADE, related_name='+', verbose_name=_("objet"))
     count = models.PositiveIntegerField(default=0, verbose_name=_("nombre"))
-    equiped = models.BooleanField(default=False, verbose_name=_("équipé ?"))
-    condition = models.PositiveSmallIntegerField(blank=True, null=True, verbose_name=_("état"))
+    slot = models.CharField(max_length=5, blank=True, null=True, verbose_name=_("emplacement"))
+    condition = models.PositiveSmallIntegerField(default=0, verbose_name=_("état"))
+    ammunition = models.ForeignKey('Item', on_delete=models.SET_NULL, blank=True, null=True, related_name='+', verbose_name=_("munitions") )
+    clip_count = models.PositiveSmallIntegerField(blank=True, null=True, verbose_name=_("munitions"))
 
     class Meta:
         verbose_name = _("équipement")
         verbose_name_plural = _("équipements")
-
