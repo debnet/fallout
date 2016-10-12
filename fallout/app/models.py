@@ -52,7 +52,7 @@ STAT_MAX_HEALTH = 'max_health'
 STAT_MAX_ACTION_POINTS = 'max_action_points'
 STAT_DAMAGE_RESISTANCE = 'damage_resistance'
 STAT_DAMAGE_THRESHOLD = 'damage_threashold'
-STAT_EVADE = 'evade'
+STAT_ARMOR_CLASS = 'armor_class'
 STAT_CARRY_WEIGHT = 'carry_weight'
 STAT_MELEE_DAMAGE = 'melee_damage'
 STAT_SEQUENCE = 'sequence'
@@ -63,7 +63,7 @@ SECONDARY_STATS = (
     (STAT_MAX_ACTION_POINTS, _("points d'action max.")),
     (STAT_DAMAGE_RESISTANCE, _("résistance aux dégâts")),
     (STAT_DAMAGE_THRESHOLD, _("seuil de dégâts")),
-    (STAT_EVADE, _("esquive")),
+    (STAT_ARMOR_CLASS, _("esquive")),
     (STAT_CARRY_WEIGHT, _("charge maximale")),
     (STAT_MELEE_DAMAGE, _("attaque en mélée")),
     (STAT_SEQUENCE, _("initiative")),
@@ -232,14 +232,35 @@ RACES = (
 # Inventory slots
 SLOT_HEAD = 'head'
 SLOT_ARMOR = 'armor'
-SLOT_HAND_1 = 'hand1'
-SLOT_HAND_2 = 'hand2'
+SLOT_HAND = 'hand1'
 SLOTS = (
     (SLOT_HEAD, _("tête")),
     (SLOT_ARMOR, _("armure")),
-    (SLOT_HAND_1, _("main principale")),
-    (SLOT_HAND_2, _("main secondaire")),
+    (SLOT_HAND, _("main")),
 )
+
+# Body parts
+PART_TORSO = 'torso'
+PART_LEGS = 'legs'
+PART_ARMS = 'arms'
+PART_HEAD = 'head'
+PART_EYES = 'eyes'
+BODY_PARTS = (
+    (PART_TORSO, _("torse")),
+    (PART_LEGS, _("jambes")),
+    (PART_ARMS, _("bras")),
+    (PART_HEAD, _("tête")),
+    (PART_EYES, _("yeux")),
+)
+
+# Body part modifiers
+BODY_PARTS_MODIFIERS = {
+    PART_TORSO: (0, 0, 0),
+    PART_LEGS: (-20, -10, 10),
+    PART_ARMS: (-30, -15, 20),
+    PART_HEAD: (-40, -20, 25),
+    PART_EYES: (-60, -30, 30),
+}
 
 # Racial traits (bonus, min, max)
 RACES_STATS = {
@@ -321,7 +342,7 @@ RACES_STATS = {
 }
 
 
-class Adventure(Entity):
+class Campaign(Entity):
     """
     Aventure
     """
@@ -331,8 +352,8 @@ class Adventure(Entity):
     current = models.ForeignKey('Character', blank=True, null=True, on_delete=models.SET_NULL, verbose_name=_("personnage actif"))
 
     class Meta:
-        verbose_name = _("aventure")
-        verbose_name_plural = _("aventures")
+        verbose_name = _("campagne")
+        verbose_name_plural = _("campagnes")
 
 
 class Character(Entity):
@@ -368,7 +389,7 @@ class Character(Entity):
     max_action_points = models.SmallIntegerField(default=0, verbose_name=_("points d'action max."))
     damage_resistance = models.SmallIntegerField(default=0, verbose_name=_("résistance aux dégâts"))
     damage_threshold = models.SmallIntegerField(default=0, verbose_name=_("seuil de dégâts"))
-    evade = models.SmallIntegerField(default=0, verbose_name=_("esquive"))
+    armor_class = models.SmallIntegerField(default=0, verbose_name=_("esquive"))
     carry_weight = models.SmallIntegerField(default=0, verbose_name=_("charge maximale"))
     melee_damage = models.SmallIntegerField(default=0, verbose_name=_("attaque en mélée"))
     sequence = models.SmallIntegerField(default=0, verbose_name=_("initiative"))
@@ -461,7 +482,7 @@ class Character(Entity):
         # Secondary statistics
         self.max_health += (15 + (self.strength + (2 * self.endurance)) + ((self.level - 1) * self.hit_points_per_level))
         self.max_action_points += 5 + (self.agility // 2)
-        self.evade += self.armor_class + self.agility
+        self.armor_class += self.agility
         self.carry_weight += 25 + (25 * self.strength)
         self.melee_damage += max(0, self.strength - 5)
         self.sequence += 2 * self.perception
@@ -531,11 +552,11 @@ class Character(Entity):
             level += 1
         return level
 
-    def roll(self, name, malus=0):
+    def roll(self, name, modifier=0):
         for names, maximum in ROLLS:
             if name in names:
                 value = getattr(self.stats, name, 0)
-                roll = randint(0, maximum) + malus
+                roll = randint(0, maximum) + modifier
                 result = roll < value
                 logger.info("[{}] roll {} ({}) => {} ({})".format(
                     self, name, value, roll, 'SUCCESS' if result else 'FAIL'))
@@ -543,7 +564,26 @@ class Character(Entity):
         return None
 
 
-class History(CommonModel):
+def fight(attacker=None, defender=None, target_range=0, hit_modifier=0, target_part=PART_TORSO):
+    # STEP 1 : base chance to hit
+    attacker_equipment = attacker.equipment_set.filter(slot=SLOT_HAND).first()
+    attacker_weapon = getattr(attacker_equipment, 'item', None)
+    attacker_skill = getattr(attacker_weapon, 'skill', SKILL_UNARMED)
+    attacker_hit_chance = getattr(attacker.stats, attacker_skill, 0)
+    attacker_weapon_range = getattr(attacker_weapon, 'range', 1)
+    attacker_weapon_throwable = getattr(attacker_weapon, 'throwable', False)
+    attacker_range_stats = SPECIAL_STRENGTH if attacker_weapon_throwable else SPECIAL_PERCEPTION
+    attacker_hit_range = attacker_weapon_range + (2 * getattr(attacker.stats, attacker_range_stats, 0)) + 1
+    attacker_hit_chance -= min(target_range - attacker_hit_range, 0) * 3  # Range modifiers
+    attacker_hit_chance -= defender.stats.armor_class  # Armor class
+    attacker_hit_chance += hit_modifier  # Other modifiers
+    attacker_hit_chance += attacker_weapon.hit_chance_modifier  # Weapon hit chance modifier
+    ranged_hit_modifier, melee_hit_modifier, critical_chance_modifier = BODY_PARTS_MODIFIERS[target_part]
+    attacker_hit_chance += melee_hit_modifier if attacker_skill == SKILL_UNARMED else ranged_hit_modifier
+    # TODO: à continuer
+
+
+class RollHistory(CommonModel):
     """
     Historique
     """
@@ -562,7 +602,7 @@ class History(CommonModel):
     real_date = models.DateTimeField(auto_now_add=True, verbose_name=_("date réelle"))
     type = models.CharField(max_length=5, choices=TYPES, verbose_name=_("type"))
     character = models.ForeignKey('Character', on_delete=models.CASCADE, verbose_name=_("personnage"))
-    adventure = models.ForeignKey('Adventure', on_delete=models.CASCADE, verbose_name=_("aventure"))
+    adventure = models.ForeignKey('Campaign', on_delete=models.CASCADE, verbose_name=_("aventure"))
     # Roll / Hit chance
     stats = models.CharField(max_length=10, blank=True, null=True, choices=ROLL_STATS, verbose_name=_("statistique"))
     value = models.PositiveSmallIntegerField(default=0, verbose_name=_("valeur"))
@@ -672,7 +712,8 @@ class Item(Entity):
     min_stength = models.PositiveSmallIntegerField(blank=True, null=True, verbose_name=_("force minimum"))
     skill = models.CharField(max_length=10, blank=True, null=True, choices=SKILLS, verbose_name=_("compétence"))
     ammunition = models.ManyToManyField('Item', blank=True, verbose_name=_("type de munition"))
-    evasion_modifier = models.SmallIntegerField(default=0, verbose_name=_("modificateur d'esquive"))
+    hit_chance_modifier = models.SmallIntegerField(default=0, verbose_name=_("modificateur de précision"))
+    armor_class_modifier = models.SmallIntegerField(default=0, verbose_name=_("modificateur d'esquive"))
     damage_modifier = models.SmallIntegerField(default=0, verbose_name=_("modificateur de dégâts"))
     resistance_modifier = models.SmallIntegerField(default=0, verbose_name=_("modificateur de résistance"))
     critical_modifier = models.FloatField(default=1.0, verbose_name=_("modificateur de coup critique"))
@@ -695,7 +736,7 @@ class Equipment(Entity):
     count = models.PositiveIntegerField(default=0, verbose_name=_("nombre"))
     slot = models.CharField(max_length=5, blank=True, null=True, verbose_name=_("emplacement"))
     condition = models.PositiveSmallIntegerField(default=0, verbose_name=_("état"))
-    ammunition = models.ForeignKey('Item', on_delete=models.SET_NULL, blank=True, null=True, related_name='+', verbose_name=_("munitions") )
+    ammunition = models.ForeignKey('Item', on_delete=models.SET_NULL, blank=True, null=True, related_name='+', verbose_name=_("munitions"))
     clip_count = models.PositiveSmallIntegerField(blank=True, null=True, verbose_name=_("munitions"))
 
     class Meta:
