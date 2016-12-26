@@ -244,3 +244,49 @@ CRITICAL_FAIL_D100 = 96
 
 # Action points cost
 AP_COST_FIGHT = 5  # Fight unarmed
+
+# Computed statistics from S.P.E.C.I.A.L.
+COMPUTED_STATS = (
+    ('hit_points_per_level', lambda s, c: 3 + (s.endurance // 2)),
+    ('skill_points_per_level', lambda s, c: 5 + (2 * s.intelligence)),
+    ('max_health', lambda s, c: (15 + (s.strength + (2 * s.endurance)) + ((c.level - 1) * s.hit_points_per_level))),
+    ('max_action_points', lambda s, c: 5 + (s.agility // 2)),
+    # Secondary statistics
+    ('armor_class', lambda s, c: s.agility),
+    ('carry_weight', lambda s, c: 25 + (25 * s.strength)),
+    ('melee_damage', lambda s, c: max(0, s.strength - 5)),
+    ('sequence', lambda s, c: 2 * s.perception),
+    ('healing_rate', lambda s, c: (s.endurance // 3)),
+    ('critical_chance', lambda s, c: s.luck),
+    # Resistances
+    ('radiation_resistance', lambda s, c: 2 * s.endurance),
+    ('poison_resistance', lambda s, c: 5 * s.endurance),
+    ('small_guns', lambda s, c: 5 + (4 * s.agility)),
+    # Skills
+    ('big_guns', lambda s, c: 2 * s.agility),
+    ('energy_weapons', lambda s, c: 2 * s.agility),
+    ('unarmed', lambda s, c: 30 + (2 * (s.strength + s.agility))),
+    ('melee_weapons', lambda s, c: 20 + (2 * (s.strength + s.agility))),
+    ('throwing', lambda s, c: 4 * s.agility),
+    ('first_aid', lambda s, c: 2 * (s.perception + s.endurance)),
+    ('doctor', lambda s, c: 5 + s.perception + s.intelligence),
+    ('chems', lambda s, c: 10 + (2 * s.intelligence)),
+    ('sneak', lambda s, c: 5 + (3 * s.agility)),
+    ('lockpick', lambda s, c: 10 + s.perception + s.agility),
+    ('steal', lambda s, c: 3 * s.agility),
+    ('traps', lambda s, c: 10 + (2 * s.perception)),
+    ('science', lambda s, c: 4 * s.intelligence),
+    ('repair', lambda s, c: 3 * s.intelligence),
+    ('speech', lambda s, c: 5 * s.charisma),
+    ('barter', lambda s, c: 4 * s.charisma),
+    ('gambling', lambda s, c: 5 * s.luck),
+    ('survival', lambda s, c: 2 * (s.endurance + s.intelligence)),
+    ('knowledge', lambda s, c: 5 * s.intelligence),
+)
+
+# Computed needs per hour
+COMPUTED_NEEDS = {
+    ('dehydration', lambda s, c: min(1, 20 - s.endurance * 2)),
+    ('hunger', lambda s, c: min(1, 16 - s.endurance * 2)),
+    ('sleep', lambda s, c: min(1, 14 - s.endurance * 2)),
+}

@@ -208,13 +208,18 @@ ALL_STATS = ROLL_STATS + (
 ITEM_WEAPON = 'weapon'
 ITEM_AMMO = 'ammo'
 ITEM_ARMOR = 'armor'
-ITEM_FOOD = 'food'
-ITEM_CHEM = 'chem'
-ITEM_MISC = 'misc'
-ITEM_TYPES = (
+ITEM_IMPLANT = 'implant'
+SLOT_ITEM_TYPES = (
     (ITEM_WEAPON, _("arme")),
     (ITEM_AMMO, _("munition")),
     (ITEM_ARMOR, _("armure")),
+    (ITEM_IMPLANT, _("implant")),
+)
+
+ITEM_FOOD = 'food'
+ITEM_CHEM = 'chem'
+ITEM_MISC = 'misc'
+ITEM_TYPES = SLOT_ITEM_TYPES + (
     (ITEM_FOOD, _("nourriture")),
     (ITEM_CHEM, _("drogue")),
     (ITEM_MISC, _("autre")),
@@ -234,16 +239,6 @@ RACES = (
     (RACE_DEATHCLAW, _("écorcheur")),
     (RACE_ROBOT, _("robot")),
     (RACE_ANIMAL, _("animal")),
-)
-
-# Inventory slots
-SLOT_WEAPON = 'weapon'
-SLOT_AMMO = 'ammo'
-SLOT_ARMOR = 'armor'
-SLOTS = (
-    (SLOT_WEAPON, _("arme")),
-    (SLOT_AMMO, _("munitions")),
-    (SLOT_ARMOR, _("armure")),
 )
 
 # Body parts

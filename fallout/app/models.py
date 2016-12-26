@@ -4,6 +4,7 @@ from typing import Iterable, List
 
 from common.models import CommonModel, Entity
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import ugettext as _
 
@@ -32,18 +33,6 @@ class Stats(models.Model):
     """
     Statistiques actuelles du personnage
     """
-    # Primary statistics
-    experience = models.PositiveIntegerField(default=0, verbose_name=_("expérience"))
-    karma = models.PositiveSmallIntegerField(default=0, verbose_name=_("karma"))
-    health = models.PositiveSmallIntegerField(default=0, verbose_name=_("santé"))
-    action_points = models.PositiveSmallIntegerField(default=0, verbose_name=_("points d'action"))
-    skill_points = models.PositiveSmallIntegerField(default=0, verbose_name=_("points de compétences"))
-    perk_points = models.PositiveSmallIntegerField(default=0, verbose_name=_("points de talent"))
-    # Survival / needs statistics
-    dehydration = models.PositiveSmallIntegerField(default=0, verbose_name=_("soif"))  # 20-END*2 / hour
-    hunger = models.PositiveSmallIntegerField(default=0, verbose_name=_("faim"))  # 16-END*2 / hour
-    sleep = models.PositiveSmallIntegerField(default=0, verbose_name=_("sommeil"))  # 14-END*2 / hour
-    irradiation = models.PositiveSmallIntegerField(default=0, verbose_name=_("irradiation"))  # -END / month
     # S.P.E.C.I.A.L.
     strength = models.PositiveSmallIntegerField(default=0, verbose_name=_("force"))
     perception = models.PositiveSmallIntegerField(default=0, verbose_name=_("perception"))
@@ -123,45 +112,17 @@ class Stats(models.Model):
                     pass  # TODO: permanent effects of equipment
         # Effect modifiers
         # TODO: permanent or semi-permanent effects (perks, consummables, etc...)
-        # Main statistics
-        stats.hit_points_per_level += 3 + (stats.endurance // 2)
-        stats.skill_points_per_level += 5 + (2 * stats.intelligence)
-        # Secondary statistics
-        stats.max_health += (15 + (stats.strength + (2 * stats.endurance)) + (
-            (character.level - 1) * stats.hit_points_per_level))
-        if stats.health > stats.max_health:
-            stats.health = stats.max_health
-        stats.max_action_points += 5 + (stats.agility // 2)
-        stats.armor_class += stats.agility
-        stats.carry_weight += 25 + (25 * stats.strength)
-        stats.melee_damage += max(0, stats.strength - 5)
-        stats.sequence += 2 * stats.perception
-        stats.healing_rate += (stats.endurance // 3)
-        stats.critical_chance += stats.luck
-        # Resistances
-        stats.radiation_resistance += 2 * stats.endurance
-        stats.poison_resistance += 5 * stats.endurance
-        # Skills
-        stats.small_guns += 5 + (4 * stats.agility)
-        stats.big_guns += 2 * stats.agility
-        stats.energy_weapons += 2 * stats.agility
-        stats.unarmed += 30 + (2 * (stats.strength + stats.agility))
-        stats.melee_weapons = 20 + (2 * (stats.strength + stats.agility))
-        stats.throwing += 4 * stats.agility
-        stats.first_aid += 2 * (stats.perception + stats.endurance)
-        stats.doctor += 5 + stats.perception + stats.intelligence
-        stats.chems += 10 + (2 * stats.intelligence)
-        stats.sneak += 5 + (3 * stats.agility)
-        stats.lockpick += 10 + stats.perception + stats.agility
-        stats.steal += 3 * stats.agility
-        stats.traps += 10 + (2 * stats.perception)
-        stats.science += 4 * stats.intelligence
-        stats.repair += 3 * stats.intelligence
-        stats.speech += 5 * stats.charisma
-        stats.barter += 4 * stats.charisma
-        stats.gambling += 5 * stats.luck
-        stats.survival += 2 * (stats.endurance + stats.intelligence)
-        stats.knowledge += 5 * stats.intelligence
+        # Derivated statistics
+        old_max_health = stats.max_health
+        old_max_action_points = stats.max_action_points
+        for stats_name, function in COMPUTED_STATS:
+            setattr(stats, stats_name, getattr(stats, stats_name) + function(stats, character))
+        # Health
+        if character.health > stats.max_health or character.health == old_max_health:
+            character.health = stats.max_health
+        # Action points
+        if character.action_points > stats.max_action_points or character.action_points == old_max_action_points:
+            character.action_points = stats.max_action_points
         return stats
 
     def _change_all_stats(self, stats):
@@ -191,6 +152,18 @@ class Character(Entity, Stats):
     image = models.ImageField(blank=True, null=True, verbose_name=_("image"))
     race = models.CharField(max_length=12, choices=RACES, default=RACE_HUMAN, verbose_name=_("race"))
     level = models.PositiveSmallIntegerField(default=1, verbose_name=_("niveau"))
+    # Primary statistics
+    experience = models.PositiveIntegerField(default=0, verbose_name=_("expérience"))
+    karma = models.PositiveSmallIntegerField(default=0, verbose_name=_("karma"))
+    health = models.PositiveSmallIntegerField(default=0, verbose_name=_("santé"))
+    action_points = models.PositiveSmallIntegerField(default=0, verbose_name=_("points d'action"))
+    skill_points = models.PositiveSmallIntegerField(default=0, verbose_name=_("points de compétences"))
+    perk_points = models.PositiveSmallIntegerField(default=0, verbose_name=_("points de talent"))
+    # Needs
+    dehydration = models.PositiveSmallIntegerField(default=0, verbose_name=_("soif"))
+    hunger = models.PositiveSmallIntegerField(default=0, verbose_name=_("faim"))
+    sleep = models.PositiveSmallIntegerField(default=0, verbose_name=_("sommeil"))
+    irradiation = models.PositiveSmallIntegerField(default=0, verbose_name=_("irradiation"))
     # Statistics cache
     _stats = {}
 
@@ -244,7 +217,7 @@ class Item(Entity):
     description = models.TextField(blank=True, null=True, verbose_name=_("description"))
     image = models.ImageField(blank=True, null=True, verbose_name=_("image"))
     # Technical informations
-    type = models.CharField(max_length=6, choices=ITEM_TYPES, verbose_name=_("type"))
+    type = models.CharField(max_length=7, choices=ITEM_TYPES, verbose_name=_("type"))
     value = models.PositiveIntegerField(default=0, verbose_name=_("valeur"))
     quest = models.BooleanField(default=False, verbose_name=_("quête ?"))
     weight = models.PositiveSmallIntegerField(default=0, verbose_name=_("poids"))
@@ -288,14 +261,29 @@ class Equipment(Entity):
     """
     Equipement
     """
-    character = models.ForeignKey('Character', on_delete=models.CASCADE, verbose_name=_("personnage"))
+    character = models.ForeignKey('Character', on_delete=models.CASCADE, related_name='equipments', verbose_name=_("personnage"))
     item = models.ForeignKey('Item', on_delete=models.CASCADE, related_name='+', verbose_name=_("objet"))
-    slot = models.CharField(max_length=6, choices=SLOTS, blank=True, null=True, verbose_name=_("emplacement"))
+    slot = models.CharField(max_length=7, choices=SLOT_ITEM_TYPES, blank=True, null=True, verbose_name=_("emplacement"))
     count = models.PositiveIntegerField(default=0, verbose_name=_("nombre"))
     condition = models.FloatField(default=1.0, verbose_name=_("état"))
     clip_count = models.PositiveSmallIntegerField(default=0, verbose_name=_("munitions"))
 
     # TODO: __str__
+
+    def clean(self):
+        if self.slot:
+            if self.character.equipments.exclude(id=self.id).filter(slot=self.slot).exists():
+                raise ValidationError(dict(slot=_("Un autre objet est déjà présent à cet emplacement.")))
+            if self.slot != self.item.type:
+                raise ValidationError(dict(slot=_("L'emplacement doit correspondre au type d'objet.")))
+        if self.slot == ITEM_AMMO:
+            equipment = self.character.equipments.select_related('item').filter(slot=ITEM_WEAPON).first()
+            if equipment and not equipment.item.ammunition.filter(id=self.item.id).exists():
+                raise ValidationError(dict(item=_("Ces munitions sont incompatibles avec l'arme actuellement équipée.")))
+        elif self.slot == ITEM_WEAPON:
+            equipment = self.character.equipments.select_related('item').filter(slot=ITEM_AMMO).first()
+            if equipment and not self.item.ammunition.filter(id=equipment.item.id).exists():
+                raise ValidationError(dict(item=_("Cette arme est incompatible avec les munitions actuellement équipées.")))
 
     class Meta:
         verbose_name = _("équipement")
@@ -522,7 +510,7 @@ def burst(attacker: Character, *targets: Iterable[Character],
     :return: Liste d'historiques de combat
     """
     histories = []
-    attacker_weapon_equipment = attacker.equipment_set.filter(slot=SLOT_WEAPON).first()
+    attacker_weapon_equipment = attacker.equipment_set.filter(slot=ITEM_WEAPON).first()
     attacker_weapon = getattr(attacker_weapon_equipment, 'item', None)
     all_targets = list(zip(targets, targets_range))
     for round in range(getattr(attacker_weapon, 'burst_count', 0)):
@@ -547,9 +535,9 @@ def fight(attacker: Character, defender: Character, is_burst: bool=False,
     history = FightHistory(attacker=attacker, defender=defender, burst=is_burst)
     history.game_date = attacker.campaign.game_date
     # Equipment
-    attacker_weapon_equipment = attacker.equipment_set.filter(slot=SLOT_WEAPON).first()
-    attacker_ammo_equipment = attacker.equipment_set.filter(slot=SLOT_AMMO).first()
-    defender_armor_equipment = defender.equipment_set.filter(slot=SLOT_ARMOR).first()
+    attacker_weapon_equipment = attacker.equipment_set.filter(slot=ITEM_WEAPON).first()
+    attacker_ammo_equipment = attacker.equipment_set.filter(slot=ITEM_AMMO).first()
+    defender_armor_equipment = defender.equipment_set.filter(slot=ITEM_ARMOR).first()
     attacker_weapon = history.attacker_weapon = getattr(attacker_weapon_equipment, 'item', None)
     attacker_ammo = history.attacker_ammo = getattr(attacker_ammo_equipment, 'item', None)
     defender_armor = history.defender_armor = getattr(defender_armor_equipment, 'item', None)
