@@ -2,25 +2,6 @@
 from django.utils.translation import ugettext as _
 
 
-# S.P.E.C.I.A.L.
-SPECIAL_STRENGTH = 'strength'
-SPECIAL_PERCEPTION = 'perception'
-SPECIAL_ENDURANCE = 'endurance'
-SPECIAL_CHARISMA = 'charisma'
-SPECIAL_INTELLIGENCE = 'intelligence'
-SPECIAL_AGILITY = 'agility'
-SPECIAL_LUCK = 'luck'
-SPECIALS = (
-    (SPECIAL_STRENGTH, _("force")),
-    (SPECIAL_PERCEPTION, _("perception")),
-    (SPECIAL_ENDURANCE, _("endurance")),
-    (SPECIAL_CHARISMA, _("charisme")),
-    (SPECIAL_INTELLIGENCE, _("intelligence")),
-    (SPECIAL_AGILITY, _("agilité")),
-    (SPECIAL_LUCK, _("chance")),
-)
-LIST_SPECIALS = [a for a, *_ in SPECIALS]
-
 # General statistics
 STATS_HEALTH = 'health'
 STATS_ACTION_POINTS = 'action_points'
@@ -41,6 +22,25 @@ GENERAL_STATS = (
     (STATS_SLEEP, _("sommeil")),
 )
 LIST_GENERAL_STATS = [a for a, *_ in GENERAL_STATS]
+
+# S.P.E.C.I.A.L.
+SPECIAL_STRENGTH = 'strength'
+SPECIAL_PERCEPTION = 'perception'
+SPECIAL_ENDURANCE = 'endurance'
+SPECIAL_CHARISMA = 'charisma'
+SPECIAL_INTELLIGENCE = 'intelligence'
+SPECIAL_AGILITY = 'agility'
+SPECIAL_LUCK = 'luck'
+SPECIALS = (
+    (SPECIAL_STRENGTH, _("force")),
+    (SPECIAL_PERCEPTION, _("perception")),
+    (SPECIAL_ENDURANCE, _("endurance")),
+    (SPECIAL_CHARISMA, _("charisme")),
+    (SPECIAL_INTELLIGENCE, _("intelligence")),
+    (SPECIAL_AGILITY, _("agilité")),
+    (SPECIAL_LUCK, _("chance")),
+)
+LIST_SPECIALS = [a for a, *_ in SPECIALS]
 
 # Secondary statistics
 STATS_MAX_HEALTH = 'max_health'
@@ -188,8 +188,8 @@ LEVELED_STATS = (
 LIST_LEVELED_STATS = [a for a, *_ in LEVELED_STATS]
 
 # Lists of statistics
-LIST_EDITABLE_STATS = LIST_SECONDARY_STATS + LIST_RESISTANCES + LIST_LEVELED_STATS
-LIST_ALL_STATS = LIST_SPECIALS + LIST_GENERAL_STATS + LIST_EDITABLE_STATS
+LIST_EDITABLE_STATS = LIST_SPECIALS + LIST_SKILLS + LIST_SECONDARY_STATS + LIST_RESISTANCES + LIST_LEVELED_STATS
+LIST_ALL_STATS = LIST_GENERAL_STATS + LIST_EDITABLE_STATS
 
 # Rollable statistics
 ROLL_STATS = (
@@ -202,6 +202,7 @@ ALL_STATS = ROLL_STATS + (
     (_("Statistiques générales"), GENERAL_STATS),
     (_("Statistiques secondaires"), SECONDARY_STATS),
     (_("Résistances"), RESISTANCES),
+    (_("Statistiques de niveau"), LEVELED_STATS),
 )
 
 # Item type

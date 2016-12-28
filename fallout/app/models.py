@@ -6,6 +6,7 @@ from common.models import CommonModel, Entity
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models import F
 from django.utils.translation import ugettext as _
 
 from fallout.app.constants import *  # noqa
@@ -21,6 +22,9 @@ class Campaign(Entity):
     current_character = models.ForeignKey(
         'Character', blank=True, null=True, on_delete=models.SET_NULL,
         related_name='+', verbose_name=_("personnage actif"))
+    effects = models.ManyToManyField(
+        'Effect', blank=True, null=True,
+        related_name='+', verbose_name=_("effets actifs"))
 
     # TODO: __str__
 
@@ -90,10 +94,14 @@ class Stats(models.Model):
     skill_points_per_level = models.SmallIntegerField(default=0, verbose_name=_("points de compétence par niveau"))
     perk_rate = models.SmallIntegerField(default=0, verbose_name=_("niveaux pour un talent"))
 
+    # TODO: __str__
+
     @staticmethod
-    def get(character=None):
+    def get(character: Character):
         stats = Stats()
         stats.character = character
+        old_max_health = stats.max_health
+        old_max_action_points = stats.max_action_points
         # Get all character's stats
         for stats_name in LIST_ALL_STATS:
             setattr(stats, stats_name, getattr(character, stats_name, 0))
@@ -105,34 +113,42 @@ class Stats(models.Model):
                 if mini <= getattr(character, stats_name, 0) < maxi:
                     stats._change_all_stats(effects)
         # Equipment modifiers
-        for equipment in character.equipment_set.filter(slot__isnull=False) \
+        for equipment in character.equipments.filter(slot__isnull=False)\
                 .select_related('item').prefetch_related('item__effects').all():
-            for effect in equipment.item.effects.select_related('conditions', 'stats').all():
-                if all(condition.evaluate(character) for condition in effect.conditions):
-                    pass  # TODO: permanent effects of equipment
-        # Effect modifiers
-        # TODO: permanent or semi-permanent effects (perks, consummables, etc...)
+            for effect in equipment.item.effects.select_related('statistics').all():
+                    for statistic in effect.statistics.all():
+                        stats._change_stats(statistic.stats, statistic.value)
+        # Active effects modifiers
+        for effect in character.active_effects.select_related('effect').prefetch_related('effect__statistics').filter(
+                start_date__gte=F('character__campaign__game_date'), end_date__lte=F('character__campaign__game_date')):
+            for statistic in effect.effect.statistics.all():
+                stats._change_stats(statistic.stats, statistic.value)
+        # Campaign effects modifiers
+        if character.campaign:
+            for effect in character.campaign.effects.prefetch_related('statistics').all():
+                for statistic in effect.effect.statistics.all():
+                    stats._change_stats(statistic.stats, statistic.value)
         # Derivated statistics
-        old_max_health = stats.max_health
-        old_max_action_points = stats.max_action_points
-        for stats_name, function in COMPUTED_STATS:
-            setattr(stats, stats_name, getattr(stats, stats_name) + function(stats, character))
-        # Health
+        for stats_name, formula in COMPUTED_STATS:
+            stats._change_stats(stats_name, formula(stats, character))
+        # Health & action points
         if character.health > stats.max_health or character.health == old_max_health:
             character.health = stats.max_health
-        # Action points
         if character.action_points > stats.max_action_points or character.action_points == old_max_action_points:
             character.action_points = stats.max_action_points
         return stats
 
     def _change_all_stats(self, stats):
+        assert isinstance(self, Stats), _("Cette fonction ne peut être utilisée que par les statistiques.")
         for name, values in stats.items():
             self._change_stats(name, *values)
 
     def _change_stats(self, name, value=0, mini=None, maxi=None):
+        assert isinstance(self, Stats), _("Cette fonction ne peut être utilisée que par les statistiques.")
+        target = self if name in LIST_EDITABLE_STATS else self.character
         mini = mini if mini is not None else float('-inf')
         maxi = maxi if maxi is not None else float('+inf')
-        setattr(self, name, min(max(getattr(self, name, 0) + value, mini), maxi))
+        setattr(target, name, min(max(getattr(target, name, 0) + value, mini), maxi))
 
     class Meta:
         abstract = True
@@ -143,8 +159,12 @@ class Character(Entity, Stats):
     Personnage
     """
     # Technical informations
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True, on_delete=models.SET_NULL, verbose_name=_("utilisateur"))
-    campaign = models.ForeignKey('Campaign', blank=True, null=True, on_delete=models.SET_NULL, verbose_name=_("campagne"))
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, blank=True, null=True, on_delete=models.SET_NULL,
+        related_name='characters', verbose_name=_("utilisateur"))
+    campaign = models.ForeignKey(
+        'Campaign', blank=True, null=True, on_delete=models.SET_NULL,
+        related_name='characters', verbose_name=_("campagne"))
     # General informations
     name = models.CharField(max_length=200, verbose_name=_("nom"))
     title = models.CharField(max_length=200, blank=True, null=True, verbose_name=_("titre"))
@@ -167,9 +187,7 @@ class Character(Entity, Stats):
     # Statistics cache
     _stats = {}
 
-    class Meta:
-        verbose_name = _("personnage")
-        verbose_name_plural = _("personnages")
+    # TODO: __str__
 
     @property
     def stats(self) -> Stats:
@@ -177,8 +195,6 @@ class Character(Entity, Stats):
         if self.id:
             Character._stats[self.id] = stats
         return stats
-
-    # TODO: __str__
 
     def save(self, *args, **kwargs):
         self.check_level()
@@ -205,6 +221,161 @@ class Character(Entity, Stats):
                 self.perk_points += 1
             level += 1
         return level
+
+    def update_needs(self, hours=0) -> None:
+        """
+        Mise à jour des besoins
+        :param hours: Nombre d'heures passées
+        :return: Rien
+        """
+        for stats_name, formula in COMPUTED_NEEDS:
+            for hour in range(int(hours)):
+                setattr(self, stats_name, getattr(self, stats_name) + formula(self.stats, self))
+
+    def roll(self, stats: str, modifier: int=0) -> RollHistory:
+        """
+        Réalise un jet de compétence pour un personnage
+        :param stats: Code de la statistique
+        :param modifier: Modificateur de jet éventuel
+        :return: Historique de jet
+        """
+        history = RollHistory(character=self, modifier=modifier)
+        history.game_date = self.campaign.game_date
+        is_special = stats in LIST_SPECIALS
+        history.value = getattr(self.stats, stats, 0)
+        history.roll = randint(1, 10 if is_special else 100)
+        history.success = history.roll > history.value + history.modifier
+        history.critical = (history.roll <= (1 if is_special else self.stats.luck)) if history.success \
+            else (history.roll >= CRITICAL_FAIL_D10 if is_special else CRITICAL_FAIL_D100)
+        history.save()
+        return history
+
+    def burst(self, *targets: Iterable['Character'],
+              targets_range: Iterable[int]=None, hit_modifier: int=0) -> List[FightHistory]:
+        """
+        Permet de lancer une attaque en rafale sur un groupe d'ennemis
+        :param targets: Liste de personnages ciblés
+        :param targets_range: Liste des distances (en cases) de chaque personnage dans le même ordre que la liste précédente
+        :param hit_modifier: Modificateurs complémentaires de précision (lumière, couverture, etc...)
+        :return: Liste d'historiques de combat
+        """
+        histories = []
+        attacker_weapon_equipment = self.equipment_set.filter(slot=ITEM_WEAPON).first()
+        attacker_weapon = getattr(attacker_weapon_equipment, 'item', None)
+        all_targets = list(zip(targets, targets_range))
+        for round in range(getattr(attacker_weapon, 'burst_count', 0)):
+            target, target_range = choice(all_targets)
+            history = self.fight(target, is_burst=True, target_range=target_range, hit_modifier=hit_modifier)
+            histories.append(history)
+        return histories
+
+    def fight(self, defender: 'Character', is_burst: bool=False, target_range: int=0,
+              hit_modifier: int=0, target_part=None) -> FightHistory:
+        """
+        Calcul un round de combat entre deux personnages
+        :param defender: Personnage ciblé
+        :param is_burst: Attaque en rafale ?
+        :param target_range: Distance (en cases) entre les deux personnages
+        :param hit_modifier: Modificateurs complémentaires de précision (lumière, couverture, etc...)
+        :param target_part: Partie du corps ciblée par l'attaquant (ou torse par défaut)
+        :return: Historique de combat
+        """
+        history = FightHistory(attacker=self, defender=defender, burst=is_burst)
+        history.game_date = self.campaign.game_date
+        # Equipment
+        attacker_weapon_equipment = self.equipment_set.filter(slot=ITEM_WEAPON).first()
+        attacker_ammo_equipment = self.equipment_set.filter(slot=ITEM_AMMO).first()
+        defender_armor_equipment = defender.equipment_set.filter(slot=ITEM_ARMOR).first()
+        attacker_weapon = history.attacker_weapon = getattr(attacker_weapon_equipment, 'item', None)
+        attacker_ammo = history.attacker_ammo = getattr(attacker_ammo_equipment, 'item', None)
+        defender_armor = history.defender_armor = getattr(defender_armor_equipment, 'item', None)
+        # Fight condition
+        # TODO: weapon and armor condition, weapon strength requirement, clip count, characters not dead, etc...
+        # Chance to hit
+        attacker_skill = getattr(attacker_weapon, 'skill', SKILL_UNARMED)
+        attacker_hit_chance = getattr(self.stats, attacker_skill, 0)
+        attacker_weapon_range = getattr(attacker_weapon, 'range', 0)
+        attacker_weapon_throwable = getattr(attacker_weapon, 'throwable', False)
+        attacker_range_stats = SPECIAL_STRENGTH if attacker_weapon_throwable else SPECIAL_PERCEPTION
+        attacker_hit_range = attacker_weapon_range + (2 * getattr(self.stats, attacker_range_stats, 0)) + 1
+        attacker_hit_range *= getattr(attacker_weapon, 'range_modifier', 1.0)
+        attacker_hit_range *= getattr(attacker_ammo, 'range_modifier', 1.0)
+        attacker_hit_chance -= min(target_range - attacker_hit_range, 0) * 3  # Range modifiers
+        attacker_hit_chance += getattr(attacker_weapon, 'hit_chance_modifier', 0)  # Weapon hit chance modifier
+        attacker_hit_chance -= getattr(defender_armor, 'armor_class_modifier', 0)  # Defender armor class
+        attacker_hit_chance -= defender.stats.armor_class  # Armor class
+        # Targetted body part modifiers
+        body_part = target_part
+        if not target_part:
+            for body_part, chance in BODY_PARTS_RANDOM_CHANCES:
+                if randint(1, 100) < chance:
+                    break
+        history.body_part = body_part or PART_TORSO
+        ranged_hit_modifier, melee_hit_modifier, critical_modifier = BODY_PARTS_MODIFIERS[history.body_part]
+        attacker_hit_chance += melee_hit_modifier if attacker_skill == SKILL_UNARMED else ranged_hit_modifier
+        attacker_hit_chance += hit_modifier  # Other modifiers
+        attacker_hit_chance *= getattr(attacker_weapon_equipment, 'condition', 1.0)  # Weapon condition
+        history.hit_chance = attacker_hit_chance
+        attacker_hit_roll = history.hit_roll = randint(1, 100)
+        history.hit_success = attacker_hit_roll <= attacker_hit_chance
+        history.hit_critical = attacker_hit_roll >= CRITICAL_FAIL_D100
+        if history.hit_success:
+            # Damage
+            history.hit_critical = attacker_hit_roll < getattr(self.stats, 'critical_chance', 0) + critical_modifier
+            attacker_damage_type = getattr(attacker_weapon, 'damage_type', DAMAGE_NORMAL)
+            damage = 0
+            for item in [attacker_weapon, attacker_ammo]:
+                if not item:
+                    continue
+                damage += item.damage_bonus
+                for i in range(item.damage_dice_count):
+                    damage += randint(1, item.damage_dice_value)
+            damage *= getattr(attacker_weapon, 'damage_modifier', 1.0) * getattr(attacker_ammo, 'damage_modifier', 1.0)
+            damage += self.stats.melee_damage if attacker_skill in [SKILL_UNARMED, SKILL_MELEE_WEAPONS] else 0
+            damage -= defender.damage_threshold
+            defender_damage_resistance = max(
+                defender.stats.damage_resistance +
+                getattr(defender.stats, DAMAGE_RESISTANCE.get(attacker_damage_type), 0) +
+                getattr(defender_armor, 'resistance_modifier', 0), 100) / 100
+            defender_damage_resistance *= getattr(defender_armor_equipment, 'condition', 1.0)  # Armor condition
+            damage -= damage * defender_damage_resistance
+            history.damage = damage
+            # On hit effects
+            for item in (attacker_weapon, defender_armor):
+                if not item:
+                    continue
+                for effect in item.effects_on_hit.all():
+                    if randint(1, 100) >= effect.chance:
+                        continue
+                    ActiveEffect.objects.get_or_create(
+                        character=defender, effect=effect,
+                        defaults=dict(start_date=history.game_date, end_date=None))
+            defender.update_effects()
+            # Health
+            defender.health -= damage
+            defender.save(_reason=str(history))
+        # Clip count & weapon condition
+        if attacker_weapon_equipment:
+            attacker_weapon_equipment.clip_count -= 1
+            attacker_weapon_equipment.condition -= attacker_weapon_equipment.condition * (
+                getattr(attacker_weapon, 'condition_modifier', 0.0) + getattr(attacker_ammo, 'condition_modifier', 0.0))
+            attacker_weapon_equipment.save(_reason=str(history))
+        # Armor condition
+        if defender_armor_equipment and history.hit_success:
+            defender_armor_equipment.condition -= defender_armor_equipment.condition * (
+                getattr(defender_armor, 'condition_modifier', 0.0))
+            defender_armor_equipment.save(_reason=str(history))
+        # Action points
+        ap_cost_type = 'ap_cost_burst' if is_burst else 'ap_cost_target' if target_part else 'ap_cost_normal'
+        self.action_points -= getattr(attacker_weapon, ap_cost_type, None) or AP_COST_FIGHT
+        self.save(_reason=str(history))
+        # Return
+        history.save()
+        return history
+
+    class Meta:
+        verbose_name = _("personnage")
+        verbose_name_plural = _("personnages")
 
 
 class Item(Entity):
@@ -304,41 +475,6 @@ class Statistic(CommonModel):
         verbose_name_plural = _("statistiques")
 
 
-class Condition(CommonModel):
-    """
-    Condition
-    """
-    CONDITION_EQUAL = '=='
-    CONDITION_GREATER_OR_EQUAL = '>='
-    CONDITION_GREATER = '>'
-    CONDITION_LESS_OR_EQUAL = '<='
-    CONDITION_LESS = '<'
-    CONDITION_DIFFERENT = '!='
-    CONDITIONS = (
-        (CONDITION_EQUAL, _("est égal à")),
-        (CONDITION_GREATER_OR_EQUAL, _("est supérieur ou égal à")),
-        (CONDITION_GREATER, _("est supérieur à")),
-        (CONDITION_LESS_OR_EQUAL, _("est inférieur ou égal à")),
-        (CONDITION_LESS, _("est inférieur à")),
-        (CONDITION_DIFFERENT, _("est différent de")),
-    )
-
-    stats = models.CharField(max_length=20, choices=ALL_STATS, verbose_name=_("statistique"))
-    condition = models.CharField(max_length=2, choices=CONDITIONS, verbose_name=_("condition"))
-    value = models.CharField(max_length=10, verbose_name=_("valeur"))
-
-    # TODO: __str__
-
-    def evaluate(self, character):
-        from common.utils import evaluate
-        return evaluate('character.{stats} {condition} {value}'.format(
-            stats=self.stats, condition=self.condition, value=self.value), _locals=dict(character=character))
-
-    class Meta:
-        verbose_name = _("condition")
-        verbose_name_plural = _("conditions")
-
-
 class Effect(Entity):
     """
     Effet
@@ -351,9 +487,7 @@ class Effect(Entity):
     # Technical informations
     chance = models.PositiveSmallIntegerField(default=100, verbose_name=_("chance"))
     duration = models.DurationField(blank=True, null=True, verbose_name=_("durée"))
-    interval = models.DurationField(blank=True, null=True, verbose_name=_("intervalle"))
-    conditions = models.ManyToManyField('Condition', blank=True, related_name='+', verbose_name=_("conditions"))
-    stats = models.ManyToManyField('Statistic', blank=True, related_name='+', verbose_name=_("statistiques"))
+    statistics = models.ManyToManyField('Statistic', blank=True, related_name='+', verbose_name=_("statistiques"))
 
     # TODO: __str__
 
@@ -370,9 +504,13 @@ class ActiveEffect(Entity):
     effect = models.ForeignKey('Effect', on_delete=models.CASCADE, verbose_name=_("effet"), related_name='active_effects')
     start_date = models.DateTimeField(blank=True, null=True, verbose_name=_("date d'effet"))
     end_date = models.DateTimeField(blank=True, null=True, verbose_name=_("date d'arrêt"))
-    next_hit = models.DateTimeField(blank=True, null=True, verbose_name=_("date prochain effet"))
 
     # TODO: __str__
+
+    def save(self, *args, **kwargs):
+        if not self.end_date and self.start_date and self.effect.duration:
+            self.end_date = self.start_date + self.effect.duration
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = _("effet en cours")
@@ -439,188 +577,3 @@ class FightHistory(CommonModel):
     class Meta:
         verbose_name = _("historique de combat")
         verbose_name_plural = _("historiques de combat")
-
-
-class EffectHistory(CommonModel):
-    """
-    Historique des effets
-    """
-    date = models.DateTimeField(auto_now_add=True, verbose_name=_("date"))
-    game_date = models.DateTimeField(blank=True, null=True, verbose_name=_("date en jeu"))
-    character = models.ForeignKey('Character', on_delete=models.CASCADE, verbose_name=_("personnage"), related_name='+')
-    effect = models.ForeignKey('Effect', on_delete=models.CASCADE, verbose_name=_("effet"), related_name='+')
-    stats = models.CharField(max_length=10, blank=True, null=True, choices=ALL_STATS, verbose_name=_("statistique"))
-    damage = models.PositiveSmallIntegerField(default=0, verbose_name=_("dégâts"))
-
-    # TODO: __str__
-
-    class Meta:
-        verbose_name = _("historique de jet")
-        verbose_name_plural = _("historiques de jets")
-
-
-def run_effects(character: Character) -> List[ActiveEffect]:
-    """
-    Mise à jour et application des effets actifs sur le personnage
-    :return: Liste des effets actifs
-    """
-    effects = []
-    if not character.campaign:
-        return effects
-    game_date = character.campaign.game_date
-    for active_effect in character.active_effects.select_related('effect').all():
-        effect = active_effect.effect
-        if not active_effect.end_date and effect.duration:
-            active_effect.end_date = active_effect.start_date + effect.duration
-        if active_effect.next_hit and active_effect.next_hit > game_date:
-            continue
-        # TODO:
-        active_effect.save()
-    return effects
-
-
-def roll(character: Character, stats: str, modifier=0):
-    """
-    Réalise un jet de compétence pour un personnage
-    :param character: Personnage concerné
-    :param stats: Code de la statistique
-    :param modifier: Modificateur de jet éventuel
-    :return: Historique de jet
-    """
-    history = RollHistory(character=character, modifier=modifier)
-    history.game_date = character.campaign.game_date
-    is_special = stats in LIST_SPECIALS
-    history.value = getattr(character.stats, stats, 0)
-    history.roll = randint(1, 10 if is_special else 100)
-    history.success = history.roll > history.value + history.modifier
-    history.critical = (history.roll <= (1 if is_special else character.stats.luck)) if history.success \
-        else (history.roll >= CRITICAL_FAIL_D10 if is_special else CRITICAL_FAIL_D100)
-    history.save()
-    return history
-
-
-def burst(attacker: Character, *targets: Iterable[Character],
-          targets_range: Iterable[int]=None, hit_modifier: int=0) -> List[FightHistory]:
-    """
-    Permet de lancer une attaque en rafale sur un groupe d'ennemis
-    :param attacker: Personnage en attaque
-    :param targets: Liste de personnages ciblés
-    :param targets_range: Liste des distances (en cases) de chaque personnage dans le même ordre que la liste précédente
-    :param hit_modifier: Modificateurs complémentaires de précision (lumière, couverture, etc...)
-    :return: Liste d'historiques de combat
-    """
-    histories = []
-    attacker_weapon_equipment = attacker.equipment_set.filter(slot=ITEM_WEAPON).first()
-    attacker_weapon = getattr(attacker_weapon_equipment, 'item', None)
-    all_targets = list(zip(targets, targets_range))
-    for round in range(getattr(attacker_weapon, 'burst_count', 0)):
-        target, target_range = choice(all_targets)
-        history = fight(attacker, target, is_burst=True, target_range=target_range, hit_modifier=hit_modifier)
-        histories.append(history)
-    return histories
-
-
-def fight(attacker: Character, defender: Character, is_burst: bool=False,
-          target_range: int=0, hit_modifier: int=0, target_part=None) -> FightHistory:
-    """
-    Calcul un round de combat entre deux personnages
-    :param attacker: Personnage en attaque
-    :param defender: Personnage en défense
-    :param is_burst: Attaque en rafale ?
-    :param target_range: Distance (en cases) entre les deux personnages
-    :param hit_modifier: Modificateurs complémentaires de précision (lumière, couverture, etc...)
-    :param target_part: Partie du corps ciblée par l'attaquant (ou torse par défaut)
-    :return: Historique de combat
-    """
-    history = FightHistory(attacker=attacker, defender=defender, burst=is_burst)
-    history.game_date = attacker.campaign.game_date
-    # Equipment
-    attacker_weapon_equipment = attacker.equipment_set.filter(slot=ITEM_WEAPON).first()
-    attacker_ammo_equipment = attacker.equipment_set.filter(slot=ITEM_AMMO).first()
-    defender_armor_equipment = defender.equipment_set.filter(slot=ITEM_ARMOR).first()
-    attacker_weapon = history.attacker_weapon = getattr(attacker_weapon_equipment, 'item', None)
-    attacker_ammo = history.attacker_ammo = getattr(attacker_ammo_equipment, 'item', None)
-    defender_armor = history.defender_armor = getattr(defender_armor_equipment, 'item', None)
-    # Fight condition
-    # TODO: weapon and armor condition, weapon strength requirement, clip count, characters not dead, etc...
-    # Chance to hit
-    attacker_skill = getattr(attacker_weapon, 'skill', SKILL_UNARMED)
-    attacker_hit_chance = getattr(attacker.stats, attacker_skill, 0)
-    attacker_weapon_range = getattr(attacker_weapon, 'range', 0)
-    attacker_weapon_throwable = getattr(attacker_weapon, 'throwable', False)
-    attacker_range_stats = SPECIAL_STRENGTH if attacker_weapon_throwable else SPECIAL_PERCEPTION
-    attacker_hit_range = attacker_weapon_range + (2 * getattr(attacker.stats, attacker_range_stats, 0)) + 1
-    attacker_hit_range *= getattr(attacker_weapon, 'range_modifier', 1.0)
-    attacker_hit_range *= getattr(attacker_ammo, 'range_modifier', 1.0)
-    attacker_hit_chance -= min(target_range - attacker_hit_range, 0) * 3  # Range modifiers
-    attacker_hit_chance += getattr(attacker_weapon, 'hit_chance_modifier', 0)  # Weapon hit chance modifier
-    attacker_hit_chance -= getattr(defender_armor, 'armor_class_modifier', 0)  # Defender armor class
-    attacker_hit_chance -= defender.stats.armor_class  # Armor class
-    # Targetted body part modifiers
-    body_part = target_part
-    if not target_part:
-        for body_part, chance in BODY_PARTS_RANDOM_CHANCES:
-            if randint(1, 100) < chance:
-                break
-    history.body_part = body_part or PART_TORSO
-    ranged_hit_modifier, melee_hit_modifier, critical_modifier = BODY_PARTS_MODIFIERS[history.body_part]
-    attacker_hit_chance += melee_hit_modifier if attacker_skill == SKILL_UNARMED else ranged_hit_modifier
-    attacker_hit_chance += hit_modifier  # Other modifiers
-    attacker_hit_chance *= getattr(attacker_weapon_equipment, 'condition', 1.0)  # Weapon condition
-    history.hit_chance = attacker_hit_chance
-    attacker_hit_roll = history.hit_roll = randint(1, 100)
-    history.hit_success = attacker_hit_roll <= attacker_hit_chance
-    history.hit_critical = attacker_hit_roll >= CRITICAL_FAIL_D100
-    if history.hit_success:
-        # Damage
-        history.hit_critical = attacker_hit_roll < getattr(attacker.stats, 'critical_chance', 0) + critical_modifier
-        attacker_damage_type = getattr(attacker_weapon, 'damage_type', DAMAGE_NORMAL)
-        damage = 0
-        for item in [attacker_weapon, attacker_ammo]:
-            if not item:
-                continue
-            damage += item.damage_bonus
-            for i in range(item.damage_dice_count):
-                damage += randint(1, item.damage_dice_value)
-        damage *= getattr(attacker_weapon, 'damage_modifier', 1.0) * getattr(attacker_ammo, 'damage_modifier', 1.0)
-        damage += attacker.stats.melee_damage if attacker_skill in [SKILL_UNARMED, SKILL_MELEE_WEAPONS] else 0
-        damage -= defender.damage_threshold
-        defender_damage_resistance = max(
-            defender.stats.damage_resistance +
-            getattr(defender.stats, DAMAGE_RESISTANCE.get(attacker_damage_type), 0) +
-            getattr(defender_armor, 'resistance_modifier', 0), 100) / 100
-        defender_damage_resistance *= getattr(defender_armor_equipment, 'condition', 1.0)  # Armor condition
-        damage -= damage * defender_damage_resistance
-        history.damage = damage
-        # On hit effects
-        for item in (attacker_weapon, defender_armor):
-            if not item:
-                continue
-            for effect in item.effects_on_hit.all():
-                if randint(1, 100) >= effect.chance:
-                    continue
-                ActiveEffect.objects.get_or_create(
-                    character=defender, effect=effect,
-                    defaults=dict(start_date=history.game_date, end_date=None, next_hit=None, hits=0))
-        run_effects(defender)
-        # Health
-        defender.health -= damage
-        defender.save(_reason=str(history))
-    # Clip count & weapon condition
-    if attacker_weapon_equipment:
-        attacker_weapon_equipment.clip_count -= 1
-        attacker_weapon_equipment.condition -= attacker_weapon_equipment.condition * (
-            getattr(attacker_weapon, 'condition_modifier', 0.0) + getattr(attacker_ammo, 'condition_modifier', 0.0))
-        attacker_weapon_equipment.save(_reason=str(history))
-    # Armor condition
-    if defender_armor_equipment and history.hit_success:
-        defender_armor_equipment.condition -= defender_armor_equipment.condition * (
-            getattr(defender_armor, 'condition_modifier', 0.0))
-        defender_armor_equipment.save(_reason=str(history))
-    # Action points
-    ap_cost_type = 'ap_cost_burst' if is_burst else 'ap_cost_target' if target_part else 'ap_cost_normal'
-    attacker.action_points -= getattr(attacker_weapon, ap_cost_type, None) or AP_COST_FIGHT
-    attacker.save(_reason=str(history))
-    # Return
-    history.save()
-    return history
