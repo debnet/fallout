@@ -6,7 +6,7 @@ from common.models import CommonModel, Entity
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models import F
+from django.db.models import F, Q
 from django.utils.translation import ugettext as _
 
 from fallout.app.constants import *  # noqa
@@ -120,7 +120,8 @@ class Stats(models.Model):
                         stats._change_stats(statistic.stats, statistic.value)
         # Active effects modifiers
         for effect in character.active_effects.select_related('effect').prefetch_related('effect__statistics').filter(
-                start_date__gte=F('character__campaign__game_date'), end_date__lte=F('character__campaign__game_date')):
+                Q(start_date__isnull=True) | Q(start_date__gte=F('character__campaign__game_date')),
+                Q(end_date__isnull=True) | Q(end_date__lte=F('character__campaign__game_date'))):
             for statistic in effect.effect.statistics.all():
                 stats._change_stats(statistic.stats, statistic.value)
         # Campaign effects modifiers
@@ -508,6 +509,8 @@ class ActiveEffect(Entity):
     # TODO: __str__
 
     def save(self, *args, **kwargs):
+        if not self.start_date and self.character.campaign:
+            self.start_date = self.character.campaign.game_date
         if not self.end_date and self.start_date and self.effect.duration:
             self.end_date = self.start_date + self.effect.duration
         super().save(*args, **kwargs)
