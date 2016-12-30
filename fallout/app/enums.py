@@ -46,7 +46,7 @@ LIST_SPECIALS = [a for a, *_ in SPECIALS]
 STATS_MAX_HEALTH = 'max_health'
 STATS_MAX_ACTION_POINTS = 'max_action_points'
 STATS_ARMOR_CLASS = 'armor_class'
-STATS_DAMAGE_THRESHOLD = 'damage_threashold'
+STATS_DAMAGE_THRESHOLD = 'damage_threshold'
 STATS_DAMAGE_RESISTANCE = 'damage_resistance'
 STATS_CARRY_WEIGHT = 'carry_weight'
 STATS_MELEE_DAMAGE = 'melee_damage'
@@ -148,6 +148,7 @@ DAMAGE_FIRE = 'fire'
 DAMAGE_ELECTRICITY = 'electricity'
 DAMAGE_GAZ_CONTACT = 'gas_contact'
 DAMAGE_GAZ_INHALED = 'gas_inhaled'
+DAMAGE_HEAL = 'heal'
 DAMAGES = (
     (DAMAGE_NORMAL, _("dégâts normaux")),
     (DAMAGE_LASER, _("dégâts de laser")),
@@ -159,6 +160,7 @@ DAMAGES = (
     (DAMAGE_ELECTRICITY, _("dégâts d'électricité")),
     (DAMAGE_GAZ_CONTACT, _("dégâts de gaz (contact)")),
     (DAMAGE_GAZ_INHALED, _("dégâts de gaz (inhalé)")),
+    (DAMAGE_HEAL, _("soins")),
 )
 LIST_DAMAGES = [a for a, *_ in DAMAGES]
 
@@ -174,6 +176,7 @@ DAMAGE_RESISTANCE = {
     DAMAGE_ELECTRICITY: RESISTANCE_ELECTRICITY,
     DAMAGE_GAZ_CONTACT: RESISTANCE_GAZ_CONTACT,
     DAMAGE_GAZ_INHALED: RESISTANCE_GAZ_INHALED,
+    DAMAGE_HEAL: None,
 }
 
 # Leveled stats
@@ -186,10 +189,6 @@ LEVELED_STATS = (
     (PERK_RATE, _("niveaux pour un talent")),
 )
 LIST_LEVELED_STATS = [a for a, *_ in LEVELED_STATS]
-
-# Lists of statistics
-LIST_EDITABLE_STATS = LIST_SPECIALS + LIST_SKILLS + LIST_SECONDARY_STATS + LIST_RESISTANCES + LIST_LEVELED_STATS
-LIST_ALL_STATS = LIST_GENERAL_STATS + LIST_EDITABLE_STATS
 
 # Rollable statistics
 ROLL_STATS = (
@@ -204,6 +203,11 @@ ALL_STATS = ROLL_STATS + (
     (_("Résistances"), RESISTANCES),
     (_("Statistiques de niveau"), LEVELED_STATS),
 )
+
+# Lists of statistics
+EDITABLE_STATS = SPECIALS + SKILLS + SECONDARY_STATS + RESISTANCES + LEVELED_STATS
+LIST_EDITABLE_STATS = [a for a, *_ in EDITABLE_STATS]
+LIST_ALL_STATS = LIST_GENERAL_STATS + LIST_EDITABLE_STATS
 
 # Item type
 ITEM_WEAPON = 'weapon'
@@ -235,7 +239,7 @@ RACE_ROBOT = 'robot'
 RACE_ANIMAL = 'animal'
 RACES = (
     (RACE_HUMAN, _("humain")),
-    (RACE_GHOUL, _("ghoul")),
+    (RACE_GHOUL, _("ghoule")),
     (RACE_SUPER_MUTANT, _("super-mutant")),
     (RACE_DEATHCLAW, _("écorcheur")),
     (RACE_ROBOT, _("robot")),

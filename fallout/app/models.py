@@ -1,6 +1,6 @@
 # encoding: utf-8
 from random import randint, choice
-from typing import Iterable, List
+from typing import Dict, Iterable, List, Tuple
 
 from common.models import CommonModel, Entity
 from django.conf import settings
@@ -13,7 +13,7 @@ from fallout.app.constants import *  # noqa
 from fallout.app.enums import *  # noqa
 
 
-class Campaign(Entity):
+class Campaign(CommonModel):
     """
     Aventure
     """
@@ -22,11 +22,12 @@ class Campaign(Entity):
     current_character = models.ForeignKey(
         'Character', blank=True, null=True, on_delete=models.SET_NULL,
         related_name='+', verbose_name=_("personnage actif"))
-    effects = models.ManyToManyField(
-        'Effect', blank=True, null=True,
-        related_name='+', verbose_name=_("effets actifs"))
+    statistics = models.ManyToManyField(
+        'Statistic', blank=True,
+        related_name='+', verbose_name=_("modificateurs"))
 
-    # TODO: __str__
+    def __str__(self):
+        return self.name
 
     class Meta:
         verbose_name = _("campagne")
@@ -38,13 +39,13 @@ class Stats(models.Model):
     Statistiques actuelles du personnage
     """
     # S.P.E.C.I.A.L.
-    strength = models.PositiveSmallIntegerField(default=0, verbose_name=_("force"))
-    perception = models.PositiveSmallIntegerField(default=0, verbose_name=_("perception"))
-    endurance = models.PositiveSmallIntegerField(default=0, verbose_name=_("endurance"))
-    charisma = models.PositiveSmallIntegerField(default=0, verbose_name=_("charisme"))
-    intelligence = models.PositiveSmallIntegerField(default=0, verbose_name=_("intelligence"))
-    agility = models.PositiveSmallIntegerField(default=0, verbose_name=_("agilité"))
-    luck = models.PositiveSmallIntegerField(default=0, verbose_name=_("chance"))
+    strength = models.PositiveSmallIntegerField(default=1, verbose_name=_("force"))
+    perception = models.PositiveSmallIntegerField(default=1, verbose_name=_("perception"))
+    endurance = models.PositiveSmallIntegerField(default=1, verbose_name=_("endurance"))
+    charisma = models.PositiveSmallIntegerField(default=1, verbose_name=_("charisme"))
+    intelligence = models.PositiveSmallIntegerField(default=1, verbose_name=_("intelligence"))
+    agility = models.PositiveSmallIntegerField(default=1, verbose_name=_("agilité"))
+    luck = models.PositiveSmallIntegerField(default=1, verbose_name=_("chance"))
     # Secondary statistics
     max_health = models.PositiveSmallIntegerField(default=0, verbose_name=_("santé maximale"))
     max_action_points = models.PositiveSmallIntegerField(default=0, verbose_name=_("points d'action max."))
@@ -66,8 +67,8 @@ class Stats(models.Model):
     poison_resistance = models.SmallIntegerField(default=0, verbose_name=_("résistance aux poisons"))
     fire_resistance = models.SmallIntegerField(default=0, verbose_name=_("résistance au feu"))
     electricity_resistance = models.SmallIntegerField(default=0, verbose_name=_("résistance à l'électricité"))
-    gas_resistance_contact = models.SmallIntegerField(default=0, verbose_name=_("résistance au gaz (contact)"))
-    gas_resistance_inhaled = models.SmallIntegerField(default=0, verbose_name=_("résistance au gaz (inhalé)"))
+    gas_contact_resistance = models.SmallIntegerField(default=0, verbose_name=_("résistance au gaz (contact)"))
+    gas_inhaled_resistance = models.SmallIntegerField(default=0, verbose_name=_("résistance au gaz (inhalé)"))
     # Skills
     small_guns = models.SmallIntegerField(default=0, verbose_name=_("armes à feu légères"))
     big_guns = models.SmallIntegerField(default=0, verbose_name=_("armes à feu lourdes"))
@@ -94,30 +95,30 @@ class Stats(models.Model):
     skill_points_per_level = models.SmallIntegerField(default=0, verbose_name=_("points de compétence par niveau"))
     perk_rate = models.SmallIntegerField(default=0, verbose_name=_("niveaux pour un talent"))
 
-    # TODO: __str__
+    def __str__(self):
+        return self.character.name
 
     @staticmethod
-    def get(character: Character):
+    def get(character: 'Character'):
         stats = Stats()
         stats.character = character
         old_max_health = stats.max_health
         old_max_action_points = stats.max_action_points
         # Get all character's stats
-        for stats_name in LIST_ALL_STATS:
+        for stats_name in LIST_EDITABLE_STATS:
             setattr(stats, stats_name, getattr(character, stats_name, 0))
         # Racial modifiers
-        stats._change_all_stats(RACES_STATS[character.race])
+        stats._change_all_stats(**RACES_STATS.get(character.race, {}))
         # Survival modifiers
         for stats_name, survival in SURVIVAL_EFFECTS:
             for (mini, maxi), effects in survival.items():
                 if mini <= getattr(character, stats_name, 0) < maxi:
-                    stats._change_all_stats(effects)
+                    stats._change_all_stats(**effects)
         # Equipment modifiers
         for equipment in character.equipments.filter(slot__isnull=False)\
-                .select_related('item').prefetch_related('item__effects').all():
-            for effect in equipment.item.effects.select_related('statistics').all():
-                    for statistic in effect.statistics.all():
-                        stats._change_stats(statistic.stats, statistic.value)
+                .select_related('item').prefetch_related('item__statistics').all():
+            for statistic in equipment.item.statistics.all():
+                stats._change_stats(statistic.stats, statistic.value)
         # Active effects modifiers
         for effect in character.active_effects.select_related('effect').prefetch_related('effect__statistics').filter(
                 Q(start_date__isnull=True) | Q(start_date__gte=F('character__campaign__game_date')),
@@ -126,9 +127,8 @@ class Stats(models.Model):
                 stats._change_stats(statistic.stats, statistic.value)
         # Campaign effects modifiers
         if character.campaign:
-            for effect in character.campaign.effects.prefetch_related('statistics').all():
-                for statistic in effect.effect.statistics.all():
-                    stats._change_stats(statistic.stats, statistic.value)
+            for statistic in character.campaign.statistics.all():
+                stats._change_stats(statistic.stats, statistic.value)
         # Derivated statistics
         for stats_name, formula in COMPUTED_STATS:
             stats._change_stats(stats_name, formula(stats, character))
@@ -139,12 +139,12 @@ class Stats(models.Model):
             character.action_points = stats.max_action_points
         return stats
 
-    def _change_all_stats(self, stats):
+    def _change_all_stats(self, **stats: Dict[str, Tuple[int, int, int]]):
         assert isinstance(self, Stats), _("Cette fonction ne peut être utilisée que par les statistiques.")
         for name, values in stats.items():
             self._change_stats(name, *values)
 
-    def _change_stats(self, name, value=0, mini=None, maxi=None):
+    def _change_stats(self, name: str, value: int=0, mini: int=None, maxi: int=None):
         assert isinstance(self, Stats), _("Cette fonction ne peut être utilisée que par les statistiques.")
         target = self if name in LIST_EDITABLE_STATS else self.character
         mini = mini if mini is not None else float('-inf')
@@ -173,9 +173,10 @@ class Character(Entity, Stats):
     image = models.ImageField(blank=True, null=True, verbose_name=_("image"))
     race = models.CharField(max_length=12, choices=RACES, default=RACE_HUMAN, verbose_name=_("race"))
     level = models.PositiveSmallIntegerField(default=1, verbose_name=_("niveau"))
+    is_player = models.BooleanField(default=False, verbose_name=_("joueur ?"))
     # Primary statistics
     experience = models.PositiveIntegerField(default=0, verbose_name=_("expérience"))
-    karma = models.PositiveSmallIntegerField(default=0, verbose_name=_("karma"))
+    karma = models.SmallIntegerField(default=0, verbose_name=_("karma"))
     health = models.PositiveSmallIntegerField(default=0, verbose_name=_("santé"))
     action_points = models.PositiveSmallIntegerField(default=0, verbose_name=_("points d'action"))
     skill_points = models.PositiveSmallIntegerField(default=0, verbose_name=_("points de compétences"))
@@ -188,7 +189,8 @@ class Character(Entity, Stats):
     # Statistics cache
     _stats = {}
 
-    # TODO: __str__
+    def __str__(self):
+        return self.name
 
     @property
     def stats(self) -> Stats:
@@ -200,6 +202,9 @@ class Character(Entity, Stats):
     def save(self, *args, **kwargs):
         self.check_level()
         Character._stats.pop(self.id, None)
+        if not self.id:
+            self.health = self.stats.max_health
+            self.action_points = self.stats.max_action_points
         super().save(*args, **kwargs)
 
     def check_level(self) -> int:
@@ -223,7 +228,7 @@ class Character(Entity, Stats):
             level += 1
         return level
 
-    def update_needs(self, hours=0) -> None:
+    def update_needs(self, hours: float=0.0) -> None:
         """
         Mise à jour des besoins
         :param hours: Nombre d'heures passées
@@ -233,7 +238,7 @@ class Character(Entity, Stats):
             for hour in range(int(hours)):
                 setattr(self, stats_name, getattr(self, stats_name) + formula(self.stats, self))
 
-    def roll(self, stats: str, modifier: int=0) -> RollHistory:
+    def roll(self, stats: str, modifier: int=0) -> 'RollHistory':
         """
         Réalise un jet de compétence pour un personnage
         :param stats: Code de la statistique
@@ -252,7 +257,7 @@ class Character(Entity, Stats):
         return history
 
     def burst(self, *targets: Iterable['Character'],
-              targets_range: Iterable[int]=None, hit_modifier: int=0) -> List[FightHistory]:
+              targets_range: Iterable[int]=None, hit_modifier: int=0) -> List['FightHistory']:
         """
         Permet de lancer une attaque en rafale sur un groupe d'ennemis
         :param targets: Liste de personnages ciblés
@@ -271,7 +276,7 @@ class Character(Entity, Stats):
         return histories
 
     def fight(self, defender: 'Character', is_burst: bool=False, target_range: int=0,
-              hit_modifier: int=0, target_part=None) -> FightHistory:
+              hit_modifier: int=0, target_part=None) -> 'FightHistory':
         """
         Calcul un round de combat entre deux personnages
         :param defender: Personnage ciblé
@@ -339,13 +344,13 @@ class Character(Entity, Stats):
                 getattr(defender.stats, DAMAGE_RESISTANCE.get(attacker_damage_type), 0) +
                 getattr(defender_armor, 'resistance_modifier', 0), 100) / 100
             defender_damage_resistance *= getattr(defender_armor_equipment, 'condition', 1.0)  # Armor condition
-            damage -= damage * defender_damage_resistance
+            damage -= damage * defender_damage_resistance * (-1.0 if attacker_damage_type == DAMAGE_HEAL else 1.0)
             history.damage = damage
             # On hit effects
-            for item in (attacker_weapon, defender_armor):
+            for item in (attacker_weapon, attacker_ammo, defender_armor):
                 if not item:
                     continue
-                for effect in item.effects_on_hit.all():
+                for effect in item.effects.all():
                     if randint(1, 100) >= effect.chance:
                         continue
                     ActiveEffect.objects.get_or_create(
@@ -379,6 +384,15 @@ class Character(Entity, Stats):
         verbose_name_plural = _("personnages")
 
 
+# Add property on Character for each stats
+for stats, name in EDITABLE_STATS:
+    def current_stats(self, stats=stats):
+        return getattr(self.stats, stats, None)
+
+    current_stats.short_description = name
+    setattr(Character, 'current_' + stats, property(current_stats))
+
+
 class Item(Entity):
     """
     Objet
@@ -388,14 +402,13 @@ class Item(Entity):
     title = models.CharField(max_length=200, blank=True, null=True, verbose_name=_("titre"))
     description = models.TextField(blank=True, null=True, verbose_name=_("description"))
     image = models.ImageField(blank=True, null=True, verbose_name=_("image"))
-    # Technical informations
     type = models.CharField(max_length=7, choices=ITEM_TYPES, verbose_name=_("type"))
     value = models.PositiveIntegerField(default=0, verbose_name=_("valeur"))
+    weight = models.FloatField(default=0.0, verbose_name=_("poids"))
     quest = models.BooleanField(default=False, verbose_name=_("quête ?"))
-    weight = models.PositiveSmallIntegerField(default=0, verbose_name=_("poids"))
-    throwable = models.BooleanField(default=False, verbose_name=_("jetable ?"))
     # Weapon specific
     melee = models.BooleanField(default=False, verbose_name=_("arme de mêlée"))
+    throwable = models.BooleanField(default=False, verbose_name=_("jetable ?"))
     damage_type = models.CharField(max_length=10, blank=True, null=True, choices=DAMAGES, verbose_name=_("type de dégâts"))
     damage_dice_count = models.PositiveSmallIntegerField(default=0, verbose_name=_("nombre de dés"))
     damage_dice_value = models.PositiveSmallIntegerField(default=0, verbose_name=_("valeur de dé"))
@@ -407,7 +420,7 @@ class Item(Entity):
     ap_cost_target = models.PositiveSmallIntegerField(blank=True, null=True, verbose_name=_("coût PA ciblé"))
     ap_cost_burst = models.PositiveSmallIntegerField(blank=True, null=True, verbose_name=_("coût PA rafale"))
     burst_count = models.PositiveSmallIntegerField(blank=True, null=True, verbose_name=_("munitions en rafale"))
-    min_stength = models.PositiveSmallIntegerField(blank=True, null=True, verbose_name=_("force minimum"))
+    min_strength = models.PositiveSmallIntegerField(blank=True, null=True, verbose_name=_("force minimum"))
     skill = models.CharField(max_length=10, blank=True, null=True, choices=SKILLS, verbose_name=_("compétence"))
     ammunition = models.ManyToManyField('Item', blank=True, verbose_name=_("type de munition"))
     # Modifiers
@@ -419,10 +432,11 @@ class Item(Entity):
     critical_modifier = models.FloatField(default=1.0, verbose_name=_("modificateur de coup critique"))
     condition_modifier = models.FloatField(default=0.0, verbose_name=_("modificateur de condition"))
     # Effets
+    statistics = models.ManyToManyField('Statistic', blank=True, related_name='+', verbose_name=_("modificateurs"))
     effects = models.ManyToManyField('Effect', blank=True, related_name='+', verbose_name=_("effets"))
-    effects_on_hit = models.ManyToManyField('Effect', blank=True, related_name='+', verbose_name=_("effets sur cible"))
 
-    # TODO: __str__
+    def __str__(self):
+        return self.name
 
     class Meta:
         verbose_name = _("objet")
@@ -440,7 +454,8 @@ class Equipment(Entity):
     condition = models.FloatField(default=1.0, verbose_name=_("état"))
     clip_count = models.PositiveSmallIntegerField(default=0, verbose_name=_("munitions"))
 
-    # TODO: __str__
+    def __str__(self):
+        return "({}) {}".format(self.character, self.item)
 
     def clean(self):
         if self.slot:
@@ -469,7 +484,8 @@ class Statistic(CommonModel):
     stats = models.CharField(max_length=20, choices=ALL_STATS, verbose_name=_("statistique"))
     value = models.SmallIntegerField(default=0, verbose_name=_("valeur"))
 
-    # TODO: __str__
+    def __str__(self):
+        return "{} = {}".format(self.get_stats_display(), self.value)
 
     class Meta:
         verbose_name = _("statistique")
@@ -485,12 +501,18 @@ class Effect(Entity):
     title = models.CharField(max_length=200, blank=True, null=True, verbose_name=_("titre"))
     description = models.TextField(blank=True, null=True, verbose_name=_("description"))
     image = models.ImageField(blank=True, null=True, verbose_name=_("image"))
-    # Technical informations
     chance = models.PositiveSmallIntegerField(default=100, verbose_name=_("chance"))
     duration = models.DurationField(blank=True, null=True, verbose_name=_("durée"))
-    statistics = models.ManyToManyField('Statistic', blank=True, related_name='+', verbose_name=_("statistiques"))
+    statistic = models.ManyToManyField('Statistic', blank=True, related_name='+', verbose_name=_("statistiques"))
+    # Timed damage
+    interval = models.DurationField(blank=True, null=True, verbose_name=_("intervalle"))
+    damage_type = models.CharField(max_length=10, blank=True, null=True, choices=DAMAGES, verbose_name=_("type de dégâts"))
+    damage_dice_count = models.PositiveSmallIntegerField(default=0, verbose_name=_("nombre de dés"))
+    damage_dice_value = models.PositiveSmallIntegerField(default=0, verbose_name=_("valeur de dé"))
+    damage_bonus = models.PositiveSmallIntegerField(default=0, verbose_name=_("bonus au dé"))
 
-    # TODO: __str__
+    def __str__(self):
+        return self.name
 
     class Meta:
         verbose_name = _("effet")
@@ -506,7 +528,8 @@ class ActiveEffect(Entity):
     start_date = models.DateTimeField(blank=True, null=True, verbose_name=_("date d'effet"))
     end_date = models.DateTimeField(blank=True, null=True, verbose_name=_("date d'arrêt"))
 
-    # TODO: __str__
+    def __str__(self):
+        return "({}) {}".format(self.character, self.effect)
 
     def save(self, *args, **kwargs):
         if not self.start_date and self.character.campaign:
@@ -533,6 +556,9 @@ class RollHistory(CommonModel):
     roll = models.PositiveIntegerField(default=0, verbose_name=_("jet"))
     success = models.BooleanField(default=False, verbose_name=_("succès ?"))
     critical = models.BooleanField(default=False, verbose_name=_("critique ?"))
+
+    def __str__(self):
+        return "({}) {}".format(self.character, self.get_stats_display())
 
     @property
     def label(self):
@@ -575,7 +601,8 @@ class FightHistory(CommonModel):
     damage = models.PositiveSmallIntegerField(default=0, verbose_name=_("dégâts"))
     # TODO: more details (base hit chance, base damage, effects applied, etc...)
 
-    # TODO: __str__
+    def __str__(self):
+        return "{} / {}".format(self.attacker, self.defender)
 
     class Meta:
         verbose_name = _("historique de combat")
