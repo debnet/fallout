@@ -253,7 +253,7 @@ COMPUTED_STATS = (
     ('max_action_points', lambda s, c: 5 + (s.agility // 2)),
     # Secondary statistics
     ('armor_class', lambda s, c: s.agility),
-    ('carry_weight', lambda s, c: 25 + (25 * s.strength)),
+    ('carry_weight', lambda s, c: (25 + (25 * s.strength)) * 450),  # 1 lb = 453.592 g
     ('melee_damage', lambda s, c: max(0, s.strength - 5)),
     ('sequence', lambda s, c: 2 * s.perception),
     ('healing_rate', lambda s, c: (s.endurance // 3)),
@@ -261,8 +261,8 @@ COMPUTED_STATS = (
     # Resistances
     ('radiation_resistance', lambda s, c: 2 * s.endurance),
     ('poison_resistance', lambda s, c: 5 * s.endurance),
-    ('small_guns', lambda s, c: 5 + (4 * s.agility)),
     # Skills
+    ('small_guns', lambda s, c: 5 + (4 * s.agility)),
     ('big_guns', lambda s, c: 2 * s.agility),
     ('energy_weapons', lambda s, c: 2 * s.agility),
     ('unarmed', lambda s, c: 30 + (2 * (s.strength + s.agility))),

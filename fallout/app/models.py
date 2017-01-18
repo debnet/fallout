@@ -6,7 +6,7 @@ from common.models import CommonModel, Entity
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models import F, Q
+from django.db.models import F, Q, Sum
 from django.utils.translation import ugettext as _
 
 from fallout.app.constants import *  # noqa
@@ -22,9 +22,15 @@ class Campaign(CommonModel):
     current_character = models.ForeignKey(
         'Character', blank=True, null=True, on_delete=models.SET_NULL,
         related_name='+', verbose_name=_("personnage actif"))
-    statistics = models.ManyToManyField(
-        'Statistic', blank=True,
-        related_name='+', verbose_name=_("modificateurs"))
+    active_effects = models.ManyToManyField(
+        'Effect', blank=True,
+        related_name='+', verbose_name=_("effets actifs"))
+
+    def clear_loot(self):
+        """
+        Supprime les butins non réclamés de la campagne
+        """
+        return self.loots.all().delete()
 
     def __str__(self):
         return self.name
@@ -116,19 +122,19 @@ class Stats(models.Model):
                     stats._change_all_stats(**effects)
         # Equipment modifiers
         for equipment in character.equipments.filter(slot__isnull=False)\
-                .select_related('item').prefetch_related('item__statistics').all():
-            for statistic in equipment.item.statistics.all():
-                stats._change_stats(statistic.stats, statistic.value)
+                .select_related('item').prefetch_related('item__modifiers').all():
+            for modifier in equipment.item.modifiers.all():
+                stats._change_stats(modifier.stats, modifier.value)
         # Active effects modifiers
-        for effect in character.active_effects.select_related('effect').prefetch_related('effect__statistics').filter(
+        for effect in character.active_effects.select_related('effect').prefetch_related('effect__modifiers').filter(
                 Q(start_date__isnull=True) | Q(start_date__gte=F('character__campaign__game_date')),
                 Q(end_date__isnull=True) | Q(end_date__lte=F('character__campaign__game_date'))):
-            for statistic in effect.effect.statistics.all():
-                stats._change_stats(statistic.stats, statistic.value)
+            for modifier in effect.effect.modifiers.all():
+                stats._change_stats(modifier.stats, modifier.value)
         # Campaign effects modifiers
         if character.campaign:
-            for statistic in character.campaign.statistics.all():
-                stats._change_stats(statistic.stats, statistic.value)
+            for modifier in character.campaign.modifiers.all():
+                stats._change_stats(modifier.stats, modifier.value)
         # Derivated statistics
         for stats_name, formula in COMPUTED_STATS:
             stats._change_stats(stats_name, formula(stats, character))
@@ -189,15 +195,15 @@ class Character(Entity, Stats):
     # Statistics cache
     _stats = {}
 
-    def __str__(self):
-        return self.name
-
     @property
     def stats(self) -> Stats:
         stats = Character._stats.get(self.id) or Stats.get(self)
         if self.id:
             Character._stats[self.id] = stats
         return stats
+
+    def charge(self):
+        return self.equipments.aggregate(charge=Sum(F('count') * F('item__weight'))).get('charge', 0)
 
     def save(self, *args, **kwargs):
         self.check_level()
@@ -333,9 +339,7 @@ class Character(Entity, Stats):
             for item in [attacker_weapon, attacker_ammo]:
                 if not item:
                     continue
-                damage += item.damage_bonus
-                for i in range(item.damage_dice_count):
-                    damage += randint(1, item.damage_dice_value)
+                damage += item.base_damage
             damage *= getattr(attacker_weapon, 'damage_modifier', 1.0) * getattr(attacker_ammo, 'damage_modifier', 1.0)
             damage += self.stats.melee_damage if attacker_skill in [SKILL_UNARMED, SKILL_MELEE_WEAPONS] else 0
             damage -= defender.damage_threshold
@@ -379,6 +383,9 @@ class Character(Entity, Stats):
         history.save()
         return history
 
+    def __str__(self):
+        return self.name
+
     class Meta:
         verbose_name = _("personnage")
         verbose_name_plural = _("personnages")
@@ -393,6 +400,17 @@ for stats, name in EDITABLE_STATS:
     setattr(Character, 'current_' + stats, property(current_stats))
 
 
+class Modifier(CommonModel):
+    """
+    Modificateur de statistique
+    """
+    stats = models.CharField(max_length=20, choices=ALL_STATS, verbose_name=_("statistique"))
+    value = models.SmallIntegerField(default=0, verbose_name=_("valeur"))
+
+    class Meta:
+        abstract = True
+
+
 class Item(Entity):
     """
     Objet
@@ -405,10 +423,10 @@ class Item(Entity):
     type = models.CharField(max_length=7, choices=ITEM_TYPES, verbose_name=_("type"))
     value = models.PositiveIntegerField(default=0, verbose_name=_("valeur"))
     weight = models.FloatField(default=0.0, verbose_name=_("poids"))
-    quest = models.BooleanField(default=False, verbose_name=_("quête ?"))
+    is_quest = models.BooleanField(default=False, verbose_name=_("quête ?"))
     # Weapon specific
-    melee = models.BooleanField(default=False, verbose_name=_("arme de mêlée"))
-    throwable = models.BooleanField(default=False, verbose_name=_("jetable ?"))
+    is_melee = models.BooleanField(default=False, verbose_name=_("arme de mêlée ?"))
+    is_throwable = models.BooleanField(default=False, verbose_name=_("jetable ?"))
     damage_type = models.CharField(max_length=10, blank=True, null=True, choices=DAMAGES, verbose_name=_("type de dégâts"))
     damage_dice_count = models.PositiveSmallIntegerField(default=0, verbose_name=_("nombre de dés"))
     damage_dice_value = models.PositiveSmallIntegerField(default=0, verbose_name=_("valeur de dé"))
@@ -422,7 +440,9 @@ class Item(Entity):
     burst_count = models.PositiveSmallIntegerField(blank=True, null=True, verbose_name=_("munitions en rafale"))
     min_strength = models.PositiveSmallIntegerField(blank=True, null=True, verbose_name=_("force minimum"))
     skill = models.CharField(max_length=10, blank=True, null=True, choices=SKILLS, verbose_name=_("compétence"))
-    ammunition = models.ManyToManyField('Item', blank=True, verbose_name=_("type de munition"))
+    ammunition = models.ManyToManyField(
+        'Item', blank=True, verbose_name=_("type de munition"),
+        limit_choices_to={'type': ITEM_AMMO})
     # Modifiers
     hit_chance_modifier = models.PositiveSmallIntegerField(default=0, verbose_name=_("modificateur de précision"))
     armor_class_modifier = models.PositiveSmallIntegerField(default=0, verbose_name=_("modificateur d'esquive"))
@@ -432,8 +452,18 @@ class Item(Entity):
     critical_modifier = models.FloatField(default=1.0, verbose_name=_("modificateur de coup critique"))
     condition_modifier = models.FloatField(default=0.0, verbose_name=_("modificateur de condition"))
     # Effets
-    statistics = models.ManyToManyField('Statistic', blank=True, related_name='+', verbose_name=_("modificateurs"))
     effects = models.ManyToManyField('Effect', blank=True, related_name='+', verbose_name=_("effets"))
+
+    @property
+    def base_damage(self):
+        """
+        Calcul unitaire des dégâts de base de l'objet
+        :return: Nombre de dégâts de base
+        """
+        damage = self.damage_bonus
+        for i in range(self.damage_dice_count):
+            damage += randint(1, self.damage_dice_value)
+        return damage
 
     def __str__(self):
         return self.name
@@ -441,6 +471,20 @@ class Item(Entity):
     class Meta:
         verbose_name = _("objet")
         verbose_name_plural = _("objets")
+
+
+class ItemModifier(Modifier):
+    """
+    Modificateur d'objet
+    """
+    item = models.ForeignKey('Item', on_delete=models.CASCADE, verbose_name=_("objet"), related_name='modifiers')
+
+    def __str__(self):
+        return "{} = {}".format(self.get_stats_display(), self.value)
+
+    class Meta:
+        verbose_name = _("modificateur d'objet")
+        verbose_name_plural = _("modificateurs d'objets")
 
 
 class Equipment(Entity):
@@ -451,11 +495,8 @@ class Equipment(Entity):
     item = models.ForeignKey('Item', on_delete=models.CASCADE, related_name='+', verbose_name=_("objet"))
     slot = models.CharField(max_length=7, choices=SLOT_ITEM_TYPES, blank=True, null=True, verbose_name=_("emplacement"))
     count = models.PositiveIntegerField(default=0, verbose_name=_("nombre"))
-    condition = models.FloatField(default=1.0, verbose_name=_("état"))
     clip_count = models.PositiveSmallIntegerField(default=0, verbose_name=_("munitions"))
-
-    def __str__(self):
-        return "({}) {}".format(self.character, self.item)
+    condition = models.FloatField(default=1.0, verbose_name=_("état"))
 
     def clean(self):
         if self.slot:
@@ -472,24 +513,12 @@ class Equipment(Entity):
             if equipment and not self.item.ammunition.filter(id=equipment.item.id).exists():
                 raise ValidationError(dict(item=_("Cette arme est incompatible avec les munitions actuellement équipées.")))
 
+    def __str__(self):
+        return "({}) {}".format(self.character, self.item)
+
     class Meta:
         verbose_name = _("équipement")
         verbose_name_plural = _("équipements")
-
-
-class Statistic(CommonModel):
-    """
-    Statistique
-    """
-    stats = models.CharField(max_length=20, choices=ALL_STATS, verbose_name=_("statistique"))
-    value = models.SmallIntegerField(default=0, verbose_name=_("valeur"))
-
-    def __str__(self):
-        return "{} = {}".format(self.get_stats_display(), self.value)
-
-    class Meta:
-        verbose_name = _("statistique")
-        verbose_name_plural = _("statistiques")
 
 
 class Effect(Entity):
@@ -503,7 +532,6 @@ class Effect(Entity):
     image = models.ImageField(blank=True, null=True, verbose_name=_("image"))
     chance = models.PositiveSmallIntegerField(default=100, verbose_name=_("chance"))
     duration = models.DurationField(blank=True, null=True, verbose_name=_("durée"))
-    statistic = models.ManyToManyField('Statistic', blank=True, related_name='+', verbose_name=_("statistiques"))
     # Timed damage
     interval = models.DurationField(blank=True, null=True, verbose_name=_("intervalle"))
     damage_type = models.CharField(max_length=10, blank=True, null=True, choices=DAMAGES, verbose_name=_("type de dégâts"))
@@ -519,6 +547,20 @@ class Effect(Entity):
         verbose_name_plural = _("effets")
 
 
+class EffectModifier(Modifier):
+    """
+    Modificateur d'effet
+    """
+    effect = models.ForeignKey('Effect', on_delete=models.CASCADE, verbose_name=_("effet"), related_name='modifiers')
+
+    def __str__(self):
+        return "{} = {}".format(self.get_stats_display(), self.value)
+
+    class Meta:
+        verbose_name = _("modificateur d'effet")
+        verbose_name_plural = _("modificateurs d'effets")
+
+
 class ActiveEffect(Entity):
     """
     Effet actif sur un personnage
@@ -527,9 +569,7 @@ class ActiveEffect(Entity):
     effect = models.ForeignKey('Effect', on_delete=models.CASCADE, verbose_name=_("effet"), related_name='active_effects')
     start_date = models.DateTimeField(blank=True, null=True, verbose_name=_("date d'effet"))
     end_date = models.DateTimeField(blank=True, null=True, verbose_name=_("date d'arrêt"))
-
-    def __str__(self):
-        return "({}) {}".format(self.character, self.effect)
+    next_date = models.DateTimeField(blank=True, null=True, verbose_name=_("date suivante"))
 
     def save(self, *args, **kwargs):
         if not self.start_date and self.character.campaign:
@@ -538,9 +578,71 @@ class ActiveEffect(Entity):
             self.end_date = self.start_date + self.effect.duration
         super().save(*args, **kwargs)
 
+    def __str__(self):
+        return "({}) {}".format(str(self.character), str(self.effect))
+
     class Meta:
         verbose_name = _("effet en cours")
         verbose_name_plural = _("effets en cours")
+
+
+class LootTemplate(Entity):
+    """
+    Modèle de butin
+    """
+    name = models.CharField(max_length=200, verbose_name=_("nom"))
+    title = models.CharField(max_length=200, blank=True, null=True, verbose_name=_("titre"))
+    description = models.TextField(blank=True, null=True, verbose_name=_("description"))
+    image = models.ImageField(blank=True, null=True, verbose_name=_("image"))
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = _("modèle de butin")
+        verbose_name_plural = _("modèles de butins")
+
+
+class LootTemplateItem(Entity):
+    """
+    Objet de butin
+    """
+    template = models.ForeignKey('LootTemplate', on_delete=models.CASCADE, verbose_name=_("modèle"), related_name="items")
+    item = models.ForeignKey('Item', on_delete=models.CASCADE, verbose_name=_("objet"), related_name="+")
+    chance = models.PositiveSmallIntegerField(default=100, verbose_name=_("chance"))
+    min_count = models.PositiveIntegerField(default=1, verbose_name=_("nombre min."))
+    max_count = models.PositiveIntegerField(default=1, null=True, verbose_name=_("nombre max."))
+    min_condition = models.FloatField(blank=True, null=True, verbose_name=_("état min."))
+    max_condition = models.FloatField(blank=True, null=True, verbose_name=_("état max."))
+
+    def __str__(self):
+        return "({}) {}".format(str(self.template), str(self.item))
+
+    class Meta:
+        verbose_name = _("objet de butin")
+        verbose_name_plural = _("objets de butins")
+
+
+class Loot(CommonModel):
+    """
+    Butin
+    """
+    campaign = models.ForeignKey('Campaign', on_delete=models.CASCADE, verbose_name=_("campagne"), related_name="loots")
+    item = models.ForeignKey('Item', on_delete=models.CASCADE, verbose_name=_("objet"), related_name="loots")
+    count = models.PositiveIntegerField(default=1, verbose_name=_("nombre"))
+    condition = models.FloatField(blank=True, null=True, verbose_name=_("état"))
+
+    def save(self, *args, **kwargs):
+        if self.count <= 0:
+            return self.delete()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return "({}) {}".format(str(self.campaign), str(self.item))
+
+    class Meta:
+        verbose_name = _("butin")
+        verbose_name_plural = _("butins")
 
 
 class RollHistory(CommonModel):
@@ -557,17 +659,14 @@ class RollHistory(CommonModel):
     success = models.BooleanField(default=False, verbose_name=_("succès ?"))
     critical = models.BooleanField(default=False, verbose_name=_("critique ?"))
 
-    def __str__(self):
-        return "({}) {}".format(self.character, self.get_stats_display())
-
     @property
     def label(self):
         return ' '.join(([_("échec"), _("réussite")][self.success], [_("normal"), _("critique")][self.critical]))
 
     def __str__(self):
-        return _("jet de {stats} pour {character} : {result}").format(
-            stats=self.get_stats_display(),
+        return _("({character}) jet de {stats} : {result}").format(
             character=str(self.character),
+            stats=self.get_stats_display(),
             result=self.label)
 
     class Meta:
