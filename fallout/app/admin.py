@@ -89,9 +89,9 @@ class EquipmentAdmin(EntityAdmin):
         )),
     )
     # TODO:
-    list_display = ()
-    list_editable = ()
-    list_filter = ()
+    list_display = ('character', 'item', 'slot', 'count', 'condition', 'clip_count', )
+    list_editable = ('slot', 'count', 'condition', 'clip_count', )
+    list_filter = ('character', 'item', 'slot', )
 
 
 class EffectModifierInline(admin.TabularInline):

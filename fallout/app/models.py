@@ -282,7 +282,7 @@ class Character(Entity, Stats):
         return histories
 
     def fight(self, defender: 'Character', is_burst: bool=False, target_range: int=0,
-              hit_modifier: int=0, target_part=None) -> 'FightHistory':
+              hit_modifier: int=0, target_part=None, user: 'User'=None) -> 'FightHistory':
         """
         Calcul un round de combat entre deux personnages
         :param defender: Personnage ciblé
@@ -290,6 +290,7 @@ class Character(Entity, Stats):
         :param target_range: Distance (en cases) entre les deux personnages
         :param hit_modifier: Modificateurs complémentaires de précision (lumière, couverture, etc...)
         :param target_part: Partie du corps ciblée par l'attaquant (ou torse par défaut)
+        :param user: Utilisateur effectuant l'action
         :return: Historique de combat
         """
         history = FightHistory(attacker=self, defender=defender, burst=is_burst)
@@ -362,26 +363,62 @@ class Character(Entity, Stats):
                         defaults=dict(start_date=history.game_date, end_date=None))
             defender.update_effects()
             # Health
-            defender.health -= damage
-            defender.save(_reason=str(history))
+            if damage:
+                defender.health -= damage
+                defender.save(_reason=str(history), _current_user=user)
         # Clip count & weapon condition
         if attacker_weapon_equipment:
             attacker_weapon_equipment.clip_count -= 1
             attacker_weapon_equipment.condition -= attacker_weapon_equipment.condition * (
                 getattr(attacker_weapon, 'condition_modifier', 0.0) + getattr(attacker_ammo, 'condition_modifier', 0.0))
+            attacker_weapon_equipment.condition = min(attacker_weapon_equipment.condition, 0)
             attacker_weapon_equipment.save(_reason=str(history))
         # Armor condition
         if defender_armor_equipment and history.hit_success:
             defender_armor_equipment.condition -= defender_armor_equipment.condition * (
                 getattr(defender_armor, 'condition_modifier', 0.0))
+            defender_armor_equipment.condition = min(defender_armor_equipment.condition, 0)
             defender_armor_equipment.save(_reason=str(history))
         # Action points
         ap_cost_type = 'ap_cost_burst' if is_burst else 'ap_cost_target' if target_part else 'ap_cost_normal'
         self.action_points -= getattr(attacker_weapon, ap_cost_type, None) or AP_COST_FIGHT
-        self.save(_reason=str(history))
+        self.save(_reason=str(history), _current_user=user)
         # Return
         history.save()
         return history
+
+    def damage(self, dice_count: int, dice_value: int, damage_bonus: int,
+               damage_type: str=DAMAGE_NORMAL, user: 'User'=None) -> int:
+        """
+        Inflige des dégâts au personnage
+        :param dice_count: Nombre de dés
+        :param dice_value: Valeur des dés
+        :param damage_bonus: Dégâts bonus
+        :param damage_type: Type des dégâts
+        :param user: Utilisateur effectuant l'action
+        :return: Nombre de dégâts
+        """
+        damage = damage_bonus
+        for i in range(dice_count):
+            damage += randint(1, dice_value)
+        armor_equipment = self.equipment_set.filter(slot=ITEM_ARMOR).first()
+        armor = getattr(armor_equipment, 'item', None)
+        damage -= self.damage_threshold
+        defender_damage_resistance = max(
+            self.stats.damage_resistance +
+            getattr(self.stats, DAMAGE_RESISTANCE.get(damage_type), 0) +
+            getattr(armor, 'resistance_modifier', 0), 100) / 100
+        defender_damage_resistance *= getattr(armor_equipment, 'condition', 1.0)  # Armor condition
+        damage -= damage * defender_damage_resistance * (-1.0 if damage_type == DAMAGE_HEAL else 1.0)
+        if armor_equipment:
+            armor_equipment.condition -= armor_equipment.condition * (
+                getattr(armor, 'condition_modifier', 0.0))
+            armor_equipment.condition = min(armor_equipment.condition, 0)
+            armor_equipment.save(_current_user=user)
+        if damage:
+            self.health -= damage
+            self.save(_current_user=user)
+        return damage
 
     def __str__(self):
         return self.name
