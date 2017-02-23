@@ -1,6 +1,6 @@
 # encoding: utf-8
 from random import randint, choice
-from typing import Dict, Iterable, List, Tuple
+from typing import Dict, Iterable, List, Tuple, Union
 
 from common.models import CommonModel, Entity
 from django.conf import settings
@@ -32,7 +32,7 @@ class Campaign(CommonModel):
         """
         return self.loots.all().delete()
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
     class Meta:
@@ -105,7 +105,7 @@ class Stats(models.Model):
         return self.character.name
 
     @staticmethod
-    def get(character: 'Character'):
+    def get(character: 'Character') -> 'Stats':
         stats = Stats()
         stats.character = character
         old_max_health = stats.max_health
@@ -145,12 +145,12 @@ class Stats(models.Model):
             character.action_points = stats.max_action_points
         return stats
 
-    def _change_all_stats(self, **stats: Dict[str, Tuple[int, int, int]]):
+    def _change_all_stats(self, **stats: Dict[str, Tuple[int, int, int]]) -> None:
         assert isinstance(self, Stats), _("Cette fonction ne peut être utilisée que par les statistiques.")
         for name, values in stats.items():
             self._change_stats(name, *values)
 
-    def _change_stats(self, name: str, value: int=0, mini: int=None, maxi: int=None):
+    def _change_stats(self, name: str, value: int=0, mini: int=None, maxi: int=None) -> None:
         assert isinstance(self, Stats), _("Cette fonction ne peut être utilisée que par les statistiques.")
         target = self if name in LIST_EDITABLE_STATS else self.character
         mini = mini if mini is not None else float('-inf')
@@ -262,13 +262,14 @@ class Character(Entity, Stats):
         history.save()
         return history
 
-    def burst(self, *targets: Iterable['Character'],
-              targets_range: Iterable[int]=None, hit_modifier: int=0) -> List['FightHistory']:
+    def burst(self, *targets: Iterable['Character'], targets_range: Iterable[int]=None,
+              hit_modifier: int=0, user: 'User'=None) -> List['FightHistory']:
         """
         Permet de lancer une attaque en rafale sur un groupe d'ennemis
         :param targets: Liste de personnages ciblés
         :param targets_range: Liste des distances (en cases) de chaque personnage dans le même ordre que la liste précédente
         :param hit_modifier: Modificateurs complémentaires de précision (lumière, couverture, etc...)
+        :param user: Utilisateur effectuant l'action
         :return: Liste d'historiques de combat
         """
         histories = []
@@ -277,7 +278,8 @@ class Character(Entity, Stats):
         all_targets = list(zip(targets, targets_range))
         for round in range(getattr(attacker_weapon, 'burst_count', 0)):
             target, target_range = choice(all_targets)
-            history = self.fight(target, is_burst=True, target_range=target_range, hit_modifier=hit_modifier)
+            history = self.fight(
+                target, is_burst=True, target_range=target_range, hit_modifier=hit_modifier, user=user)
             histories.append(history)
         return histories
 
@@ -293,7 +295,7 @@ class Character(Entity, Stats):
         :param user: Utilisateur effectuant l'action
         :return: Historique de combat
         """
-        history = FightHistory(attacker=self, defender=defender, burst=is_burst)
+        history = FightHistory(attacker=self, defender=defender, burst=is_burst, range=target_range)
         history.game_date = self.campaign.game_date
         # Equipment
         attacker_weapon_equipment = self.equipment_set.filter(slot=ITEM_WEAPON).first()
@@ -328,6 +330,7 @@ class Character(Entity, Stats):
         attacker_hit_chance += melee_hit_modifier if attacker_skill == SKILL_UNARMED else ranged_hit_modifier
         attacker_hit_chance += hit_modifier  # Other modifiers
         attacker_hit_chance *= getattr(attacker_weapon_equipment, 'condition', 1.0)  # Weapon condition
+        history.hit_modifier = hit_modifier
         history.hit_chance = attacker_hit_chance
         attacker_hit_roll = history.hit_roll = randint(1, 100)
         history.hit_success = attacker_hit_roll <= attacker_hit_chance
@@ -349,6 +352,7 @@ class Character(Entity, Stats):
                 getattr(defender.stats, DAMAGE_RESISTANCE.get(attacker_damage_type), 0) +
                 getattr(defender_armor, 'resistance_modifier', 0), 100) / 100
             defender_damage_resistance *= getattr(defender_armor_equipment, 'condition', 1.0)  # Armor condition
+            history.damage_resistance = defender_damage_resistance
             damage -= damage * defender_damage_resistance * (-1.0 if attacker_damage_type == DAMAGE_HEAL else 1.0)
             history.damage = damage
             # On hit effects
@@ -364,7 +368,10 @@ class Character(Entity, Stats):
             defender.update_effects()
             # Health
             if damage:
-                defender.health -= damage
+                if attacker_damage_type == DAMAGE_RADIATION:
+                    defender.irradiation += damage
+                else:
+                    defender.health -= damage
                 defender.save(_reason=str(history), _current_user=user)
         # Clip count & weapon condition
         if attacker_weapon_equipment:
@@ -416,11 +423,14 @@ class Character(Entity, Stats):
             armor_equipment.condition = min(armor_equipment.condition, 0)
             armor_equipment.save(_current_user=user)
         if damage:
-            self.health -= damage
+            if damage_type == DAMAGE_RADIATION:
+                self.irradiation += damage
+            else:
+                self.health -= damage
             self.save(_current_user=user)
         return damage
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
     class Meta:
@@ -492,7 +502,7 @@ class Item(Entity):
     effects = models.ManyToManyField('Effect', blank=True, related_name='+', verbose_name=_("effets"))
 
     @property
-    def base_damage(self):
+    def base_damage(self) -> int:
         """
         Calcul unitaire des dégâts de base de l'objet
         :return: Nombre de dégâts de base
@@ -502,7 +512,7 @@ class Item(Entity):
             damage += randint(1, self.damage_dice_value)
         return damage
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
     class Meta:
@@ -516,7 +526,7 @@ class ItemModifier(Modifier):
     """
     item = models.ForeignKey('Item', on_delete=models.CASCADE, verbose_name=_("objet"), related_name='modifiers')
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "{} = {}".format(self.get_stats_display(), self.value)
 
     class Meta:
@@ -544,13 +554,13 @@ class Equipment(Entity):
         if self.slot == ITEM_AMMO:
             equipment = self.character.equipments.select_related('item').filter(slot=ITEM_WEAPON).first()
             if equipment and not equipment.item.ammunition.filter(id=self.item.id).exists():
-                raise ValidationError(dict(item=_("Ces munitions sont incompatibles avec l'arme actuellement équipée.")))
+                raise ValidationError(dict(item=_("Ces munitions sont incompatibles avec l'arme équipée.")))
         elif self.slot == ITEM_WEAPON:
             equipment = self.character.equipments.select_related('item').filter(slot=ITEM_AMMO).first()
             if equipment and not self.item.ammunition.filter(id=equipment.item.id).exists():
-                raise ValidationError(dict(item=_("Cette arme est incompatible avec les munitions actuellement équipées.")))
+                raise ValidationError(dict(item=_("Cette arme est incompatible avec les munitions équipées.")))
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "({}) {}".format(self.character, self.item)
 
     class Meta:
@@ -576,7 +586,26 @@ class Effect(Entity):
     damage_dice_value = models.PositiveSmallIntegerField(default=0, verbose_name=_("valeur de dé"))
     damage_bonus = models.PositiveSmallIntegerField(default=0, verbose_name=_("bonus au dé"))
 
-    def __str__(self):
+    @property
+    def base_damage(self) -> int:
+        """
+        Calcul unitaire des dégâts de base de l'effet
+        :return: Nombre de dégâts de base
+        """
+        damage = self.damage_bonus
+        for i in range(self.damage_dice_count):
+            damage += randint(1, self.damage_dice_value)
+        return damage
+
+    @property
+    def damage_config(self) -> Dict[str, Union[str, int]]:
+        return dict(
+            damage_type=self.damage_type,
+            dice_count=self.damage_dice_count,
+            dice_value=self.damage_dice_value,
+            damage_bonus=self.damage_bonus)
+
+    def __str__(self) -> str:
         return self.name
 
     class Meta:
@@ -590,7 +619,7 @@ class EffectModifier(Modifier):
     """
     effect = models.ForeignKey('Effect', on_delete=models.CASCADE, verbose_name=_("effet"), related_name='modifiers')
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "{} = {}".format(self.get_stats_display(), self.value)
 
     class Meta:
@@ -608,14 +637,25 @@ class ActiveEffect(Entity):
     end_date = models.DateTimeField(blank=True, null=True, verbose_name=_("date d'arrêt"))
     next_date = models.DateTimeField(blank=True, null=True, verbose_name=_("date suivante"))
 
+    def apply(self, user: 'User'=None):
+        if not self.character.campaign and not self.next_date:
+            return
+        game_date = self.character.campaign.game_date
+        while self.next_date < game_date:
+            self.character.damage(**self.effect.damage_config, user=user)
+            self.next_date += self.effect.duration
+        self.save(_current_user=user)
+
     def save(self, *args, **kwargs):
         if not self.start_date and self.character.campaign:
             self.start_date = self.character.campaign.game_date
         if not self.end_date and self.start_date and self.effect.duration:
             self.end_date = self.start_date + self.effect.duration
+        if self.character.campaign and self.end_date and self.end_date <= self.character.campaign.game_date:
+            return self.delete(*args, **kwargs)
         super().save(*args, **kwargs)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "({}) {}".format(str(self.character), str(self.effect))
 
     class Meta:
@@ -632,7 +672,7 @@ class LootTemplate(Entity):
     description = models.TextField(blank=True, null=True, verbose_name=_("description"))
     image = models.ImageField(blank=True, null=True, verbose_name=_("image"))
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
     class Meta:
@@ -652,7 +692,7 @@ class LootTemplateItem(Entity):
     min_condition = models.FloatField(blank=True, null=True, verbose_name=_("état min."))
     max_condition = models.FloatField(blank=True, null=True, verbose_name=_("état max."))
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "({}) {}".format(str(self.template), str(self.item))
 
     class Meta:
@@ -671,10 +711,10 @@ class Loot(CommonModel):
 
     def save(self, *args, **kwargs):
         if self.count <= 0:
-            return self.delete()
+            return self.delete(*args, **kwargs)
         super().save(*args, **kwargs)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "({}) {}".format(str(self.campaign), str(self.item))
 
     class Meta:
@@ -697,10 +737,10 @@ class RollHistory(CommonModel):
     critical = models.BooleanField(default=False, verbose_name=_("critique ?"))
 
     @property
-    def label(self):
+    def label(self) -> str:
         return ' '.join(([_("échec"), _("réussite")][self.success], [_("normal"), _("critique")][self.critical]))
 
-    def __str__(self):
+    def __str__(self) -> str:
         return _("({character}) jet de {stats} : {result}").format(
             character=str(self.character),
             stats=self.get_stats_display(),
@@ -729,15 +769,18 @@ class FightHistory(CommonModel):
         'Item', blank=True, null=True, on_delete=models.CASCADE, related_name='+',
         verbose_name=_("protection du défenseur"), limit_choices_to={'type': ITEM_ARMOR})
     burst = models.BooleanField(default=False, verbose_name=_("tir en rafale ?"))
+    range = models.PositiveSmallIntegerField(default=0, verbose_name=_("distance"))
     body_part = models.CharField(max_length=5, choices=BODY_PARTS, verbose_name=_("partie du corps"))
+    hit_modifier = models.SmallIntegerField(default=0, verbose_name=_("modificateur de précision"))
     hit_chance = models.PositiveSmallIntegerField(default=0, verbose_name=_("précision"))
     hit_roll = models.PositiveSmallIntegerField(default=0, verbose_name=_("jet de précision"))
     hit_success = models.BooleanField(default=False, verbose_name=_("touché ?"))
     hit_critical = models.BooleanField(default=False, verbose_name=_("critique ?"))
+    damage_resistance = models.FloatField(default=0.0, verbose_name=_("résistance aux dégâts"))
     damage = models.PositiveSmallIntegerField(default=0, verbose_name=_("dégâts"))
     # TODO: more details (base hit chance, base damage, effects applied, etc...)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "{} / {}".format(self.attacker, self.defender)
 
     class Meta:
