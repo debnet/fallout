@@ -1,4 +1,5 @@
 # encoding: utf-8
+import re
 from random import randint, choice
 from typing import Dict, Iterable, List, Tuple, Union
 
@@ -18,7 +19,8 @@ class Campaign(CommonModel):
     Aventure
     """
     name = models.CharField(max_length=200, verbose_name=_("nom"))
-    game_date = models.DateTimeField(verbose_name=_("date"))
+    start_game_date = models.DateTimeField(verbose_name=_("date de début"))
+    current_game_date = models.DateTimeField(verbose_name=_("date courante"))
     current_character = models.ForeignKey(
         'Character', blank=True, null=True, on_delete=models.SET_NULL,
         related_name='+', verbose_name=_("personnage actif"))
@@ -31,6 +33,13 @@ class Campaign(CommonModel):
         Supprime les butins non réclamés de la campagne
         """
         return self.loots.all().delete()
+
+    def save(self, *args, **kwargs):
+        hours = round((self._copy.get('current_game_date', self.current_game_date) - self.current_game_date) / 3600, 2)
+        if hours <= 0:
+            for character in self.characters.all():
+                character.update_needs(hours=hours)
+        return super().save(*args, **kwargs)
 
     def __str__(self) -> str:
         return self.name
@@ -127,14 +136,15 @@ class Stats(models.Model):
                 stats._change_stats(modifier.stats, modifier.value)
         # Active effects modifiers
         for effect in character.active_effects.select_related('effect').prefetch_related('effect__modifiers').filter(
-                Q(start_date__isnull=True) | Q(start_date__gte=F('character__campaign__game_date')),
-                Q(end_date__isnull=True) | Q(end_date__lte=F('character__campaign__game_date'))):
+                Q(start_date__isnull=True) | Q(start_date__gte=F('character__campaign__current_game_date')),
+                Q(end_date__isnull=True) | Q(end_date__lte=F('character__campaign__current_game_date'))):
             for modifier in effect.effect.modifiers.all():
                 stats._change_stats(modifier.stats, modifier.value)
         # Campaign effects modifiers
         if character.campaign:
-            for modifier in character.campaign.modifiers.all():
-                stats._change_stats(modifier.stats, modifier.value)
+            for effect in character.campaign.active_effects.all():
+                for modifier in effect.modifiers.all():
+                    stats._change_stats(modifier.stats, modifier.value)
         # Derivated statistics
         for stats_name, formula in COMPUTED_STATS:
             stats._change_stats(stats_name, formula(stats, character))
@@ -185,13 +195,15 @@ class Character(Entity, Stats):
     karma = models.SmallIntegerField(default=0, verbose_name=_("karma"))
     health = models.PositiveSmallIntegerField(default=0, verbose_name=_("santé"))
     action_points = models.PositiveSmallIntegerField(default=0, verbose_name=_("points d'action"))
-    skill_points = models.PositiveSmallIntegerField(default=0, verbose_name=_("points de compétences"))
+    skill_points = models.PositiveSmallIntegerField(default=0, verbose_name=_("points de compétence"))
     perk_points = models.PositiveSmallIntegerField(default=0, verbose_name=_("points de talent"))
     # Needs
-    dehydration = models.PositiveSmallIntegerField(default=0, verbose_name=_("soif"))
-    hunger = models.PositiveSmallIntegerField(default=0, verbose_name=_("faim"))
-    sleep = models.PositiveSmallIntegerField(default=0, verbose_name=_("sommeil"))
-    irradiation = models.PositiveSmallIntegerField(default=0, verbose_name=_("irradiation"))
+    dehydration = models.FloatField(default=0, verbose_name=_("soif"))
+    hunger = models.FloatField(default=0, verbose_name=_("faim"))
+    sleep = models.FloatField(default=0, verbose_name=_("sommeil"))
+    irradiation = models.FloatField(default=0, verbose_name=_("irradiation"))
+    # Tag skills
+    tag_skills = models.CharField(max_length=60, blank=True, verbose_name=_("compétences ciblées"))
     # Statistics cache
     _stats = {}
 
@@ -202,16 +214,21 @@ class Character(Entity, Stats):
             Character._stats[self.id] = stats
         return stats
 
-    def charge(self):
+    @property
+    def current_tag_skills(self):
+        return set(re.split(r'[^\w]', self.tag_skills)) & set(LIST_SKILLS)
+
+    @property
+    def current_charge(self):
         return self.equipments.aggregate(charge=Sum(F('count') * F('item__weight'))).get('charge', 0)
 
-    def save(self, *args, **kwargs):
-        self.check_level()
-        Character._stats.pop(self.id, None)
-        if not self.id:
-            self.health = self.stats.max_health
-            self.action_points = self.stats.max_action_points
-        super().save(*args, **kwargs)
+    @property
+    def used_skill_points(self):
+        tag_skills = self.current_tag_skills
+        return sum(getattr(self, skill) * (0.5 if skill in tag_skills else 1) for skill in LIST_SKILLS)
+
+    def modify_value(self, name, value):
+        setattr(self, name, getattr(self, name, 0) + value)
 
     def check_level(self) -> int:
         """
@@ -221,7 +238,7 @@ class Character(Entity, Stats):
         needed_xp = 0
         level = 2
         while True:
-            needed_xp += (level - 1) * 1000
+            needed_xp += (level - 1) * BASE_XP
             if self.level >= level:
                 continue
             if self.experience < needed_xp:
@@ -234,6 +251,35 @@ class Character(Entity, Stats):
             level += 1
         return level
 
+    def randomize(self, level: int=None, rate: float=0.0) -> None:
+        """
+        Randomise les statistiques d'un personnage jusqu'à un certain niveau
+        :param level: Niveau du personnage à forcer
+        :param rate: Pourcentage des points à répartir sur les compétences ciblées
+        :return: Rien
+        """
+        # Experience points for the targetted level
+        level = level or self.level
+        self.level = 1
+        self.experience = sum((l - 1) * BASE_XP for l in range(2, level + 1))
+        self.check_level()
+        # Randomly distribute a fraction of the skill points on tag skills
+        skill_points = self.skill_points
+        tag_skills = self.current_tag_skills
+        for i in range(int(skill_points * rate)):
+            self.modified(choice(tag_skills), 2)
+            skill_points -= 1
+        # Randomly distribute remaining skill points on other skills
+        other_skills = set(LIST_SKILLS) - tag_skills
+        while skill_points:
+            self.modified(choice(other_skills), 1)
+            skill_points -= 1
+        # Reset health and action points to their maximum
+        self.health = self.stats.max_health
+        self.action_points = self.stats.max_action_points
+        # Save the changes
+        self.save(_reason=_("Personnage généré aléatoirement"))
+
     def update_needs(self, hours: float=0.0) -> None:
         """
         Mise à jour des besoins
@@ -241,8 +287,7 @@ class Character(Entity, Stats):
         :return: Rien
         """
         for stats_name, formula in COMPUTED_NEEDS:
-            for hour in range(int(hours)):
-                setattr(self, stats_name, getattr(self, stats_name) + formula(self.stats, self))
+            self.modify_value(stats_name, formula(self.stats, self) * hours)
 
     def roll(self, stats: str, modifier: int=0) -> 'RollHistory':
         """
@@ -252,7 +297,7 @@ class Character(Entity, Stats):
         :return: Historique de jet
         """
         history = RollHistory(character=self, modifier=modifier)
-        history.game_date = self.campaign.game_date
+        history.game_date = self.campaign.current_game_date
         is_special = stats in LIST_SPECIALS
         history.value = getattr(self.stats, stats, 0)
         history.roll = randint(1, 10 if is_special else 100)
@@ -273,7 +318,7 @@ class Character(Entity, Stats):
         :return: Liste d'historiques de combat
         """
         histories = []
-        attacker_weapon_equipment = self.equipment_set.filter(slot=ITEM_WEAPON).first()
+        attacker_weapon_equipment = self.equipments.filter(slot=ITEM_WEAPON).first()
         attacker_weapon = getattr(attacker_weapon_equipment, 'item', None)
         all_targets = list(zip(targets, targets_range))
         for round in range(getattr(attacker_weapon, 'burst_count', 0)):
@@ -296,11 +341,11 @@ class Character(Entity, Stats):
         :return: Historique de combat
         """
         history = FightHistory(attacker=self, defender=defender, burst=is_burst, range=target_range)
-        history.game_date = self.campaign.game_date
+        history.game_date = self.campaign.current_game_date
         # Equipment
-        attacker_weapon_equipment = self.equipment_set.filter(slot=ITEM_WEAPON).first()
-        attacker_ammo_equipment = self.equipment_set.filter(slot=ITEM_AMMO).first()
-        defender_armor_equipment = defender.equipment_set.filter(slot=ITEM_ARMOR).first()
+        attacker_weapon_equipment = self.equipments.filter(slot=ITEM_WEAPON).first()
+        attacker_ammo_equipment = self.equipments.filter(slot=ITEM_AMMO).first()
+        defender_armor_equipment = defender.equipments.filter(slot=ITEM_ARMOR).first()
         attacker_weapon = history.attacker_weapon = getattr(attacker_weapon_equipment, 'item', None)
         attacker_ammo = history.attacker_ammo = getattr(attacker_ammo_equipment, 'item', None)
         defender_armor = history.defender_armor = getattr(defender_armor_equipment, 'item', None)
@@ -308,7 +353,8 @@ class Character(Entity, Stats):
         # TODO: weapon and armor condition, weapon strength requirement, clip count, characters not dead, etc...
         # Chance to hit
         attacker_skill = getattr(attacker_weapon, 'skill', SKILL_UNARMED)
-        attacker_hit_chance = getattr(self.stats, attacker_skill, 0)
+        attacker_hit_chance = getattr(self.stats, attacker_skill, 0)  # Base skill and min strength modifier
+        attacker_hit_chance += min(20 * (self.stats.strength - getattr(attacker_weapon, 'min_strength', 0)), 0)
         attacker_weapon_range = getattr(attacker_weapon, 'range', 0)
         attacker_weapon_throwable = getattr(attacker_weapon, 'throwable', False)
         attacker_range_stats = SPECIAL_STRENGTH if attacker_weapon_throwable else SPECIAL_PERCEPTION
@@ -365,7 +411,7 @@ class Character(Entity, Stats):
                     ActiveEffect.objects.get_or_create(
                         character=defender, effect=effect,
                         defaults=dict(start_date=history.game_date, end_date=None))
-            defender.update_effects()
+            # TODO: apply effects immediatly?
             # Health
             if damage:
                 if attacker_damage_type == DAMAGE_RADIATION:
@@ -408,7 +454,7 @@ class Character(Entity, Stats):
         damage = damage_bonus
         for i in range(dice_count):
             damage += randint(1, dice_value)
-        armor_equipment = self.equipment_set.filter(slot=ITEM_ARMOR).first()
+        armor_equipment = self.equipments.filter(slot=ITEM_ARMOR).first()
         armor = getattr(armor_equipment, 'item', None)
         damage -= self.damage_threshold
         defender_damage_resistance = max(
@@ -429,6 +475,21 @@ class Character(Entity, Stats):
                 self.health -= damage
             self.save(_current_user=user)
         return damage
+
+    def save(self, *args, **kwargs):
+        self.check_level()
+        Character._stats.pop(self.id, None)
+        if not self.id:
+            self.health = self.stats.max_health
+            self.action_points = self.stats.max_action_points
+        super().save(*args, **kwargs)
+
+    def clean(self):
+        used_skill_points = self.used_skill_points
+        if self.skill_points < used_skill_points:
+            raise ValidationError(dict(skill_points=_(
+                "Ce personnage consomme plus de points ({used}) de compétence qu'il n'en possède ({owned}).").format(
+                    used=used_skill_points, owned=self.skill_points)))
 
     def __str__(self) -> str:
         return self.name
@@ -640,7 +701,7 @@ class ActiveEffect(Entity):
     def apply(self, user: 'User'=None):
         if not self.character.campaign and not self.next_date:
             return
-        game_date = self.character.campaign.game_date
+        game_date = self.character.campaign.current_game_date
         while self.next_date < game_date:
             self.character.damage(**self.effect.damage_config, user=user)
             self.next_date += self.effect.duration
@@ -648,10 +709,10 @@ class ActiveEffect(Entity):
 
     def save(self, *args, **kwargs):
         if not self.start_date and self.character.campaign:
-            self.start_date = self.character.campaign.game_date
+            self.start_date = self.character.campaign.current_game_date
         if not self.end_date and self.start_date and self.effect.duration:
             self.end_date = self.start_date + self.effect.duration
-        if self.character.campaign and self.end_date and self.end_date <= self.character.campaign.game_date:
+        if self.character.campaign and self.end_date and self.end_date <= self.character.campaign.current_game_date:
             return self.delete(*args, **kwargs)
         super().save(*args, **kwargs)
 

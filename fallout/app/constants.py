@@ -242,6 +242,9 @@ SURVIVAL_EFFECTS = (
 CRITICAL_FAIL_D10 = 10
 CRITICAL_FAIL_D100 = 96
 
+# Valeur de base des points d'expérience
+BASE_XP = 1000
+
 # Action points cost
 AP_COST_FIGHT = 5  # Fight unarmed
 

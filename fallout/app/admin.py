@@ -28,7 +28,7 @@ class CampaignAdmin(CommonAdmin):
 
 @admin.register(Character)
 class CharacterAdmin(EntityAdmin):
-    fieldsets = (
+    fieldsets = tuple([
         (_("Informations techniques"), dict(
             fields=('user', 'campaign', ),
             classes=('wide', 'collapse', ),
@@ -37,7 +37,17 @@ class CharacterAdmin(EntityAdmin):
             fields=('name', 'title', 'description', 'image', 'race', 'level', 'is_player', ),
             classes=('wide', ),
         )),
-    ) + tuple((title, dict(fields=[a for a, b in fields], classes=('wide', 'collapse'))) for title, fields in ALL_STATS)
+        (_("Autres informations"), dict(
+            fields=('tag_skills', ),
+            classes=('wide', ),
+        )),
+        *(
+            (title, dict(
+                fields=tuple(a for a, b in fields),
+                classes=('wide', 'collapse', )))
+            for title, fields in ALL_STATS
+        )
+    ])
     list_display = ('name', 'race', 'level', 'is_player', 'health', 'action_points', 'experience', 'karma')
     list_editable = ('health', 'action_points', 'experience', 'karma')
     list_filter = ('campaign', 'user', 'race', 'is_player')
@@ -57,14 +67,16 @@ class ItemAdmin(EntityAdmin):
             classes=('wide', ),
         )),
         (_("Armement"), dict(
-            fields=('melee', 'throwable', 'damage_type', 'damage_dice_count', 'damage_dice_value', 'damage_bonus',
-                    'range', 'clip_size', 'ap_cost_reload', 'ap_cost_normal', 'ap_cost_target', 'ap_cost_burst',
-                    'burst_count', 'min_strength', 'skill', 'ammunition', ),
+            fields=(
+                'melee', 'throwable', 'damage_type', 'damage_dice_count', 'damage_dice_value', 'damage_bonus',
+                'range', 'clip_size', 'ap_cost_reload', 'ap_cost_normal', 'ap_cost_target', 'ap_cost_burst',
+                'burst_count', 'min_strength', 'skill', 'ammunition', ),
             classes=('wide', 'collapse', ),
         )),
         (_("Modificateurs"), dict(
-            fields=('hit_chance_modifier', 'armor_class_modifier', 'resistance_modifier', 'range_modifier',
-                    'damage_modifier', 'critical_modifier', 'condition_modifier', ),
+            fields=(
+                'hit_chance_modifier', 'armor_class_modifier', 'resistance_modifier', 'range_modifier',
+                'damage_modifier', 'critical_modifier', 'condition_modifier', ),
             classes=('wide', 'collapse', ),
         )),
         (_("Effets"), dict(

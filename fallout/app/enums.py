@@ -21,7 +21,7 @@ GENERAL_STATS = (
     (STATS_HUNGER, _("faim")),
     (STATS_SLEEP, _("sommeil")),
 )
-LIST_GENERAL_STATS = [a for a, *_ in GENERAL_STATS]
+LIST_GENERAL_STATS = [a for a, *b in GENERAL_STATS]
 
 # S.P.E.C.I.A.L.
 SPECIAL_STRENGTH = 'strength'
@@ -40,7 +40,7 @@ SPECIALS = (
     (SPECIAL_AGILITY, _("agilité")),
     (SPECIAL_LUCK, _("chance")),
 )
-LIST_SPECIALS = [a for a, *_ in SPECIALS]
+LIST_SPECIALS = [a for a, *b in SPECIALS]
 
 # Secondary statistics
 STATS_MAX_HEALTH = 'max_health'
@@ -65,7 +65,7 @@ SECONDARY_STATS = (
     (STATS_HEALING_RATE, _("taux de regénération")),
     (STATS_CRITICAL_CHANCE, _("chance de critique")),
 )
-LIST_SECONDARY_STATS = [a for a, *_ in SECONDARY_STATS]
+LIST_SECONDARY_STATS = [a for a, *b in SECONDARY_STATS]
 
 # Skills
 SKILL_SMALL_GUNS = 'small_guns'
@@ -110,7 +110,7 @@ SKILLS = (
     (SKILL_SURVIVAL, _("survie")),
     (SKILL_KNOWLEDGE, _("connaissance")),
 )
-LIST_SKILLS = [a for a, *_ in SKILLS]
+LIST_SKILLS = [a for a, *b in SKILLS]
 
 # Resistances
 RESISTANCE_NORMAL_DAMAGE = 'normal_damage_resistance'
@@ -135,7 +135,7 @@ RESISTANCES = (
     (RESISTANCE_GAZ_CONTACT, _("résistance au gaz (contact)")),
     (RESISTANCE_GAZ_INHALED, _("résistance au gaz (inhalé)")),
 )
-LIST_RESISTANCES = [a for a, *_ in RESISTANCES]
+LIST_RESISTANCES = [a for a, *b in RESISTANCES]
 
 # Damage
 DAMAGE_NORMAL = 'normal'
@@ -162,7 +162,7 @@ DAMAGES = (
     (DAMAGE_GAZ_INHALED, _("dégâts de gaz (inhalé)")),
     (DAMAGE_HEAL, _("soins")),
 )
-LIST_DAMAGES = [a for a, *_ in DAMAGES]
+LIST_DAMAGES = [a for a, *b in DAMAGES]
 
 # Damage / resistance
 DAMAGE_RESISTANCE = {
@@ -188,7 +188,7 @@ LEVELED_STATS = (
     (SKILL_POINTS_PER_LEVEL, _("points de compétence par niveau")),
     (PERK_RATE, _("niveaux pour un talent")),
 )
-LIST_LEVELED_STATS = [a for a, *_ in LEVELED_STATS]
+LIST_LEVELED_STATS = [a for a, *b in LEVELED_STATS]
 
 # Rollable statistics
 ROLL_STATS = (
@@ -198,7 +198,7 @@ ROLL_STATS = (
 
 # All statistics
 ALL_STATS = ROLL_STATS + (
-    (_("Statistiques générales"), GENERAL_STATS),
+    [_("Statistiques générales"), GENERAL_STATS],
     (_("Statistiques secondaires"), SECONDARY_STATS),
     (_("Résistances"), RESISTANCES),
     (_("Statistiques de niveau"), LEVELED_STATS),
@@ -206,7 +206,7 @@ ALL_STATS = ROLL_STATS + (
 
 # Lists of statistics
 EDITABLE_STATS = SPECIALS + SKILLS + SECONDARY_STATS + RESISTANCES + LEVELED_STATS
-LIST_EDITABLE_STATS = [a for a, *_ in EDITABLE_STATS]
+LIST_EDITABLE_STATS = [a for a, *b in EDITABLE_STATS]
 LIST_ALL_STATS = LIST_GENERAL_STATS + LIST_EDITABLE_STATS
 
 # Item type
