@@ -1,4 +1,4 @@
-# encoding: utf-8
+# coding: utf-8
 import re
 from random import randint, choice
 from typing import Dict, Iterable, List, Tuple, Union
@@ -10,8 +10,9 @@ from django.db import models
 from django.db.models import F, Q, Sum
 from django.utils.translation import ugettext as _
 
-from fallout.app.constants import *  # noqa
-from fallout.app.enums import *  # noqa
+from rpg.fallout.constants import *  # noqa
+from rpg.fallout.enums import *  # noqa
+from rpg.fallout.fields import MultipleChoiceField
 
 
 class Campaign(CommonModel):
@@ -73,10 +74,10 @@ class Stats(models.Model):
     healing_rate = models.PositiveSmallIntegerField(default=0, verbose_name=_("taux de regénération"))
     critical_chance = models.PositiveSmallIntegerField(default=0, verbose_name=_("chance de critique"))
     # Damage resistances
-    normal_damage_resistance = models.SmallIntegerField(default=0, verbose_name=_("résistance aux dégâts normaux"))
-    laser_damage_resistance = models.SmallIntegerField(default=0, verbose_name=_("résistance aux dégâts de laser"))
-    plasma_damage_resistance = models.SmallIntegerField(default=0, verbose_name=_("résistance aux dégâts de plasma"))
-    explosive_damage_resistance = models.SmallIntegerField(default=0, verbose_name=_("résistance aux dégâts explosifs"))
+    normal_damage_resistance = models.SmallIntegerField(default=0, verbose_name=_("résistance aux dégâts"))
+    laser_damage_resistance = models.SmallIntegerField(default=0, verbose_name=_("résistance au laser"))
+    plasma_damage_resistance = models.SmallIntegerField(default=0, verbose_name=_("résistance au plasma"))
+    explosive_damage_resistance = models.SmallIntegerField(default=0, verbose_name=_("résistance aux explosions"))
     # Environment resistances
     radiation_resistance = models.SmallIntegerField(default=0, verbose_name=_("résistance aux radiations"))
     poison_resistance = models.SmallIntegerField(default=0, verbose_name=_("résistance aux poisons"))
@@ -106,8 +107,8 @@ class Stats(models.Model):
     survival = models.SmallIntegerField(default=0, verbose_name=_("survie"))
     knowledge = models.SmallIntegerField(default=0, verbose_name=_("connaissance"))
     # Per level
-    hit_points_per_level = models.SmallIntegerField(default=0, verbose_name=_("points de santé par niveau"))
-    skill_points_per_level = models.SmallIntegerField(default=0, verbose_name=_("points de compétence par niveau"))
+    hit_points_per_level = models.SmallIntegerField(default=0, verbose_name=_("santé par niveau"))
+    skill_points_per_level = models.SmallIntegerField(default=0, verbose_name=_("compétences par niveau"))
     perk_rate = models.SmallIntegerField(default=0, verbose_name=_("niveaux pour un talent"))
 
     def __str__(self):
@@ -127,7 +128,7 @@ class Stats(models.Model):
         # Survival modifiers
         for stats_name, survival in SURVIVAL_EFFECTS:
             for (mini, maxi), effects in survival.items():
-                if mini <= getattr(character, stats_name, 0) < maxi:
+                if (mini or 0) <= getattr(character, stats_name, 0) < (maxi or float('+inf')):
                     stats._change_all_stats(**effects)
         # Equipment modifiers
         for equipment in character.equipments.filter(slot__isnull=False)\
@@ -191,19 +192,19 @@ class Character(Entity, Stats):
     level = models.PositiveSmallIntegerField(default=1, verbose_name=_("niveau"))
     is_player = models.BooleanField(default=False, verbose_name=_("joueur ?"))
     # Primary statistics
-    experience = models.PositiveIntegerField(default=0, verbose_name=_("expérience"))
-    karma = models.SmallIntegerField(default=0, verbose_name=_("karma"))
     health = models.PositiveSmallIntegerField(default=0, verbose_name=_("santé"))
     action_points = models.PositiveSmallIntegerField(default=0, verbose_name=_("points d'action"))
     skill_points = models.PositiveSmallIntegerField(default=0, verbose_name=_("points de compétence"))
     perk_points = models.PositiveSmallIntegerField(default=0, verbose_name=_("points de talent"))
+    experience = models.PositiveIntegerField(default=0, verbose_name=_("expérience"))
+    karma = models.SmallIntegerField(default=0, verbose_name=_("karma"))
     # Needs
     dehydration = models.FloatField(default=0, verbose_name=_("soif"))
     hunger = models.FloatField(default=0, verbose_name=_("faim"))
     sleep = models.FloatField(default=0, verbose_name=_("sommeil"))
     irradiation = models.FloatField(default=0, verbose_name=_("irradiation"))
     # Tag skills
-    tag_skills = models.CharField(max_length=60, blank=True, verbose_name=_("compétences ciblées"))
+    tag_skills = MultipleChoiceField(max_length=200, choices=SKILLS, blank=True, verbose_name=_("spécialités"))
     # Statistics cache
     _stats = {}
 
@@ -215,17 +216,12 @@ class Character(Entity, Stats):
         return stats
 
     @property
-    def current_tag_skills(self):
-        return set(re.split(r'[^\w]', self.tag_skills)) & set(LIST_SKILLS)
-
-    @property
     def current_charge(self):
         return self.equipments.aggregate(charge=Sum(F('count') * F('item__weight'))).get('charge', 0)
 
     @property
     def used_skill_points(self):
-        tag_skills = self.current_tag_skills
-        return sum(getattr(self, skill) * (0.5 if skill in tag_skills else 1) for skill in LIST_SKILLS)
+        return sum(getattr(self, skill) * (0.5 if skill in self.tag_skills else 1) for skill in LIST_SKILLS)
 
     def modify_value(self, name, value):
         setattr(self, name, getattr(self, name, 0) + value)
@@ -484,12 +480,9 @@ class Character(Entity, Stats):
             self.action_points = self.stats.max_action_points
         super().save(*args, **kwargs)
 
-    def clean(self):
-        used_skill_points = self.used_skill_points
-        if self.skill_points < used_skill_points:
-            raise ValidationError(dict(skill_points=_(
-                "Ce personnage consomme plus de points ({used}) de compétence qu'il n'en possède ({owned}).").format(
-                    used=used_skill_points, owned=self.skill_points)))
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse('character.infos', args=[str(self.id)])
 
     def __str__(self) -> str:
         return self.name
@@ -505,7 +498,7 @@ for stats, name in EDITABLE_STATS:
         return getattr(self.stats, stats, None)
 
     current_stats.short_description = name
-    setattr(Character, 'current_' + stats, property(current_stats))
+    setattr(Character, '_' + stats, property(current_stats))
 
 
 class Modifier(CommonModel):
@@ -833,7 +826,7 @@ class FightHistory(CommonModel):
     range = models.PositiveSmallIntegerField(default=0, verbose_name=_("distance"))
     body_part = models.CharField(max_length=5, choices=BODY_PARTS, verbose_name=_("partie du corps"))
     hit_modifier = models.SmallIntegerField(default=0, verbose_name=_("modificateur de précision"))
-    hit_chance = models.PositiveSmallIntegerField(default=0, verbose_name=_("précision"))
+    hit_chance = models.SmallIntegerField(default=0, verbose_name=_("précision"))
     hit_roll = models.PositiveSmallIntegerField(default=0, verbose_name=_("jet de précision"))
     hit_success = models.BooleanField(default=False, verbose_name=_("touché ?"))
     hit_critical = models.BooleanField(default=False, verbose_name=_("critique ?"))
@@ -847,3 +840,20 @@ class FightHistory(CommonModel):
     class Meta:
         verbose_name = _("historique de combat")
         verbose_name_plural = _("historiques de combat")
+
+
+MODELS = (
+    Campaign,
+    Character,
+    Item,
+    ItemModifier,
+    Equipment,
+    Effect,
+    EffectModifier,
+    ActiveEffect,
+    LootTemplate,
+    LootTemplateItem,
+    Loot,
+    RollHistory,
+    FightHistory,
+)

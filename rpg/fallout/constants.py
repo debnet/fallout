@@ -1,5 +1,5 @@
 # encoding: utf-8
-from fallout.app.enums import *  # noqa
+from rpg.fallout.enums import *  # noqa
 
 
 # Body part modifiers (ranged, melee, critical)

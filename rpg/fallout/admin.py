@@ -1,10 +1,9 @@
 # coding: utf-8
+from common.admin import CommonAdmin, EntityAdmin, EntityStackedInline
 from django.contrib import admin
 from django.utils.translation import ugettext as _
 
-from common.admin import CommonAdmin, EntityAdmin, EntityStackedInline
-
-from fallout.app.models import *  # noqa
+from rpg.fallout.models import *  # noqa
 
 
 class LootInline(admin.TabularInline):
@@ -16,14 +15,14 @@ class LootInline(admin.TabularInline):
 class CampaignAdmin(CommonAdmin):
     fieldsets = (
         (None, dict(
-            fields=('name', 'game_date', 'current_character', 'active_effects', ),
+            fields=('name', 'start_game_date', 'current_game_date', 'current_character', 'active_effects', ),
             classes=('wide', ),
         )),
     )
     inlines = [LootInline]
     filter_horizontal = ('active_effects', )
-    list_display = ('name', 'game_date', 'current_character', )
-    list_editable = ('game_date', 'current_character', )
+    list_display = ('name', 'current_game_date', 'current_character', )
+    list_editable = ('current_game_date', 'current_character', )
 
 
 @admin.register(Character)
@@ -37,9 +36,9 @@ class CharacterAdmin(EntityAdmin):
             fields=('name', 'title', 'description', 'image', 'race', 'level', 'is_player', ),
             classes=('wide', ),
         )),
-        (_("Autres informations"), dict(
+        (_("Spécialités"), dict(
             fields=('tag_skills', ),
-            classes=('wide', ),
+            classes=('collapse', ),
         )),
         *(
             (title, dict(
@@ -48,10 +47,22 @@ class CharacterAdmin(EntityAdmin):
             for title, fields in ALL_STATS
         )
     ])
-    list_display = ('name', 'race', 'level', 'is_player', 'health', 'action_points', 'experience', 'karma')
+    list_display = (
+        'name', 'race', 'level', 'is_player',
+        'health', '_max_health', 'action_points', '_max_action_points', 'experience', 'karma')
     list_editable = ('health', 'action_points', 'experience', 'karma')
     list_filter = ('campaign', 'user', 'race', 'is_player')
     search_fields = ('name', 'title', 'description')
+
+    def get_form(self, request, obj=None, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+        if obj:
+            for field_name, field in form.base_fields.items():
+                value = getattr(obj.stats, field_name, None)
+                if value is None:
+                    continue
+                field.help_text = _("Valeur actuelle : {}.").format(value)
+        return form
 
 
 class ItemModifierInline(admin.TabularInline):

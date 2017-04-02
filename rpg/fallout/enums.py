@@ -5,6 +5,8 @@ from django.utils.translation import ugettext as _
 # General statistics
 STATS_HEALTH = 'health'
 STATS_ACTION_POINTS = 'action_points'
+STATS_SKILL_POINTS = 'skill_points'
+STATS_PERK_POINTS = 'perk_points'
 STATS_EXPERIENCE = 'experience'
 STATS_KARMA = 'karma'
 STATS_IRRADIATION = 'irradiation'
@@ -14,6 +16,8 @@ STATS_SLEEP = 'sleep'
 GENERAL_STATS = (
     (STATS_HEALTH, _("santé")),
     (STATS_ACTION_POINTS, _("points d'action")),
+    (STATS_SKILL_POINTS, _("points de compétence")),
+    (STATS_PERK_POINTS, _("points de talent")),
     (STATS_EXPERIENCE, _("expérience")),
     (STATS_KARMA, _("karma")),
     (STATS_IRRADIATION, _("irradiation")),
@@ -124,10 +128,10 @@ RESISTANCE_ELECTRICITY = 'electricity_resistance'
 RESISTANCE_GAZ_CONTACT = 'gas_contact_resistance'
 RESISTANCE_GAZ_INHALED = 'gas_inhaled_resistance'
 RESISTANCES = (
-    (RESISTANCE_NORMAL_DAMAGE, _("résistance aux dégâts normaux")),
-    (RESISTANCE_LASER_DAMAGE, _("résistance aux dégâts de laser")),
-    (RESISTANCE_PLASMA_DAMAGE, _("résistance aux dégâts de plasma")),
-    (RESISTANCE_EXPLOSIVE_DAMAGE, _("résistance aux dégâts explosifs")),
+    (RESISTANCE_NORMAL_DAMAGE, _("résistance aux dégâts")),
+    (RESISTANCE_LASER_DAMAGE, _("résistance au laser")),
+    (RESISTANCE_PLASMA_DAMAGE, _("résistance au plasma")),
+    (RESISTANCE_EXPLOSIVE_DAMAGE, _("résistance aux explosions")),
     (RESISTANCE_RADIATION, _("résistance aux radiations")),
     (RESISTANCE_POISON, _("résistance aux poisons")),
     (RESISTANCE_FIRE, _("résistance au feu")),
@@ -184,8 +188,8 @@ HIT_POINTS_PER_LEVEL = 'hit_points_per_level'
 SKILL_POINTS_PER_LEVEL = 'skill_points_per_level'
 PERK_RATE = 'perk_rate'
 LEVELED_STATS = (
-    (HIT_POINTS_PER_LEVEL, _("points de santé par niveau")),
-    (SKILL_POINTS_PER_LEVEL, _("points de compétence par niveau")),
+    (HIT_POINTS_PER_LEVEL, _("santé par niveau")),
+    (SKILL_POINTS_PER_LEVEL, _("compétences par niveau")),
     (PERK_RATE, _("niveaux pour un talent")),
 )
 LIST_LEVELED_STATS = [a for a, *b in LEVELED_STATS]
