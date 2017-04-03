@@ -14,6 +14,7 @@ SECRET_KEY = 't%h7u=(!i%=n*8^^0g9#vk+$f!vd)(ouem%9*!*!uki0r$0kq4'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 DEBUG_TOOLBAR_PATCH_SETTINGS = False
+INTERNAL_IPS = ['127.0.0.1']
 
 ALLOWED_HOSTS = ['*']
 
@@ -26,15 +27,15 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'debug_toolbar',
     'pytz',
     'rest_framework',
     'rest_framework.authtoken',
     'common',
     'rpg.fallout',
+    'debug_toolbar',
 )
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE = (
     'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -78,7 +79,7 @@ DATABASES = {
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
 LANGUAGE_CODE = 'fr-fr'
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Paris'
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True

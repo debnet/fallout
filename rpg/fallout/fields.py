@@ -23,7 +23,6 @@ class MultipleChoiceField(models.TextField):
 
     def validate(self, value, model_instance):
         choices = set(a for a, b in self.flatchoices)
-        print(value & choices)
         if value & choices == value:
             return
         return super().validate(value, model_instance)

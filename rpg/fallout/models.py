@@ -1,5 +1,4 @@
 # coding: utf-8
-import re
 from random import randint, choice
 from typing import Dict, Iterable, List, Tuple, Union
 
@@ -44,6 +43,8 @@ class Campaign(CommonModel):
         next_character = None
         characters = self.characters.filter(is_active=True)
         characters = sorted(characters, key=lambda e: -e.stats.sequence)
+        if self.current_character not in characters:
+            self.current_character = None
         if not self.current_character:
             next_character = next(iter(characters), None)
         else:
@@ -213,9 +214,9 @@ class Character(Entity, Stats):
         related_name='characters', verbose_name=_("campagne"))
     # General informations
     name = models.CharField(max_length=200, verbose_name=_("nom"))
-    title = models.CharField(max_length=200, blank=True, null=True, verbose_name=_("titre"))
-    description = models.TextField(blank=True, null=True, verbose_name=_("description"))
-    image = models.ImageField(blank=True, null=True, verbose_name=_("image"))
+    title = models.CharField(max_length=200, blank=True, verbose_name=_("titre"))
+    description = models.TextField(blank=True, verbose_name=_("description"))
+    image = models.ImageField(blank=True, verbose_name=_("image"))
     race = models.CharField(max_length=12, choices=RACES, default=RACE_HUMAN, db_index=True, verbose_name=_("race"))
     level = models.PositiveSmallIntegerField(default=1, verbose_name=_("niveau"))
     is_player = models.BooleanField(default=False, db_index=True, verbose_name=_("joueur ?"))
@@ -265,11 +266,11 @@ class Character(Entity, Stats):
         while True:
             needed_xp += (level - 1) * BASE_XP
             if self.level >= level:
+                level += 1
                 continue
             if self.experience < needed_xp:
                 break
             self.level += 1
-            self.max_health += self.stats.hit_points_per_level
             self.skill_points += self.stats.skill_points_per_level
             if not self.level % self.stats.perk_rate:
                 self.perk_points += 1
@@ -290,14 +291,14 @@ class Character(Entity, Stats):
         self.check_level()
         # Randomly distribute a fraction of the skill points on tag skills
         skill_points = self.skill_points
-        tag_skills = self.current_tag_skills
         for i in range(int(skill_points * rate)):
-            self.modified(choice(tag_skills), 2)
+            self.modified(choice(self.tag_skills), 2)
             skill_points -= 1
         # Randomly distribute remaining skill points on other skills
-        other_skills = set(LIST_SKILLS) - tag_skills
+        other_skills = (set(LIST_SKILLS) - self.tag_skills) if rate else LIST_SKILLS
         while skill_points:
-            self.modified(choice(other_skills), 1)
+            skill = choice(other_skills)
+            self.modified(skill, 2 if skill in self.tag_skills else 1)
             skill_points -= 1
         # Reset health and action points to their maximum
         self.health = self.stats.max_health
@@ -376,6 +377,10 @@ class Character(Entity, Stats):
         defender_armor = history.defender_armor = getattr(defender_armor_equipment, 'item', None)
         # Fight condition
         # TODO: weapon and armor condition, weapon strength requirement, clip count, characters not dead, etc...
+        if attacker_weapon and attacker_weapon.clip_size and attacker_weapon_equipment.clip_count == 0:
+            history.fail = FAIL_AMMO
+            history.save()
+            return history
         # Chance to hit
         attacker_skill = getattr(attacker_weapon, 'skill', SKILL_UNARMED)
         attacker_hit_chance = getattr(self.stats, attacker_skill, 0)  # Base skill and min strength modifier
@@ -547,9 +552,9 @@ class Item(Entity):
     """
     # General informations
     name = models.CharField(max_length=200, verbose_name=_("nom"))
-    title = models.CharField(max_length=200, blank=True, null=True, verbose_name=_("titre"))
-    description = models.TextField(blank=True, null=True, verbose_name=_("description"))
-    image = models.ImageField(blank=True, null=True, verbose_name=_("image"))
+    title = models.CharField(max_length=200, blank=True, verbose_name=_("titre"))
+    description = models.TextField(blank=True, verbose_name=_("description"))
+    image = models.ImageField(blank=True, verbose_name=_("image"))
     type = models.CharField(max_length=7, choices=ITEM_TYPES, verbose_name=_("type"))
     value = models.PositiveIntegerField(default=0, verbose_name=_("valeur"))
     weight = models.FloatField(default=0.0, verbose_name=_("poids"))
@@ -557,7 +562,7 @@ class Item(Entity):
     # Weapon specific
     is_melee = models.BooleanField(default=False, verbose_name=_("arme de mêlée ?"))
     is_throwable = models.BooleanField(default=False, verbose_name=_("jetable ?"))
-    damage_type = models.CharField(max_length=10, blank=True, null=True, choices=DAMAGES, verbose_name=_("type de dégâts"))
+    damage_type = models.CharField(max_length=10, blank=True, choices=DAMAGES, verbose_name=_("type de dégâts"))
     damage_dice_count = models.PositiveSmallIntegerField(default=0, verbose_name=_("nombre de dés"))
     damage_dice_value = models.PositiveSmallIntegerField(default=0, verbose_name=_("valeur de dé"))
     damage_bonus = models.PositiveSmallIntegerField(default=0, verbose_name=_("bonus au dé"))
@@ -569,7 +574,7 @@ class Item(Entity):
     ap_cost_burst = models.PositiveSmallIntegerField(blank=True, null=True, verbose_name=_("coût PA rafale"))
     burst_count = models.PositiveSmallIntegerField(blank=True, null=True, verbose_name=_("munitions en rafale"))
     min_strength = models.PositiveSmallIntegerField(blank=True, null=True, verbose_name=_("force minimum"))
-    skill = models.CharField(max_length=10, blank=True, null=True, choices=SKILLS, verbose_name=_("compétence"))
+    skill = models.CharField(max_length=10, blank=True, choices=SKILLS, verbose_name=_("compétence"))
     ammunition = models.ManyToManyField(
         'Item', blank=True, verbose_name=_("type de munition"),
         limit_choices_to={'type': ITEM_AMMO})
@@ -623,7 +628,7 @@ class Equipment(Entity):
     """
     character = models.ForeignKey('Character', on_delete=models.CASCADE, related_name='equipments', verbose_name=_("personnage"))
     item = models.ForeignKey('Item', on_delete=models.CASCADE, related_name='+', verbose_name=_("objet"))
-    slot = models.CharField(max_length=7, choices=SLOT_ITEM_TYPES, blank=True, null=True, verbose_name=_("emplacement"))
+    slot = models.CharField(max_length=7, choices=SLOT_ITEM_TYPES, blank=True, verbose_name=_("emplacement"))
     count = models.PositiveIntegerField(default=0, verbose_name=_("nombre"))
     clip_count = models.PositiveSmallIntegerField(default=0, verbose_name=_("munitions"))
     condition = models.FloatField(default=1.0, verbose_name=_("état"))
@@ -657,14 +662,14 @@ class Effect(Entity):
     """
     # General informations
     name = models.CharField(max_length=200, verbose_name=_("nom"))
-    title = models.CharField(max_length=200, blank=True, null=True, verbose_name=_("titre"))
-    description = models.TextField(blank=True, null=True, verbose_name=_("description"))
-    image = models.ImageField(blank=True, null=True, verbose_name=_("image"))
+    title = models.CharField(max_length=200, blank=True, verbose_name=_("titre"))
+    description = models.TextField(blank=True, verbose_name=_("description"))
+    image = models.ImageField(blank=True, verbose_name=_("image"))
     chance = models.PositiveSmallIntegerField(default=100, verbose_name=_("chance"))
     duration = models.DurationField(blank=True, null=True, verbose_name=_("durée"))
     # Timed damage
     interval = models.DurationField(blank=True, null=True, verbose_name=_("intervalle"))
-    damage_type = models.CharField(max_length=10, blank=True, null=True, choices=DAMAGES, verbose_name=_("type de dégâts"))
+    damage_type = models.CharField(max_length=10, blank=True, choices=DAMAGES, verbose_name=_("type de dégâts"))
     damage_dice_count = models.PositiveSmallIntegerField(default=0, verbose_name=_("nombre de dés"))
     damage_dice_value = models.PositiveSmallIntegerField(default=0, verbose_name=_("valeur de dé"))
     damage_bonus = models.PositiveSmallIntegerField(default=0, verbose_name=_("bonus au dé"))
@@ -751,9 +756,9 @@ class LootTemplate(Entity):
     Modèle de butin
     """
     name = models.CharField(max_length=200, verbose_name=_("nom"))
-    title = models.CharField(max_length=200, blank=True, null=True, verbose_name=_("titre"))
-    description = models.TextField(blank=True, null=True, verbose_name=_("description"))
-    image = models.ImageField(blank=True, null=True, verbose_name=_("image"))
+    title = models.CharField(max_length=200, blank=True, verbose_name=_("titre"))
+    description = models.TextField(blank=True, verbose_name=_("description"))
+    image = models.ImageField(blank=True, verbose_name=_("image"))
 
     def __str__(self) -> str:
         return self.name
@@ -812,7 +817,7 @@ class RollHistory(CommonModel):
     date = models.DateTimeField(auto_now_add=True, verbose_name=_("date"))
     game_date = models.DateTimeField(blank=True, null=True, verbose_name=_("date en jeu"))
     character = models.ForeignKey('Character', on_delete=models.CASCADE, verbose_name=_("personnage"), related_name='+')
-    stats = models.CharField(max_length=10, blank=True, null=True, choices=ROLL_STATS, verbose_name=_("statistique"))
+    stats = models.CharField(max_length=10, blank=True, choices=ROLL_STATS, verbose_name=_("statistique"))
     value = models.PositiveSmallIntegerField(default=0, verbose_name=_("valeur"))
     modifier = models.SmallIntegerField(default=0, verbose_name=_("modificateur"))
     roll = models.PositiveIntegerField(default=0, verbose_name=_("jet"))
@@ -861,14 +866,14 @@ class FightHistory(CommonModel):
     hit_critical = models.BooleanField(default=False, verbose_name=_("critique ?"))
     damage_resistance = models.FloatField(default=0.0, verbose_name=_("résistance aux dégâts"))
     damage = models.PositiveSmallIntegerField(default=0, verbose_name=_("dégâts"))
-    # TODO: more details (base hit chance, base damage, effects applied, etc...)
+    fail = models.CharField(max_length=5, choices=FIGHT_FAILS, blank=True, verbose_name=_("échec"))
 
     def __str__(self) -> str:
         return "{} / {}".format(self.attacker, self.defender)
 
     class Meta:
         verbose_name = _("historique de combat")
-        verbose_name_plural = _("historiques de combat")
+        verbose_name_plural = _("historiques de combats")
 
 
 MODELS = (

@@ -263,3 +263,13 @@ BODY_PARTS = (
     (PART_HEAD, _("tête")),
     (PART_EYES, _("yeux")),
 )
+
+# Fight fails
+FAIL_MISS = 'miss'
+FAIL_AMMO = 'ammo'
+FAIL_DEAD = 'dead'
+FIGHT_FAILS = (
+    (FAIL_MISS, _("cible ratée")),
+    (FAIL_AMMO, _("munitions insuffisantes")),
+    (FAIL_DEAD, _("cible inconsciente")),
+)
