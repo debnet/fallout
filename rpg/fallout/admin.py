@@ -33,7 +33,7 @@ class CharacterAdmin(EntityAdmin):
             classes=('wide', 'collapse', ),
         )),
         (_("Informations générales"), dict(
-            fields=('name', 'title', 'description', 'image', 'race', 'level', 'is_player', ),
+            fields=('name', 'title', 'description', 'image', 'race', 'level', 'is_player', 'is_active', ),
             classes=('wide', ),
         )),
         (_("Spécialités"), dict(
@@ -48,10 +48,10 @@ class CharacterAdmin(EntityAdmin):
         )
     ])
     list_display = (
-        'name', 'race', 'level', 'is_player',
+        'name', 'race', 'level', 'is_player', 'is_active',
         'health', '_max_health', 'action_points', '_max_action_points', 'experience', 'karma')
     list_editable = ('health', 'action_points', 'experience', 'karma')
-    list_filter = ('campaign', 'user', 'race', 'is_player')
+    list_filter = ('campaign', 'user', 'race', 'is_player', 'is_active')
     search_fields = ('name', 'title', 'description')
 
     def get_form(self, request, obj=None, **kwargs):
@@ -62,6 +62,8 @@ class CharacterAdmin(EntityAdmin):
                 if value is None:
                     continue
                 field.help_text = _("Valeur actuelle : {}.").format(value)
+                if field_name in obj.tag_skills:
+                    field.help_text += _(" (Spécialité +{}) ").format(TAG_SKILL_BONUS)
         return form
 
 

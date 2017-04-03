@@ -35,8 +35,33 @@ class Campaign(CommonModel):
         """
         return self.loots.all().delete()
 
+    def next(self, apply=False):
+        """
+        Détermine qui est le prochain personnage à agir
+        :param apply: Applique directement le changement sur la campagne
+        :return: Personnage suivant
+        """
+        next_character = None
+        characters = self.characters.filter(is_active=True)
+        characters = sorted(characters, key=lambda e: -e.stats.sequence)
+        if not self.current_character:
+            next_character = next(iter(characters), None)
+        else:
+            from itertools import cycle
+            previous_character = None
+            for character in cycle(characters):
+                if previous_character == self.current_character:
+                    next_character = character
+                    break
+                previous_character = character
+        if apply and next_character:
+            self.current_character = next_character
+            self.save()
+        return next_character
+
     def save(self, *args, **kwargs):
-        hours = round((self._copy.get('current_game_date', self.current_game_date) - self.current_game_date) / 3600, 2)
+        difference = (self._copy.get('current_game_date') or self.current_game_date) - self.current_game_date
+        hours = round(difference.seconds / 3600, 2)
         if hours <= 0:
             for character in self.characters.all():
                 character.update_needs(hours=hours)
@@ -125,6 +150,9 @@ class Stats(models.Model):
             setattr(stats, stats_name, getattr(character, stats_name, 0))
         # Racial modifiers
         stats._change_all_stats(**RACES_STATS.get(character.race, {}))
+        # Tag skills
+        for skill in (character.tag_skills or set()):
+            stats._change_stats(skill, TAG_SKILL_BONUS)
         # Survival modifiers
         for stats_name, survival in SURVIVAL_EFFECTS:
             for (mini, maxi), effects in survival.items():
@@ -188,9 +216,10 @@ class Character(Entity, Stats):
     title = models.CharField(max_length=200, blank=True, null=True, verbose_name=_("titre"))
     description = models.TextField(blank=True, null=True, verbose_name=_("description"))
     image = models.ImageField(blank=True, null=True, verbose_name=_("image"))
-    race = models.CharField(max_length=12, choices=RACES, default=RACE_HUMAN, verbose_name=_("race"))
+    race = models.CharField(max_length=12, choices=RACES, default=RACE_HUMAN, db_index=True, verbose_name=_("race"))
     level = models.PositiveSmallIntegerField(default=1, verbose_name=_("niveau"))
-    is_player = models.BooleanField(default=False, verbose_name=_("joueur ?"))
+    is_player = models.BooleanField(default=False, db_index=True, verbose_name=_("joueur ?"))
+    is_active = models.BooleanField(default=True, db_index=True, verbose_name=_("actif ?"))
     # Primary statistics
     health = models.PositiveSmallIntegerField(default=0, verbose_name=_("santé"))
     action_points = models.PositiveSmallIntegerField(default=0, verbose_name=_("points d'action"))
