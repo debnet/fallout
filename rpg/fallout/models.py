@@ -132,10 +132,33 @@ class Stats(models.Model):
     gambling = models.SmallIntegerField(default=0, verbose_name=_("hasard"))
     survival = models.SmallIntegerField(default=0, verbose_name=_("survie"))
     knowledge = models.SmallIntegerField(default=0, verbose_name=_("connaissance"))
-    # Per level
+    # Leveled stats
     hit_points_per_level = models.SmallIntegerField(default=0, verbose_name=_("santé par niveau"))
     skill_points_per_level = models.SmallIntegerField(default=0, verbose_name=_("compétences par niveau"))
     perk_rate = models.SmallIntegerField(default=0, verbose_name=_("niveaux pour un talent"))
+
+    def get_stats(self, stats):
+        return [(code, label, getattr(self, code, 0)) for code, label in stats]
+
+    @property
+    def special(self):
+        return self.get_stats(SPECIALS)
+
+    @property
+    def skills(self):
+        return self.get_stats(SKILLS)
+
+    @property
+    def secondary_stats(self):
+        return self.get_stats(SECONDARY_STATS)
+
+    @property
+    def leveled_stats(self):
+        return self.get_stats(LEVELED_STATS)
+
+    @property
+    def resistances(self):
+        return self.get_stats(RESISTANCES)
 
     def __str__(self):
         return self.character.name

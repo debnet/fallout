@@ -11,4 +11,5 @@ def character_infos(request, pk):
     return {
         'site_header': str(character),
         'title': str(character),
+        'character': character,
     }
