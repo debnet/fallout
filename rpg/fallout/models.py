@@ -27,6 +27,7 @@ class Campaign(CommonModel):
     active_effects = models.ManyToManyField(
         'Effect', blank=True,
         related_name='+', verbose_name=_("effets actifs"))
+    radioactivity = models.PositiveSmallIntegerField(default=0, verbose_name=_("radioactivité"))
 
     def clear_loot(self):
         """
@@ -277,7 +278,9 @@ class Character(Entity, Stats):
         return sum(getattr(self, skill) * (0.5 if skill in self.tag_skills else 1) for skill in LIST_SKILLS)
 
     def modify_value(self, name, value):
-        setattr(self, name, getattr(self, name, 0) + value)
+        value = getattr(self, name, 0) + value
+        setattr(self, name, value)
+        return value
 
     def check_level(self) -> int:
         """
@@ -329,14 +332,20 @@ class Character(Entity, Stats):
         # Save the changes
         self.save(_reason=_("Personnage généré aléatoirement"))
 
-    def update_needs(self, hours: float=0.0) -> None:
+    def update_needs(self, hours: float=0.0, radioactivity: int=0, user: 'User'=None, save: bool=True) -> None:
         """
         Mise à jour des besoins
         :param hours: Nombre d'heures passées
+        :param radioactivity: Radioactivité actuelle
+        :param user: Utilisateur effectuant l'action
+        :param save: Sauvegarder les modifications sur le personnage ?
         :return: Rien
         """
         for stats_name, formula in COMPUTED_NEEDS:
             self.modify_value(stats_name, formula(self.stats, self) * hours)
+        self.damage(damage_bonus=radioactivity, save=False)
+        if save:
+            self.save(_reason=_("Mise à jour des besoins"), _current_user=user)
 
     def roll(self, stats: str, modifier: int=0) -> 'RollHistory':
         """
@@ -493,8 +502,8 @@ class Character(Entity, Stats):
         history.save()
         return history
 
-    def damage(self, dice_count: int, dice_value: int, damage_bonus: int,
-               damage_type: str=DAMAGE_NORMAL, user: 'User'=None) -> int:
+    def damage(self, dice_count: int=0, dice_value: int=0, damage_bonus: int=0,
+               damage_type: str=DAMAGE_NORMAL, user: 'User'=None, save: bool=True) -> int:
         """
         Inflige des dégâts au personnage
         :param dice_count: Nombre de dés
@@ -502,6 +511,7 @@ class Character(Entity, Stats):
         :param damage_bonus: Dégâts bonus
         :param damage_type: Type des dégâts
         :param user: Utilisateur effectuant l'action
+        :param save: Sauvegarder les modifications sur le personnage ?
         :return: Nombre de dégâts
         """
         damage = damage_bonus
@@ -516,17 +526,22 @@ class Character(Entity, Stats):
             getattr(armor, 'resistance_modifier', 0), 100) / 100
         defender_damage_resistance *= getattr(armor_equipment, 'condition', 1.0)  # Armor condition
         damage -= damage * defender_damage_resistance * (-1.0 if damage_type == DAMAGE_HEAL else 1.0)
-        if armor_equipment:
-            armor_equipment.condition -= armor_equipment.condition * (
-                getattr(armor, 'condition_modifier', 0.0))
-            armor_equipment.condition = min(armor_equipment.condition, 0)
-            armor_equipment.save(_current_user=user)
+        reason = _("{dc}d{dv}+{db} dégât(s) ({damage}) de {type}").format(
+            dc=dice_count, dv=dice_value, db=damage_bonus, damage=damage,
+            type=dict(DAMAGES).get(damage_type, _("inconnu")))
+        if armor_equipment and damage_type not in [DAMAGE_RADIATION, DAMAGE_POISON, DAMAGE_GAZ_INHALED, DAMAGE_HEAL]:
+            armor_damage = armor_equipment.condition * (getattr(armor, 'condition_modifier', 0.0))
+            if armor_damage:
+                armor_equipment.condition -= armor_damage
+                armor_equipment.condition = min(armor_equipment.condition, 0)
+                armor_equipment.save(_reason=reason, _current_user=user)
         if damage:
             if damage_type == DAMAGE_RADIATION:
                 self.irradiation += damage
             else:
                 self.health -= damage
-            self.save(_current_user=user)
+            if save:
+                self.save(_reason=reason, _current_user=user)
         return damage
 
     def save(self, *args, **kwargs):
