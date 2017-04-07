@@ -50,24 +50,24 @@ LIST_SPECIALS = [a for a, *b in SPECIALS]
 STATS_MAX_HEALTH = 'max_health'
 STATS_MAX_ACTION_POINTS = 'max_action_points'
 STATS_ARMOR_CLASS = 'armor_class'
-STATS_DAMAGE_THRESHOLD = 'damage_threshold'
-STATS_DAMAGE_RESISTANCE = 'damage_resistance'
 STATS_CARRY_WEIGHT = 'carry_weight'
 STATS_MELEE_DAMAGE = 'melee_damage'
 STATS_SEQUENCE = 'sequence'
 STATS_HEALING_RATE = 'healing_rate'
 STATS_CRITICAL_CHANCE = 'critical_chance'
+STATS_DAMAGE_THRESHOLD = 'damage_threshold'
+STATS_DAMAGE_RESISTANCE = 'damage_resistance'
 SECONDARY_STATS = (
     (STATS_MAX_HEALTH, _("santé maximale")),
     (STATS_MAX_ACTION_POINTS, _("points d'action max.")),
     (STATS_ARMOR_CLASS, _("esquive")),
-    (STATS_DAMAGE_THRESHOLD, _("seuil de dégâts")),
-    (STATS_DAMAGE_RESISTANCE, _("résistance aux dégâts")),
     (STATS_CARRY_WEIGHT, _("charge maximale")),
     (STATS_MELEE_DAMAGE, _("attaque en mélée")),
     (STATS_SEQUENCE, _("initiative")),
     (STATS_HEALING_RATE, _("taux de regénération")),
     (STATS_CRITICAL_CHANCE, _("chance de critique")),
+    (STATS_DAMAGE_THRESHOLD, _("seuil de dégâts")),
+    (STATS_DAMAGE_RESISTANCE, _("résistance aux dégâts")),
 )
 LIST_SECONDARY_STATS = [a for a, *b in SECONDARY_STATS]
 

@@ -93,25 +93,26 @@ class Stats(models.Model):
     max_health = models.PositiveSmallIntegerField(default=0, verbose_name=_("santé maximale"))
     max_action_points = models.PositiveSmallIntegerField(default=0, verbose_name=_("points d'action max."))
     armor_class = models.PositiveSmallIntegerField(default=0, verbose_name=_("esquive"))
-    damage_threshold = models.PositiveSmallIntegerField(default=0, verbose_name=_("seuil de dégâts"))
-    damage_resistance = models.PositiveSmallIntegerField(default=0, verbose_name=_("résistance aux dégâts"))
     carry_weight = models.PositiveSmallIntegerField(default=0, verbose_name=_("charge maximale"))
     melee_damage = models.PositiveSmallIntegerField(default=0, verbose_name=_("attaque en mélée"))
     sequence = models.PositiveSmallIntegerField(default=0, verbose_name=_("initiative"))
     healing_rate = models.PositiveSmallIntegerField(default=0, verbose_name=_("taux de regénération"))
     critical_chance = models.PositiveSmallIntegerField(default=0, verbose_name=_("chance de critique"))
+    # TODO: keeping damage resistance when we are damage specific types resistances?
+    damage_threshold = models.PositiveSmallIntegerField(default=0, verbose_name=_("seuil de dégâts"))
+    damage_resistance = models.FloatField(default=0.0, verbose_name=_("résistance aux dégâts"))
     # Damage resistances
-    normal_damage_resistance = models.SmallIntegerField(default=0, verbose_name=_("résistance aux dégâts"))
-    laser_damage_resistance = models.SmallIntegerField(default=0, verbose_name=_("résistance au laser"))
-    plasma_damage_resistance = models.SmallIntegerField(default=0, verbose_name=_("résistance au plasma"))
-    explosive_damage_resistance = models.SmallIntegerField(default=0, verbose_name=_("résistance aux explosions"))
+    normal_damage_resistance = models.FloatField(default=0.0, verbose_name=_("résistance aux dégâts"))
+    laser_damage_resistance = models.FloatField(default=0.0, verbose_name=_("résistance au laser"))
+    plasma_damage_resistance = models.FloatField(default=0.0, verbose_name=_("résistance au plasma"))
+    explosive_damage_resistance = models.FloatField(default=0.0, verbose_name=_("résistance aux explosions"))
     # Environment resistances
-    radiation_resistance = models.SmallIntegerField(default=0, verbose_name=_("résistance aux radiations"))
-    poison_resistance = models.SmallIntegerField(default=0, verbose_name=_("résistance aux poisons"))
-    fire_resistance = models.SmallIntegerField(default=0, verbose_name=_("résistance au feu"))
-    electricity_resistance = models.SmallIntegerField(default=0, verbose_name=_("résistance à l'électricité"))
-    gas_contact_resistance = models.SmallIntegerField(default=0, verbose_name=_("résistance au gaz (contact)"))
-    gas_inhaled_resistance = models.SmallIntegerField(default=0, verbose_name=_("résistance au gaz (inhalé)"))
+    radiation_resistance = models.FloatField(default=0.0, verbose_name=_("résistance aux radiations"))
+    poison_resistance = models.FloatField(default=0.0, verbose_name=_("résistance aux poisons"))
+    fire_resistance = models.FloatField(default=0.0, verbose_name=_("résistance au feu"))
+    electricity_resistance = models.FloatField(default=0.0, verbose_name=_("résistance à l'électricité"))
+    gas_contact_resistance = models.FloatField(default=0.0, verbose_name=_("résistance au gaz (contact)"))
+    gas_inhaled_resistance = models.FloatField(default=0.0, verbose_name=_("résistance au gaz (inhalé)"))
     # Skills
     small_guns = models.SmallIntegerField(default=0, verbose_name=_("armes à feu légères"))
     big_guns = models.SmallIntegerField(default=0, verbose_name=_("armes à feu lourdes"))
@@ -343,7 +344,7 @@ class Character(Entity, Stats):
         """
         for stats_name, formula in COMPUTED_NEEDS:
             self.modify_value(stats_name, formula(self.stats, self) * hours)
-        self.damage(damage=radioactivity, save=False)
+        self.damage(damage=radioactivity * hours * 3600, damage_type=DAMAGE_RADIATION, save=False)
         if save:
             self.save(_reason=_("Mise à jour des besoins"), _current_user=user)
 
@@ -450,6 +451,7 @@ class Character(Entity, Stats):
         attacker_hit_chance += getattr(attacker_weapon, 'hit_chance_modifier', 0)  # Weapon hit chance modifier
         attacker_hit_chance -= getattr(defender_armor, 'armor_class_modifier', 0)  # Defender armor class
         attacker_hit_chance -= defender.stats.armor_class  # Armor class
+        # TODO: hit chance must be 0 if attacked is melee/unarmed and target is farther than 1 tile away
         # Targetted body part modifiers
         body_part = target_part
         if not target_part:
@@ -507,7 +509,7 @@ class Character(Entity, Stats):
         history.save()
         return history
 
-    def damage(self, damage: int=0, dice_count: int=0, dice_value: int=0,
+    def damage(self, damage: float=0.0, dice_count: int=0, dice_value: int=0,
                damage_type: str=DAMAGE_NORMAL, user: 'User'=None, save: bool=True) -> int:
         """
         Inflige des dégâts au personnage
@@ -530,14 +532,13 @@ class Character(Entity, Stats):
         armor_damage = 0
         if armor and armor_equipment:
             total_damage -= armor.get_threshold(damage_type)  # Armor damage threshold
-            armor_resistance = armor.get_resistance(damage_type) * armor_equipment.condition * armor.resistance_modifier
-            total_damage -= armor_resistance
+            armor_resistance = armor.get_resistance(damage_type) * armor_equipment.condition
+            total_damage *= armor_resistance * armor.resistance_modifier
             armor_damage = max((base_damage - total_damage) * (getattr(armor, 'condition_modifier', 0.0)), 0)
         # Self threshold and resistance
         total_damage -= self.damage_threshold
-        damage_resistance = self.stats.damage_resistance + getattr(self.stats, DAMAGE_RESISTANCE.get(damage_type), 0)
-        damage_resistance = max(damage_resistance, 100)
-        total_damage -= total_damage * (-1.0 if damage_type == DAMAGE_HEAL else damage_resistance)
+        damage_resistance = self.stats.damage_resistance + getattr(self.stats, DAMAGE_RESISTANCE.get(damage_type), 0.0)
+        total_damage -= total_damage * (-1.0 if damage_type == DAMAGE_HEAL else max(damage_resistance, 1.0))
         # Apply damage on self
         reason = "{total} {type}" if raw_damage else "{total} {type} ({dc}d{dv}+{db}={base})"
         reason = reason.format(
@@ -553,7 +554,6 @@ class Character(Entity, Stats):
         # Condition decrease on armor
         if armor_damage > 0 and damage_type in [DAMAGE_NORMAL, DAMAGE_LASER, DAMAGE_PLASMA, DAMAGE_EXPLOSIVE, DAMAGE_FIRE]:
             armor_equipment.condition -= armor_damage
-            armor_equipment.condition = min(armor_equipment.condition, 0)
             armor_equipment.save(_reason=reason, _current_user=user)
         return total_damage
 
@@ -639,15 +639,15 @@ class Item(Entity):
     condition_modifier = models.FloatField(default=0.0, verbose_name=_("modif. de condition"))
     # Resistances
     normal_threshold = models.PositiveSmallIntegerField(default=0, verbose_name=_("seuil normal"))
-    normal_resistance = models.PositiveSmallIntegerField(default=0, verbose_name=_("résistance normal"))
+    normal_resistance = models.FloatField(default=0.0, verbose_name=_("résistance normal"))
     laser_threshold = models.PositiveSmallIntegerField(default=0, verbose_name=_("seuil laser"))
-    laser_resistance = models.PositiveSmallIntegerField(default=0, verbose_name=_("résistance laser"))
+    laser_resistance = models.FloatField(default=0.0, verbose_name=_("résistance laser"))
     plasma_threshold = models.PositiveSmallIntegerField(default=0, verbose_name=_("seuil plasma"))
-    plasma_resistance = models.PositiveSmallIntegerField(default=0, verbose_name=_("résistance plasma"))
+    plasma_resistance = models.FloatField(default=0.0, verbose_name=_("résistance plasma"))
     explosive_threshold = models.PositiveSmallIntegerField(default=0, verbose_name=_("seuil explosifs"))
-    explosive_resistance = models.PositiveSmallIntegerField(default=0, verbose_name=_("résistance explosifs"))
+    explosive_resistance = models.FloatField(default=0.0, verbose_name=_("résistance explosifs"))
     fire_threshold = models.PositiveSmallIntegerField(default=0, verbose_name=_("seuil feu"))
-    fire_resistance = models.PositiveSmallIntegerField(default=0, verbose_name=_("résistance feu"))
+    fire_resistance = models.FloatField(default=0.0, verbose_name=_("résistance feu"))
     # Effets
     effects = models.ManyToManyField('Effect', blank=True, related_name='+', verbose_name=_("effets"))
 
