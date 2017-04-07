@@ -92,6 +92,13 @@ class ItemAdmin(EntityAdmin):
                 'damage_modifier', 'critical_modifier', 'condition_modifier', ),
             classes=('wide', 'collapse', ),
         )),
+        (_("Résistances"), dict(
+            fields=(
+                'normal_threshold', 'normal_resistance', 'laser_threshold', 'laser_resistance',
+                'plasma_threshold', 'plasma_resistance', 'explosive_threshold', 'explosive_resistance',
+                'fire_threshold', 'fire_resistance', ),
+            classes=('wide', 'collapse', ),
+        )),
         (_("Effets"), dict(
             fields=('effects', ),
             classes=('wide', 'collapse', ),
