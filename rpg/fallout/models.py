@@ -27,7 +27,7 @@ class Campaign(CommonModel):
     active_effects = models.ManyToManyField(
         'Effect', blank=True,
         related_name='+', verbose_name=_("effets actifs"))
-    radioactivity = models.PositiveSmallIntegerField(default=0, verbose_name=_("radioactivité"))
+    radiation = models.PositiveSmallIntegerField(default=0, verbose_name=_("rads par heure"))
 
     def clear_loot(self):
         """
@@ -66,7 +66,7 @@ class Campaign(CommonModel):
         hours = round(difference.seconds / 3600, 2)
         if hours <= 0:
             for character in self.characters.all():
-                character.update_needs(hours=hours)
+                character.update_needs(hours=hours, radiation=self.radiation)
         return super().save(*args, **kwargs)
 
     def __str__(self) -> str:
@@ -92,27 +92,25 @@ class Stats(models.Model):
     # Secondary statistics
     max_health = models.PositiveSmallIntegerField(default=0, verbose_name=_("santé maximale"))
     max_action_points = models.PositiveSmallIntegerField(default=0, verbose_name=_("points d'action max."))
-    armor_class = models.PositiveSmallIntegerField(default=0, verbose_name=_("esquive"))
-    carry_weight = models.PositiveSmallIntegerField(default=0, verbose_name=_("charge maximale"))
-    melee_damage = models.PositiveSmallIntegerField(default=0, verbose_name=_("attaque en mélée"))
-    sequence = models.PositiveSmallIntegerField(default=0, verbose_name=_("initiative"))
-    healing_rate = models.PositiveSmallIntegerField(default=0, verbose_name=_("taux de regénération"))
-    critical_chance = models.PositiveSmallIntegerField(default=0, verbose_name=_("chance de critique"))
-    # TODO: keeping damage resistance when we are damage specific types resistances?
-    damage_threshold = models.PositiveSmallIntegerField(default=0, verbose_name=_("seuil de dégâts"))
+    armor_class = models.SmallIntegerField(default=0, verbose_name=_("esquive"))
+    carry_weight = models.SmallIntegerField(default=0, verbose_name=_("charge maximale"))
+    melee_damage = models.SmallIntegerField(default=0, verbose_name=_("attaque en mélée"))
+    sequence = models.SmallIntegerField(default=0, verbose_name=_("initiative"))
+    healing_rate = models.SmallIntegerField(default=0, verbose_name=_("taux de regénération"))
+    critical_chance = models.SmallIntegerField(default=0, verbose_name=_("chance de critique"))
+    damage_threshold = models.SmallIntegerField(default=0, verbose_name=_("seuil de dégâts"))
     damage_resistance = models.FloatField(default=0.0, verbose_name=_("résistance aux dégâts"))
-    # Damage resistances
-    normal_damage_resistance = models.FloatField(default=0.0, verbose_name=_("résistance aux dégâts"))
-    laser_damage_resistance = models.FloatField(default=0.0, verbose_name=_("résistance au laser"))
-    plasma_damage_resistance = models.FloatField(default=0.0, verbose_name=_("résistance au plasma"))
-    explosive_damage_resistance = models.FloatField(default=0.0, verbose_name=_("résistance aux explosions"))
-    # Environment resistances
-    radiation_resistance = models.FloatField(default=0.0, verbose_name=_("résistance aux radiations"))
-    poison_resistance = models.FloatField(default=0.0, verbose_name=_("résistance aux poisons"))
+    # Resistances
+    normal_resistance = models.FloatField(default=0.0, verbose_name=_("résistance physique"))
+    laser_resistance = models.FloatField(default=0.0, verbose_name=_("résistance au laser"))
+    plasma_resistance = models.FloatField(default=0.0, verbose_name=_("résistance au plasma"))
+    explosive_resistance = models.FloatField(default=0.0, verbose_name=_("résistance aux explosions"))
     fire_resistance = models.FloatField(default=0.0, verbose_name=_("résistance au feu"))
-    electricity_resistance = models.FloatField(default=0.0, verbose_name=_("résistance à l'électricité"))
     gas_contact_resistance = models.FloatField(default=0.0, verbose_name=_("résistance au gaz (contact)"))
     gas_inhaled_resistance = models.FloatField(default=0.0, verbose_name=_("résistance au gaz (inhalé)"))
+    electricity_resistance = models.FloatField(default=0.0, verbose_name=_("résistance à l'électricité"))
+    poison_resistance = models.FloatField(default=0.0, verbose_name=_("résistance aux poisons"))
+    radiation_resistance = models.FloatField(default=0.0, verbose_name=_("résistance aux radiations"))
     # Skills
     small_guns = models.SmallIntegerField(default=0, verbose_name=_("armes à feu légères"))
     big_guns = models.SmallIntegerField(default=0, verbose_name=_("armes à feu lourdes"))
@@ -331,22 +329,21 @@ class Character(Entity, Stats):
         self.health = self.stats.max_health
         self.action_points = self.stats.max_action_points
         # Save the changes
-        self.save(_reason=_("Personnage généré aléatoirement"))
+        self.save()
 
-    def update_needs(self, hours: float=0.0, radioactivity: int=0, user: 'User'=None, save: bool=True) -> None:
+    def update_needs(self, hours: float=0.0, radiation: int=0, save: bool=True) -> None:
         """
         Mise à jour des besoins
         :param hours: Nombre d'heures passées
-        :param radioactivity: Radioactivité actuelle
-        :param user: Utilisateur effectuant l'action
+        :param radiation: Radioactivité actuelle (en rads / heure)
         :param save: Sauvegarder les modifications sur le personnage ?
         :return: Rien
         """
         for stats_name, formula in COMPUTED_NEEDS:
             self.modify_value(stats_name, formula(self.stats, self) * hours)
-        self.damage(damage=radioactivity * hours * 3600, damage_type=DAMAGE_RADIATION, save=False)
+        self.damage(damage=radiation * hours, damage_type=DAMAGE_RADIATION, save=False)
         if save:
-            self.save(_reason=_("Mise à jour des besoins"), _current_user=user)
+            self.save()
 
     def roll(self, stats: str, modifier: int=0) -> 'RollHistory':
         """
@@ -390,28 +387,27 @@ class Character(Entity, Stats):
         return loots
 
     def burst(self, *targets: Iterable['Character'], targets_range: Iterable[int]=None,
-              hit_modifier: int=0, user: 'User'=None) -> List['FightHistory']:
+              hit_modifier: int=0) -> List['FightHistory']:
         """
         Permet de lancer une attaque en rafale sur un groupe d'ennemis
         :param targets: Liste de personnages ciblés
         :param targets_range: Liste des distances (en cases) de chaque personnage dans le même ordre que la liste précédente
         :param hit_modifier: Modificateurs complémentaires de précision (lumière, couverture, etc...)
-        :param user: Utilisateur effectuant l'action
         :return: Liste d'historiques de combat
         """
         histories = []
         attacker_weapon_equipment = self.equipments.filter(slot=ITEM_WEAPON).first()
         attacker_weapon = getattr(attacker_weapon_equipment, 'item', None)
+        self.action_points -= getattr(attacker_weapon, 'ap_cost_burst', None) or AP_COST_FIGHT
         all_targets = list(zip(targets, targets_range))
         for round in range(getattr(attacker_weapon, 'burst_count', 0)):
             target, target_range = choice(all_targets)
-            history = self.fight(
-                target, is_burst=True, target_range=target_range, hit_modifier=hit_modifier, user=user)
+            history = self.fight(target, is_burst=True, target_range=target_range, hit_modifier=hit_modifier)
             histories.append(history)
         return histories
 
     def fight(self, defender: 'Character', is_burst: bool=False, target_range: int=0,
-              hit_modifier: int=0, target_part=None, user: 'User'=None) -> 'FightHistory':
+              hit_modifier: int=0, target_part=None) -> 'FightHistory':
         """
         Calcul un round de combat entre deux personnages
         :param defender: Personnage ciblé
@@ -419,7 +415,6 @@ class Character(Entity, Stats):
         :param target_range: Distance (en cases) entre les deux personnages
         :param hit_modifier: Modificateurs complémentaires de précision (lumière, couverture, etc...)
         :param target_part: Partie du corps ciblée par l'attaquant (ou torse par défaut)
-        :param user: Utilisateur effectuant l'action
         :return: Historique de combat
         """
         history = FightHistory(attacker=self, defender=defender, burst=is_burst, range=target_range)
@@ -431,10 +426,19 @@ class Character(Entity, Stats):
         attacker_weapon = history.attacker_weapon = getattr(attacker_weapon_equipment, 'item', None)
         attacker_ammo = history.attacker_ammo = getattr(attacker_ammo_equipment, 'item', None)
         defender_armor = history.defender_armor = getattr(defender_armor_equipment, 'item', None)
-        # Fight condition
-        # TODO: weapon and armor condition, weapon strength requirement, clip count, characters not dead, etc...
+        # Action points
+        if not is_burst:
+            ap_cost_type = 'ap_cost_target' if target_part else 'ap_cost_normal'
+            self.action_points -= getattr(attacker_weapon, ap_cost_type, None) or AP_COST_FIGHT
+        # Fight conditions
         if attacker_weapon and attacker_weapon.clip_size and attacker_weapon_equipment.clip_count == 0:
-            history.fail = FAIL_AMMO
+            history.fail = STATUS_NO_MORE_AMMO
+        elif defender.health <= 0:
+            history.fail = STATUS_TARGET_DEAD
+        elif attacker_weapon_equipment and attacker_weapon_equipment.condition <= 0.0:
+            history.status = STATUS_WEAPON_BROKEN
+        if history.status:
+            self.save()
             history.save()
             return history
         # Chance to hit
@@ -447,30 +451,37 @@ class Character(Entity, Stats):
         attacker_hit_range = attacker_weapon_range + (2 * getattr(self.stats, attacker_range_stats, 0)) + 1
         attacker_hit_range *= getattr(attacker_weapon, 'range_modifier', 1.0)
         attacker_hit_range *= getattr(attacker_ammo, 'range_modifier', 1.0)
-        attacker_hit_chance -= min(target_range - attacker_hit_range, 0) * 3  # Range modifiers
+        attacker_hit_chance -= min(target_range - attacker_hit_range, 0) * FIGHT_RANGE_MALUS  # Range modifiers
         attacker_hit_chance += getattr(attacker_weapon, 'hit_chance_modifier', 0)  # Weapon hit chance modifier
         attacker_hit_chance -= getattr(defender_armor, 'armor_class_modifier', 0)  # Defender armor class
         attacker_hit_chance -= defender.stats.armor_class  # Armor class
-        # TODO: hit chance must be 0 if attacked is melee/unarmed and target is farther than 1 tile away
         # Targetted body part modifiers
         body_part = target_part
         if not target_part:
-            for body_part, chance in BODY_PARTS_RANDOM_CHANCES:
+            for body_part, chance, body_hit_modifier in BODY_PARTS_RANDOM_CHANCES:
                 if randint(1, 100) < chance:
                     break
         history.body_part = body_part or PART_TORSO
         ranged_hit_modifier, melee_hit_modifier, critical_modifier = BODY_PARTS_MODIFIERS[history.body_part]
-        attacker_hit_chance += melee_hit_modifier if attacker_skill == SKILL_UNARMED else ranged_hit_modifier
+        if target_part:
+            attacker_hit_chance += melee_hit_modifier if attacker_skill == SKILL_UNARMED else ranged_hit_modifier
         attacker_hit_chance += hit_modifier  # Other modifiers
         attacker_hit_chance *= getattr(attacker_weapon_equipment, 'condition', 1.0)  # Weapon condition
-        history.hit_modifier = hit_modifier
-        history.hit_chance = attacker_hit_chance
+        # Hit chance is null if attacker is melee/unarmed and target is farther than weapon range
+        if target_range - attacker_hit_range > 0 and attacker_skill in [SKILL_UNARMED, SKILL_MELEE_WEAPONS]:
+            attacker_hit_chance = 0
+        history.hit_modifier = int(hit_modifier)
+        history.hit_chance = int(min(attacker_hit_chance, 0))
+        history.status = STATUS_HIT_FAILED
         attacker_hit_roll = history.hit_roll = randint(1, 100)
-        history.hit_success = attacker_hit_roll <= attacker_hit_chance
+        history.hit_success = attacker_hit_roll <= history.hit_chance
         history.hit_critical = attacker_hit_roll >= CRITICAL_FAIL_D100
         if history.hit_success:
             # Apply damage
-            history.hit_critical = attacker_hit_roll < getattr(self.stats, 'critical_chance', 0) + critical_modifier
+            history.status = STATUS_HIT_SUCCEED
+            history.hit_critical = \
+                (attacker_hit_roll < getattr(self.stats, 'critical_chance', 0)) + \
+                critical_modifier if target_part else 0
             attacker_damage_type = getattr(attacker_weapon, 'damage_type', DAMAGE_NORMAL)
             damage = 0
             for item in [attacker_weapon, attacker_ammo]:
@@ -480,7 +491,7 @@ class Character(Entity, Stats):
             damage *= getattr(attacker_weapon, 'damage_modifier', 1.0) * getattr(attacker_ammo, 'damage_modifier', 1.0)
             damage += self.stats.melee_damage if attacker_skill in [SKILL_UNARMED, SKILL_MELEE_WEAPONS] else 0
             history.base_damage = damage
-            damage = defender.damage(damage=damage, damage_type=attacker_damage_type, user=user, save=True)
+            damage = defender.damage(damage=damage, damage_type=attacker_damage_type, save=True)
             history.damage = damage
             # On hit effects
             for item in (attacker_weapon, attacker_ammo, defender_armor):
@@ -491,33 +502,28 @@ class Character(Entity, Stats):
                         continue
                     ActiveEffect.objects.get_or_create(
                         character=defender, effect=effect,
-                        defaults=dict(start_date=history.game_date, end_date=None))
-            # TODO: apply effects immediatly?
+                        defaults=dict(start_date=history.game_date))
+            defender.apply_effects()  # Apply effects immediatly
         # Clip count & weapon condition
-        if attacker_weapon_equipment:
-            attacker_weapon_equipment.clip_count -= 1
+        if attacker_weapon_equipment and attacker_weapon:
+            attacker_weapon_equipment.clip_count -= 0 if attacker_weapon.is_melee else 1
             # TODO: weapon condition based on damage
             attacker_weapon_equipment.condition -= attacker_weapon_equipment.condition * (
                 getattr(attacker_weapon, 'condition_modifier', 0.0) + getattr(attacker_ammo, 'condition_modifier', 0.0))
-            attacker_weapon_equipment.condition = min(attacker_weapon_equipment.condition, 0)
-            attacker_weapon_equipment.save(_reason=str(history))
-        # Action points
-        ap_cost_type = 'ap_cost_burst' if is_burst else 'ap_cost_target' if target_part else 'ap_cost_normal'
-        self.action_points -= getattr(attacker_weapon, ap_cost_type, None) or AP_COST_FIGHT
-        self.save(_reason=str(history), _current_user=user)
-        # Return
+            attacker_weapon_equipment.save()
+        # Save character and return history
+        self.save()
         history.save()
         return history
 
     def damage(self, damage: float=0.0, dice_count: int=0, dice_value: int=0,
-               damage_type: str=DAMAGE_NORMAL, user: 'User'=None, save: bool=True) -> int:
+               damage_type: str=DAMAGE_NORMAL, save: bool=True) -> int:
         """
         Inflige des dégâts au personnage
         :param dice_count: Nombre de dés
         :param dice_value: Valeur des dés
         :param damage: Dégâts bonus
         :param damage_type: Type des dégâts
-        :param user: Utilisateur effectuant l'action
         :param save: Sauvegarder les modifications sur le personnage ?
         :return: Nombre de dégâts
         """
@@ -525,7 +531,6 @@ class Character(Entity, Stats):
         for i in range(dice_count):
             total_damage += randint(1, dice_value)
         base_damage = total_damage
-        raw_damage = total_damage == damage
         # Armor threshold and resistance
         armor_equipment = self.equipments.filter(slot=ITEM_ARMOR).first()
         armor = getattr(armor_equipment, 'item', None)
@@ -538,24 +543,29 @@ class Character(Entity, Stats):
         # Self threshold and resistance
         total_damage -= self.damage_threshold
         damage_resistance = self.stats.damage_resistance + getattr(self.stats, DAMAGE_RESISTANCE.get(damage_type), 0.0)
-        total_damage -= total_damage * (-1.0 if damage_type == DAMAGE_HEAL else max(damage_resistance, 1.0))
+        total_damage -= total_damage * (-1.0 if damage_type == DAMAGE_HEAL else damage_resistance)
+        total_damage = int(total_damage)
         # Apply damage on self
-        reason = "{total} {type}" if raw_damage else "{total} {type} ({dc}d{dv}+{db}={base})"
-        reason = reason.format(
-            dc=dice_count, dv=dice_value, db=damage, base=base_damage, total=total_damage,
-            type=dict(DAMAGES).get(damage_type, _("dégâts d'origine inconnue")))
         if total_damage:
             if damage_type == DAMAGE_RADIATION:
                 self.irradiation += total_damage
             else:
                 self.health -= total_damage
             if save:
-                self.save(_reason=reason, _current_user=user)
+                self.save()
         # Condition decrease on armor
-        if armor_damage > 0 and damage_type in [DAMAGE_NORMAL, DAMAGE_LASER, DAMAGE_PLASMA, DAMAGE_EXPLOSIVE, DAMAGE_FIRE]:
+        if armor_damage > 0 and damage_type in PHYSICAL_DAMAGES:
             armor_equipment.condition -= armor_damage
-            armor_equipment.save(_reason=reason, _current_user=user)
+            armor_equipment.save()
         return total_damage
+
+    def apply_effects(self):
+        """
+        Force l'application des effets en cours
+        :return: Rien
+        """
+        for effect in self.active_effects.all():
+            effect.apply()
 
     def save(self, *args, **kwargs):
         self.check_level()
@@ -567,7 +577,7 @@ class Character(Entity, Stats):
 
     def get_absolute_url(self):
         from django.urls import reverse
-        return reverse('character.infos', args=[str(self.id)])
+        return reverse('character', args=[str(self.id)])
 
     def __str__(self) -> str:
         return self.name
@@ -616,22 +626,22 @@ class Item(Entity):
     damage_type = models.CharField(max_length=10, blank=True, choices=DAMAGES, verbose_name=_("type de dégâts"))
     damage_dice_count = models.PositiveSmallIntegerField(default=0, verbose_name=_("nombre de dés"))
     damage_dice_value = models.PositiveSmallIntegerField(default=0, verbose_name=_("valeur de dé"))
-    damage_bonus = models.PositiveSmallIntegerField(default=0, verbose_name=_("bonus au dé"))
-    range = models.PositiveSmallIntegerField(blank=True, null=True, verbose_name=_("portée"))
-    clip_size = models.PositiveSmallIntegerField(blank=True, null=True, verbose_name=_("taille du chargeur"))
-    ap_cost_reload = models.PositiveSmallIntegerField(blank=True, null=True, verbose_name=_("coût PA recharge"))
-    ap_cost_normal = models.PositiveSmallIntegerField(blank=True, null=True, verbose_name=_("coût PA normal"))
-    ap_cost_target = models.PositiveSmallIntegerField(blank=True, null=True, verbose_name=_("coût PA ciblé"))
-    ap_cost_burst = models.PositiveSmallIntegerField(blank=True, null=True, verbose_name=_("coût PA rafale"))
-    burst_count = models.PositiveSmallIntegerField(blank=True, null=True, verbose_name=_("munitions en rafale"))
-    min_strength = models.PositiveSmallIntegerField(blank=True, null=True, verbose_name=_("force minimum"))
+    damage_bonus = models.PositiveSmallIntegerField(default=0, verbose_name=_("bonus de dégâts"))
+    range = models.PositiveSmallIntegerField(default=1, verbose_name=_("portée"))
+    clip_size = models.PositiveSmallIntegerField(default=0, verbose_name=_("taille du chargeur"))
+    ap_cost_reload = models.PositiveSmallIntegerField(default=0, verbose_name=_("coût PA recharge"))
+    ap_cost_normal = models.PositiveSmallIntegerField(default=0, verbose_name=_("coût PA normal"))
+    ap_cost_target = models.PositiveSmallIntegerField(default=0, verbose_name=_("coût PA ciblé"))
+    ap_cost_burst = models.PositiveSmallIntegerField(default=0, verbose_name=_("coût PA rafale"))
+    burst_count = models.PositiveSmallIntegerField(default=0, verbose_name=_("munitions en rafale"))
+    min_strength = models.PositiveSmallIntegerField(default=0, verbose_name=_("force minimum"))
     skill = models.CharField(max_length=10, blank=True, choices=SKILLS, verbose_name=_("compétence"))
     ammunition = models.ManyToManyField(
         'Item', blank=True, verbose_name=_("type de munition"),
         limit_choices_to={'type': ITEM_AMMO})
     # Modifiers
-    hit_chance_modifier = models.PositiveSmallIntegerField(default=0, verbose_name=_("mod.if de précision"))
-    armor_class_modifier = models.PositiveSmallIntegerField(default=0, verbose_name=_("modif. d'esquive"))
+    hit_chance_modifier = models.SmallIntegerField(default=0, verbose_name=_("modif. de précision"))
+    armor_class_modifier = models.SmallIntegerField(default=0, verbose_name=_("modif. d'esquive"))
     resistance_modifier = models.FloatField(default=1.0, verbose_name=_("modif. de resistance"))
     range_modifier = models.FloatField(default=1.0, verbose_name=_("modif. de portée"))
     damage_modifier = models.FloatField(default=1.0, verbose_name=_("modif. de dégâts"))
@@ -697,9 +707,13 @@ class Equipment(Entity):
     character = models.ForeignKey('Character', on_delete=models.CASCADE, related_name='equipments', verbose_name=_("personnage"))
     item = models.ForeignKey('Item', on_delete=models.CASCADE, related_name='+', verbose_name=_("objet"))
     slot = models.CharField(max_length=7, choices=SLOT_ITEM_TYPES, blank=True, verbose_name=_("emplacement"))
-    count = models.PositiveIntegerField(default=0, verbose_name=_("nombre"))
+    count = models.PositiveIntegerField(default=1, verbose_name=_("nombre"))
     clip_count = models.PositiveSmallIntegerField(default=0, verbose_name=_("munitions"))
     condition = models.FloatField(default=1.0, verbose_name=_("état"))
+
+    @property
+    def value(self):
+        return self.item.value * self.condition * self.count
 
     def clean(self):
         if self.slot:
@@ -740,7 +754,7 @@ class Effect(Entity):
     image = models.ImageField(blank=True, verbose_name=_("image"))
     chance = models.PositiveSmallIntegerField(default=100, verbose_name=_("chance"))
     duration = models.DurationField(blank=True, null=True, verbose_name=_("durée"))
-    # Timed damage
+    # Timed effects
     interval = models.DurationField(blank=True, null=True, verbose_name=_("intervalle"))
     damage_type = models.CharField(max_length=10, blank=True, choices=DAMAGES, verbose_name=_("type de dégâts"))
     damage_dice_count = models.PositiveSmallIntegerField(default=0, verbose_name=_("nombre de dés"))
@@ -798,14 +812,16 @@ class ActiveEffect(Entity):
     end_date = models.DateTimeField(blank=True, null=True, verbose_name=_("date d'arrêt"))
     next_date = models.DateTimeField(blank=True, null=True, verbose_name=_("date suivante"))
 
-    def apply(self, user: 'User'=None):
+    def apply(self):
+        if not self.next_date and self.effect.interval:
+            self.next_date = self.start_date
         if not self.character.campaign and not self.next_date:
             return
         game_date = self.character.campaign.current_game_date
-        while self.next_date < game_date:
-            self.character.damage(**self.effect.damage_config, user=user)
-            self.next_date += self.effect.duration
-        self.save(_current_user=user)
+        while self.next_date <= game_date:
+            self.character.damage(**self.effect.damage_config)
+            self.next_date += self.effect.interval
+        self.save()
 
     def save(self, *args, **kwargs):
         if not self.start_date and self.character.campaign:
@@ -932,15 +948,14 @@ class FightHistory(CommonModel):
     burst = models.BooleanField(default=False, verbose_name=_("tir en rafale ?"))
     range = models.PositiveSmallIntegerField(default=0, verbose_name=_("distance"))
     body_part = models.CharField(max_length=5, choices=BODY_PARTS, verbose_name=_("partie du corps"))
-    hit_modifier = models.SmallIntegerField(default=0, verbose_name=_("modificateur de précision"))
+    hit_modifier = models.SmallIntegerField(default=0, verbose_name=_("modif. de précision"))
     hit_chance = models.SmallIntegerField(default=0, verbose_name=_("précision"))
     hit_roll = models.PositiveSmallIntegerField(default=0, verbose_name=_("jet de précision"))
     hit_success = models.BooleanField(default=False, verbose_name=_("touché ?"))
     hit_critical = models.BooleanField(default=False, verbose_name=_("critique ?"))
     base_damage = models.PositiveSmallIntegerField(default=0, verbose_name=_("dégâts de base"))
     damage = models.PositiveSmallIntegerField(default=0, verbose_name=_("dégâts réels"))
-    # TODO: fill the fail attribute
-    fail = models.CharField(max_length=5, choices=FIGHT_FAILS, blank=True, verbose_name=_("échec"))
+    status = models.CharField(max_length=15, choices=FIGHT_STATUS, blank=True, verbose_name=_("status"))
 
     def __str__(self) -> str:
         return "{} / {}".format(self.attacker, self.defender)

@@ -11,7 +11,7 @@ BODY_PARTS_MODIFIERS = {
     PART_EYES: (-60, -30, 30),
 }
 
-# Body part randomly hit if not targetted
+# Body part randomly hit if not targetted (chance, hit modifier)
 BODY_PARTS_RANDOM_CHANCES = (
     (PART_EYES, 5),
     (PART_HEAD, 10),
@@ -53,10 +53,7 @@ RACES_STATS = {
         SPECIAL_INTELLIGENCE: (0, 1, 8),
         SPECIAL_AGILITY: (0, 1, 8),
         SPECIAL_LUCK: (0, 1, 10),
-        RESISTANCE_NORMAL_DAMAGE: (25, 0, 100),
-        RESISTANCE_LASER_DAMAGE: (25, 0, 100),
-        RESISTANCE_PLASMA_DAMAGE: (25, 0, 100),
-        RESISTANCE_EXPLOSIVE_DAMAGE: (25, 0, 100),
+        STATS_DAMAGE_RESISTANCE: (25, 0, 100),
         RESISTANCE_RADIATION: (50, 0, 100),
         RESISTANCE_POISON: (20, 0, 100),
         RESISTANCE_FIRE: (25, 0, 100),
@@ -71,11 +68,7 @@ RACES_STATS = {
         SPECIAL_INTELLIGENCE: (0, 1, 4),
         SPECIAL_AGILITY: (0, 6, 16),
         SPECIAL_LUCK: (0, 1, 10),
-        RESISTANCE_NORMAL_DAMAGE: (40, 0, 100),
-        RESISTANCE_EXPLOSIVE_DAMAGE: (40, 0, 100),
-        RESISTANCE_FIRE: (40, 0, 100),
-        RESISTANCE_GAZ_CONTACT: (40, 0, 100),
-        RESISTANCE_GAZ_INHALED: (40, 0, 100),
+        STATS_DAMAGE_RESISTANCE: (40, 0, 100),
         HIT_POINTS_PER_LEVEL: (2, None, None),
         STATS_MELEE_DAMAGE: (5, None, None),
         STATS_DAMAGE_THRESHOLD: (4, None, None),
@@ -89,10 +82,7 @@ RACES_STATS = {
         SPECIAL_INTELLIGENCE: (0, 1, 12),
         SPECIAL_AGILITY: (0, 1, 12),
         SPECIAL_LUCK: (0, 5, 5),
-        RESISTANCE_NORMAL_DAMAGE: (40, 0, 100),
-        RESISTANCE_LASER_DAMAGE: (40, 0, 100),
-        RESISTANCE_PLASMA_DAMAGE: (40, 0, 100),
-        RESISTANCE_EXPLOSIVE_DAMAGE: (40, 0, 100),
+        STATS_DAMAGE_RESISTANCE: (40, 0, 100),
         RESISTANCE_RADIATION: (100, 0, 100),
         RESISTANCE_POISON: (100, 0, 100),
         RESISTANCE_FIRE: (40, 0, 100),
@@ -247,6 +237,9 @@ BASE_XP = 1000
 
 # Tag skill bonus
 TAG_SKILL_BONUS = 20
+
+# Range malus when fighting
+FIGHT_RANGE_MALUS = 3
 
 # Action points cost
 AP_COST_FIGHT = 5  # Fight unarmed

@@ -5,7 +5,7 @@ from rpg.fallout import api, views
 
 
 urlpatterns = [
-    url(r'^character/(?P<pk>\d+)/$', views.character_infos, name='character.infos'),
+    url(r'^character/(?P<pk>\d+)/$', views.character_infos, name='character'),
 ]
 
 # API REST

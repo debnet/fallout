@@ -21,8 +21,8 @@ class CampaignAdmin(CommonAdmin):
     )
     inlines = [LootInline]
     filter_horizontal = ('active_effects', )
-    list_display = ('name', 'current_game_date', 'current_character', 'radioactivity', )
-    list_editable = ('current_game_date', 'current_character', 'radioactivity', )
+    list_display = ('name', 'current_game_date', 'current_character', 'radiation', )
+    list_editable = ('current_game_date', 'current_character', 'radiation', )
 
 
 @admin.register(Character)

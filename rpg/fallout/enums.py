@@ -117,27 +117,27 @@ SKILLS = (
 LIST_SKILLS = [a for a, *b in SKILLS]
 
 # Resistances
-RESISTANCE_NORMAL_DAMAGE = 'normal_damage_resistance'
-RESISTANCE_LASER_DAMAGE = 'laser_damage_resistance'
-RESISTANCE_PLASMA_DAMAGE = 'plasma_damage_resistance'
-RESISTANCE_EXPLOSIVE_DAMAGE = 'explosive_damage_resistance'
-RESISTANCE_RADIATION = 'radiation_resistance'
-RESISTANCE_POISON = 'poison_resistance'
+RESISTANCE_NORMAL = 'normal_resistance'
+RESISTANCE_LASER = 'laser_resistance'
+RESISTANCE_PLASMA = 'plasma_resistance'
+RESISTANCE_EXPLOSIVE = 'explosive_resistance'
 RESISTANCE_FIRE = 'fire_resistance'
-RESISTANCE_ELECTRICITY = 'electricity_resistance'
 RESISTANCE_GAZ_CONTACT = 'gas_contact_resistance'
 RESISTANCE_GAZ_INHALED = 'gas_inhaled_resistance'
+RESISTANCE_ELECTRICITY = 'electricity_resistance'
+RESISTANCE_POISON = 'poison_resistance'
+RESISTANCE_RADIATION = 'radiation_resistance'
 RESISTANCES = (
-    (RESISTANCE_NORMAL_DAMAGE, _("résistance aux dégâts")),
-    (RESISTANCE_LASER_DAMAGE, _("résistance au laser")),
-    (RESISTANCE_PLASMA_DAMAGE, _("résistance au plasma")),
-    (RESISTANCE_EXPLOSIVE_DAMAGE, _("résistance aux explosions")),
-    (RESISTANCE_RADIATION, _("résistance aux radiations")),
-    (RESISTANCE_POISON, _("résistance aux poisons")),
+    (RESISTANCE_NORMAL, _("résistance aux dégâts")),
+    (RESISTANCE_LASER, _("résistance au laser")),
+    (RESISTANCE_PLASMA, _("résistance au plasma")),
+    (RESISTANCE_EXPLOSIVE, _("résistance aux explosions")),
     (RESISTANCE_FIRE, _("résistance au feu")),
-    (RESISTANCE_ELECTRICITY, _("résistance à l'électricité")),
     (RESISTANCE_GAZ_CONTACT, _("résistance au gaz (contact)")),
     (RESISTANCE_GAZ_INHALED, _("résistance au gaz (inhalé)")),
+    (RESISTANCE_ELECTRICITY, _("résistance à l'électricité")),
+    (RESISTANCE_POISON, _("résistance aux poisons")),
+    (RESISTANCE_RADIATION, _("résistance aux radiations")),
 )
 LIST_RESISTANCES = [a for a, *b in RESISTANCES]
 
@@ -146,40 +146,41 @@ DAMAGE_NORMAL = 'normal'
 DAMAGE_LASER = 'laser'
 DAMAGE_PLASMA = 'plasma'
 DAMAGE_EXPLOSIVE = 'explosive'
-DAMAGE_RADIATION = 'radiation'
-DAMAGE_POISON = 'poison'
 DAMAGE_FIRE = 'fire'
-DAMAGE_ELECTRICITY = 'electricity'
 DAMAGE_GAZ_CONTACT = 'gas_contact'
 DAMAGE_GAZ_INHALED = 'gas_inhaled'
+DAMAGE_ELECTRICITY = 'electricity'
+DAMAGE_POISON = 'poison'
+DAMAGE_RADIATION = 'radiation'
 DAMAGE_HEAL = 'heal'
 DAMAGES = (
     (DAMAGE_NORMAL, _("dégâts normaux")),
     (DAMAGE_LASER, _("dégâts de laser")),
     (DAMAGE_PLASMA, _("dégâts de plasma")),
     (DAMAGE_EXPLOSIVE, _("dégâts explosifs")),
-    (DAMAGE_RADIATION, _("dégâts de radiations")),
-    (DAMAGE_POISON, _("dégâts de poison")),
     (DAMAGE_FIRE, _("dégâts de feu")),
-    (DAMAGE_ELECTRICITY, _("dégâts d'électricité")),
     (DAMAGE_GAZ_CONTACT, _("dégâts de gaz (contact)")),
     (DAMAGE_GAZ_INHALED, _("dégâts de gaz (inhalé)")),
+    (DAMAGE_ELECTRICITY, _("dégâts d'électricité")),
+    (DAMAGE_POISON, _("dégâts de poison")),
+    (DAMAGE_RADIATION, _("dégâts de radiations")),
     (DAMAGE_HEAL, _("soins")),
 )
 LIST_DAMAGES = [a for a, *b in DAMAGES]
+PHYSICAL_DAMAGES = (DAMAGE_NORMAL, DAMAGE_LASER, DAMAGE_PLASMA, DAMAGE_EXPLOSIVE, DAMAGE_FIRE)
 
 # Damage / resistance
 DAMAGE_RESISTANCE = {
-    DAMAGE_NORMAL: RESISTANCE_NORMAL_DAMAGE,
-    DAMAGE_LASER: RESISTANCE_LASER_DAMAGE,
-    DAMAGE_PLASMA: RESISTANCE_PLASMA_DAMAGE,
-    DAMAGE_EXPLOSIVE: RESISTANCE_EXPLOSIVE_DAMAGE,
-    DAMAGE_RADIATION: RESISTANCE_RADIATION,
-    DAMAGE_POISON: RESISTANCE_POISON,
+    DAMAGE_NORMAL: RESISTANCE_NORMAL,
+    DAMAGE_LASER: RESISTANCE_LASER,
+    DAMAGE_PLASMA: RESISTANCE_PLASMA,
+    DAMAGE_EXPLOSIVE: RESISTANCE_EXPLOSIVE,
     DAMAGE_FIRE: RESISTANCE_FIRE,
-    DAMAGE_ELECTRICITY: RESISTANCE_ELECTRICITY,
     DAMAGE_GAZ_CONTACT: RESISTANCE_GAZ_CONTACT,
     DAMAGE_GAZ_INHALED: RESISTANCE_GAZ_INHALED,
+    DAMAGE_ELECTRICITY: RESISTANCE_ELECTRICITY,
+    DAMAGE_POISON: RESISTANCE_POISON,
+    DAMAGE_RADIATION: RESISTANCE_RADIATION,
     DAMAGE_HEAL: None,
 }
 
@@ -264,12 +265,16 @@ BODY_PARTS = (
     (PART_EYES, _("yeux")),
 )
 
-# Fight fails
-FAIL_MISS = 'miss'
-FAIL_AMMO = 'ammo'
-FAIL_DEAD = 'dead'
-FIGHT_FAILS = (
-    (FAIL_MISS, _("cible ratée")),
-    (FAIL_AMMO, _("munitions insuffisantes")),
-    (FAIL_DEAD, _("cible inconsciente")),
+# Fight status
+STATUS_HIT_SUCCEED = 'hit_succeed'
+STATUS_HIT_FAILED = 'hit_failed'
+STATUS_NO_MORE_AMMO = 'no_more_ammo'
+STATUS_TARGET_DEAD = 'target_dead'
+STATUS_WEAPON_BROKEN = 'weapon_broken'
+FIGHT_STATUS = (
+    (STATUS_HIT_SUCCEED, _("cible touchée")),
+    (STATUS_HIT_FAILED, _("cible manquée")),
+    (STATUS_NO_MORE_AMMO, _("munitions insuffisantes")),
+    (STATUS_TARGET_DEAD, _("cible inconsciente")),
+    (STATUS_WEAPON_BROKEN, _("arme défectueuse")),
 )
