@@ -1,4 +1,5 @@
 # coding: utf-8
+from datetime import timedelta
 from random import randint, choice
 from typing import Dict, Iterable, List, Tuple, Union
 
@@ -35,10 +36,11 @@ class Campaign(CommonModel):
         """
         return self.loots.all().delete()
 
-    def next(self, apply=False):
+    def next_turn(self, apply: bool=True, seconds: int=TURN_TIME):
         """
         Détermine qui est le prochain personnage à agir
         :param apply: Applique directement le changement sur la campagne
+        :param seconds: Temps utilisé (en secondes) par le personnage précédent pour son tour de jeu
         :return: Personnage suivant
         """
         next_character = None
@@ -57,8 +59,12 @@ class Campaign(CommonModel):
                     break
                 previous_character = character
         if apply and next_character:
+            self.current_game_date += timedelta(seconds=seconds)
             self.current_character = next_character
             self.save()
+            # Reset character action points
+            self.current_character.action_points = self.current_character.stats.max_action_points
+            self.current_character.save()
         return next_character
 
     def save(self, *args, **kwargs):
@@ -175,7 +181,7 @@ class Stats(models.Model):
         # Racial modifiers
         stats._change_all_stats(**RACES_STATS.get(character.race, {}))
         # Tag skills
-        for skill in (character.tag_skills or set()):
+        for skill in set(character.tag_skills):
             stats._change_stats(skill, TAG_SKILL_BONUS)
         # Survival modifiers
         for stats_name, survival in SURVIVAL_EFFECTS:
@@ -215,9 +221,10 @@ class Stats(models.Model):
 
     def _change_stats(self, name: str, value: int=0, mini: int=None, maxi: int=None) -> None:
         assert isinstance(self, Stats), _("Cette fonction ne peut être utilisée que par les statistiques.")
+        bonus, race_mini, race_maxi = RACES_STATS.get(self.character.race, {}).get(name, (None, None, None))
         target = self if name in LIST_EDITABLE_STATS else self.character
-        mini = mini if mini is not None else float('-inf')
-        maxi = maxi if maxi is not None else float('+inf')
+        mini = mini if mini is not None else race_mini or float('-inf')
+        maxi = maxi if maxi is not None else race_maxi or float('+inf')
         setattr(target, name, min(max(getattr(target, name, 0) + value, mini), maxi))
 
     class Meta:
@@ -244,6 +251,7 @@ class Character(Entity, Stats):
     level = models.PositiveSmallIntegerField(default=1, verbose_name=_("niveau"))
     is_player = models.BooleanField(default=False, db_index=True, verbose_name=_("joueur ?"))
     is_active = models.BooleanField(default=True, db_index=True, verbose_name=_("actif ?"))
+    is_resting = models.BooleanField(default=False, verbose_name=_("au repos ?"))
     # Primary statistics
     health = models.PositiveSmallIntegerField(default=0, verbose_name=_("santé"))
     action_points = models.PositiveSmallIntegerField(default=0, verbose_name=_("points d'action"))
@@ -252,10 +260,11 @@ class Character(Entity, Stats):
     experience = models.PositiveIntegerField(default=0, verbose_name=_("expérience"))
     karma = models.SmallIntegerField(default=0, verbose_name=_("karma"))
     # Needs
-    dehydration = models.FloatField(default=0, verbose_name=_("soif"))
-    hunger = models.FloatField(default=0, verbose_name=_("faim"))
-    sleep = models.FloatField(default=0, verbose_name=_("sommeil"))
-    irradiation = models.FloatField(default=0, verbose_name=_("irradiation"))
+    irradiation = models.FloatField(default=0.0, verbose_name=_("irradiation"))
+    dehydration = models.FloatField(default=0.0, verbose_name=_("soif"))
+    hunger = models.FloatField(default=0.0, verbose_name=_("faim"))
+    sleep = models.FloatField(default=0.0, verbose_name=_("sommeil"))
+    regeneration = models.FloatField(default=0.0, verbose_name=_("regénération"))
     # Tag skills
     tag_skills = MultipleChoiceField(max_length=200, choices=SKILLS, blank=True, verbose_name=_("spécialités"))
     # Statistics cache
@@ -342,6 +351,8 @@ class Character(Entity, Stats):
         for stats_name, formula in COMPUTED_NEEDS:
             self.modify_value(stats_name, formula(self.stats, self) * hours)
         self.damage(damage=radiation * hours, damage_type=DAMAGE_RADIATION, save=False)
+        self.regeneration += self.stats.healing_rate * (hours / 24.0) * (
+            HEALING_RATE_RESTING_MULT if self.is_resting else 1.0)
         if save:
             self.save()
 
@@ -568,6 +579,10 @@ class Character(Entity, Stats):
             effect.apply()
 
     def save(self, *args, **kwargs):
+        if self.regeneration >= 1.0:
+            healing = int(self.regeneration)
+            self.regeneration -= healing
+            self.health = max(self.health + healing, self.stats.max_health)
         self.check_level()
         Character._stats.pop(self.id, None)
         if not self.id:

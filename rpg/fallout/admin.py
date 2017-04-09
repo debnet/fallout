@@ -1,5 +1,5 @@
 # coding: utf-8
-from common.admin import CommonAdmin, EntityAdmin, EntityStackedInline
+from common.admin import CommonAdmin, EntityAdmin, EntityTabularInline
 from django.contrib import admin
 from django.utils.translation import ugettext as _
 
@@ -25,6 +25,16 @@ class CampaignAdmin(CommonAdmin):
     list_editable = ('current_game_date', 'current_character', 'radiation', )
 
 
+class EquipmentInlineAdmin(EntityTabularInline):
+    model = Equipment
+    extra = 1
+
+
+class ActiveEffectInlineAdmin(EntityTabularInline):
+    model = ActiveEffect
+    extra = 1
+
+
 @admin.register(Character)
 class CharacterAdmin(EntityAdmin):
     fieldsets = tuple([
@@ -35,6 +45,10 @@ class CharacterAdmin(EntityAdmin):
         (_("Informations générales"), dict(
             fields=('name', 'title', 'description', 'image', 'race', 'level', 'is_player', 'is_active', ),
             classes=('wide', ),
+        )),
+        (_("Besoins"), dict(
+            fields=('irradiation', 'dehydration', 'hunger', 'sleep', 'regeneration', ),
+            classes=('wide', 'collapse', ),
         )),
         (_("Spécialités"), dict(
             fields=('tag_skills', ),
@@ -47,6 +61,7 @@ class CharacterAdmin(EntityAdmin):
             for title, fields in ALL_STATS
         )
     ])
+    inlines = [EquipmentInlineAdmin, ActiveEffectInlineAdmin]
     list_display = (
         'name', 'race', 'level', 'is_player', 'is_active',
         'health', '_max_health', 'action_points', '_max_action_points', 'experience', 'karma')
@@ -66,6 +81,11 @@ class CharacterAdmin(EntityAdmin):
                     field.help_text += _(" (Spécialité +{}) ").format(TAG_SKILL_BONUS)
         return form
 
+    def get_queryset(self, request):
+        return super().get_queryset(request)\
+            .select_related('user', 'campaign')\
+            .prefetch_related('equipments', 'active_effects')
+
 
 class ItemModifierInline(admin.TabularInline):
     model = ItemModifier
@@ -81,7 +101,7 @@ class ItemAdmin(EntityAdmin):
         )),
         (_("Armement"), dict(
             fields=(
-                'melee', 'throwable', 'damage_type', 'damage_dice_count', 'damage_dice_value', 'damage_bonus',
+                'is_melee', 'is_throwable', 'damage_type', 'damage_dice_count', 'damage_dice_value', 'damage_bonus',
                 'range', 'clip_size', 'ap_cost_reload', 'ap_cost_normal', 'ap_cost_target', 'ap_cost_burst',
                 'burst_count', 'min_strength', 'skill', 'ammunition', ),
             classes=('wide', 'collapse', ),
@@ -111,6 +131,9 @@ class ItemAdmin(EntityAdmin):
     list_filter = ('type', 'is_quest', 'is_melee', 'is_throwable')
     search_fields = ('name', 'title', 'description')
 
+    def get_queryset(self, request):
+        return super().get_queryset(request).prefetch_related('modifiers')
+
 
 @admin.register(Equipment)
 class EquipmentAdmin(EntityAdmin):
@@ -125,6 +148,9 @@ class EquipmentAdmin(EntityAdmin):
     list_editable = ('slot', 'count', 'condition', 'clip_count', )
     list_filter = ('character', 'item', 'slot', )
 
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('item')
+
 
 class EffectModifierInline(admin.TabularInline):
     model = EffectModifier
@@ -135,7 +161,7 @@ class EffectModifierInline(admin.TabularInline):
 class EffectAdmin(EntityAdmin):
     fieldsets = (
         (_("Informations générales"), dict(
-            fields=('name', 'title', 'description', 'image', 'chance', 'duration', 'statistic', ),
+            fields=('name', 'title', 'description', 'image', 'chance', 'duration', ),
             classes=('wide', ),
         )),
         (_("Dégâts temporels"), dict(
@@ -148,6 +174,9 @@ class EffectAdmin(EntityAdmin):
     list_display = ()
     list_editable = ()
     list_filter = ()
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).prefetch_related('modifiers')
 
 
 @admin.register(ActiveEffect)
@@ -164,7 +193,7 @@ class ActiveEffectAdmin(EntityAdmin):
     list_filter = ()
 
 
-class LootTemplateItemInline(EntityStackedInline):
+class LootTemplateItemInline(EntityTabularInline):
     model = LootTemplateItem
     extra = 1
 
@@ -182,6 +211,9 @@ class LootTemplateAdmin(EntityAdmin):
     list_display = ()
     list_editable = ()
     list_filter = ()
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).prefetch_related('items')
 
 
 @admin.register(RollHistory)

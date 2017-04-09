@@ -69,9 +69,9 @@ RACES_STATS = {
         SPECIAL_AGILITY: (0, 6, 16),
         SPECIAL_LUCK: (0, 1, 10),
         STATS_DAMAGE_RESISTANCE: (40, 0, 100),
-        HIT_POINTS_PER_LEVEL: (2, None, None),
         STATS_MELEE_DAMAGE: (5, None, None),
         STATS_DAMAGE_THRESHOLD: (4, None, None),
+        HIT_POINTS_PER_LEVEL: (2, None, None),
         PERK_RATE: (3, None, None),
     },
     RACE_ROBOT: {
@@ -83,6 +83,7 @@ RACES_STATS = {
         SPECIAL_AGILITY: (0, 1, 12),
         SPECIAL_LUCK: (0, 5, 5),
         STATS_DAMAGE_RESISTANCE: (40, 0, 100),
+        STATS_HEALING_RATE: (0, 0, 0),
         RESISTANCE_RADIATION: (100, 0, 100),
         RESISTANCE_POISON: (100, 0, 100),
         RESISTANCE_FIRE: (40, 0, 100),
@@ -238,11 +239,17 @@ BASE_XP = 1000
 # Tag skill bonus
 TAG_SKILL_BONUS = 20
 
+# Healing rate multiplicator when resting
+HEALING_RATE_RESTING_MULT = 4.0
+
 # Range malus when fighting
 FIGHT_RANGE_MALUS = 3
 
 # Action points cost
 AP_COST_FIGHT = 5  # Fight unarmed
+
+# Turn time
+TURN_TIME = 30
 
 # Computed statistics from S.P.E.C.I.A.L.
 COMPUTED_STATS = (
