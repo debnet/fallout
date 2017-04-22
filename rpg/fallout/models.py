@@ -20,6 +20,9 @@ class Campaign(CommonModel):
     Aventure
     """
     name = models.CharField(max_length=200, verbose_name=_("nom"))
+    title = models.CharField(max_length=200, blank=True, verbose_name=_("titre"))
+    description = models.TextField(blank=True, verbose_name=_("description"))
+    image = models.ImageField(blank=True, upload_to='campaign', verbose_name=_("image"))
     start_game_date = models.DateTimeField(verbose_name=_("date de début"))
     current_game_date = models.DateTimeField(verbose_name=_("date courante"))
     current_character = models.ForeignKey(
@@ -74,6 +77,10 @@ class Campaign(CommonModel):
             for character in self.characters.all():
                 character.update_needs(hours=hours, radiation=self.radiation)
         return super().save(*args, **kwargs)
+
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse('fallout_campaign', args=[str(self.id)])
 
     def __str__(self) -> str:
         return self.name
@@ -246,7 +253,7 @@ class Character(Entity, Stats):
     name = models.CharField(max_length=200, verbose_name=_("nom"))
     title = models.CharField(max_length=200, blank=True, verbose_name=_("titre"))
     description = models.TextField(blank=True, verbose_name=_("description"))
-    image = models.ImageField(blank=True, verbose_name=_("image"))
+    image = models.ImageField(blank=True, upload_to='character', verbose_name=_("image"))
     race = models.CharField(max_length=12, choices=RACES, default=RACE_HUMAN, db_index=True, verbose_name=_("race"))
     level = models.PositiveSmallIntegerField(default=1, verbose_name=_("niveau"))
     is_player = models.BooleanField(default=False, db_index=True, verbose_name=_("joueur ?"))
@@ -409,16 +416,15 @@ class Character(Entity, Stats):
         histories = []
         attacker_weapon_equipment = self.equipments.filter(slot=ITEM_WEAPON).first()
         attacker_weapon = getattr(attacker_weapon_equipment, 'item', None)
-        self.action_points -= getattr(attacker_weapon, 'ap_cost_burst', None) or AP_COST_FIGHT
         all_targets = list(zip(targets, targets_range))
-        for round in range(getattr(attacker_weapon, 'burst_count', 0)):
+        for hit in range(getattr(attacker_weapon, 'burst_count', 0)):
             target, target_range = choice(all_targets)
-            history = self.fight(target, is_burst=True, target_range=target_range, hit_modifier=hit_modifier)
+            history = self.fight(target, is_burst=True, target_range=target_range, hit_modifier=hit_modifier, hit=hit)
             histories.append(history)
         return histories
 
     def fight(self, defender: 'Character', is_burst: bool=False, target_range: int=0,
-              hit_modifier: int=0, target_part=None) -> 'FightHistory':
+              hit_modifier: int=0, target_part=None, hit=0) -> 'FightHistory':
         """
         Calcul un round de combat entre deux personnages
         :param defender: Personnage ciblé
@@ -426,9 +432,10 @@ class Character(Entity, Stats):
         :param target_range: Distance (en cases) entre les deux personnages
         :param hit_modifier: Modificateurs complémentaires de précision (lumière, couverture, etc...)
         :param target_part: Partie du corps ciblée par l'attaquant (ou torse par défaut)
+        :param hit: Compteur de coup lors d'une attaque en rafale
         :return: Historique de combat
         """
-        history = FightHistory(attacker=self, defender=defender, burst=is_burst, range=target_range)
+        history = FightHistory(attacker=self, defender=defender, burst=is_burst, hit_count=hit + 1, range=target_range)
         history.game_date = self.campaign.current_game_date
         # Equipment
         attacker_weapon_equipment = self.equipments.filter(slot=ITEM_WEAPON).first()
@@ -437,10 +444,6 @@ class Character(Entity, Stats):
         attacker_weapon = history.attacker_weapon = getattr(attacker_weapon_equipment, 'item', None)
         attacker_ammo = history.attacker_ammo = getattr(attacker_ammo_equipment, 'item', None)
         defender_armor = history.defender_armor = getattr(defender_armor_equipment, 'item', None)
-        # Action points
-        if not is_burst:
-            ap_cost_type = 'ap_cost_target' if target_part else 'ap_cost_normal'
-            self.action_points -= getattr(attacker_weapon, ap_cost_type, None) or AP_COST_FIGHT
         # Fight conditions
         if attacker_weapon and attacker_weapon.clip_size and attacker_weapon_equipment.clip_count == 0:
             history.fail = STATUS_NO_MORE_AMMO
@@ -448,8 +451,17 @@ class Character(Entity, Stats):
             history.fail = STATUS_TARGET_DEAD
         elif attacker_weapon_equipment and attacker_weapon_equipment.condition <= 0.0:
             history.status = STATUS_WEAPON_BROKEN
+        # Action points
+        ap_cost = 0
+        if not is_burst:
+            ap_cost_type = 'ap_cost_target' if target_part else 'ap_cost_normal'
+            ap_cost = getattr(attacker_weapon, ap_cost_type, None) or AP_COST_FIGHT
+        elif not hit:
+            ap_cost = getattr(attacker_weapon, 'ap_cost_burst', None) or AP_COST_FIGHT
+        if ap_cost > self.action_points:
+            history.status = STATUS_NOT_ENOUGH_AP
+        # Premature end of fight
         if history.status:
-            self.save()
             history.save()
             return history
         # Chance to hit
@@ -523,6 +535,7 @@ class Character(Entity, Stats):
                 getattr(attacker_weapon, 'condition_modifier', 0.0) + getattr(attacker_ammo, 'condition_modifier', 0.0))
             attacker_weapon_equipment.save()
         # Save character and return history
+        self.action_points -= ap_cost
         self.save()
         history.save()
         return history
@@ -592,7 +605,7 @@ class Character(Entity, Stats):
 
     def get_absolute_url(self):
         from django.urls import reverse
-        return reverse('character', args=[str(self.id)])
+        return reverse('fallout_character', args=[str(self.id)])
 
     def __str__(self) -> str:
         return self.name
@@ -630,7 +643,7 @@ class Item(Entity):
     name = models.CharField(max_length=200, verbose_name=_("nom"))
     title = models.CharField(max_length=200, blank=True, verbose_name=_("titre"))
     description = models.TextField(blank=True, verbose_name=_("description"))
-    image = models.ImageField(blank=True, verbose_name=_("image"))
+    image = models.ImageField(blank=True, upload_to='item', verbose_name=_("image"))
     type = models.CharField(max_length=7, choices=ITEM_TYPES, verbose_name=_("type"))
     value = models.PositiveIntegerField(default=0, verbose_name=_("valeur"))
     weight = models.FloatField(default=0.0, verbose_name=_("poids"))
@@ -766,7 +779,7 @@ class Effect(Entity):
     name = models.CharField(max_length=200, verbose_name=_("nom"))
     title = models.CharField(max_length=200, blank=True, verbose_name=_("titre"))
     description = models.TextField(blank=True, verbose_name=_("description"))
-    image = models.ImageField(blank=True, verbose_name=_("image"))
+    image = models.ImageField(blank=True, upload_to='effect', verbose_name=_("image"))
     chance = models.PositiveSmallIntegerField(default=100, verbose_name=_("chance"))
     duration = models.DurationField(blank=True, null=True, verbose_name=_("durée"))
     # Timed effects
@@ -862,7 +875,7 @@ class LootTemplate(Entity):
     name = models.CharField(max_length=200, verbose_name=_("nom"))
     title = models.CharField(max_length=200, blank=True, verbose_name=_("titre"))
     description = models.TextField(blank=True, verbose_name=_("description"))
-    image = models.ImageField(blank=True, verbose_name=_("image"))
+    image = models.ImageField(blank=True, upload_to='loot', verbose_name=_("image"))
 
     def __str__(self) -> str:
         return self.name
@@ -961,6 +974,7 @@ class FightHistory(CommonModel):
         'Item', blank=True, null=True, on_delete=models.CASCADE, related_name='+',
         verbose_name=_("protection du défenseur"), limit_choices_to={'type': ITEM_ARMOR})
     burst = models.BooleanField(default=False, verbose_name=_("tir en rafale ?"))
+    hit_count = models.PositiveSmallIntegerField(default=0, verbose_name=_("compteur de coups"))
     range = models.PositiveSmallIntegerField(default=0, verbose_name=_("distance"))
     body_part = models.CharField(max_length=5, choices=BODY_PARTS, verbose_name=_("partie du corps"))
     hit_modifier = models.SmallIntegerField(default=0, verbose_name=_("modif. de précision"))

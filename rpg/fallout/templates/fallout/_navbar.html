@@ -1,0 +1,25 @@
+{% load i18n %}
+
+
+<ul class="navbar-nav mr-auto">
+    <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" id="campaign-navbar" href="#" data-toggle="dropdown"
+           aria-haspopup="true" aria-expanded="false">{{ campaign.name|default:_("Aucune campagne") }}</a>
+        <div class="dropdown-menu" aria-labelledby="campaign-navbar">
+            <a class="dropdown-item" href="{% url 'fallout_index' %}">{% trans "Aucune campagne" %}</a>
+            {% for campaign in campaigns %}
+                <a class="dropdown-item" href="{% url 'fallout_campaign' campaign.id %}">{{ campaign.name }}</a>
+            {% endfor %}
+        </div>
+    </li>
+    <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle {% if not characters %}disabled{% endif %}"
+           id="campaign-navbar" href="#" data-toggle="dropdown"
+           aria-haspopup="true" aria-expanded="false">{{ character.name|default:_("Personnages") }}</a>
+        <div class="dropdown-menu" aria-labelledby="campaign-navbar">
+            {% for character in characters %}
+                <a class="dropdown-item" href="{% url 'fallout_character' character.id %}">{{ character.name }}</a>
+            {% endfor %}
+        </div>
+    </li>
+</ul>

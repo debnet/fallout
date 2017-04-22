@@ -1,6 +1,36 @@
 {% extends "fallout/_base.html" %}
+{% load i18n %}
+
+{% block navbar %}
+    {% with campaign=character.campaign %}
+        {% include "fallout/_navbar.html" %}
+    {% endwith %}
+{% endblock %}
+
+{% block actions %}
+    <div class="dropdown">
+        <button class="btn btn-secondary dropdown-toggle" type="button" id="actions"
+                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            {% trans "Actions" %}
+        </button>
+        <div class="dropdown-menu" aria-labelledby="actions">
+            <a class="dropdown-item" href="{% url 'admin:fallout_character_add' %}?campaign={{ character.campaign_id }}">
+                {% trans "Ajouter" %}</a>
+            <a class="dropdown-item" href="{% url 'admin:fallout_character_change' character.id %}">
+                {% trans "Modifier" %}</a>
+        </div>
+    </div>
+{% endblock %}
+
 {% block content %}
-<div>
-    <h1>{{ character.name }}</h1>
-</div>
+    <div class="jumbotron">
+        <h1>{{ character.name }}</h1>
+        {% if character.title %}<h3>{{ character.title }}</h3>{% endif %}
+        {% if character.description %}<p>{{ character.description }}</p>{% endif %}
+    </div>
+    <div class="row">
+        <div class="col">
+
+        </div>
+    </div>
 {% endblock %}

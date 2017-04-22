@@ -14,9 +14,17 @@ class LootInline(admin.TabularInline):
 @admin.register(Campaign)
 class CampaignAdmin(CommonAdmin):
     fieldsets = (
-        (None, dict(
-            fields=('name', 'start_game_date', 'current_game_date', 'current_character', 'active_effects', ),
+        (_("Informations générales"), dict(
+            fields=('name', 'title', 'description', 'image', ),
             classes=('wide', ),
+        )),
+        (_("Informations techniques"), dict(
+            fields=('start_game_date', 'current_game_date', 'current_character', ),
+            classes=('wide', 'collapse', ),
+        )),
+        (_("Effets"), dict(
+            fields=('active_effects', 'radiation', ),
+            classes=('wide', 'collapse', ),
         )),
     )
     inlines = [LootInline]
