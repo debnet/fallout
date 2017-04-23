@@ -11,6 +11,7 @@ admin.site.site_header = 'Fallout RPG'
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
+    url(r'^favicon\.ico$', RedirectView.as_view(url='/static/favicon.ico', permanent=True)),
     # Fallout RPG
     url(r'^$', RedirectView.as_view(pattern_name='fallout_index', permanent=True)),
     url(r'^fallout/', include(fallout_urls)),

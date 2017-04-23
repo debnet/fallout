@@ -8,29 +8,53 @@
 {% endblock %}
 
 {% block actions %}
-    <div class="dropdown">
-        <button class="btn btn-secondary dropdown-toggle" type="button" id="actions"
-                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            {% trans "Actions" %}
-        </button>
-        <div class="dropdown-menu" aria-labelledby="actions">
-            <a class="dropdown-item" href="{% url 'admin:fallout_character_add' %}?campaign={{ character.campaign_id }}">
-                {% trans "Ajouter" %}</a>
-            <a class="dropdown-item" href="{% url 'admin:fallout_character_change' character.id %}">
-                {% trans "Modifier" %}</a>
+    {% if request.user.is_superuser %}
+        <div class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="actions"
+                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                {% trans "Actions" %}
+            </button>
+            <div class="dropdown-menu" aria-labelledby="actions">
+                <a class="dropdown-item" href="{% url 'admin:fallout_character_add' %}?campaign={{ character.campaign_id }}">
+                    {% trans "Ajouter" %}</a>
+                {% if character %}
+                    <a class="dropdown-item" href="{% url 'admin:fallout_character_change' character.id %}">
+                        {% trans "Modifier" %}</a>
+                {% endif %}
+            </div>
         </div>
-    </div>
+    {% endif %}
 {% endblock %}
 
 {% block content %}
-    <div class="jumbotron">
-        <h1>{{ character.name }}</h1>
-        {% if character.title %}<h3>{{ character.title }}</h3>{% endif %}
-        {% if character.description %}<p>{{ character.description }}</p>{% endif %}
-    </div>
-    <div class="row">
-        <div class="col">
-
+    {% if roll %}
+        {% include "fallout/_roll.html" %}
+    {% endif %}
+    {% if character %}
+        <div class="content">
+            <h3 class="display-4">
+                {{ character.name }}
+                {% if character.title %}<small class="text-muted">{{ character.title }}</small>{% endif %}
+            </h3>
+            {% if character.description %}<p class="lead">{{ character.description }}</p>{% endif %}
         </div>
-    </div>
+        <div class="row">
+            <div class="col">
+                {% with label=_("Etat") stats=character.general_stats view=True %}
+                    {% include "fallout/_stats.html" %}
+                {% endwith %}
+                {% with label=_("S.P.E.C.I.A.L.") stats=character.special %}
+                    {% include "fallout/_stats.html" %}
+                {% endwith %}
+            </div>
+            <div class="col">
+                {% with label=_("Compétences") stats=character.skills %}
+                    {% include "fallout/_stats.html" %}
+                {% endwith %}
+            </div>
+            <div class="col">
+
+            </div>
+        </div>
+    {% endif %}
 {% endblock %}

@@ -6,35 +6,39 @@
 {% endblock %}
 
 {% block actions %}
-    <div class="dropdown">
-        <button class="btn btn-secondary dropdown-toggle" type="button" id="actions"
-                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            {% trans "Actions" %}
-        </button>
-        <div class="dropdown-menu" aria-labelledby="actions">
-            <a class="dropdown-item" href="{% url 'admin:fallout_campaign_add' %}">
-                {% trans "Ajouter" %}</a>
-            {% if campaign %}
-            <a class="dropdown-item" href="{% url 'admin:fallout_campaign_change' campaign.id %}">
-                {% trans "Modifier" %}</a>
-            {% endif %}
-            <a class="dropdown-item" href="{% url 'admin:fallout_character_add' %}?campaign={{ campaign.id }}">
-                {% trans "Nouveau personnage" %}</a>
+    {% if request.user.is_superuser %}
+        <div class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="actions"
+                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                {% trans "Actions" %}
+            </button>
+            <div class="dropdown-menu" aria-labelledby="actions">
+                <a class="dropdown-item" href="{% url 'admin:fallout_campaign_add' %}">
+                    {% trans "Ajouter" %}</a>
+                {% if campaign %}
+                <a class="dropdown-item" href="{% url 'admin:fallout_campaign_change' campaign.id %}">
+                    {% trans "Modifier" %}</a>
+                {% endif %}
+                <a class="dropdown-item" href="{% url 'admin:fallout_character_add' %}?campaign={{ campaign.id }}">
+                    {% trans "Nouveau personnage" %}</a>
+            </div>
         </div>
-    </div>
+    {% endif %}
 {% endblock %}
 
 {% block content %}
     {% if campaign %}
-        <div class="jumbotron">
-            <h1>{{ campaign.name }}</h1>
-            {% if campaign.title %}<h3>{{ campaign.title }}</h3>{% endif %}
-            {% if campaign.description %}<p>{{ campaign.description }}</p>{% endif %}
+        <div class="container">
+            <h3 class="display-4">
+                {{ campaign.name }}
+                {% if campaign.title %}<small class="text-muted">{{ campaign.title }}</small>{% endif %}
+            </h3>
+            {% if campaign.description %}<p class="lead">{{ campaign.description }}</p>{% endif %}
+        </div>
+        <div class="row">
+            <div class="col">
+
+            </div>
         </div>
     {% endif %}
-    <div class="row">
-        <div class="col">
-
-        </div>
-    </div>
 {% endblock %}

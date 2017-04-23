@@ -1,3 +1,9 @@
+
 body {
     padding-top: 5rem;
+}
+
+.tiny {
+    width: 4em;
+    display: inline-block;
 }

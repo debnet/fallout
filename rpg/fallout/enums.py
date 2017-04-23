@@ -202,8 +202,9 @@ ROLL_STATS = (
 )
 
 # All statistics
-ALL_STATS = ROLL_STATS + (
-    [_("Statistiques générales"), GENERAL_STATS],
+ALL_STATS = (
+    [_("Etat général"), GENERAL_STATS],
+) + ROLL_STATS + (
     (_("Statistiques secondaires"), SECONDARY_STATS),
     (_("Résistances"), RESISTANCES),
     (_("Statistiques de niveau"), LEVELED_STATS),

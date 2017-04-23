@@ -25,11 +25,13 @@
         <div class="collapse navbar-collapse" id="navbar">
             {% block navbar %}{% endblock %}
             {% block actions %}{% endblock %}
-            <ul class="nav navbar-nav navbar-right">
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'admin:index' %}">{% trans "Administration" %}</a>
-                </li>
-            </ul>
+            {% if request.user.is_superuser %}
+                <ul class="nav navbar-nav navbar-right">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'admin:index' %}">{% trans "Administration" %}</a>
+                    </li>
+                </ul>
+            {% endif %}
         </div>
     </div>
 </nav>

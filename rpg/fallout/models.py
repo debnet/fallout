@@ -150,29 +150,6 @@ class Stats(models.Model):
     skill_points_per_level = models.SmallIntegerField(default=0, verbose_name=_("compétences par niveau"))
     perk_rate = models.SmallIntegerField(default=0, verbose_name=_("niveaux pour un talent"))
 
-    def get_stats(self, stats):
-        return [(code, label, getattr(self, code, 0)) for code, label in stats]
-
-    @property
-    def special(self):
-        return self.get_stats(SPECIALS)
-
-    @property
-    def skills(self):
-        return self.get_stats(SKILLS)
-
-    @property
-    def secondary_stats(self):
-        return self.get_stats(SECONDARY_STATS)
-
-    @property
-    def leveled_stats(self):
-        return self.get_stats(LEVELED_STATS)
-
-    @property
-    def resistances(self):
-        return self.get_stats(RESISTANCES)
-
     def __str__(self):
         return self.character.name
 
@@ -180,8 +157,6 @@ class Stats(models.Model):
     def get(character: 'Character') -> 'Stats':
         stats = Stats()
         stats.character = character
-        old_max_health = stats.max_health
-        old_max_action_points = stats.max_action_points
         # Get all character's stats
         for stats_name in LIST_EDITABLE_STATS:
             setattr(stats, stats_name, getattr(character, stats_name, 0))
@@ -214,11 +189,6 @@ class Stats(models.Model):
         # Derivated statistics
         for stats_name, formula in COMPUTED_STATS:
             stats._change_stats(stats_name, formula(stats, character))
-        # Health & action points
-        if character.health > stats.max_health or character.health == old_max_health:
-            character.health = stats.max_health
-        if character.action_points > stats.max_action_points or character.action_points == old_max_action_points:
-            character.action_points = stats.max_action_points
         return stats
 
     def _change_all_stats(self, **stats: Dict[str, Tuple[int, int, int]]) -> None:
@@ -276,6 +246,33 @@ class Character(Entity, Stats):
     tag_skills = MultipleChoiceField(max_length=200, choices=SKILLS, blank=True, verbose_name=_("spécialités"))
     # Statistics cache
     _stats = {}
+
+    def get_stats(self, stats, from_stats=True):
+        return [(code, label, getattr(self.stats if from_stats else self, code, 0)) for code, label in stats]
+
+    @property
+    def special(self):
+        return self.get_stats(SPECIALS)
+
+    @property
+    def skills(self):
+        return self.get_stats(SKILLS)
+
+    @property
+    def general_stats(self):
+        return self.get_stats(GENERAL_STATS, from_stats=False)
+
+    @property
+    def secondary_stats(self):
+        return self.get_stats(SECONDARY_STATS)
+
+    @property
+    def leveled_stats(self):
+        return self.get_stats(LEVELED_STATS)
+
+    @property
+    def resistances(self):
+        return self.get_stats(RESISTANCES)
 
     @property
     def stats(self) -> Stats:
@@ -370,14 +367,14 @@ class Character(Entity, Stats):
         :param modifier: Modificateur de jet éventuel
         :return: Historique de jet
         """
-        history = RollHistory(character=self, modifier=modifier)
+        history = RollHistory(character=self, stats=stats, modifier=modifier)
         history.game_date = self.campaign.current_game_date
         is_special = stats in LIST_SPECIALS
         history.value = getattr(self.stats, stats, 0)
         history.roll = randint(1, 10 if is_special else 100)
-        history.success = history.roll > history.value + history.modifier
+        history.success = history.roll < (history.value + history.modifier)
         history.critical = (history.roll <= (1 if is_special else self.stats.luck)) if history.success \
-            else (history.roll >= CRITICAL_FAIL_D10 if is_special else CRITICAL_FAIL_D100)
+            else (history.roll >= (CRITICAL_FAIL_D10 if is_special else CRITICAL_FAIL_D100))
         history.save()
         return history
 
@@ -592,15 +589,23 @@ class Character(Entity, Stats):
             effect.apply()
 
     def save(self, *args, **kwargs):
+        # Regeneration
         if self.regeneration >= 1.0:
             healing = int(self.regeneration)
             self.regeneration -= healing
-            self.health = max(self.health + healing, self.stats.max_health)
+            self.health = self.health + healing
+        # Detect if character is at max health/ap in case of level up or stats modifications
+        has_max_health = not self.id or self.health == self.stats.max_health
+        has_max_action_points = not self.id or self.action_points == self.stats.max_action_points
+        # Check and increase level
         self.check_level()
+        # Remove stats in cache
         Character._stats.pop(self.id, None)
-        if not self.id:
-            self.health = self.stats.max_health
-            self.action_points = self.stats.max_action_points
+        # Fixing health and action points
+        self.health = self.stats.max_health if has_max_health else \
+            max(0, min(self.health, self.stats.max_health))
+        self.action_points = self.stats.max_action_points if has_max_action_points else \
+            max(0, min(self.action_points, self.stats.max_action_points))
         super().save(*args, **kwargs)
 
     def get_absolute_url(self):
@@ -943,7 +948,7 @@ class RollHistory(CommonModel):
 
     @property
     def label(self) -> str:
-        return ' '.join(([_("échec"), _("réussite")][self.success], [_("normal"), _("critique")][self.critical]))
+        return ' '.join(([_("échec"), _("réussite")][self.success], [_("simple"), _("critique")][self.critical]))
 
     def __str__(self) -> str:
         return _("({character}) jet de {stats} : {result}").format(

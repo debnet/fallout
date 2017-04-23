@@ -1,0 +1,34 @@
+{% load i18n %}
+<form method="post" action="{{ request.path }}">
+    <table class="table table-sm table-striped">
+        <thead class="thead-inverse">
+            <th class="text-center" colspan="2">{{ label }}</th>
+        </thead>
+        <tbody>
+            {% if not view %}
+                <tr>
+                    <td>{% trans "modificateur" %}</td>
+                    <td class="text-right">
+                        <input class="form-control form-control-sm tiny" type="number" name="modifier" value="0" />
+                    </td>
+                </tr>
+            {% endif %}
+            {% for code, label, value in stats %}
+                <tr>
+                    <td>{{ label }}</td>
+                    <td class="text-right">
+                        {% if view %}
+                            <strong>{{ value|floatformat:0 }}</strong>
+                        {% else %}
+                            <button class="btn btn-sm btn-primary tiny" type="submit" name="stats" value="{{ code }}">{{ value|floatformat:0 }}</button>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% if not view %}
+        <input type="hidden" name="type" value="roll" />
+        {% csrf_token %}
+    {% endif %}
+</form>
