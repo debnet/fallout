@@ -149,3 +149,6 @@ REST_FRAMEWORK = {
     'COERCE_DECIMAL_TO_STRING': True,
     'HYPERLINKED': True,
 }
+
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/'

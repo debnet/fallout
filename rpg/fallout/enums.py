@@ -26,6 +26,7 @@ GENERAL_STATS = (
     (STATS_SLEEP, _("sommeil")),
 )
 LIST_GENERAL_STATS = [a for a, *b in GENERAL_STATS]
+LIST_NEEDS = [STATS_IRRADIATION, STATS_DEHYDRATION, STATS_HUNGER, STATS_SLEEP]
 
 # S.P.E.C.I.A.L.
 SPECIAL_STRENGTH = 'strength'
@@ -49,8 +50,8 @@ LIST_SPECIALS = [a for a, *b in SPECIALS]
 # Secondary statistics
 STATS_MAX_HEALTH = 'max_health'
 STATS_MAX_ACTION_POINTS = 'max_action_points'
-STATS_ARMOR_CLASS = 'armor_class'
 STATS_CARRY_WEIGHT = 'carry_weight'
+STATS_ARMOR_CLASS = 'armor_class'
 STATS_MELEE_DAMAGE = 'melee_damage'
 STATS_SEQUENCE = 'sequence'
 STATS_HEALING_RATE = 'healing_rate'
@@ -60,8 +61,8 @@ STATS_DAMAGE_RESISTANCE = 'damage_resistance'
 SECONDARY_STATS = (
     (STATS_MAX_HEALTH, _("santé maximale")),
     (STATS_MAX_ACTION_POINTS, _("points d'action max.")),
-    (STATS_ARMOR_CLASS, _("esquive")),
     (STATS_CARRY_WEIGHT, _("charge maximale")),
+    (STATS_ARMOR_CLASS, _("esquive")),
     (STATS_MELEE_DAMAGE, _("attaque en mélée")),
     (STATS_SEQUENCE, _("initiative")),
     (STATS_HEALING_RATE, _("taux de regénération")),

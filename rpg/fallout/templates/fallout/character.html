@@ -40,9 +40,11 @@
         </div>
         <div class="row">
             <div class="col">
-                {% with label=_("Etat") stats=character.general_stats view=True %}
+                {% with label=_("Etat général") stats=character.general_stats view=True %}
                     {% include "fallout/_stats.html" %}
                 {% endwith %}
+            </div>
+            <div class="col">
                 {% with label=_("S.P.E.C.I.A.L.") stats=character.special %}
                     {% include "fallout/_stats.html" %}
                 {% endwith %}
@@ -53,7 +55,9 @@
                 {% endwith %}
             </div>
             <div class="col">
-
+                {% with label=_("Combat") %}
+                    {% include "fallout/_stats.html" %}
+                {% endwith %}
             </div>
         </div>
     {% endif %}

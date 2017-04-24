@@ -260,7 +260,20 @@ class Character(Entity, Stats):
 
     @property
     def general_stats(self):
-        return self.get_stats(GENERAL_STATS, from_stats=False)
+        results = []
+        for code, label in GENERAL_STATS:
+            lvalue = getattr(self, code, 0)
+            rvalue = None
+            if code == STATS_HEALTH:
+                rvalue = getattr(self.stats, STATS_MAX_HEALTH, 0)
+            elif code == STATS_ACTION_POINTS:
+                rvalue = getattr(self.stats, STATS_MAX_ACTION_POINTS, 0)
+            elif code == STATS_EXPERIENCE:
+                rvalue = sum((l - 1) * BASE_XP for l in range(2, self.level + 1))
+            elif code in LIST_NEEDS:
+                rvalue = 1000
+            results.append((code, label, lvalue, rvalue))
+        return results
 
     @property
     def secondary_stats(self):
@@ -282,8 +295,8 @@ class Character(Entity, Stats):
         return stats
 
     @property
-    def current_charge(self):
-        return self.equipments.aggregate(charge=Sum(F('count') * F('item__weight'))).get('charge', 0)
+    def total_charge(self):
+        return self.equipments.aggregate(charge=Sum(F('count') * F('item__weight'))).get('charge', 0) or 0
 
     @property
     def used_skill_points(self):
