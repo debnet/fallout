@@ -269,10 +269,11 @@ class Character(Entity, Stats):
             elif code == STATS_ACTION_POINTS:
                 rvalue = getattr(self.stats, STATS_MAX_ACTION_POINTS, 0)
             elif code == STATS_EXPERIENCE:
-                rvalue = sum((l - 1) * BASE_XP for l in range(2, self.level + 1))
+                rvalue = sum(l * BASE_XP for l in range(1, self.level + 1))
             elif code in LIST_NEEDS:
                 rvalue = 1000
             results.append((code, label, lvalue, rvalue))
+        results.append((STATS_CARRY_WEIGHT, _("charge"), self.total_charge, self.stats.carry_weight))
         return results
 
     @property
@@ -280,12 +281,12 @@ class Character(Entity, Stats):
         return self.get_stats(SECONDARY_STATS)
 
     @property
-    def leveled_stats(self):
-        return self.get_stats(LEVELED_STATS)
-
-    @property
     def resistances(self):
         return self.get_stats(RESISTANCES)
+
+    @property
+    def other_stats(self):
+        return self.secondary_stats + self.resistances
 
     @property
     def stats(self) -> Stats:
@@ -381,7 +382,7 @@ class Character(Entity, Stats):
         :return: Historique de jet
         """
         history = RollHistory(character=self, stats=stats, modifier=modifier)
-        history.game_date = self.campaign.current_game_date
+        history.game_date = self.campaign and self.campaign.current_game_date
         is_special = stats in LIST_SPECIALS
         history.value = getattr(self.stats, stats, 0)
         history.roll = randint(1, 10 if is_special else 100)
@@ -433,7 +434,7 @@ class Character(Entity, Stats):
             histories.append(history)
         return histories
 
-    def fight(self, defender: 'Character', is_burst: bool=False, target_range: int=0,
+    def fight(self, defender: 'Character', is_burst: bool=False, target_range: int=1,
               hit_modifier: int=0, target_part=None, hit=0) -> 'FightHistory':
         """
         Calcul un round de combat entre deux personnages
@@ -446,7 +447,7 @@ class Character(Entity, Stats):
         :return: Historique de combat
         """
         history = FightHistory(attacker=self, defender=defender, burst=is_burst, hit_count=hit + 1, range=target_range)
-        history.game_date = self.campaign.current_game_date
+        history.game_date = self.campaign and self.campaign.current_game_date
         # Equipment
         attacker_weapon_equipment = self.equipments.filter(slot=ITEM_WEAPON).first()
         attacker_ammo_equipment = self.equipments.filter(slot=ITEM_AMMO).first()
@@ -480,8 +481,11 @@ class Character(Entity, Stats):
         attacker_hit_chance += min(20 * (self.stats.strength - getattr(attacker_weapon, 'min_strength', 0)), 0)
         attacker_weapon_range = getattr(attacker_weapon, 'range', 0)
         attacker_weapon_throwable = getattr(attacker_weapon, 'throwable', False)
-        attacker_range_stats = SPECIAL_STRENGTH if attacker_weapon_throwable else SPECIAL_PERCEPTION
-        attacker_hit_range = attacker_weapon_range + (2 * getattr(self.stats, attacker_range_stats, 0)) + 1
+        if attacker_skill in [SKILL_UNARMED, SKILL_MELEE_WEAPONS]:
+            attacker_hit_range = 1
+        else:
+            attacker_range_stats = SPECIAL_STRENGTH if attacker_weapon_throwable else SPECIAL_PERCEPTION
+            attacker_hit_range = attacker_weapon_range + (2 * getattr(self.stats, attacker_range_stats, 0)) + 1
         attacker_hit_range *= getattr(attacker_weapon, 'range_modifier', 1.0)
         attacker_hit_range *= getattr(attacker_ammo, 'range_modifier', 1.0)
         attacker_hit_chance -= min(target_range - attacker_hit_range, 0) * FIGHT_RANGE_MALUS  # Range modifiers
@@ -491,7 +495,7 @@ class Character(Entity, Stats):
         # Targetted body part modifiers
         body_part = target_part
         if not target_part:
-            for body_part, chance, body_hit_modifier in BODY_PARTS_RANDOM_CHANCES:
+            for body_part, chance in BODY_PARTS_RANDOM_CHANCES:
                 if randint(1, 100) < chance:
                     break
         history.body_part = body_part or PART_TORSO
@@ -504,28 +508,32 @@ class Character(Entity, Stats):
         if target_range - attacker_hit_range > 0 and attacker_skill in [SKILL_UNARMED, SKILL_MELEE_WEAPONS]:
             attacker_hit_chance = 0
         history.hit_modifier = int(hit_modifier)
-        history.hit_chance = int(min(attacker_hit_chance, 0))
+        history.hit_chance = int(max(attacker_hit_chance, 0))
         history.status = STATUS_HIT_FAILED
         attacker_hit_roll = history.hit_roll = randint(1, 100)
         history.hit_success = attacker_hit_roll <= history.hit_chance
         history.hit_critical = attacker_hit_roll >= CRITICAL_FAIL_D100
         if history.hit_success:
+            # Critical chance
+            critical_chance = getattr(self.stats, 'critical_chance', 0)
+            critical_chance += critical_modifier
+            critical_chance *= getattr(attacker_weapon, 'critical_modifier', 1.0)
+            critical_chance *= getattr(attacker_ammo, 'critical_modifier', 1.0)
             # Apply damage
             history.status = STATUS_HIT_SUCCEED
-            history.hit_critical = \
-                (attacker_hit_roll < getattr(self.stats, 'critical_chance', 0)) + \
-                critical_modifier if target_part else 0
+            history.hit_critical = attacker_hit_roll < critical_chance
             attacker_damage_type = getattr(attacker_weapon, 'damage_type', DAMAGE_NORMAL)
             damage = 0
             for item in [attacker_weapon, attacker_ammo]:
                 if not item:
                     continue
                 damage += item.base_damage
-            damage *= getattr(attacker_weapon, 'damage_modifier', 1.0) * getattr(attacker_ammo, 'damage_modifier', 1.0)
             damage += self.stats.melee_damage if attacker_skill in [SKILL_UNARMED, SKILL_MELEE_WEAPONS] else 0
-            history.base_damage = damage
-            damage = defender.damage(damage=damage, damage_type=attacker_damage_type, save=True)
-            history.damage = damage
+            damage *= getattr(attacker_weapon, 'damage_modifier', 1.0) * getattr(attacker_ammo, 'damage_modifier', 1.0)
+            damage *= getattr(attacker_weapon, 'critical_damage', 1.0) * getattr(attacker_ammo, 'critical_damage', 1.0)
+            damage *= UNARMED_CRITICAL_DAMAGE if attacker_skill == SKILL_UNARMED else 1.0
+            history.base_damage = int(damage)
+            history.damage = defender.damage(damage=damage, damage_type=attacker_damage_type, save=True)
             # On hit effects
             for item in (attacker_weapon, attacker_ammo, defender_armor):
                 if not item:
@@ -692,6 +700,7 @@ class Item(Entity):
     range_modifier = models.FloatField(default=1.0, verbose_name=_("modif. de portée"))
     damage_modifier = models.FloatField(default=1.0, verbose_name=_("modif. de dégâts"))
     critical_modifier = models.FloatField(default=1.0, verbose_name=_("modif. de coup critique"))
+    critical_damage = models.FloatField(default=1.0, verbose_name=_("dégâts critiques"))
     condition_modifier = models.FloatField(default=0.0, verbose_name=_("modif. de condition"))
     # Resistances
     normal_threshold = models.PositiveSmallIntegerField(default=0, verbose_name=_("seuil normal"))

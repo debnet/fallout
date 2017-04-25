@@ -13,10 +13,10 @@ BODY_PARTS_MODIFIERS = {
 
 # Body part randomly hit if not targetted (chance, hit modifier)
 BODY_PARTS_RANDOM_CHANCES = (
-    (PART_EYES, 5),
-    (PART_HEAD, 10),
-    (PART_ARMS, 30),
-    (PART_LEGS, 50),
+    (PART_EYES, 1),
+    (PART_HEAD, 5),
+    (PART_ARMS, 10),
+    (PART_LEGS, 15),
     (PART_TORSO, 100),
 )
 
@@ -245,6 +245,9 @@ HEALING_RATE_RESTING_MULT = 4.0
 # Range malus when fighting
 FIGHT_RANGE_MALUS = 3
 
+# Unarmed critical damage multiplier
+UNARMED_CRITICAL_DAMAGE = 3.0
+
 # Action points cost
 AP_COST_FIGHT = 5  # Fight unarmed
 
@@ -259,7 +262,7 @@ COMPUTED_STATS = (
     ('max_action_points', lambda s, c: 5 + (s.agility // 2)),
     # Secondary statistics
     ('armor_class', lambda s, c: s.agility),
-    ('carry_weight', lambda s, c: (25 + (25 * s.strength)) * 400),  # 1 lb = 453.592 g
+    ('carry_weight', lambda s, c: (25 + (25 * s.strength)) * 0.4),  # 1 lb = 453.592 g
     ('melee_damage', lambda s, c: max(0, s.strength - 5)),
     ('sequence', lambda s, c: 2 * s.perception),
     ('healing_rate', lambda s, c: (s.endurance // 3)),

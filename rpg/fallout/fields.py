@@ -23,7 +23,7 @@ class MultipleChoiceField(models.TextField):
 
     def validate(self, value, model_instance):
         choices = set(a for a, b in self.flatchoices)
-        if value & choices == value:
+        if set(value) & choices == set(value):
             return
         return super().validate(value, model_instance)
 
@@ -43,8 +43,8 @@ class MultipleChoiceField(models.TextField):
         import re
         choices = dict(self.flatchoices)
         if not choices:
-            return set()
-        return set(value if isinstance(value, list) else re.split(r'[^\w]', value))
+            return []
+        return list(re.split(r'[^\w]', value) if isinstance(value, str) else value)
 
     def from_db_value(self, value, *args, **kwargs):
         if value is None:

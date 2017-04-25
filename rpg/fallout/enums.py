@@ -129,7 +129,7 @@ RESISTANCE_ELECTRICITY = 'electricity_resistance'
 RESISTANCE_POISON = 'poison_resistance'
 RESISTANCE_RADIATION = 'radiation_resistance'
 RESISTANCES = (
-    (RESISTANCE_NORMAL, _("résistance aux dégâts")),
+    (RESISTANCE_NORMAL, _("résistance physique")),
     (RESISTANCE_LASER, _("résistance au laser")),
     (RESISTANCE_PLASMA, _("résistance au plasma")),
     (RESISTANCE_EXPLOSIVE, _("résistance aux explosions")),

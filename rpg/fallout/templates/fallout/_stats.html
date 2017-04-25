@@ -5,7 +5,7 @@
             <th class="text-center" colspan="2">{{ label }}</th>
         </thead>
         <tbody>
-            {% if not view %}
+            {% if not view or not request.user.is_superuser %}
                 <tr>
                     <td>{% trans "modificateur" %}</td>
                     <td class="text-right">
@@ -18,8 +18,8 @@
                     <td>{{ s.1 }}</td>
                     <td class="text-right">
                         {% if view %}
-                            <strong>{{ s.2|floatformat:0 }}{% if s.3 %} / {{ s.3|floatformat:0 }}{% endif %}</strong>
-                        {% else %}
+                            <strong>{{ s.2|floatformat:0 }}{% if s.3 is not None %} / {{ s.3|floatformat:0 }}{% endif %}</strong>
+                        {% elif request.user.is_superuser %}
                             <button class="btn btn-sm btn-primary tiny" type="submit" name="stats" value="{{ s.0 }}">{{ s.2|floatformat:0 }}</button>
                         {% endif %}
                     </td>

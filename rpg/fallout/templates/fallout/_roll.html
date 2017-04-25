@@ -5,6 +5,9 @@
     </button>
     <h4 class="alert-heading text-capitalize">{{ roll.label }}</h4>
     {% blocktrans with stats=roll.get_stats_display roll=roll.roll value=roll.value %}
-        Jet de <strong>{{ stats }}</strong> : {{ roll }} pour {{ value }}.
+        Jet de <strong>{{ stats }}</strong> : {{ roll }} pour {{ value }}
     {% endblocktrans %}
+    {% if roll.modifier %}
+        ({% if roll.modifier > 0 %}+{% endif %}{{ roll.modifier }}={{ roll.value|add:roll.modifier }})
+    {% endif %}
 </div>

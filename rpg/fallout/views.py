@@ -37,6 +37,7 @@ def view_character(request, character_id):
     if character and request.user.is_superuser and request.method == 'POST':
         data = request.POST
         if data.get('type') == 'roll':
+            print(data.get('modifier'))
             roll_history = character.roll(data.get('stats'), int(data.get('modifier')))
     return {
         'campaigns': Campaign.objects.all(),

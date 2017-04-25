@@ -54,10 +54,6 @@ class CharacterAdmin(EntityAdmin):
             fields=('name', 'title', 'description', 'image', 'race', 'level', 'is_player', 'is_active', ),
             classes=('wide', ),
         )),
-        (_("Besoins"), dict(
-            fields=('irradiation', 'dehydration', 'hunger', 'sleep', 'regeneration', ),
-            classes=('wide', 'collapse', ),
-        )),
         (_("Spécialités"), dict(
             fields=('tag_skills', ),
             classes=('collapse', ),

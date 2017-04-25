@@ -8,11 +8,10 @@
 {% block actions %}
     {% if request.user.is_superuser %}
         <div class="dropdown">
-            <button class="btn btn-secondary dropdown-toggle" type="button" id="actions"
-                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="actions" data-toggle="dropdown">
                 {% trans "Actions" %}
             </button>
-            <div class="dropdown-menu" aria-labelledby="actions">
+            <div class="dropdown-menu">
                 <a class="dropdown-item" href="{% url 'admin:fallout_campaign_add' %}">
                     {% trans "Ajouter" %}</a>
                 {% if campaign %}
