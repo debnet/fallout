@@ -2,6 +2,7 @@
 from common.utils import render_to
 from django.contrib.auth.decorators import login_required
 
+from rpg.fallout.enums import BODY_PARTS
 from rpg.fallout.models import Campaign, Character
 
 
@@ -18,8 +19,8 @@ def view_campaign(request, campaign_id):
     if not request.user.is_superuser:
         characters = characters.filter(user=request.user)
     return {
-        'campaigns': Campaign.objects.all(),
-        'characters': characters,
+        'campaigns': Campaign.objects.exclude(id=campaign_id).order_by('name'),
+        'characters': characters.order_by('name'),
         'campaign': campaign,
     }
 
@@ -37,11 +38,13 @@ def view_character(request, character_id):
     if character and request.user.is_superuser and request.method == 'POST':
         data = request.POST
         if data.get('type') == 'roll':
-            print(data.get('modifier'))
             roll_history = character.roll(data.get('stats'), int(data.get('modifier')))
+        elif data.get('type') in ['fight', 'burst']:
+            print(data)
     return {
-        'campaigns': Campaign.objects.all(),
-        'characters': characters,
+        'campaigns': Campaign.objects.order_by('name'),
+        'characters': characters.exclude(id=character_id).order_by('name'),
         'character': character,
         'roll': roll_history,
+        'bodyparts': BODY_PARTS,
     }

@@ -1000,10 +1000,10 @@ class FightHistory(CommonModel):
     defender_armor = models.ForeignKey(
         'Item', blank=True, null=True, on_delete=models.CASCADE, related_name='+',
         verbose_name=_("protection du défenseur"), limit_choices_to={'type': ITEM_ARMOR})
-    burst = models.BooleanField(default=False, verbose_name=_("tir en rafale ?"))
-    hit_count = models.PositiveSmallIntegerField(default=0, verbose_name=_("compteur de coups"))
     range = models.PositiveSmallIntegerField(default=0, verbose_name=_("distance"))
     body_part = models.CharField(max_length=5, choices=BODY_PARTS, verbose_name=_("partie du corps"))
+    burst = models.BooleanField(default=False, verbose_name=_("tir en rafale ?"))
+    hit_count = models.PositiveSmallIntegerField(default=0, verbose_name=_("compteur de coups"))
     hit_modifier = models.SmallIntegerField(default=0, verbose_name=_("modif. de précision"))
     hit_chance = models.SmallIntegerField(default=0, verbose_name=_("précision"))
     hit_roll = models.PositiveSmallIntegerField(default=0, verbose_name=_("jet de précision"))
@@ -1014,7 +1014,7 @@ class FightHistory(CommonModel):
     status = models.CharField(max_length=15, choices=FIGHT_STATUS, blank=True, verbose_name=_("status"))
 
     def __str__(self) -> str:
-        return "{} / {}".format(self.attacker, self.defender)
+        return "{} vs. {}".format(self.attacker, self.defender)
 
     class Meta:
         verbose_name = _("historique de combat")

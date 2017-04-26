@@ -211,8 +211,8 @@ class LootTemplateAdmin(EntityAdmin):
         )),
     )
     inlines = [LootTemplateItemInline]
-    # TODO:
-    list_display = ()
+    # TODO: afficher un contenu potentiel du butin
+    list_display = ('name', )
     list_editable = ()
     list_filter = ()
 
@@ -222,15 +222,47 @@ class LootTemplateAdmin(EntityAdmin):
 
 @admin.register(RollHistory)
 class RollHistoryAdmin(CommonAdmin):
-    # TODO:
-    list_display = ()
+    fieldsets = (
+        (_("Informations techniques"), dict(
+            fields=('date', 'game_date', 'character', ),
+            classes=('wide', ),
+        )),
+        (_("Jet"), dict(
+            fields=('stats', 'value', 'modifier', 'roll', 'success', 'critical', ),
+            classes=('wide', ),
+        )),
+    )
+    list_display = ('date', 'game_date', 'character', 'stats', 'value', 'success', 'critical', )
     list_editable = ()
-    list_filter = ()
+    list_filter = ('date', 'game_date', 'character', 'stats', 'success', 'critical', )
+    ordering = ('-date', )
+    date_hierarchy = 'date'
 
 
 @admin.register(FightHistory)
 class FightHistoryAdmin(CommonAdmin):
-    # TODO:
-    list_display = ()
+    fieldsets = (
+        (_("Informations techniques"), dict(
+            fields=('date', 'game_date', ),
+            classes=('wide', ),
+        )),
+        (_("Attaquant"), dict(
+            fields=('attacker', 'attacker_weapon', 'attacker_ammo', ),
+            classes=('wide', ),
+        )),
+        (_("Défenseur"), dict(
+            fields=('defender', 'defender_armor', 'range', 'body_part', ),
+            classes=('wide', ),
+        )),
+        (_("Combat"), dict(
+            fields=(
+                'status', 'burst', 'hit_count', 'hit_modifier', 'hit_chance',
+                'hit_roll', 'hit_success', 'hit_critical', 'base_damage', 'damage', ),
+            classes=('wide', ),
+        )),
+    )
+    list_display = ('date', 'game_date', 'attacker', 'defender', 'hit_success', 'hit_critical', 'status', 'damage', )
     list_editable = ()
-    list_filter = ()
+    list_filter = ('date', 'game_date', 'attacker', 'defender', 'hit_success', 'hit_critical', 'status', )
+    ordering = ('-date', )
+    date_hierarchy = 'date'

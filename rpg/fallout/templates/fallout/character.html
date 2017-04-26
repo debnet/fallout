@@ -47,6 +47,10 @@
                        href="#stats-panel" role="tab">{% trans "Statistiques" %}</a>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link" id="items-tab" data-toggle="tab"
+                       href="#items-panel" role="tab">{% trans "Inventaire" %}</a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link" id="actions-tab" data-toggle="tab"
                        href="#actions-panel" role="tab">{% trans "Actions" %}</a>
                 </li>
@@ -76,6 +80,23 @@
                     </div>
                 </div>
                 <div class="tab-pane fade" id="actions-panel" role="tabpanel">
+                    <div class="row">
+                        <div class="col">
+                            {% with stats=characters %}
+                                {% include "fallout/_attack.html" %}
+                            {% endwith %}
+                        </div>
+                        <div class="col">
+                            {% with stats=characters burst=True %}
+                                {% include "fallout/_attack.html" %}
+                            {% endwith %}
+                        </div>
+                        <div class="col">
+
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="items-panel" role="tabpanel">
 
                 </div>
             </div>
@@ -88,6 +109,6 @@
     $('#character-tabs a').click(function (e) {
         e.preventDefault();
         $(this).tab('show');
-    })
+    });
 </script>
 {% endblock %}

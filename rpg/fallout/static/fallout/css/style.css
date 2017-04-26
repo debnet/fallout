@@ -7,3 +7,7 @@ body {
     width: 4em;
     display: inline-block;
 }
+
+.tab-pane {
+    padding-top: 1em;
+}

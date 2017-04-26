@@ -1,0 +1,72 @@
+{% load i18n %}
+
+<form method="post" action="{{ request.path }}">
+    <table class="table table-sm table-striped">
+        <thead class="thead-inverse">
+            <th class="text-center" colspan="2">
+                {% if burst %}{% trans "Attaque en rafale" %}{% else %}{% trans "Attaque simple" %}{% endif %}
+            </th>
+        </thead>
+        <tbody>
+            {% if burst %}
+                {% for character in characters %}
+                    <tr class="check-control">
+                        <td>
+                            <label class="form-check-label">
+                                <input class="form-check-input" type="checkbox" name="characters" value="{{ character.id }}">
+                                {{ character.name }}
+                            </label>
+                        </td>
+                        <td class="text-right">
+                            <input class="form-control form-control-sm tiny" type="number" name="range" value="1" disabled />
+                        </td>
+                    </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td><label for="target-list">{% trans "personnage" %}</label></td>
+                    <td class="text-right">
+                        <select class="form-control form-control-sm" id="target-list" name="target">
+                            {% for character in characters %}
+                                <option value="{{ character.id }}">{{ character.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </td>
+                </tr>
+            {% endif %}
+            {% if not burst %}
+                <tr>
+                    <td><label for="bodypart-list">{% trans "cible" %}</label></td>
+                    <td class="text-right">
+                        <select class="form-control form-control-sm" id="bodypart-list" name="bodypart">
+                            {% for code, label in bodyparts %}
+                                <option value="{{ code }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>{% trans "distance" %}</td>
+                    <td class="text-right">
+                        <input class="form-control form-control-sm tiny" type="number" name="range" value="1" />
+                    </td>
+                </tr>
+            {% endif %}
+            <tr>
+                <td>{% trans "modificateur" %}</td>
+                <td class="text-right">
+                    <input class="form-control form-control-sm tiny" type="number" name="modifier" value="0" />
+                </td>
+            </tr>
+        </tbody>
+        <tfoot class="thead-inverse">
+            <th class="text-right" colspan="2">
+                <button class="btn btn-sm btn-primary" type="submit">{% trans "OK" %}</button>
+            </th>
+        </tfoot>
+    </table>
+    {% if not view %}
+        <input type="hidden" name="type" value="{% if burst %}burst{% else %}fight{% endif %}" />
+        {% csrf_token %}
+    {% endif %}
+</form>
