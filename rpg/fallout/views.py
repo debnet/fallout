@@ -2,7 +2,7 @@
 from common.utils import render_to
 from django.contrib.auth.decorators import login_required
 
-from rpg.fallout.enums import BODY_PARTS
+from rpg.fallout.enums import BODY_PARTS, DAMAGES_TYPES
 from rpg.fallout.models import Campaign, Character
 
 
@@ -40,11 +40,18 @@ def view_character(request, character_id):
         if data.get('type') == 'roll':
             roll_history = character.roll(data.get('stats'), int(data.get('modifier')))
         elif data.get('type') in ['fight', 'burst']:
-            print(data)
+            print(data)  # TODO: for testing purpose only
+        elif data.get('type') == 'damage':
+            print(data)  # TODO: for testing purpose only
     return {
         'campaigns': Campaign.objects.order_by('name'),
         'characters': characters.exclude(id=character_id).order_by('name'),
         'character': character,
+        # History
         'roll': roll_history,
-        'bodyparts': BODY_PARTS,
+        'fight': None,
+        'damage': None,
+        # Enums
+        'body_parts': BODY_PARTS,
+        'damage_types': DAMAGES_TYPES,
     }

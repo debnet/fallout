@@ -368,7 +368,7 @@ class Character(Entity, Stats):
         """
         for stats_name, formula in COMPUTED_NEEDS:
             self.modify_value(stats_name, formula(self.stats, self) * hours)
-        self.damage(damage=radiation * hours, damage_type=DAMAGE_RADIATION, save=False)
+        self.damage(raw_damage=radiation * hours, damage_type=DAMAGE_RADIATION, save=False)
         self.regeneration += self.stats.healing_rate * (hours / 24.0) * (
             HEALING_RATE_RESTING_MULT if self.is_resting else 1.0)
         if save:
@@ -533,7 +533,7 @@ class Character(Entity, Stats):
             damage *= getattr(attacker_weapon, 'critical_damage', 1.0) * getattr(attacker_ammo, 'critical_damage', 1.0)
             damage *= UNARMED_CRITICAL_DAMAGE if attacker_skill == SKILL_UNARMED else 1.0
             history.base_damage = int(damage)
-            history.damage = defender.damage(damage=damage, damage_type=attacker_damage_type, save=True)
+            history.damage = defender.damage(raw_damage=damage, damage_type=attacker_damage_type, save=True)
             # On hit effects
             for item in (attacker_weapon, attacker_ammo, defender_armor):
                 if not item:
@@ -558,32 +558,41 @@ class Character(Entity, Stats):
         history.save()
         return history
 
-    def damage(self, damage: float=0.0, dice_count: int=0, dice_value: int=0,
+    def damage(self, raw_damage: float=0.0, dice_count: int=0, dice_value: int=0,
                damage_type: str=DAMAGE_NORMAL, save: bool=True) -> int:
         """
         Inflige des dégâts au personnage
+        :param raw_damage: Dégâts bruts
         :param dice_count: Nombre de dés
         :param dice_value: Valeur des dés
-        :param damage: Dégâts bonus
         :param damage_type: Type des dégâts
         :param save: Sauvegarder les modifications sur le personnage ?
         :return: Nombre de dégâts
         """
-        total_damage = damage
+        history = DamageHistory(
+            character=self, type=damage_type, raw_damage=raw_damage, dice_count=dice_count, dice_value=dice_value)
+        history.game_date = self.campaign and self.campaign.current_game_date
+        # Base damage
+        total_damage = raw_damage
         for i in range(dice_count):
             total_damage += randint(1, dice_value)
-        base_damage = total_damage
+        base_damage = history.base_damage = total_damage
         # Armor threshold and resistance
         armor_equipment = self.equipments.filter(slot=ITEM_ARMOR).first()
-        armor = getattr(armor_equipment, 'item', None)
+        armor = history.armor = getattr(armor_equipment, 'item', None)
         armor_damage = 0
         if armor and armor_equipment:
-            total_damage -= armor.get_threshold(damage_type)  # Armor damage threshold
+            armor_threshold = armor.get_threshold(damage_type)
+            total_damage -= armor_threshold  # Armor damage threshold
             armor_resistance = armor.get_resistance(damage_type) * armor_equipment.condition
             total_damage *= armor_resistance * armor.resistance_modifier
             armor_damage = max((base_damage - total_damage) * (getattr(armor, 'condition_modifier', 0.0)), 0)
+            # History
+            history.armor_threshold = armor_threshold
+            history.armor_resistance = armor_resistance
+            history.armor_damage = armor_damage
         # Self threshold and resistance
-        total_damage -= self.damage_threshold
+        total_damage -= self.stats.damage_threshold
         damage_resistance = self.stats.damage_resistance + getattr(self.stats, DAMAGE_RESISTANCE.get(damage_type), 0.0)
         total_damage -= total_damage * (-1.0 if damage_type == DAMAGE_HEAL else damage_resistance)
         total_damage = int(total_damage)
@@ -599,6 +608,11 @@ class Character(Entity, Stats):
         if armor_damage > 0 and damage_type in PHYSICAL_DAMAGES:
             armor_equipment.condition -= armor_damage
             armor_equipment.save()
+        # History
+        history.damage_threshold = self.stats.damage_threshold
+        history.damage_resistance = damage_resistance
+        history.damage = total_damage
+        history.save()
         return total_damage
 
     def apply_effects(self):
@@ -677,10 +691,10 @@ class Item(Entity):
     # Weapon specific
     is_melee = models.BooleanField(default=False, verbose_name=_("arme de mêlée ?"))
     is_throwable = models.BooleanField(default=False, verbose_name=_("jetable ?"))
-    damage_type = models.CharField(max_length=10, blank=True, choices=DAMAGES, verbose_name=_("type de dégâts"))
+    damage_type = models.CharField(max_length=10, blank=True, choices=DAMAGES_TYPES, verbose_name=_("type de dégâts"))
+    raw_damage = models.PositiveSmallIntegerField(default=0, verbose_name=_("dégâts bruts"))
     damage_dice_count = models.PositiveSmallIntegerField(default=0, verbose_name=_("nombre de dés"))
     damage_dice_value = models.PositiveSmallIntegerField(default=0, verbose_name=_("valeur de dé"))
-    damage_bonus = models.PositiveSmallIntegerField(default=0, verbose_name=_("bonus de dégâts"))
     range = models.PositiveSmallIntegerField(default=1, verbose_name=_("portée"))
     clip_size = models.PositiveSmallIntegerField(default=0, verbose_name=_("taille du chargeur"))
     ap_cost_reload = models.PositiveSmallIntegerField(default=0, verbose_name=_("coût PA recharge"))
@@ -722,7 +736,7 @@ class Item(Entity):
         Calcul unitaire des dégâts de base de l'objet
         :return: Nombre de dégâts de base
         """
-        damage = self.damage_bonus
+        damage = self.raw_damage
         for i in range(self.damage_dice_count):
             damage += randint(1, self.damage_dice_value)
         return damage
@@ -811,10 +825,10 @@ class Effect(Entity):
     duration = models.DurationField(blank=True, null=True, verbose_name=_("durée"))
     # Timed effects
     interval = models.DurationField(blank=True, null=True, verbose_name=_("intervalle"))
-    damage_type = models.CharField(max_length=10, blank=True, choices=DAMAGES, verbose_name=_("type de dégâts"))
+    damage_type = models.CharField(max_length=10, blank=True, choices=DAMAGES_TYPES, verbose_name=_("type de dégâts"))
+    raw_damage = models.PositiveSmallIntegerField(default=0, verbose_name=_("dégâts bruts"))
     damage_dice_count = models.PositiveSmallIntegerField(default=0, verbose_name=_("nombre de dés"))
     damage_dice_value = models.PositiveSmallIntegerField(default=0, verbose_name=_("valeur de dé"))
-    damage_bonus = models.PositiveSmallIntegerField(default=0, verbose_name=_("bonus au dé"))
 
     @property
     def base_damage(self) -> int:
@@ -822,7 +836,7 @@ class Effect(Entity):
         Calcul unitaire des dégâts de base de l'effet
         :return: Nombre de dégâts de base
         """
-        damage = self.damage_bonus
+        damage = self.raw_damage
         for i in range(self.damage_dice_count):
             damage += randint(1, self.damage_dice_value)
         return damage
@@ -830,7 +844,7 @@ class Effect(Entity):
     @property
     def damage_config(self) -> Dict[str, Union[str, int]]:
         return dict(
-            damage=self.damage_bonus,
+            raw_damage=self.raw_damage,
             dice_count=self.damage_dice_count,
             dice_value=self.damage_dice_value,
             damage_type=self.damage_type)
@@ -909,7 +923,7 @@ class LootTemplate(Entity):
 
     class Meta:
         verbose_name = _("modèle de butin")
-        verbose_name_plural = _("modèles de butins")
+        verbose_name_plural = _("modèles des butins")
 
 
 class LootTemplateItem(Entity):
@@ -929,7 +943,7 @@ class LootTemplateItem(Entity):
 
     class Meta:
         verbose_name = _("objet de butin")
-        verbose_name_plural = _("objets de butins")
+        verbose_name_plural = _("objets des butins")
 
 
 class Loot(CommonModel):
@@ -980,7 +994,7 @@ class RollHistory(CommonModel):
 
     class Meta:
         verbose_name = _("historique de jet")
-        verbose_name_plural = _("historiques de jets")
+        verbose_name_plural = _("historiques des jets")
 
 
 class FightHistory(CommonModel):
@@ -1018,7 +1032,40 @@ class FightHistory(CommonModel):
 
     class Meta:
         verbose_name = _("historique de combat")
-        verbose_name_plural = _("historiques de combats")
+        verbose_name_plural = _("historiques des combats")
+
+
+class DamageHistory(CommonModel):
+    """
+    Historique des dégâts
+    """
+    date = models.DateTimeField(auto_now_add=True, verbose_name=_("date"))
+    game_date = models.DateTimeField(blank=True, null=True, verbose_name=_("date en jeu"))
+    character = models.ForeignKey('Character', on_delete=models.CASCADE, verbose_name=_("personnage"), related_name='+')
+    damage_type = models.CharField(max_length=10, blank=True, choices=DAMAGES_TYPES, verbose_name=_("type de dégâts"))
+    raw_damage = models.PositiveSmallIntegerField(default=0, verbose_name=_("dégâts bruts"))
+    damage_dice_count = models.PositiveSmallIntegerField(default=0, verbose_name=_("nombre de dés"))
+    damage_dice_value = models.PositiveSmallIntegerField(default=0, verbose_name=_("valeur de dé"))
+    base_damage = models.PositiveSmallIntegerField(default=0, verbose_name=_("dégâts de base"))
+    armor = models.ForeignKey(
+        'Item', blank=True, null=True, on_delete=models.CASCADE, related_name='+',
+        verbose_name=_("protection"), limit_choices_to={'type': ITEM_ARMOR})
+    armor_threshold = models.PositiveSmallIntegerField(default=0, verbose_name=_("seuil armure"))
+    armor_resistance = models.FloatField(default=0.0, verbose_name=_("résistance armure"))
+    armor_damage = models.FloatField(default=0.0, verbose_name=_("dégats armure"))
+    damage_threshold = models.PositiveSmallIntegerField(default=0, verbose_name=_("seuil dégâts"))
+    damage_resistance = models.FloatField(default=0.0, verbose_name=_("résistance dégâts"))
+    damage = models.PositiveSmallIntegerField(default=0, verbose_name=_("dégâts réels"))
+
+    def __str__(self) -> str:
+        return _("({character}) {damage_type} : {damage}").format(
+            character=str(self.character),
+            damage_type=self.get_damage_type_display(),
+            damage=self.damage)
+
+    class Meta:
+        verbose_name = _("historique de dégâts")
+        verbose_name_plural = _("historiques des dégâts")
 
 
 MODELS = (
@@ -1035,4 +1082,5 @@ MODELS = (
     Loot,
     RollHistory,
     FightHistory,
+    DamageHistory,
 )

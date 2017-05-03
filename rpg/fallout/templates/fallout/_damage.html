@@ -1,0 +1,70 @@
+{% load i18n %}
+
+<form method="post" action="{{ request.path }}">
+    <table class="table table-sm table-striped">
+        <thead class="thead-inverse">
+            <tr>
+                <th class="text-center" colspan="2">{% trans "Dégâts" %}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if multiple %}
+                {% for character in characters %}
+                    <tr class="check-control">
+                        <td>
+                            <label class="form-check-label">
+                                <input class="form-check-input" type="checkbox"
+                                       name="characters" value="{{ character.id }}">
+                                {{ character.name }}
+                            </label>
+                        </td>
+                        <td class="text-right">
+                            <input class="form-control form-control-sm tiny" type="number"
+                                   name="range" value="1" disabled />
+                        </td>
+                    </tr>
+                {% endfor %}
+            {% endif %}
+            <tr>
+                <td><label for="damagetype-list">{% trans "type" %}</label></td>
+                <td class="text-right">
+                    <select class="form-control form-control-sm" id="{{ code }}-damagetype-list" name="damagetype">
+                        {% for code, label in damage_types %}
+                            <option value="{{ code }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td><label for="{{ code }}-damage-bonus">{% trans "dégâts fixes" %}</label></td>
+                <td class="text-right">
+                    <input id="{{ code }}-damage-bonus" class="form-control form-control-sm tiny" type="number"
+                           name="modifier" value="0" />
+                </td>
+            </tr>
+            <tr>
+                <td><label for="{{ code }}-damage-dice-count">{% trans "nombre de dés" %}</label></td>
+                <td class="text-right">
+                    <input id="{{ code }}-damage-dice-count" class="form-control form-control-sm tiny" type="number"
+                           name="modifier" value="0" />
+                </td>
+            </tr>
+            <tr>
+                <td><label for="{{ code }}-damage-dice-value">{% trans "valeur de dé" %}</label></td>
+                <td class="text-right">
+                    <input for="{{ code }}-damage-dice-value" class="form-control form-control-sm tiny" type="number"
+                           name="modifier" value="0" />
+                </td>
+            </tr>
+        </tbody>
+        <tfoot class="thead-inverse">
+            <tr>
+                <th class="text-right" colspan="2">
+                    <button class="btn btn-sm btn-primary" type="submit">{% trans "OK" %}</button>
+                </th>
+            </tr>
+        </tfoot>
+    </table>
+    <input type="hidden" name="type" value="damage" />
+    {% csrf_token %}
+</form>

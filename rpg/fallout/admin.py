@@ -29,6 +29,7 @@ class CampaignAdmin(CommonAdmin):
     )
     inlines = [LootInline]
     filter_horizontal = ('active_effects', )
+    list_display_links = ('name', )
     list_display = ('name', 'current_game_date', 'current_character', 'radiation', )
     list_editable = ('current_game_date', 'current_character', 'radiation', )
 
@@ -66,6 +67,7 @@ class CharacterAdmin(EntityAdmin):
         )
     ])
     inlines = [EquipmentInlineAdmin, ActiveEffectInlineAdmin]
+    list_display_links = ('name', )
     list_display = (
         'name', 'race', 'level', 'is_player', 'is_active',
         'health', '_max_health', 'action_points', '_max_action_points', 'experience', 'karma')
@@ -130,6 +132,7 @@ class ItemAdmin(EntityAdmin):
     )
     filter_horizontal = ('ammunition', 'effects', )
     inlines = [ItemModifierInline]
+    list_display_links = ('name', )
     list_display = ('name', 'type', 'value', 'weight', 'is_quest', )
     list_editable = ()
     list_filter = ('type', 'is_quest', 'is_melee', 'is_throwable')
@@ -175,7 +178,8 @@ class EffectAdmin(EntityAdmin):
     )
     inlines = [EffectModifierInline]
     # TODO:
-    list_display = ()
+    list_display_links = ('name', )
+    list_display = ('name', )
     list_editable = ()
     list_filter = ()
 
@@ -212,6 +216,7 @@ class LootTemplateAdmin(EntityAdmin):
     )
     inlines = [LootTemplateItemInline]
     # TODO: afficher un contenu potentiel du butin
+    list_display_links = ('name', )
     list_display = ('name', )
     list_editable = ()
     list_filter = ()
@@ -264,5 +269,32 @@ class FightHistoryAdmin(CommonAdmin):
     list_display = ('date', 'game_date', 'attacker', 'defender', 'hit_success', 'hit_critical', 'status', 'damage', )
     list_editable = ()
     list_filter = ('date', 'game_date', 'attacker', 'defender', 'hit_success', 'hit_critical', 'status', )
+    ordering = ('-date', )
+    date_hierarchy = 'date'
+
+
+@admin.register(DamageHistory)
+class DamageHistoryAdmin(CommonAdmin):
+    fieldsets = (
+        (_("Informations techniques"), dict(
+            fields=('date', 'game_date', 'character', ),
+            classes=('wide', ),
+        )),
+        (_("Dégâts de base"), dict(
+            fields=('damage_type', 'raw_damage', 'damage_dice_count', 'damage_dice_value', 'base_damage', ),
+            classes=('wide', ),
+        )),
+        (_("Etat de la protection"), dict(
+            fields=('armor', 'armor_threshold', 'armor_resistance', 'armor_damage', ),
+            classes=('wide', ),
+        )),
+        (_("Etat du personnage"), dict(
+            fields=('damage_threshold', 'damage_resistance', 'damage', ),
+            classes=('wide', ),
+        )),
+    )
+    list_display = ('date', 'game_date', 'character', 'damage_type', 'base_damage', 'damage', )
+    list_editable = ()
+    list_filter = ('date', 'game_date', 'character', 'damage_type', )
     ordering = ('-date', )
     date_hierarchy = 'date'

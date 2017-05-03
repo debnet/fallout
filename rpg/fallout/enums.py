@@ -154,7 +154,7 @@ DAMAGE_ELECTRICITY = 'electricity'
 DAMAGE_POISON = 'poison'
 DAMAGE_RADIATION = 'radiation'
 DAMAGE_HEAL = 'heal'
-DAMAGES = (
+DAMAGES_TYPES = (
     (DAMAGE_NORMAL, _("dégâts normaux")),
     (DAMAGE_LASER, _("dégâts de laser")),
     (DAMAGE_PLASMA, _("dégâts de plasma")),
@@ -167,7 +167,7 @@ DAMAGES = (
     (DAMAGE_RADIATION, _("dégâts de radiations")),
     (DAMAGE_HEAL, _("soins")),
 )
-LIST_DAMAGES = [a for a, *b in DAMAGES]
+LIST_DAMAGES = [a for a, *b in DAMAGES_TYPES]
 PHYSICAL_DAMAGES = (DAMAGE_NORMAL, DAMAGE_LASER, DAMAGE_PLASMA, DAMAGE_EXPLOSIVE, DAMAGE_FIRE)
 
 # Damage / resistance

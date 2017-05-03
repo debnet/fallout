@@ -1,4 +1,5 @@
 {% load i18n %}
+
 <form method="post" action="{{ request.path }}">
     <table class="table table-sm table-striped">
         <thead class="thead-inverse">
@@ -7,9 +8,10 @@
         <tbody>
             {% if not view or not request.user.is_superuser %}
                 <tr>
-                    <td>{% trans "modificateur" %}</td>
+                    <td><label for="{{ code }}-modifier">{% trans "modificateur" %}</label></td>
                     <td class="text-right">
-                        <input class="form-control form-control-sm tiny" type="number" name="modifier" value="0" />
+                        <input id="{{ code }}-modifier" class="form-control form-control-sm tiny" type="number"
+                               name="modifier" value="0" />
                     </td>
                 </tr>
             {% endif %}
