@@ -18,6 +18,7 @@ def view_campaign(request, campaign_id):
     characters = Character.objects.filter(campaign=campaign)
     if not request.user.is_superuser:
         characters = characters.filter(user=request.user)
+
     return {
         'campaigns': Campaign.objects.exclude(id=campaign_id).order_by('name'),
         'characters': characters.order_by('name'),
@@ -33,24 +34,36 @@ def view_character(request, character_id):
         characters = characters.filter(user=request.user)
     character = characters.filter(id=character_id).first()
     # Actions
-    roll_history = None
+    roll_history = fight_history = damage_history = None
     characters = characters.filter(campaign_id=character.campaign_id if character else None)
     if character and request.user.is_superuser and request.method == 'POST':
         data = request.POST
         if data.get('type') == 'roll':
-            roll_history = character.roll(data.get('stats'), int(data.get('modifier')))
-        elif data.get('type') in ['fight', 'burst']:
-            print(data)  # TODO: for testing purpose only
+            roll_history = character.roll(
+                data.get('stats'),
+                int(data.get('modifier')))
+        elif data.get('type') == 'fight':
+            fight_history = character.fight(
+                defender=data.get('target'),
+                target_part=data.get('bodypart'),
+                target_range=int(data.get('range')),
+                hit_modifier=int(data.get('modifier')))
+        elif data.get('type') == 'burst':
+            fight_history = character.burst(
+                targets=data.get('targets'),
+                targets_ranges=data.get('ranges'),
+                hit_modifier=int(data.get('modifier')))
         elif data.get('type') == 'damage':
             print(data)  # TODO: for testing purpose only
+
     return {
         'campaigns': Campaign.objects.order_by('name'),
         'characters': characters.exclude(id=character_id).order_by('name'),
         'character': character,
         # History
         'roll': roll_history,
-        'fight': None,
-        'damage': None,
+        'fight': fight_history,
+        'damage': damage_history,
         # Enums
         'body_parts': BODY_PARTS,
         'damage_types': DAMAGES_TYPES,

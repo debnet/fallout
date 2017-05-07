@@ -268,6 +268,9 @@ class Character(Entity, Stats):
                 rvalue = getattr(self.stats, STATS_MAX_HEALTH, 0)
             elif code == STATS_ACTION_POINTS:
                 rvalue = getattr(self.stats, STATS_MAX_ACTION_POINTS, 0)
+            elif code == STATS_SKILL_POINTS:
+                rvalue = lvalue
+                lvalue = self.used_skill_points
             elif code == STATS_EXPERIENCE:
                 rvalue = sum(l * BASE_XP for l in range(1, self.level + 1))
             elif code in LIST_NEEDS:
@@ -435,7 +438,7 @@ class Character(Entity, Stats):
         return histories
 
     def fight(self, defender: 'Character', is_burst: bool=False, target_range: int=1,
-              hit_modifier: int=0, target_part=None, hit=0) -> 'FightHistory':
+              hit_modifier: int=0, target_part: BODY_PARTS=None, hit: int=0) -> 'FightHistory':
         """
         Calcul un round de combat entre deux personnages
         :param defender: Personnage ciblé
@@ -443,9 +446,11 @@ class Character(Entity, Stats):
         :param target_range: Distance (en cases) entre les deux personnages
         :param hit_modifier: Modificateurs complémentaires de précision (lumière, couverture, etc...)
         :param target_part: Partie du corps ciblée par l'attaquant (ou torse par défaut)
-        :param hit: Compteur de coup lors d'une attaque en rafale
+        :param hit: Compteur de coups lors d'une attaque en rafale
         :return: Historique de combat
         """
+        if isinstance(defender, (int, str)):
+            defender = Character.objects.get(pk=str(defender))
         history = FightHistory(attacker=self, defender=defender, burst=is_burst, hit_count=hit + 1, range=target_range)
         history.game_date = self.campaign and self.campaign.current_game_date
         # Equipment
@@ -532,7 +537,6 @@ class Character(Entity, Stats):
             damage *= getattr(attacker_weapon, 'damage_modifier', 1.0) * getattr(attacker_ammo, 'damage_modifier', 1.0)
             damage *= getattr(attacker_weapon, 'critical_damage', 1.0) * getattr(attacker_ammo, 'critical_damage', 1.0)
             damage *= UNARMED_CRITICAL_DAMAGE if attacker_skill == SKILL_UNARMED else 1.0
-            history.base_damage = int(damage)
             history.damage = defender.damage(raw_damage=damage, damage_type=attacker_damage_type, save=True)
             # On hit effects
             for item in (attacker_weapon, attacker_ammo, defender_armor):
@@ -570,7 +574,8 @@ class Character(Entity, Stats):
         :return: Nombre de dégâts
         """
         history = DamageHistory(
-            character=self, type=damage_type, raw_damage=raw_damage, dice_count=dice_count, dice_value=dice_value)
+            character=self, damage_type=damage_type, raw_damage=raw_damage,
+            damage_dice_count=dice_count, damage_dice_value=dice_value)
         history.game_date = self.campaign and self.campaign.current_game_date
         # Base damage
         total_damage = raw_damage
@@ -611,9 +616,9 @@ class Character(Entity, Stats):
         # History
         history.damage_threshold = self.stats.damage_threshold
         history.damage_resistance = damage_resistance
-        history.damage = total_damage
+        history.real_damage = total_damage
         history.save()
-        return total_damage
+        return history
 
     def apply_effects(self):
         """
@@ -984,7 +989,9 @@ class RollHistory(CommonModel):
 
     @property
     def label(self) -> str:
-        return ' '.join(([_("échec"), _("réussite")][self.success], [_("simple"), _("critique")][self.critical]))
+        return ' '.join((
+            [_("échec"), _("réussite")][self.success],
+            ['', _("critique")][self.critical])).strip()
 
     def __str__(self) -> str:
         return _("({character}) jet de {stats} : {result}").format(
@@ -995,6 +1002,39 @@ class RollHistory(CommonModel):
     class Meta:
         verbose_name = _("historique de jet")
         verbose_name_plural = _("historiques des jets")
+
+
+class DamageHistory(CommonModel):
+    """
+    Historique des dégâts
+    """
+    date = models.DateTimeField(auto_now_add=True, verbose_name=_("date"))
+    game_date = models.DateTimeField(blank=True, null=True, verbose_name=_("date en jeu"))
+    character = models.ForeignKey('Character', on_delete=models.CASCADE, verbose_name=_("personnage"), related_name='+')
+    damage_type = models.CharField(max_length=10, blank=True, choices=DAMAGES_TYPES, verbose_name=_("type de dégâts"))
+    raw_damage = models.PositiveSmallIntegerField(default=0, verbose_name=_("dégâts bruts"))
+    damage_dice_count = models.PositiveSmallIntegerField(default=0, verbose_name=_("nombre de dés"))
+    damage_dice_value = models.PositiveSmallIntegerField(default=0, verbose_name=_("valeur de dé"))
+    base_damage = models.PositiveSmallIntegerField(default=0, verbose_name=_("dégâts de base"))
+    armor = models.ForeignKey(
+        'Item', blank=True, null=True, on_delete=models.CASCADE, related_name='+',
+        verbose_name=_("protection"), limit_choices_to={'type': ITEM_ARMOR})
+    armor_threshold = models.PositiveSmallIntegerField(default=0, verbose_name=_("seuil armure"))
+    armor_resistance = models.FloatField(default=0.0, verbose_name=_("résistance armure"))
+    armor_damage = models.FloatField(default=0.0, verbose_name=_("dégats armure"))
+    damage_threshold = models.PositiveSmallIntegerField(default=0, verbose_name=_("seuil dégâts"))
+    damage_resistance = models.FloatField(default=0.0, verbose_name=_("résistance dégâts"))
+    real_damage = models.PositiveSmallIntegerField(default=0, verbose_name=_("dégâts réels"))
+
+    def __str__(self) -> str:
+        return _("({character}) {damage_type} : {damage}").format(
+            character=str(self.character),
+            damage_type=self.get_damage_type_display(),
+            damage=self.real_damage)
+
+    class Meta:
+        verbose_name = _("historique de dégâts")
+        verbose_name_plural = _("historiques des dégâts")
 
 
 class FightHistory(CommonModel):
@@ -1023,9 +1063,10 @@ class FightHistory(CommonModel):
     hit_roll = models.PositiveSmallIntegerField(default=0, verbose_name=_("jet de précision"))
     hit_success = models.BooleanField(default=False, verbose_name=_("touché ?"))
     hit_critical = models.BooleanField(default=False, verbose_name=_("critique ?"))
-    base_damage = models.PositiveSmallIntegerField(default=0, verbose_name=_("dégâts de base"))
-    damage = models.PositiveSmallIntegerField(default=0, verbose_name=_("dégâts réels"))
     status = models.CharField(max_length=15, choices=FIGHT_STATUS, blank=True, verbose_name=_("status"))
+    damage = models.OneToOneField(
+        'DamageHistory', blank=True, null=True, on_delete=models.CASCADE, related_name='+',
+        verbose_name=_("historique des dégâts"), editable=False)
 
     def __str__(self) -> str:
         return "{} vs. {}".format(self.attacker, self.defender)
@@ -1033,39 +1074,6 @@ class FightHistory(CommonModel):
     class Meta:
         verbose_name = _("historique de combat")
         verbose_name_plural = _("historiques des combats")
-
-
-class DamageHistory(CommonModel):
-    """
-    Historique des dégâts
-    """
-    date = models.DateTimeField(auto_now_add=True, verbose_name=_("date"))
-    game_date = models.DateTimeField(blank=True, null=True, verbose_name=_("date en jeu"))
-    character = models.ForeignKey('Character', on_delete=models.CASCADE, verbose_name=_("personnage"), related_name='+')
-    damage_type = models.CharField(max_length=10, blank=True, choices=DAMAGES_TYPES, verbose_name=_("type de dégâts"))
-    raw_damage = models.PositiveSmallIntegerField(default=0, verbose_name=_("dégâts bruts"))
-    damage_dice_count = models.PositiveSmallIntegerField(default=0, verbose_name=_("nombre de dés"))
-    damage_dice_value = models.PositiveSmallIntegerField(default=0, verbose_name=_("valeur de dé"))
-    base_damage = models.PositiveSmallIntegerField(default=0, verbose_name=_("dégâts de base"))
-    armor = models.ForeignKey(
-        'Item', blank=True, null=True, on_delete=models.CASCADE, related_name='+',
-        verbose_name=_("protection"), limit_choices_to={'type': ITEM_ARMOR})
-    armor_threshold = models.PositiveSmallIntegerField(default=0, verbose_name=_("seuil armure"))
-    armor_resistance = models.FloatField(default=0.0, verbose_name=_("résistance armure"))
-    armor_damage = models.FloatField(default=0.0, verbose_name=_("dégats armure"))
-    damage_threshold = models.PositiveSmallIntegerField(default=0, verbose_name=_("seuil dégâts"))
-    damage_resistance = models.FloatField(default=0.0, verbose_name=_("résistance dégâts"))
-    damage = models.PositiveSmallIntegerField(default=0, verbose_name=_("dégâts réels"))
-
-    def __str__(self) -> str:
-        return _("({character}) {damage_type} : {damage}").format(
-            character=str(self.character),
-            damage_type=self.get_damage_type_display(),
-            damage=self.damage)
-
-    class Meta:
-        verbose_name = _("historique de dégâts")
-        verbose_name_plural = _("historiques des dégâts")
 
 
 MODELS = (
@@ -1081,6 +1089,6 @@ MODELS = (
     LootTemplateItem,
     Loot,
     RollHistory,
-    FightHistory,
     DamageHistory,
+    FightHistory,
 )

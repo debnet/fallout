@@ -10,7 +10,7 @@
 {% block actions %}
     {% if request.user.is_superuser %}
         <div class="dropdown">
-            <button class="btn btn-secondary dropdown-toggle" type="button" id="actions" data-toggle="dropdown">
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="admin-actions" data-toggle="dropdown">
                 {% trans "Actions" %}
             </button>
             <div class="dropdown-menu">
@@ -44,21 +44,21 @@
             <ul class="nav nav-tabs tab" id="character-tabs" role="tablist">
                 <li class="nav-item">
                     <a class="nav-link active" id="stats-tab" data-toggle="tab"
-                       href="#stats-panel" role="tab">{% trans "Statistiques" %}</a>
+                       href="#stats" role="tab">{% trans "Statistiques" %}</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" id="items-tab" data-toggle="tab"
-                       href="#items-panel" role="tab">{% trans "Inventaire" %}</a>
+                       href="#items" role="tab">{% trans "Inventaire" %}</a>
                 </li>
                 {% if request.user.is_superuser %}
                     <li class="nav-item">
                         <a class="nav-link" id="actions-tab" data-toggle="tab"
-                           href="#actions-panel" role="tab">{% trans "Actions" %}</a>
+                           href="#actions" role="tab">{% trans "Actions" %}</a>
                     </li>
                 {% endif %}
             </ul>
             <div class="tab-content">
-                <div class="tab-pane fade active show" id="stats-panel" role="tabpanel">
+                <div class="tab-pane fade active show" id="stats" role="tabpanel">
                     <div class="row">
                         <div class="col">
                             {% with code="general" label=_("Etat général") stats=character.general_stats view=True %}
@@ -81,7 +81,10 @@
                         </div>
                     </div>
                 </div>
-                <div class="tab-pane fade" id="actions-panel" role="tabpanel">
+                <div class="tab-pane fade" id="items" role="tabpanel">
+
+                </div>
+                <div class="tab-pane fade" id="actions" role="tabpanel">
                     <div class="row">
                         <div class="col">
                             {% with code="fight" burst=False %}
@@ -102,16 +105,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="tab-pane fade" id="items-panel" role="tabpanel">
-
-                </div>
             </div>
         </div>
     {% endif %}
-{% endblock %}
-
-{% block scripts %}
-<script type="text/javascript">
-
-</script>
 {% endblock %}

@@ -5,5 +5,7 @@ $('.tab a').click(function(event) {
 });
 
 $('input[type=checkbox]').click(function(event) {
-
+    var input = $('#' + $(this).data('target'));
+    var checked = $(this).is(':checked');
+    input.prop('disabled', !checked);
 });

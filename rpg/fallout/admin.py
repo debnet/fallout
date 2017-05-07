@@ -229,7 +229,7 @@ class LootTemplateAdmin(EntityAdmin):
 class RollHistoryAdmin(CommonAdmin):
     fieldsets = (
         (_("Informations techniques"), dict(
-            fields=('date', 'game_date', 'character', ),
+            fields=('game_date', 'character', ),
             classes=('wide', ),
         )),
         (_("Jet"), dict(
@@ -244,11 +244,38 @@ class RollHistoryAdmin(CommonAdmin):
     date_hierarchy = 'date'
 
 
+@admin.register(DamageHistory)
+class DamageHistoryAdmin(CommonAdmin):
+    fieldsets = (
+        (_("Informations techniques"), dict(
+            fields=('game_date', 'character', ),
+            classes=('wide', ),
+        )),
+        (_("Dégâts de base"), dict(
+            fields=('damage_type', 'raw_damage', 'damage_dice_count', 'damage_dice_value', 'base_damage', ),
+            classes=('wide', ),
+        )),
+        (_("Etat de la protection"), dict(
+            fields=('armor', 'armor_threshold', 'armor_resistance', 'armor_damage', ),
+            classes=('wide', ),
+        )),
+        (_("Etat du personnage"), dict(
+            fields=('damage_threshold', 'damage_resistance', 'real_damage', ),
+            classes=('wide', ),
+        )),
+    )
+    list_display = ('date', 'game_date', 'character', 'damage_type', 'base_damage', 'real_damage', )
+    list_editable = ()
+    list_filter = ('date', 'game_date', 'character', 'damage_type', )
+    ordering = ('-date', )
+    date_hierarchy = 'date'
+
+
 @admin.register(FightHistory)
 class FightHistoryAdmin(CommonAdmin):
     fieldsets = (
         (_("Informations techniques"), dict(
-            fields=('date', 'game_date', ),
+            fields=('game_date', ),
             classes=('wide', ),
         )),
         (_("Attaquant"), dict(
@@ -262,39 +289,12 @@ class FightHistoryAdmin(CommonAdmin):
         (_("Combat"), dict(
             fields=(
                 'status', 'burst', 'hit_count', 'hit_modifier', 'hit_chance',
-                'hit_roll', 'hit_success', 'hit_critical', 'base_damage', 'damage', ),
+                'hit_roll', 'hit_success', 'hit_critical', ),
             classes=('wide', ),
         )),
     )
-    list_display = ('date', 'game_date', 'attacker', 'defender', 'hit_success', 'hit_critical', 'status', 'damage', )
+    list_display = ('date', 'game_date', 'attacker', 'defender', 'hit_success', 'hit_critical', 'status', )
     list_editable = ()
     list_filter = ('date', 'game_date', 'attacker', 'defender', 'hit_success', 'hit_critical', 'status', )
-    ordering = ('-date', )
-    date_hierarchy = 'date'
-
-
-@admin.register(DamageHistory)
-class DamageHistoryAdmin(CommonAdmin):
-    fieldsets = (
-        (_("Informations techniques"), dict(
-            fields=('date', 'game_date', 'character', ),
-            classes=('wide', ),
-        )),
-        (_("Dégâts de base"), dict(
-            fields=('damage_type', 'raw_damage', 'damage_dice_count', 'damage_dice_value', 'base_damage', ),
-            classes=('wide', ),
-        )),
-        (_("Etat de la protection"), dict(
-            fields=('armor', 'armor_threshold', 'armor_resistance', 'armor_damage', ),
-            classes=('wide', ),
-        )),
-        (_("Etat du personnage"), dict(
-            fields=('damage_threshold', 'damage_resistance', 'damage', ),
-            classes=('wide', ),
-        )),
-    )
-    list_display = ('date', 'game_date', 'character', 'damage_type', 'base_damage', 'damage', )
-    list_editable = ()
-    list_filter = ('date', 'game_date', 'character', 'damage_type', )
     ordering = ('-date', )
     date_hierarchy = 'date'

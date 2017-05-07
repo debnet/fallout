@@ -1,11 +1,11 @@
 {% load i18n %}
 
-<div class="alert alert-{% if roll.success %}{% if roll.critical %}success{% else %}info{% endif %}{% else %}{% if roll.critical %}danger{% else %}warning{% endif %}{% endif %} alert-dismissible fade show" role="alert">
+<div class="alert alert-{% if roll.success %}{% if roll.critical %}info{% else %}success{% endif %}{% else %}{% if roll.critical %}danger{% else %}warning{% endif %}{% endif %} alert-dismissible fade show" role="alert">
     <button type="button" class="close" data-dismiss="alert" aria-label="{% trans "Fermer" %}">
         <span aria-hidden="true">&times;</span>
     </button>
-    <h4 class="alert-heading text-capitalize">{{ roll.label }}</h4>
-    {% blocktrans with stats=roll.get_stats_display roll=roll.roll value=roll.value %}
+    {% blocktrans with stats=roll.get_stats_display roll=roll.roll label=roll.label value=roll.value %}
+        <h4 class="alert-heading">{{ character }} : {{ label }}</h4>
         Jet de <strong>{{ stats }}</strong> : {{ roll }} pour {{ value }}
     {% endblocktrans %}
     {% if roll.modifier %}
