@@ -9,19 +9,21 @@
 
 {% block actions %}
     {% if request.user.is_superuser %}
-        <div class="dropdown">
-            <button class="btn btn-secondary dropdown-toggle" type="button" id="admin-actions" data-toggle="dropdown">
-                {% trans "Actions" %}
-            </button>
-            <div class="dropdown-menu">
-                <a class="dropdown-item" href="{% url 'admin:fallout_character_add' %}?campaign={{ character.campaign_id }}">
-                    {% trans "Ajouter" %}</a>
-                {% if character %}
-                    <a class="dropdown-item" href="{% url 'admin:fallout_character_change' character.id %}">
-                        {% trans "Modifier" %}</a>
-                {% endif %}
-            </div>
-        </div>
+        <ul class="nav navbar-nav navbar-right">
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle"
+                   id="actions-navbar" href="#" data-toggle="dropdown"
+                   aria-haspopup="true" aria-expanded="false">{% trans "Actions" %}</a>
+                <div class="dropdown-menu" aria-labelledby="actions-navbar">
+                    <a class="dropdown-item" href="{% url 'admin:fallout_character_add' %}?campaign={{ character.campaign_id }}">
+                        {% trans "Ajouter" %}</a>
+                    {% if character %}
+                        <a class="dropdown-item" href="{% url 'admin:fallout_character_change' character.id %}">
+                            {% trans "Modifier" %}</a>
+                    {% endif %}
+                </div>
+            </li>
+        </ul>
     {% endif %}
 {% endblock %}
 
@@ -46,10 +48,12 @@
                     <a class="nav-link active" id="stats-tab" data-toggle="tab"
                        href="#stats" role="tab">{% trans "Statistiques" %}</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" id="items-tab" data-toggle="tab"
-                       href="#items" role="tab">{% trans "Inventaire" %}</a>
-                </li>
+                {% if equipment or inventory %}
+                    <li class="nav-item">
+                        <a class="nav-link" id="items-tab" data-toggle="tab"
+                           href="#items" role="tab">{% trans "Objets" %}</a>
+                    </li>
+                {% endif %}
                 {% if request.user.is_superuser %}
                     <li class="nav-item">
                         <a class="nav-link" id="actions-tab" data-toggle="tab"
@@ -81,9 +85,22 @@
                         </div>
                     </div>
                 </div>
-                <div class="tab-pane fade" id="items" role="tabpanel">
-
-                </div>
+                {% if equipment or inventory %}
+                    <div class="tab-pane fade" id="items" role="tabpanel">
+                        {% if equipment %}
+                            <h4>{% trans "Equipement" %}</h4>
+                            {% with items=equipment equiped=True %}
+                                {% include "fallout/_items.html" %}
+                            {% endwith %}
+                        {% endif %}
+                        {% if inventory %}
+                            <h4>{% trans "Inventaire" %}</h4>
+                            {% with items=inventory equiped=False %}
+                                {% include "fallout/_items.html" %}
+                            {% endwith %}
+                        {% endif %}
+                    </div>
+                {% endif %}
                 <div class="tab-pane fade" id="actions" role="tabpanel">
                     <div class="row">
                         <div class="col">

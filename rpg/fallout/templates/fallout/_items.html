@@ -1,0 +1,16 @@
+<div class="d-flex align-items-stretch flex-wrap row no-gutters">
+    {% for item in items %}
+        <div class="col-md-4 col-xs-6 p-1">
+            <div class="card">
+                {% if item.item.image %}
+                    <img class="card-img-top" src="{{ item.item.image.url }}">
+                {% endif %}
+                <div class="card-block">
+                    <h5 class="card-title">{{ item.item.name }}</h5>
+                    {% if item.item.title %}<h6 class="card-subtitle mb-2 text-muted">{{ item.item.title }}</h6>{% endif %}
+                    {% if item.item.description %}<p class="card-text">{{ item.item.description }}</p>{% endif %}
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>

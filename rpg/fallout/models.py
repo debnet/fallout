@@ -708,7 +708,7 @@ class Item(Entity):
     ap_cost_burst = models.PositiveSmallIntegerField(default=0, verbose_name=_("coût PA rafale"))
     burst_count = models.PositiveSmallIntegerField(default=0, verbose_name=_("munitions en rafale"))
     min_strength = models.PositiveSmallIntegerField(default=0, verbose_name=_("force minimum"))
-    skill = models.CharField(max_length=10, blank=True, choices=SKILLS, verbose_name=_("compétence"))
+    skill = models.CharField(max_length=15, blank=True, choices=SKILLS, verbose_name=_("compétence"))
     ammunition = models.ManyToManyField(
         'Item', blank=True, verbose_name=_("type de munition"),
         limit_choices_to={'type': ITEM_AMMO})
@@ -782,8 +782,8 @@ class Equipment(Entity):
     item = models.ForeignKey('Item', on_delete=models.CASCADE, related_name='+', verbose_name=_("objet"))
     slot = models.CharField(max_length=7, choices=SLOT_ITEM_TYPES, blank=True, verbose_name=_("emplacement"))
     count = models.PositiveIntegerField(default=1, verbose_name=_("nombre"))
-    clip_count = models.PositiveSmallIntegerField(default=0, verbose_name=_("munitions"))
-    condition = models.FloatField(default=1.0, verbose_name=_("état"))
+    clip_count = models.PositiveSmallIntegerField(blank=True, null=True, verbose_name=_("munitions"))
+    condition = models.FloatField(blank=True, null=True, verbose_name=_("état"))
 
     @property
     def value(self):
@@ -805,8 +805,8 @@ class Equipment(Entity):
                 raise ValidationError(dict(item=_("Cette arme est incompatible avec les munitions équipées.")))
 
     def save(self, *args, **kwargs):
-        self.condition = min(0.0, max(1.0, self.condition or 1.0))
-        self.clip_count = min(0, self.clip_count or 0)
+        self.condition = min(0.0, max(1.0, self.condition or 1.0)) if self.slot in [ITEM_WEAPON, ITEM_ARMOR] else None
+        self.clip_count = min(0, self.clip_count or 0) if self.slot == ITEM_WEAPON and not self.item.is_melee else None
         return super().save(*args, **kwargs)
 
     def __str__(self) -> str:

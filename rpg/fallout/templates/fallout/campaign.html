@@ -7,21 +7,23 @@
 
 {% block actions %}
     {% if request.user.is_superuser %}
-        <div class="dropdown">
-            <button class="btn btn-secondary dropdown-toggle" type="button" id="admin-actions" data-toggle="dropdown">
-                {% trans "Actions" %}
-            </button>
-            <div class="dropdown-menu">
-                <a class="dropdown-item" href="{% url 'admin:fallout_campaign_add' %}">
-                    {% trans "Ajouter" %}</a>
-                {% if campaign %}
-                <a class="dropdown-item" href="{% url 'admin:fallout_campaign_change' campaign.id %}">
-                    {% trans "Modifier" %}</a>
-                {% endif %}
-                <a class="dropdown-item" href="{% url 'admin:fallout_character_add' %}?campaign={{ campaign.id }}">
-                    {% trans "Nouveau personnage" %}</a>
-            </div>
-        </div>
+        <ul class="nav navbar-nav navbar-right">
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle"
+                   id="actions-navbar" href="#" data-toggle="dropdown"
+                   aria-haspopup="true" aria-expanded="false">{% trans "Actions" %}</a>
+                <div class="dropdown-menu" aria-labelledby="actions-navbar">
+                    <a class="dropdown-item" href="{% url 'admin:fallout_campaign_add' %}">
+                        {% trans "Ajouter" %}</a>
+                    {% if campaign %}
+                    <a class="dropdown-item" href="{% url 'admin:fallout_campaign_change' campaign.id %}">
+                        {% trans "Modifier" %}</a>
+                    {% endif %}
+                    <a class="dropdown-item" href="{% url 'admin:fallout_character_add' %}?campaign={{ campaign.id }}">
+                        {% trans "Nouveau personnage" %}</a>
+                </div>
+            </li>
+        </ul>
     {% endif %}
 {% endblock %}
 

@@ -17,25 +17,22 @@
 
 <body>
 
-<nav class="navbar navbar-toggleable-md navbar-inverse bg-inverse fixed-top">
-    <div class="container">
-        <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbar"
-                aria-controls="navbar" aria-expanded="false" aria-label="{% trans "Menu" %}">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <a class="navbar-brand" href="#">{{ title|default:_("Fallout RPG") }}</a>
-
-        <div class="collapse navbar-collapse" id="navbar">
-            {% block navbar %}{% endblock %}
-            {% block actions %}{% endblock %}
-            {% if request.user.is_superuser %}
-                <ul class="nav navbar-nav navbar-right">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'admin:index' %}">{% trans "Administration" %}</a>
-                    </li>
-                </ul>
-            {% endif %}
-        </div>
+<nav class="navbar navbar-toggleable-md navbar-inverse fixed-top bg-inverse">
+    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbar"
+            aria-controls="navbar" aria-expanded="false" aria-label="{% trans "Menu" %}">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <a class="navbar-brand" href="#">{{ title|default:_("Fallout RPG") }}</a>
+    <div class="collapse navbar-collapse" id="navbar">
+        {% block navbar %}{% endblock %}
+        {% block actions %}{% endblock %}
+        {% if request.user.is_superuser %}
+            <ul class="nav navbar-nav navbar-right">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'admin:index' %}">{% trans "Administration" %}</a>
+                </li>
+            </ul>
+        {% endif %}
     </div>
 </nav>
 
