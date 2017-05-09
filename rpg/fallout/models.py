@@ -805,8 +805,8 @@ class Equipment(Entity):
                 raise ValidationError(dict(item=_("Cette arme est incompatible avec les munitions équipées.")))
 
     def save(self, *args, **kwargs):
-        self.condition = min(0.0, max(1.0, self.condition or 1.0)) if self.slot in [ITEM_WEAPON, ITEM_ARMOR] else None
-        self.clip_count = min(0, self.clip_count or 0) if self.slot == ITEM_WEAPON and not self.item.is_melee else None
+        self.condition = max(0.0, min(1.0, self.condition or 1.0)) if self.slot in [ITEM_WEAPON, ITEM_ARMOR] else None
+        self.clip_count = max(0, self.clip_count or 0) if self.slot == ITEM_WEAPON and not self.item.is_melee else None
         return super().save(*args, **kwargs)
 
     def __str__(self) -> str:

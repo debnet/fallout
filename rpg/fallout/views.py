@@ -33,8 +33,8 @@ def view_character(request, character_id):
     if not request.user.is_superuser:
         characters = characters.filter(user=request.user)
     character = characters.filter(id=character_id).first()
-    equipment = character.equipments.select_related('item').filter(slot__isnull=False)
-    inventory = character.equipments.select_related('item').filter(slot__isnull=True)
+    equipment = character.equipments.select_related('item').exclude(slot='')
+    inventory = character.equipments.select_related('item').filter(slot='')
     # Actions
     roll_history = fight_history = damage_history = None
     characters = characters.filter(campaign_id=character.campaign_id if character else None)

@@ -2,14 +2,19 @@
     {% for item in items %}
         <div class="col-md-4 col-xs-6 p-1">
             <div class="card">
-                {% if item.item.image %}
-                    <img class="card-img-top" src="{{ item.item.image.url }}">
-                {% endif %}
-                <div class="card-block">
-                    <h5 class="card-title">{{ item.item.name }}</h5>
-                    {% if item.item.title %}<h6 class="card-subtitle mb-2 text-muted">{{ item.item.title }}</h6>{% endif %}
-                    {% if item.item.description %}<p class="card-text">{{ item.item.description }}</p>{% endif %}
-                </div>
+                {% with image=item.item.image %}
+                    {% if image %}
+                        <img class="card-img-top m-1 img-fluid img-thumbnail mx-auto d-block"
+                             height="{{ image.height }}" width="{{ image.width }}" src="{{ image.url }}">
+                    {% endif %}
+                {% endwith %}
+                {% with info=item.item %}
+                    <div class="card-block">
+                        <h5 class="card-title">{{ info.name }}</h5>
+                        {% if info.title %}<h6 class="card-subtitle mb-2 text-muted">{{ info.title }}</h6>{% endif %}
+                        {% if info.description %}<p class="card-text">{{ info.description }}</p>{% endif %}
+                    </div>
+                {% endwith %}
             </div>
         </div>
     {% endfor %}
