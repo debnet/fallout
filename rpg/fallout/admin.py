@@ -105,32 +105,36 @@ class ItemAdmin(EntityAdmin):
             fields=('name', 'title', 'description', 'image', 'type', 'value', 'weight', 'is_quest', ),
             classes=('wide', ),
         )),
-        (_("Armement"), dict(
+        (_("Armes uniquement"), dict(
             fields=(
-                'is_melee', 'is_throwable', 'damage_type', 'raw_damage', 'damage_dice_count', 'damage_dice_value',
-                'range', 'clip_size', 'ap_cost_reload', 'ap_cost_normal', 'ap_cost_target', 'ap_cost_burst',
-                'burst_count', 'min_strength', 'skill', 'ammunition', ),
+                'is_melee', 'is_throwable', 'skill', 'min_strength', 'range', 'clip_size', 'burst_count',
+                'hit_chance_modifier', 'threshold_modifier', 'resistance_modifier',
+                'ap_cost_reload', 'ap_cost_normal', 'ap_cost_target', 'ap_cost_burst', ),
             classes=('wide', 'collapse', ),
         )),
-        (_("Modificateurs"), dict(
+        (_("Dégâts"), dict(
             fields=(
-                'hit_chance_modifier', 'armor_class_modifier', 'resistance_modifier', 'range_modifier',
-                'damage_modifier', 'critical_modifier', 'condition_modifier', ),
+                'damage_type', 'raw_damage', 'damage_dice_count', 'damage_dice_value',
+                'damage_modifier', 'critical_modifier', 'critical_damage', ),
             classes=('wide', 'collapse', ),
         )),
-        (_("Résistances"), dict(
+        (_("Protections uniquement"), dict(
             fields=(
-                'normal_threshold', 'normal_resistance', 'laser_threshold', 'laser_resistance',
-                'plasma_threshold', 'plasma_resistance', 'explosive_threshold', 'explosive_resistance',
-                'fire_threshold', 'fire_resistance', ),
+                'armor_class', 'condition_modifier',
+                'normal_threshold', 'normal_resistance',
+                'laser_threshold', 'laser_resistance',
+                'plasma_threshold', 'plasma_resistance',
+                'explosive_threshold', 'explosive_resistance',
+                'fire_threshold', 'fire_resistance',
+            ),
             classes=('wide', 'collapse', ),
         )),
-        (_("Effets"), dict(
-            fields=('effects', ),
+        (_("Effets et munitions"), dict(
+            fields=('effects', 'ammunitions', ),
             classes=('wide', 'collapse', ),
         )),
     )
-    filter_horizontal = ('ammunition', 'effects', )
+    filter_horizontal = ('effects', 'ammunitions', )
     inlines = [ItemModifierInline]
     list_display_links = ('name', )
     list_display = ('name', 'type', 'value', 'weight', 'is_quest', )
@@ -271,6 +275,10 @@ class DamageHistoryAdmin(CommonAdmin):
     date_hierarchy = 'date'
 
 
+class DamageHistoryInline(admin.StackedInline):
+    model = DamageHistory
+
+
 @admin.register(FightHistory)
 class FightHistoryAdmin(CommonAdmin):
     fieldsets = (
@@ -289,7 +297,7 @@ class FightHistoryAdmin(CommonAdmin):
         (_("Combat"), dict(
             fields=(
                 'status', 'burst', 'hit_count', 'hit_modifier', 'hit_chance',
-                'hit_roll', 'hit_success', 'hit_critical', ),
+                'hit_roll', 'hit_success', 'hit_critical', 'damage', ),
             classes=('wide', ),
         )),
     )

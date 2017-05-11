@@ -111,7 +111,7 @@ class Stats(models.Model):
     sequence = models.SmallIntegerField(default=0, verbose_name=_("initiative"))
     healing_rate = models.SmallIntegerField(default=0, verbose_name=_("taux de regénération"))
     critical_chance = models.SmallIntegerField(default=0, verbose_name=_("chance de critique"))
-    damage_threshold = models.SmallIntegerField(default=0, verbose_name=_("seuil de dégâts"))
+    damage_threshold = models.SmallIntegerField(default=0, verbose_name=_("absorption de dégâts"))
     damage_resistance = models.FloatField(default=0.0, verbose_name=_("résistance aux dégâts"))
     # Resistances
     normal_resistance = models.FloatField(default=0.0, verbose_name=_("résistance physique"))
@@ -423,7 +423,7 @@ class Character(Entity, Stats):
         """
         Permet de lancer une attaque en rafale sur un groupe d'ennemis
         :param targets: Liste de personnages ciblés
-        :param targets_range: Liste des distances (en cases) de chaque personnage dans le même ordre que la liste précédente
+        :param targets_range: Liste des distances (en cases) de chaque personnage dans le même ordre
         :param hit_modifier: Modificateurs complémentaires de précision (lumière, couverture, etc...)
         :return: Liste d'historiques de combat
         """
@@ -484,18 +484,17 @@ class Character(Entity, Stats):
         attacker_skill = getattr(attacker_weapon, 'skill', SKILL_UNARMED)
         attacker_hit_chance = getattr(self.stats, attacker_skill, 0)  # Base skill and min strength modifier
         attacker_hit_chance += min(20 * (self.stats.strength - getattr(attacker_weapon, 'min_strength', 0)), 0)
-        attacker_weapon_range = getattr(attacker_weapon, 'range', 0)
         attacker_weapon_throwable = getattr(attacker_weapon, 'throwable', False)
-        if attacker_skill in [SKILL_UNARMED, SKILL_MELEE_WEAPONS]:
+        if attacker_skill in [SKILL_UNARMED, SKILL_MELEE_WEAPONS] and not attacker_weapon_throwable:
             attacker_hit_range = 1
         else:
             attacker_range_stats = SPECIAL_STRENGTH if attacker_weapon_throwable else SPECIAL_PERCEPTION
-            attacker_hit_range = attacker_weapon_range + (2 * getattr(self.stats, attacker_range_stats, 0)) + 1
-        attacker_hit_range *= getattr(attacker_weapon, 'range_modifier', 1.0)
-        attacker_hit_range *= getattr(attacker_ammo, 'range_modifier', 1.0)
+            attacker_hit_range = min(getattr(attacker_weapon, 'range', 0) + getattr(attacker_ammo, 'range', 0), 1)
+            attacker_hit_range += (2 * getattr(self.stats, attacker_range_stats, 0)) + 1
         attacker_hit_chance -= min(target_range - attacker_hit_range, 0) * FIGHT_RANGE_MALUS  # Range modifiers
         attacker_hit_chance += getattr(attacker_weapon, 'hit_chance_modifier', 0)  # Weapon hit chance modifier
-        attacker_hit_chance -= getattr(defender_armor, 'armor_class_modifier', 0)  # Defender armor class
+        attacker_hit_chance += getattr(attacker_ammo, 'hit_chance_modifier', 0)  # Ammo hit chance modifier
+        attacker_hit_chance -= getattr(defender_armor, 'armor_class', 0)  # Defender armor class modifier
         attacker_hit_chance -= defender.stats.armor_class  # Armor class
         # Targetted body part modifiers
         body_part = target_part
@@ -526,7 +525,7 @@ class Character(Entity, Stats):
             critical_chance *= getattr(attacker_ammo, 'critical_modifier', 1.0)
             # Apply damage
             history.status = STATUS_HIT_SUCCEED
-            history.hit_critical = attacker_hit_roll < critical_chance
+            history.hit_critical = critical = attacker_hit_roll < critical_chance
             attacker_damage_type = getattr(attacker_weapon, 'damage_type', DAMAGE_NORMAL)
             damage = 0
             for item in [attacker_weapon, attacker_ammo]:
@@ -534,10 +533,19 @@ class Character(Entity, Stats):
                     continue
                 damage += item.base_damage
             damage += self.stats.melee_damage if attacker_skill in [SKILL_UNARMED, SKILL_MELEE_WEAPONS] else 0
-            damage *= getattr(attacker_weapon, 'damage_modifier', 1.0) * getattr(attacker_ammo, 'damage_modifier', 1.0)
-            damage *= getattr(attacker_weapon, 'critical_damage', 1.0) * getattr(attacker_ammo, 'critical_damage', 1.0)
-            damage *= UNARMED_CRITICAL_DAMAGE if attacker_skill == SKILL_UNARMED else 1.0
-            history.damage = defender.damage(raw_damage=damage, damage_type=attacker_damage_type, save=True)
+            damage *= getattr(attacker_weapon, 'damage_modifier', 1.0)
+            damage *= getattr(attacker_ammo, 'damage_modifier', 1.0)
+            if critical:
+                damage *= getattr(attacker_weapon, 'critical_damage', 1.0)
+                damage *= getattr(attacker_ammo, 'critical_damage', 1.0)
+                damage *= UNARMED_CRITICAL_DAMAGE if attacker_skill == SKILL_UNARMED else 1.0
+            threshold_modifier = getattr(attacker_weapon, 'threshold_modifier', 1.0)
+            threshold_modifier *= getattr(attacker_ammo, 'threshold_modifier', 1.0)
+            resistance_modifier = getattr(attacker_weapon, 'resistance_modifier', 1.0)
+            resistance_modifier *= getattr(attacker_ammo, 'resistance_modifier', 1.0)
+            history.damage = defender.damage(
+                raw_damage=damage, damage_type=attacker_damage_type, save=True,
+                threshold_modifier=threshold_modifier, resistance_modifier=resistance_modifier)
             # On hit effects
             for item in (attacker_weapon, attacker_ammo, defender_armor):
                 if not item:
@@ -551,10 +559,12 @@ class Character(Entity, Stats):
             defender.apply_effects()  # Apply effects immediatly
         # Clip count & weapon condition
         if attacker_weapon_equipment and attacker_weapon:
+            attacker_weapon_equipment.count -= 0 if attacker_weapon.is_throwable else 1
             attacker_weapon_equipment.clip_count -= 0 if attacker_weapon.is_melee else 1
             # TODO: weapon condition based on damage
             attacker_weapon_equipment.condition -= attacker_weapon_equipment.condition * (
-                getattr(attacker_weapon, 'condition_modifier', 0.0) + getattr(attacker_ammo, 'condition_modifier', 0.0))
+                getattr(attacker_weapon, 'condition_modifier', 0.0) +
+                getattr(attacker_ammo, 'condition_modifier', 0.0))
             attacker_weapon_equipment.save()
         # Save character and return history
         self.action_points -= ap_cost
@@ -562,14 +572,16 @@ class Character(Entity, Stats):
         history.save()
         return history
 
-    def damage(self, raw_damage: float=0.0, dice_count: int=0, dice_value: int=0,
-               damage_type: str=DAMAGE_NORMAL, save: bool=True) -> int:
+    def damage(self, raw_damage: float=0.0, dice_count: int=0, dice_value: int=0, damage_type: str=DAMAGE_NORMAL,
+               threshold_modifier: float=1.0, resistance_modifier: float=1.0, save: bool=True) -> 'DamageHistory':
         """
         Inflige des dégâts au personnage
         :param raw_damage: Dégâts bruts
         :param dice_count: Nombre de dés
         :param dice_value: Valeur des dés
         :param damage_type: Type des dégâts
+        :param threshold_modifier: Modificateur d'absorption de dégâts (appliqué à l'armure et au personnage)
+        :param resistance_modifier: Modificateur de résistance aux dégâts (appliqué à l'armure et au personnage)
         :param save: Sauvegarder les modifications sur le personnage ?
         :return: Nombre de dégâts
         """
@@ -587,19 +599,21 @@ class Character(Entity, Stats):
         armor = history.armor = getattr(armor_equipment, 'item', None)
         armor_damage = 0
         if armor and armor_equipment:
-            armor_threshold = armor.get_threshold(damage_type)
-            total_damage -= armor_threshold  # Armor damage threshold
-            armor_resistance = armor.get_resistance(damage_type) * armor_equipment.condition
-            total_damage *= armor_resistance * armor.resistance_modifier
-            armor_damage = max((base_damage - total_damage) * (getattr(armor, 'condition_modifier', 0.0)), 0)
+            armor_threshold = armor.get_threshold(damage_type) * threshold_modifier
+            armor_resistance = armor.get_resistance(damage_type) * resistance_modifier * armor_equipment.condition
+            total_damage -= armor_threshold
+            total_damage *= armor_resistance
+            armor_damage = max((base_damage - total_damage) * armor.condition_modifier, 0)
             # History
             history.armor_threshold = armor_threshold
             history.armor_resistance = armor_resistance
             history.armor_damage = armor_damage
         # Self threshold and resistance
-        total_damage -= self.stats.damage_threshold
+        damage_threshold = self.stats.damage_threshold * threshold_modifier
         damage_resistance = self.stats.damage_resistance + getattr(self.stats, DAMAGE_RESISTANCE.get(damage_type), 0.0)
-        total_damage -= total_damage * (-1.0 if damage_type == DAMAGE_HEAL else damage_resistance)
+        damage_resistance *= resistance_modifier
+        total_damage -= damage_threshold
+        total_damage -= total_damage * (-1.0 if damage_type == DAMAGE_HEAL else 1.0) * damage_resistance
         total_damage = int(total_damage)
         # Apply damage on self
         if total_damage:
@@ -614,7 +628,7 @@ class Character(Entity, Stats):
             armor_equipment.condition -= armor_damage
             armor_equipment.save()
         # History
-        history.damage_threshold = self.stats.damage_threshold
+        history.damage_threshold = damage_threshold
         history.damage_resistance = damage_resistance
         history.real_damage = total_damage
         history.save()
@@ -696,44 +710,47 @@ class Item(Entity):
     # Weapon specific
     is_melee = models.BooleanField(default=False, verbose_name=_("arme de mêlée ?"))
     is_throwable = models.BooleanField(default=False, verbose_name=_("jetable ?"))
-    damage_type = models.CharField(max_length=10, blank=True, choices=DAMAGES_TYPES, verbose_name=_("type de dégâts"))
-    raw_damage = models.PositiveSmallIntegerField(default=0, verbose_name=_("dégâts bruts"))
-    damage_dice_count = models.PositiveSmallIntegerField(default=0, verbose_name=_("nombre de dés"))
-    damage_dice_value = models.PositiveSmallIntegerField(default=0, verbose_name=_("valeur de dé"))
-    range = models.PositiveSmallIntegerField(default=1, verbose_name=_("portée"))
+    skill = models.CharField(max_length=15, blank=True, choices=SKILLS, verbose_name=_("compétence"))
+    min_strength = models.PositiveSmallIntegerField(default=0, verbose_name=_("force minimum"))
     clip_size = models.PositiveSmallIntegerField(default=0, verbose_name=_("taille du chargeur"))
+    burst_count = models.PositiveSmallIntegerField(default=0, verbose_name=_("munitions en rafale"))
+    range = models.PositiveSmallIntegerField(default=0, verbose_name=_("modif. de portée"))
+    hit_chance_modifier = models.SmallIntegerField(default=0, verbose_name=_("modif. de précision"))
+    threshold_modifier = models.FloatField(default=1.0, verbose_name=_("modif. d'absorption"))
+    resistance_modifier = models.FloatField(default=1.0, verbose_name=_("modif. de resistance"))
+    # Action points
     ap_cost_reload = models.PositiveSmallIntegerField(default=0, verbose_name=_("coût PA recharge"))
     ap_cost_normal = models.PositiveSmallIntegerField(default=0, verbose_name=_("coût PA normal"))
     ap_cost_target = models.PositiveSmallIntegerField(default=0, verbose_name=_("coût PA ciblé"))
     ap_cost_burst = models.PositiveSmallIntegerField(default=0, verbose_name=_("coût PA rafale"))
-    burst_count = models.PositiveSmallIntegerField(default=0, verbose_name=_("munitions en rafale"))
-    min_strength = models.PositiveSmallIntegerField(default=0, verbose_name=_("force minimum"))
-    skill = models.CharField(max_length=15, blank=True, choices=SKILLS, verbose_name=_("compétence"))
-    ammunition = models.ManyToManyField(
-        'Item', blank=True, verbose_name=_("type de munition"),
-        limit_choices_to={'type': ITEM_AMMO})
-    # Modifiers
-    hit_chance_modifier = models.SmallIntegerField(default=0, verbose_name=_("modif. de précision"))
-    armor_class_modifier = models.SmallIntegerField(default=0, verbose_name=_("modif. d'esquive"))
-    resistance_modifier = models.FloatField(default=1.0, verbose_name=_("modif. de resistance"))
-    range_modifier = models.FloatField(default=1.0, verbose_name=_("modif. de portée"))
+    # Damage
+    damage_type = models.CharField(max_length=10, blank=True, choices=DAMAGES_TYPES, verbose_name=_("type de dégâts"))
+    raw_damage = models.PositiveSmallIntegerField(default=0, verbose_name=_("dégâts bruts"))
+    damage_dice_count = models.PositiveSmallIntegerField(default=0, verbose_name=_("nombre de dés"))
+    damage_dice_value = models.PositiveSmallIntegerField(default=0, verbose_name=_("valeur de dé"))
     damage_modifier = models.FloatField(default=1.0, verbose_name=_("modif. de dégâts"))
     critical_modifier = models.FloatField(default=1.0, verbose_name=_("modif. de coup critique"))
     critical_damage = models.FloatField(default=1.0, verbose_name=_("dégâts critiques"))
-    condition_modifier = models.FloatField(default=0.0, verbose_name=_("modif. de condition"))
     # Resistances
-    normal_threshold = models.PositiveSmallIntegerField(default=0, verbose_name=_("seuil normal"))
+    armor_class = models.SmallIntegerField(default=0, verbose_name=_("esquive"))
+    condition_modifier = models.FloatField(default=0.0, verbose_name=_("modif. de condition"))
+    normal_threshold = models.PositiveSmallIntegerField(default=0, verbose_name=_("absorption normal"))
     normal_resistance = models.FloatField(default=0.0, verbose_name=_("résistance normal"))
-    laser_threshold = models.PositiveSmallIntegerField(default=0, verbose_name=_("seuil laser"))
+    laser_threshold = models.PositiveSmallIntegerField(default=0, verbose_name=_("absorption laser"))
     laser_resistance = models.FloatField(default=0.0, verbose_name=_("résistance laser"))
-    plasma_threshold = models.PositiveSmallIntegerField(default=0, verbose_name=_("seuil plasma"))
+    plasma_threshold = models.PositiveSmallIntegerField(default=0, verbose_name=_("absorption plasma"))
     plasma_resistance = models.FloatField(default=0.0, verbose_name=_("résistance plasma"))
-    explosive_threshold = models.PositiveSmallIntegerField(default=0, verbose_name=_("seuil explosifs"))
+    explosive_threshold = models.PositiveSmallIntegerField(default=0, verbose_name=_("absorption explosifs"))
     explosive_resistance = models.FloatField(default=0.0, verbose_name=_("résistance explosifs"))
-    fire_threshold = models.PositiveSmallIntegerField(default=0, verbose_name=_("seuil feu"))
+    fire_threshold = models.PositiveSmallIntegerField(default=0, verbose_name=_("absorption feu"))
     fire_resistance = models.FloatField(default=0.0, verbose_name=_("résistance feu"))
-    # Effets
-    effects = models.ManyToManyField('Effect', blank=True, related_name='+', verbose_name=_("effets"))
+    # Effets and ammunitions
+    effects = models.ManyToManyField(
+        'Effect', blank=True, related_name='+',
+        verbose_name=_("effets"))
+    ammunitions = models.ManyToManyField(
+        'Item', blank=True, related_name='weapons',
+        verbose_name=_("types de munitions"), limit_choices_to={'type': ITEM_AMMO})
 
     @property
     def base_damage(self) -> int:
@@ -754,6 +771,10 @@ class Item(Entity):
 
     def __str__(self) -> str:
         return self.name
+
+    def clean(self):
+        if self.type != ITEM_WEAPON and self.ammunitions:
+            raise ValidationError(dict(ammunitions=_("Ce type d'objet ne peut avoir de types de munitions.")))
 
     class Meta:
         verbose_name = _("objet")
@@ -801,7 +822,7 @@ class Equipment(Entity):
                 raise ValidationError(dict(item=_("Ces munitions sont incompatibles avec l'arme équipée.")))
         elif self.slot == ITEM_WEAPON:
             equipment = self.character.equipments.select_related('item').filter(slot=ITEM_AMMO).first()
-            if equipment and not self.item.ammunition.filter(id=equipment.item.id).exists():
+            if equipment and not self.item.ammunitions.filter(id=equipment.item.id).exists():
                 raise ValidationError(dict(item=_("Cette arme est incompatible avec les munitions équipées.")))
 
     def save(self, *args, **kwargs):
@@ -1019,10 +1040,10 @@ class DamageHistory(CommonModel):
     armor = models.ForeignKey(
         'Item', blank=True, null=True, on_delete=models.CASCADE, related_name='+',
         verbose_name=_("protection"), limit_choices_to={'type': ITEM_ARMOR})
-    armor_threshold = models.PositiveSmallIntegerField(default=0, verbose_name=_("seuil armure"))
+    armor_threshold = models.PositiveSmallIntegerField(default=0, verbose_name=_("absorption armure"))
     armor_resistance = models.FloatField(default=0.0, verbose_name=_("résistance armure"))
     armor_damage = models.FloatField(default=0.0, verbose_name=_("dégats armure"))
-    damage_threshold = models.PositiveSmallIntegerField(default=0, verbose_name=_("seuil dégâts"))
+    damage_threshold = models.PositiveSmallIntegerField(default=0, verbose_name=_("absorption dégâts"))
     damage_resistance = models.FloatField(default=0.0, verbose_name=_("résistance dégâts"))
     real_damage = models.PositiveSmallIntegerField(default=0, verbose_name=_("dégâts réels"))
 
@@ -1065,8 +1086,8 @@ class FightHistory(CommonModel):
     hit_critical = models.BooleanField(default=False, verbose_name=_("critique ?"))
     status = models.CharField(max_length=15, choices=FIGHT_STATUS, blank=True, verbose_name=_("status"))
     damage = models.OneToOneField(
-        'DamageHistory', blank=True, null=True, on_delete=models.CASCADE, related_name='+',
-        verbose_name=_("historique des dégâts"), editable=False)
+        'DamageHistory', blank=True, null=True, on_delete=models.CASCADE, related_name='fight',
+        verbose_name=_("historique des dégâts"), limit_choices_to={'fight__isnull': True})
 
     def __str__(self) -> str:
         return "{} vs. {}".format(self.attacker, self.defender)
