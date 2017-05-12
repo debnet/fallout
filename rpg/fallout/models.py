@@ -602,7 +602,7 @@ class Character(Entity, Stats):
             armor_threshold = armor.get_threshold(damage_type) * threshold_modifier
             armor_resistance = armor.get_resistance(damage_type) * resistance_modifier * armor_equipment.condition
             total_damage -= armor_threshold
-            total_damage *= armor_resistance
+            total_damage *= (1.0 - min(armor_resistance, 1.0))
             armor_damage = max((base_damage - total_damage) * armor.condition_modifier, 0)
             # History
             history.armor_threshold = armor_threshold
@@ -612,8 +612,9 @@ class Character(Entity, Stats):
         damage_threshold = self.stats.damage_threshold * threshold_modifier
         damage_resistance = self.stats.damage_resistance + getattr(self.stats, DAMAGE_RESISTANCE.get(damage_type), 0.0)
         damage_resistance *= resistance_modifier
+        total_damage = total_damage * (-1.0 if damage_type == DAMAGE_HEAL else 1.0)
         total_damage -= damage_threshold
-        total_damage -= total_damage * (-1.0 if damage_type == DAMAGE_HEAL else 1.0) * damage_resistance
+        total_damage *= (1.0 - min(damage_resistance, 1.0))
         total_damage = int(total_damage)
         # Apply damage on self
         if total_damage:
@@ -767,7 +768,7 @@ class Item(Entity):
         return getattr(self, damage_type + '_threshold', 0)
 
     def get_resistance(self, damage_type: str=DAMAGE_NORMAL):
-        return getattr(self, damage_type + '_resistance', 0)
+        return getattr(self, damage_type + '_resistance', 0.0)
 
     def __str__(self) -> str:
         return self.name
