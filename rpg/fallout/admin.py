@@ -301,15 +301,19 @@ class FightHistoryAdmin(CommonAdmin):
             classes=('wide', ),
         )),
     )
-    list_display = ('date', 'game_date', 'attacker', 'defender', 'hit_success', 'hit_critical', 'status', 'damage', )
+    list_display = (
+        'date', 'game_date', 'attacker', 'defender',
+        'hit_success', 'hit_critical', 'status', 'real_damage', )
     list_editable = ()
-    list_filter = ('date', 'game_date', 'attacker', 'defender', 'hit_success', 'hit_critical', 'status', )
+    list_filter = (
+        'date', 'game_date', 'attacker', 'defender',
+        'hit_success', 'hit_critical', 'status', )
     ordering = ('-date', )
     date_hierarchy = 'date'
 
-    def damage(self, obj):
+    def real_damage(self, obj):
         return getattr(obj.damage, 'real_damage', None)
-    damage.short_description = _("dégâts")
+    real_damage.short_description = _("dégâts")
 
     def get_queryset(self, request):
         return super().get_queryset(request).select_related('damage')

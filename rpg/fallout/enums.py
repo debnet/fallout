@@ -220,12 +220,10 @@ LIST_ALL_STATS = LIST_GENERAL_STATS + LIST_EDITABLE_STATS
 ITEM_WEAPON = 'weapon'
 ITEM_AMMO = 'ammo'
 ITEM_ARMOR = 'armor'
-ITEM_IMPLANT = 'implant'
 SLOT_ITEM_TYPES = (
     (ITEM_WEAPON, _("arme")),
     (ITEM_AMMO, _("munition")),
     (ITEM_ARMOR, _("armure")),
-    (ITEM_IMPLANT, _("implant")),
 )
 
 ITEM_FOOD = 'food'
@@ -233,7 +231,7 @@ ITEM_CHEM = 'chem'
 ITEM_MISC = 'misc'
 ITEM_TYPES = SLOT_ITEM_TYPES + (
     (ITEM_FOOD, _("nourriture")),
-    (ITEM_CHEM, _("drogue")),
+    (ITEM_CHEM, _("médicament")),
     (ITEM_MISC, _("autre")),
 )
 

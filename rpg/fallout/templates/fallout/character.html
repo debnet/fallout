@@ -45,24 +45,24 @@
         <div role="tabpanel" id="tabs">
             <ul class="nav nav-tabs tab" id="character-tabs" role="tablist">
                 <li class="nav-item">
-                    <a class="nav-link active" id="stats-tab" data-toggle="tab"
+                    <a class="nav-link{% if 'stats' in request.GET %} active{% endif %}" id="stats-tab" data-toggle="tab"
                        href="#stats" role="tab">{% trans "Statistiques" %}</a>
                 </li>
                 {% if equipment or inventory %}
                     <li class="nav-item">
-                        <a class="nav-link" id="items-tab" data-toggle="tab"
+                        <a class="nav-link{% if 'items' in request.GET %} active{% endif %}" id="items-tab" data-toggle="tab"
                            href="#items" role="tab">{% trans "Objets" %}</a>
                     </li>
                 {% endif %}
                 {% if request.user.is_superuser %}
                     <li class="nav-item">
-                        <a class="nav-link" id="actions-tab" data-toggle="tab"
+                        <a class="nav-link{% if 'actions' in request.GET %} active{% endif %}" id="actions-tab" data-toggle="tab"
                            href="#actions" role="tab">{% trans "Actions" %}</a>
                     </li>
                 {% endif %}
             </ul>
             <div class="tab-content">
-                <div class="tab-pane fade active show" id="stats" role="tabpanel">
+                <div class="tab-pane fade{% if 'stats' in request.GET %} active show{% endif %}" id="stats" role="tabpanel">
                     <div class="row">
                         <div class="col">
                             {% with code="general" label=_("Etat général") stats=character.general_stats view=True %}
@@ -86,7 +86,7 @@
                     </div>
                 </div>
                 {% if equipment or inventory %}
-                    <div class="tab-pane fade" id="items" role="tabpanel">
+                    <div class="tab-pane fade{% if 'items' in request.GET %} active show{% endif %}" id="items" role="tabpanel">
                         {% if equipment %}
                             <h4>{% trans "Equipement" %}</h4>
                             {% with items=equipment equiped=True %}
@@ -102,7 +102,7 @@
                         {% endif %}
                     </div>
                 {% endif %}
-                <div class="tab-pane fade" id="actions" role="tabpanel">
+                <div class="tab-pane fade{% if 'actions' in request.GET %} active show{% endif %}" id="actions" role="tabpanel">
                     <div class="row">
                         <div class="col">
                             {% with code="fight" burst=False %}
@@ -119,7 +119,9 @@
                             {% endwith %}
                         </div>
                         <div class="col">
-
+                            {% with code="action" %}
+                                {% include "fallout/_action.html" %}
+                            {% endwith %}
                         </div>
                     </div>
                 </div>

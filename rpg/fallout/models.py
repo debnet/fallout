@@ -276,7 +276,7 @@ class Character(Entity, Stats):
             elif code in LIST_NEEDS:
                 rvalue = 1000
             results.append((code, label, lvalue, rvalue))
-        results.append((STATS_CARRY_WEIGHT, _("charge"), self.total_charge, self.stats.carry_weight))
+        results.append((STATS_CARRY_WEIGHT, _("charge"), self.charge, self.stats.carry_weight))
         return results
 
     @property
@@ -299,8 +299,8 @@ class Character(Entity, Stats):
         return stats
 
     @property
-    def total_charge(self):
-        return self.equipments.aggregate(charge=Sum(F('count') * F('item__weight'))).get('charge', 0) or 0
+    def charge(self):
+        return self.equipments.aggregate(charge=Sum(F('count') * F('item__weight'))).get('charge') or 0
 
     @property
     def used_skill_points(self):
@@ -539,10 +539,10 @@ class Character(Entity, Stats):
                 damage *= getattr(attacker_weapon, 'critical_damage', 1.0)
                 damage *= getattr(attacker_ammo, 'critical_damage', 1.0)
                 damage *= UNARMED_CRITICAL_DAMAGE if attacker_skill == SKILL_UNARMED else 1.0
-            threshold_modifier = getattr(attacker_weapon, 'threshold_modifier', 1.0)
-            threshold_modifier *= getattr(attacker_ammo, 'threshold_modifier', 1.0)
-            resistance_modifier = getattr(attacker_weapon, 'resistance_modifier', 1.0)
-            resistance_modifier *= getattr(attacker_ammo, 'resistance_modifier', 1.0)
+            threshold_modifier = getattr(attacker_weapon, 'threshold_modifier', 0)
+            threshold_modifier += getattr(attacker_ammo, 'threshold_modifier', 0)
+            resistance_modifier = getattr(attacker_weapon, 'resistance_modifier', 0.0)
+            resistance_modifier += getattr(attacker_ammo, 'resistance_modifier', 0.0)
             history.damage = defender.damage(
                 raw_damage=damage, damage_type=attacker_damage_type, save=True,
                 threshold_modifier=threshold_modifier, resistance_modifier=resistance_modifier)
@@ -599,9 +599,9 @@ class Character(Entity, Stats):
         armor = history.armor = getattr(armor_equipment, 'item', None)
         armor_damage = 0
         if armor and armor_equipment:
-            armor_threshold = armor.get_threshold(damage_type) * threshold_modifier
-            armor_resistance = armor.get_resistance(damage_type) * resistance_modifier * armor_equipment.condition
-            total_damage -= armor_threshold
+            armor_threshold = armor.get_threshold(damage_type) + threshold_modifier
+            armor_resistance = armor.get_resistance(damage_type) * armor_equipment.condition + resistance_modifier
+            total_damage -= max(armor_threshold, 0)
             total_damage *= (1.0 - min(armor_resistance, 1.0))
             armor_damage = max((base_damage - total_damage) * armor.condition_modifier, 0)
             # History
@@ -609,11 +609,11 @@ class Character(Entity, Stats):
             history.armor_resistance = armor_resistance
             history.armor_damage = armor_damage
         # Self threshold and resistance
-        damage_threshold = self.stats.damage_threshold * threshold_modifier
+        damage_threshold = self.stats.damage_threshold + threshold_modifier
         damage_resistance = self.stats.damage_resistance + getattr(self.stats, DAMAGE_RESISTANCE.get(damage_type), 0.0)
-        damage_resistance *= resistance_modifier
+        damage_resistance += resistance_modifier
         total_damage = total_damage * (-1.0 if damage_type == DAMAGE_HEAL else 1.0)
-        total_damage -= damage_threshold
+        total_damage -= max(damage_threshold, 0)
         total_damage *= (1.0 - min(damage_resistance, 1.0))
         total_damage = int(total_damage)
         # Apply damage on self
@@ -704,7 +704,7 @@ class Item(Entity):
     title = models.CharField(max_length=200, blank=True, verbose_name=_("titre"))
     description = models.TextField(blank=True, verbose_name=_("description"))
     image = models.ImageField(blank=True, upload_to='item', verbose_name=_("image"))
-    type = models.CharField(max_length=7, choices=ITEM_TYPES, verbose_name=_("type"))
+    type = models.CharField(max_length=6, choices=ITEM_TYPES, verbose_name=_("type"))
     value = models.PositiveIntegerField(default=0, verbose_name=_("valeur"))
     weight = models.FloatField(default=0.0, verbose_name=_("poids"))
     is_quest = models.BooleanField(default=False, verbose_name=_("quête ?"))
@@ -717,8 +717,8 @@ class Item(Entity):
     burst_count = models.PositiveSmallIntegerField(default=0, verbose_name=_("munitions en rafale"))
     range = models.PositiveSmallIntegerField(default=0, verbose_name=_("modif. de portée"))
     hit_chance_modifier = models.SmallIntegerField(default=0, verbose_name=_("modif. de précision"))
-    threshold_modifier = models.FloatField(default=1.0, verbose_name=_("modif. d'absorption"))
-    resistance_modifier = models.FloatField(default=1.0, verbose_name=_("modif. de resistance"))
+    threshold_modifier = models.SmallIntegerField(default=0, verbose_name=_("modif. d'absorption"))
+    resistance_modifier = models.FloatField(default=0.0, verbose_name=_("modif. de resistance"))
     # Action points
     ap_cost_reload = models.PositiveSmallIntegerField(default=0, verbose_name=_("coût PA recharge"))
     ap_cost_normal = models.PositiveSmallIntegerField(default=0, verbose_name=_("coût PA normal"))
@@ -735,15 +735,15 @@ class Item(Entity):
     # Resistances
     armor_class = models.SmallIntegerField(default=0, verbose_name=_("esquive"))
     condition_modifier = models.FloatField(default=0.0, verbose_name=_("modif. de condition"))
-    normal_threshold = models.PositiveSmallIntegerField(default=0, verbose_name=_("absorption normal"))
+    normal_threshold = models.SmallIntegerField(default=0, verbose_name=_("absorption normal"))
     normal_resistance = models.FloatField(default=0.0, verbose_name=_("résistance normal"))
-    laser_threshold = models.PositiveSmallIntegerField(default=0, verbose_name=_("absorption laser"))
+    laser_threshold = models.SmallIntegerField(default=0, verbose_name=_("absorption laser"))
     laser_resistance = models.FloatField(default=0.0, verbose_name=_("résistance laser"))
-    plasma_threshold = models.PositiveSmallIntegerField(default=0, verbose_name=_("absorption plasma"))
+    plasma_threshold = models.SmallIntegerField(default=0, verbose_name=_("absorption plasma"))
     plasma_resistance = models.FloatField(default=0.0, verbose_name=_("résistance plasma"))
-    explosive_threshold = models.PositiveSmallIntegerField(default=0, verbose_name=_("absorption explosifs"))
+    explosive_threshold = models.SmallIntegerField(default=0, verbose_name=_("absorption explosifs"))
     explosive_resistance = models.FloatField(default=0.0, verbose_name=_("résistance explosifs"))
-    fire_threshold = models.PositiveSmallIntegerField(default=0, verbose_name=_("absorption feu"))
+    fire_threshold = models.SmallIntegerField(default=0, verbose_name=_("absorption feu"))
     fire_resistance = models.FloatField(default=0.0, verbose_name=_("résistance feu"))
     # Effets and ammunitions
     effects = models.ManyToManyField(
@@ -764,6 +764,14 @@ class Item(Entity):
             damage += randint(1, self.damage_dice_value)
         return damage
 
+    @property
+    def is_equipable(self):
+        return self.type in [ITEM_WEAPON, ITEM_AMMO, ITEM_ARMOR]
+
+    @property
+    def is_usable(self):
+        return self.type in [ITEM_FOOD, ITEM_CHEM]
+
     def get_threshold(self, damage_type: str=DAMAGE_NORMAL):
         return getattr(self, damage_type + '_threshold', 0)
 
@@ -772,10 +780,6 @@ class Item(Entity):
 
     def __str__(self) -> str:
         return self.name
-
-    def clean(self):
-        if self.type != ITEM_WEAPON and self.ammunitions:
-            raise ValidationError(dict(ammunitions=_("Ce type d'objet ne peut avoir de types de munitions.")))
 
     class Meta:
         verbose_name = _("objet")
@@ -802,14 +806,32 @@ class Equipment(Entity):
     """
     character = models.ForeignKey('Character', on_delete=models.CASCADE, related_name='equipments', verbose_name=_("personnage"))
     item = models.ForeignKey('Item', on_delete=models.CASCADE, related_name='+', verbose_name=_("objet"))
-    slot = models.CharField(max_length=7, choices=SLOT_ITEM_TYPES, blank=True, verbose_name=_("emplacement"))
+    slot = models.CharField(max_length=6, choices=SLOT_ITEM_TYPES, blank=True, verbose_name=_("emplacement"))
     count = models.PositiveIntegerField(default=1, verbose_name=_("nombre"))
     clip_count = models.PositiveSmallIntegerField(blank=True, null=True, verbose_name=_("munitions"))
     condition = models.FloatField(blank=True, null=True, verbose_name=_("état"))
 
     @property
     def value(self):
-        return self.item.value * self.condition * self.count
+        return self.item.value * self.count * (self.condition or 1)
+
+    @property
+    def charge(self):
+        return self.item.weight * self.count
+
+    @property
+    def compatible_ammunition(self):
+        if self.slot or self.item.type != ITEM_AMMO:
+            return
+        weapon = self.character.equipments.filter(slot=ITEM_WEAPON) \
+            .select_related('item').prefetch_related('item__ammunitions').first()
+        return weapon and self.item in weapon.item.ammunitions.all()
+
+    @property
+    def current_condition(self):
+        if self.condition is not None:
+            return int(self.condition * 100)
+        return None
 
     def clean(self):
         if self.slot:
@@ -819,7 +841,7 @@ class Equipment(Entity):
                 raise ValidationError(dict(slot=_("L'emplacement doit correspondre au type d'objet.")))
         if self.slot == ITEM_AMMO:
             equipment = self.character.equipments.select_related('item').filter(slot=ITEM_WEAPON).first()
-            if equipment and not equipment.item.ammunition.filter(id=self.item.id).exists():
+            if equipment and not equipment.item.ammunitions.filter(id=self.item.id).exists():
                 raise ValidationError(dict(item=_("Ces munitions sont incompatibles avec l'arme équipée.")))
         elif self.slot == ITEM_WEAPON:
             equipment = self.character.equipments.select_related('item').filter(slot=ITEM_AMMO).first()
@@ -1037,16 +1059,16 @@ class DamageHistory(CommonModel):
     raw_damage = models.PositiveSmallIntegerField(default=0, verbose_name=_("dégâts bruts"))
     damage_dice_count = models.PositiveSmallIntegerField(default=0, verbose_name=_("nombre de dés"))
     damage_dice_value = models.PositiveSmallIntegerField(default=0, verbose_name=_("valeur de dé"))
-    base_damage = models.PositiveSmallIntegerField(default=0, verbose_name=_("dégâts de base"))
+    base_damage = models.SmallIntegerField(default=0, verbose_name=_("dégâts de base"))
     armor = models.ForeignKey(
         'Item', blank=True, null=True, on_delete=models.CASCADE, related_name='+',
         verbose_name=_("protection"), limit_choices_to={'type': ITEM_ARMOR})
-    armor_threshold = models.PositiveSmallIntegerField(default=0, verbose_name=_("absorption armure"))
+    armor_threshold = models.SmallIntegerField(default=0, verbose_name=_("absorption armure"))
     armor_resistance = models.FloatField(default=0.0, verbose_name=_("résistance armure"))
     armor_damage = models.FloatField(default=0.0, verbose_name=_("dégats armure"))
-    damage_threshold = models.PositiveSmallIntegerField(default=0, verbose_name=_("absorption dégâts"))
+    damage_threshold = models.SmallIntegerField(default=0, verbose_name=_("absorption dégâts"))
     damage_resistance = models.FloatField(default=0.0, verbose_name=_("résistance dégâts"))
-    real_damage = models.PositiveSmallIntegerField(default=0, verbose_name=_("dégâts réels"))
+    real_damage = models.SmallIntegerField(default=0, verbose_name=_("dégâts réels"))
 
     def __str__(self) -> str:
         return _("({character}) {damage_type} : {damage}").format(

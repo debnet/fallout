@@ -1,0 +1,16 @@
+{% load i18n %}
+
+<form method="post" action="{{ request.path }}?actions">
+    <table class="table table-sm table-striped">
+        <thead class="thead-inverse">
+            <tr>
+                <th class="text-center" colspan="2">{% trans "Actions" %}</th>
+            </tr>
+        </thead>
+        <tbody>
+
+        </tbody>
+    </table>
+    <input type="hidden" name="type" value="action" />
+    {% csrf_token %}
+</form>

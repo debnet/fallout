@@ -1,21 +1,77 @@
+{% load i18n %}
+
 <div class="d-flex align-items-stretch flex-wrap row no-gutters">
     {% for item in items %}
-        <div class="col-md-4 col-xs-6 p-1">
-            <div class="card">
-                {% with image=item.item.image %}
-                    {% if image %}
-                        <img class="card-img-top m-1 img-fluid img-thumbnail mx-auto d-block"
-                             height="{{ image.height }}" width="{{ image.width }}" src="{{ image.url }}">
-                    {% endif %}
-                {% endwith %}
-                {% with info=item.item %}
-                    <div class="card-block">
-                        <h5 class="card-title">{{ info.name }}</h5>
-                        {% if info.title %}<h6 class="card-subtitle mb-2 text-muted">{{ info.title }}</h6>{% endif %}
-                        {% if info.description %}<p class="card-text">{{ info.description }}</p>{% endif %}
+        {% with info=item.item %}
+            <div class="card-deck col-md-4 col-xs-6 p-1">
+                <div class="card">
+                    <div class="card-header">
+                        {% if item.count > 1 %}<span class="badge badge-default">{{ item.count }}</span>{% endif %}
+                        <span class="card-title">{{ info.name }}</span>
+                        {% if info.title %}<small class="card-subtitle mb-2 text-muted">{{ info.title }}</small>{% endif %}
                     </div>
-                {% endwith %}
+                    {% with image=item.item.image %}
+                        {% if image %}
+                            <img class="card-img-top m-1 img-fluid img-thumbnail mx-auto d-block"
+                                 height="{{ image.height }}" width="{{ image.width }}" src="{{ image.url }}">
+                        {% endif %}
+                    {% endwith %}
+                    <div class="card-block">
+                        <p class="card-text">
+                            {% if info.description %}
+                            <small class="text-muted">{{ info.description }}</small>
+                            {% endif %}
+                            <small class="text-primary">{{ item.charge }} kg.</small>
+                            <small class="text-warning">{{ item.value }} &euro;</small>
+                        </p>
+                        {% with condition=item.current_condition %}
+                            {% if condition %}
+                                <div class="progress">
+                                    <div role="progressbar" style="width: {{ condition }}%;" aria-valuenow="{{ condition }}"
+                                         aria-valuemin="0" aria-valuemax="100" class="progress-bar progress-bar-striped
+                                         bg-{% if condition < 25 %}danger{% elif condition < 50 %}warning{% else %}success{% endif %}">
+                                        {{ condition }}%
+                                    </div>
+                                </div>
+                            {% endif %}
+                        {% endwith %}
+                    </div>
+                    {% if request.user.is_superuser %}
+                        <div class="card-footer">
+                            <form class="form-inline" method="post" action="{{ request.path }}?items">
+                                {% if equiped %}
+                                    <button class="btn btn-sm btn-danger m-1" type="submit"
+                                            name="unequip">{% trans "Retirer" %}</button>
+                                {% else %}
+                                    {% if item.compatible_ammunition %}
+                                        <button class="btn btn-sm btn-warning m-1" type="submit"
+                                                name="replace-ammo">{% trans "Remplacer" %}</button>
+                                    {% elif info.is_equipable %}
+                                        <button class="btn btn-sm btn-info m-1" type="submit"
+                                                name="equip">{% trans "Equiper" %}</button>
+                                    {% elif info.is_usable %}
+                                        <button class="btn btn-sm btn-success m-1" type="submit"
+                                                name="use">{% trans "Utiliser" %}</button>
+                                    {% endif %}
+                                {% endif %}
+                                {% if info.clip_size and item.clip_count < info.clip_size %}
+                                    <button class="btn btn-sm btn-info m-1" type="submit"
+                                            name="reload">{% trans "Recharger" %}</button>
+                                {% endif %}
+                                <div class="form-check m-1">
+                                    <label class="form-check-label">
+                                        <input class="form-check-input" type="checkbox" name="action">
+                                        <small>{% trans "Action" %}</small>
+                                    </label>
+                                </div>
+                                <input type="hidden" name="type" value="item" />
+                                <input type="hidden" name="item" value="{{ item.id }}" />
+                                {% csrf_token %}
+                            </form>
+                        </div>
+                    {% endif %}
+                </div>
             </div>
-        </div>
+        {% endwith %}
     {% endfor %}
 </div>
