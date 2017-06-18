@@ -3,7 +3,7 @@
 
 {% block navbar %}
     {% with campaign=character.campaign %}
-        {% include "fallout/_navbar.html" %}
+        {% include "fallout/_base_navbar.html" %}
     {% endwith %}
 {% endblock %}
 
@@ -29,7 +29,7 @@
 
 {% block content %}
     {% if roll %}
-        {% include "fallout/_roll.html" %}
+        {% include "fallout/_msg_roll.html" %}
     {% endif %}
     {% if character %}
         <div class="content">
@@ -66,21 +66,21 @@
                     <div class="row">
                         <div class="col">
                             {% with code="general" label=_("Etat général") stats=character.general_stats view=True %}
-                                {% include "fallout/_stats.html" %}
+                                {% include "fallout/_form_stats.html" %}
                             {% endwith %}
 
                             {% with code="special" label=_("S.P.E.C.I.A.L.") stats=character.special %}
-                                {% include "fallout/_stats.html" %}
+                                {% include "fallout/_form_stats.html" %}
                             {% endwith %}
                         </div>
                         <div class="col">
                             {% with code="skill" label=_("Compétences") stats=character.skills %}
-                                {% include "fallout/_stats.html" %}
+                                {% include "fallout/_form_stats.html" %}
                             {% endwith %}
                         </div>
                         <div class="col">
                             {% with code="other" label=_("Autres") stats=character.other_stats view=True %}
-                                {% include "fallout/_stats.html" %}
+                                {% include "fallout/_form_stats.html" %}
                             {% endwith %}
                         </div>
                     </div>
@@ -90,14 +90,14 @@
                         {% if equipment %}
                             <h4>{% trans "Equipement" %}</h4>
                             {% with items=equipment equiped=True %}
-                                {% include "fallout/_items.html" %}
+                                {% include "fallout/items.html" %}
                             {% endwith %}
                             <hr />
                         {% endif %}
                         {% if inventory %}
                             <h4>{% trans "Inventaire" %}</h4>
                             {% with items=inventory equiped=False %}
-                                {% include "fallout/_items.html" %}
+                                {% include "fallout/items.html" %}
                             {% endwith %}
                         {% endif %}
                     </div>
@@ -106,21 +106,21 @@
                     <div class="row">
                         <div class="col">
                             {% with code="fight" burst=False %}
-                                {% include "fallout/_attack.html" %}
+                                {% include "fallout/_form_attack.html" %}
                             {% endwith %}
 
                             {% with code="burst" burst=True %}
-                                {% include "fallout/_attack.html" %}
+                                {% include "fallout/_form_attack.html" %}
                             {% endwith %}
                         </div>
                         <div class="col">
                             {% with code="damage" multiple=False %}
-                                {% include "fallout/_damage.html" %}
+                                {% include "fallout/_form_damage.html" %}
                             {% endwith %}
                         </div>
                         <div class="col">
                             {% with code="action" %}
-                                {% include "fallout/_action.html" %}
+                                {% include "fallout/_form_action.html" %}
                             {% endwith %}
                         </div>
                     </div>

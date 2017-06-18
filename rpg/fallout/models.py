@@ -562,9 +562,10 @@ class Character(Entity, Stats):
             attacker_weapon_equipment.count -= 0 if attacker_weapon.is_throwable else 1
             attacker_weapon_equipment.clip_count -= 0 if attacker_weapon.is_melee else 1
             # TODO: weapon condition based on damage
-            attacker_weapon_equipment.condition -= attacker_weapon_equipment.condition * (
-                getattr(attacker_weapon, 'condition_modifier', 0.0) +
-                getattr(attacker_ammo, 'condition_modifier', 0.0))
+            if not attacker_weapon.is_throwable:
+                attacker_weapon_equipment.condition -= attacker_weapon_equipment.condition * (
+                    getattr(attacker_weapon, 'condition_modifier', 0.0) +
+                    getattr(attacker_ammo, 'condition_modifier', 0.0))
             attacker_weapon_equipment.save()
         # Save character and return history
         self.action_points -= ap_cost
