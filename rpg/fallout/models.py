@@ -247,6 +247,10 @@ class Character(Entity, Stats):
     # Statistics cache
     _stats = {}
 
+    # Surcharge du display pour les choix multiples
+    def get_tag_skills_display(self):
+        return ', '.join([str(label) for code, label in SKILLS if code in self.tag_skills])
+
     def get_stats(self, stats, from_stats=True):
         return [(code, label, getattr(self.stats if from_stats else self, code, 0)) for code, label in stats]
 

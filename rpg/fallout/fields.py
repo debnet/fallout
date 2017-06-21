@@ -42,7 +42,7 @@ class MultipleChoiceField(models.TextField):
     def to_python(self, value):
         import re
         choices = dict(self.flatchoices)
-        if not choices:
+        if not choices or not value:
             return []
         return list(re.split(r'[^\w]', value) if isinstance(value, str) else value)
 
