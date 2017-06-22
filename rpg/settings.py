@@ -32,6 +32,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'pytz',
+    'corsheaders',
     'rest_framework',
     'rest_framework.authtoken',
     'common',
@@ -40,6 +41,9 @@ INSTALLED_APPS = (
 )
 
 MIDDLEWARE = (
+    # CORS Headers
+    'corsheaders.middleware.CorsMiddleware',
+    # Default
     'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',

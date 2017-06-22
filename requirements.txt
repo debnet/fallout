@@ -1,6 +1,7 @@
 Django==1.11.2
 Pillow==4.1.1
 coverage==4.4.1
+django-cors-headers==2.1.0
 djangorestframework==3.6.3
 flake8==3.2.1
 python-dateutil==2.6.0
