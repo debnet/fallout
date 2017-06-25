@@ -1,6 +1,6 @@
 # coding: utf-8
 from datetime import timedelta
-from random import randint, choice
+from random import random, randint, choice
 from typing import Dict, Iterable, List, Tuple, Union
 
 from common.models import CommonModel, Entity
@@ -392,7 +392,7 @@ class Character(Entity, Stats):
         history.game_date = self.campaign and self.campaign.current_game_date
         is_special = stats in LIST_SPECIALS
         history.value = getattr(self.stats, stats, 0)
-        history.roll = randint(1, 10 if is_special else 100)
+        history.roll = randint(1, 10 if is_special else 100 - randint(0, self.stats.luck))
         history.success = history.roll < (history.value + history.modifier)
         history.critical = (history.roll <= (1 if is_special else self.stats.luck)) if history.success \
             else (history.roll >= (CRITICAL_FAIL_D10 if is_special else CRITICAL_FAIL_D100))
@@ -422,30 +422,29 @@ class Character(Entity, Stats):
             equipements.delete()
         return loots
 
-    def burst(self, *targets: Iterable['Character'], targets_range: Iterable[int]=None,
-              hit_modifier: int=0) -> List['FightHistory']:
+    def burst(self, targets: Iterable[Tuple['Character', int]], hit_modifier: int=0) -> List['FightHistory']:
         """
         Permet de lancer une attaque en rafale sur un groupe d'ennemis
-        :param targets: Liste de personnages ciblés
-        :param targets_range: Liste des distances (en cases) de chaque personnage dans le même ordre
+        :param targets: Liste de personnages ciblés avec leur distance relative (en cases) pour chacun dans un tuple
         :param hit_modifier: Modificateurs complémentaires de précision (lumière, couverture, etc...)
         :return: Liste d'historiques de combat
         """
         histories = []
         attacker_weapon_equipment = self.equipments.filter(slot=ITEM_WEAPON).first()
         attacker_weapon = getattr(attacker_weapon_equipment, 'item', None)
-        all_targets = list(zip(targets, targets_range))
-        for hit in range(getattr(attacker_weapon, 'burst_count', 0)):
-            target, target_range = choice(all_targets)
+        assert attacker_weapon and attacker_weapon.burst_count != 0, _(
+            "L'attaquant ne possède pas d'arme ou celle-ci ne permet pas d'attaque en rafale.")
+        for hit in range(attacker_weapon.burst_count):
+            target, target_range = choice(targets)
             history = self.fight(target, is_burst=True, target_range=target_range, hit_modifier=hit_modifier, hit=hit)
             histories.append(history)
         return histories
 
-    def fight(self, defender: 'Character', is_burst: bool=False, target_range: int=1,
+    def fight(self, target: 'Character', is_burst: bool=False, target_range: int=1,
               hit_modifier: int=0, target_part: BODY_PARTS=None, hit: int=0) -> 'FightHistory':
         """
         Calcul un round de combat entre deux personnages
-        :param defender: Personnage ciblé
+        :param target: Personnage ciblé
         :param is_burst: Attaque en rafale ?
         :param target_range: Distance (en cases) entre les deux personnages
         :param hit_modifier: Modificateurs complémentaires de précision (lumière, couverture, etc...)
@@ -453,21 +452,21 @@ class Character(Entity, Stats):
         :param hit: Compteur de coups lors d'une attaque en rafale
         :return: Historique de combat
         """
-        if isinstance(defender, (int, str)):
-            defender = Character.objects.get(pk=str(defender))
-        history = FightHistory(attacker=self, defender=defender, burst=is_burst, hit_count=hit + 1, range=target_range)
+        if isinstance(target, (int, str)):
+            target = Character.objects.get(pk=str(target))
+        history = FightHistory(attacker=self, defender=target, burst=is_burst, hit_count=hit + 1, range=target_range)
         history.game_date = self.campaign and self.campaign.current_game_date
         # Equipment
         attacker_weapon_equipment = self.equipments.filter(slot=ITEM_WEAPON).first()
         attacker_ammo_equipment = self.equipments.filter(slot=ITEM_AMMO).first()
-        defender_armor_equipment = defender.equipments.filter(slot=ITEM_ARMOR).first()
+        defender_armor_equipment = target.equipments.filter(slot=ITEM_ARMOR).first()
         attacker_weapon = history.attacker_weapon = getattr(attacker_weapon_equipment, 'item', None)
         attacker_ammo = history.attacker_ammo = getattr(attacker_ammo_equipment, 'item', None)
         defender_armor = history.defender_armor = getattr(defender_armor_equipment, 'item', None)
         # Fight conditions
         if attacker_weapon and attacker_weapon.clip_size and attacker_weapon_equipment.clip_count == 0:
             history.fail = STATUS_NO_MORE_AMMO
-        elif defender.health <= 0:
+        elif target.health <= 0:
             history.fail = STATUS_TARGET_DEAD
         elif attacker_weapon_equipment and attacker_weapon_equipment.condition <= 0.0:
             history.status = STATUS_WEAPON_BROKEN
@@ -499,7 +498,7 @@ class Character(Entity, Stats):
         attacker_hit_chance += getattr(attacker_weapon, 'hit_chance_modifier', 0)  # Weapon hit chance modifier
         attacker_hit_chance += getattr(attacker_ammo, 'hit_chance_modifier', 0)  # Ammo hit chance modifier
         attacker_hit_chance -= getattr(defender_armor, 'armor_class', 0)  # Defender armor class modifier
-        attacker_hit_chance -= defender.stats.armor_class  # Armor class
+        attacker_hit_chance -= target.stats.armor_class  # Armor class
         # Targetted body part modifiers
         body_part = target_part
         if not target_part:
@@ -547,7 +546,7 @@ class Character(Entity, Stats):
             threshold_modifier += getattr(attacker_ammo, 'threshold_modifier', 0)
             resistance_modifier = getattr(attacker_weapon, 'resistance_modifier', 0.0)
             resistance_modifier += getattr(attacker_ammo, 'resistance_modifier', 0.0)
-            history.damage = defender.damage(
+            history.damage = target.damage(
                 raw_damage=damage, damage_type=attacker_damage_type, save=True,
                 threshold_modifier=threshold_modifier, resistance_modifier=resistance_modifier)
             # On hit effects
@@ -558,9 +557,9 @@ class Character(Entity, Stats):
                     if randint(1, 100) >= effect.chance:
                         continue
                     ActiveEffect.objects.get_or_create(
-                        character=defender, effect=effect,
+                        character=target, effect=effect,
                         defaults=dict(start_date=history.game_date))
-            defender.apply_effects()  # Apply effects immediatly
+            target.apply_effects()  # Apply effects immediatly
         # Clip count & weapon condition
         if attacker_weapon_equipment and attacker_weapon:
             attacker_weapon_equipment.count -= 0 if attacker_weapon.is_throwable else 1
@@ -838,6 +837,19 @@ class Equipment(Entity):
             return int(self.condition * 100)
         return None
 
+    def equip(self):
+        """
+        Permet d'équiper ou de déséquiper un objet
+        :return: Equipement
+        """
+        if self.slot:
+            self.slot = None
+        elif self.item.type in SLOT_ITEM_TYPES:
+            self.slot = self.item.type
+        self.full_clean()
+        self.save()
+        return self
+
     def clean(self):
         if self.slot:
             if self.character.equipments.exclude(id=self.id).filter(slot=self.slot).exists():
@@ -963,6 +975,51 @@ class ActiveEffect(Entity):
         verbose_name_plural = _("effets en cours")
 
 
+class Loot(CommonModel):
+    """
+    Butin
+    """
+    campaign = models.ForeignKey('Campaign', on_delete=models.CASCADE, verbose_name=_("campagne"), related_name="loots")
+    item = models.ForeignKey('Item', on_delete=models.CASCADE, verbose_name=_("objet"), related_name="loots")
+    count = models.PositiveIntegerField(default=1, verbose_name=_("nombre"))
+    condition = models.FloatField(default=1.0, verbose_name=_("état"))
+
+    def take(self, character: 'Character', count=1):
+        """
+        Permet à un personnage de prendre un ou plusieurs objets du butin
+        :param character: Personnage
+        :param count: Nombre d'objets à prendre
+        :return: Equipement
+        """
+        if isinstance(character, (int, str)):
+            character = Character.objects.get(pk=int(character))
+        assert self.campaign_id == character.campaign_id, _(
+            "Le personnage doit être dans la même campagne.")
+        count = max(0, min(count, self.count))
+        equipment = Equipment.objects.select_related('item').filter(character=character, item=self.item).first()
+        if equipment and equipment.item.type not in [ITEM_WEAPON, ITEM_ARMOR]:
+            equipment.count += count
+            equipment.save()
+            return equipment
+        return Equipment.objects.create(
+            character=character,
+            item=self.item,
+            count=count,
+            condition=self.condition)
+
+    def save(self, *args, **kwargs):
+        if self.count <= 0:
+            return self.delete(*args, **kwargs)
+        super().save(*args, **kwargs)
+
+    def __str__(self) -> str:
+        return "({}) {}".format(str(self.campaign), str(self.item))
+
+    class Meta:
+        verbose_name = _("butin")
+        verbose_name_plural = _("butins")
+
+
 class LootTemplate(Entity):
     """
     Modèle de butin
@@ -971,6 +1028,34 @@ class LootTemplate(Entity):
     title = models.CharField(max_length=200, blank=True, verbose_name=_("titre"))
     description = models.TextField(blank=True, verbose_name=_("description"))
     image = models.ImageField(blank=True, upload_to='loot', verbose_name=_("image"))
+
+    def create(self, campaign: 'Campaign', character: 'Character'=None):
+        """
+        Permet de créer un butin à partir du modèle (éventuellement en fonction de la chance du personnage)
+        :param campaign: Campagne
+        :param character: Personnage
+        :return: Liste de butins
+        """
+        loots = []
+        if isinstance(campaign, (int, str)):
+            campaign = Campaign.objects.get(pk=int(campaign))
+        chance_modifier = 0
+        if character:
+            if isinstance(character, (int, str)):
+                character = Character.objects.get(pk=int(character))
+            chance_modifier = character.stats.luck
+        assert not character or campaign.id == character.campaign_id, _(
+            "Le personnage doit être dans la même campagne.")
+        for template in self.items.all():
+            chance = randint(1, 100 - randint(0, chance_modifier))
+            if chance > template.chance:
+                continue
+            loots.append(Loot.objects.create(
+                campaign=campaign,
+                item=template.item,
+                count=randint(template.min_count, template.max_count),
+                condition=randint(template.min_condition * 100, template.max_condition * 100) / 100))
+        return loots
 
     def __str__(self) -> str:
         return self.name
@@ -998,28 +1083,6 @@ class LootTemplateItem(Entity):
     class Meta:
         verbose_name = _("objet de butin")
         verbose_name_plural = _("objets des butins")
-
-
-class Loot(CommonModel):
-    """
-    Butin
-    """
-    campaign = models.ForeignKey('Campaign', on_delete=models.CASCADE, verbose_name=_("campagne"), related_name="loots")
-    item = models.ForeignKey('Item', on_delete=models.CASCADE, verbose_name=_("objet"), related_name="loots")
-    count = models.PositiveIntegerField(default=1, verbose_name=_("nombre"))
-    condition = models.FloatField(default=1.0, verbose_name=_("état"))
-
-    def save(self, *args, **kwargs):
-        if self.count <= 0:
-            return self.delete(*args, **kwargs)
-        super().save(*args, **kwargs)
-
-    def __str__(self) -> str:
-        return "({}) {}".format(str(self.campaign), str(self.item))
-
-    class Meta:
-        verbose_name = _("butin")
-        verbose_name_plural = _("butins")
 
 
 class RollHistory(CommonModel):
@@ -1134,9 +1197,9 @@ MODELS = (
     Effect,
     EffectModifier,
     ActiveEffect,
+    Loot,
     LootTemplate,
     LootTemplateItem,
-    Loot,
     RollHistory,
     DamageHistory,
     FightHistory,
