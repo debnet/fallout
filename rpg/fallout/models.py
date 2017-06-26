@@ -1,6 +1,6 @@
 # coding: utf-8
 from datetime import timedelta
-from random import random, randint, choice
+from random import randint, choice
 from typing import Dict, Iterable, List, Tuple, Union
 
 from common.models import CommonModel, Entity
@@ -15,9 +15,24 @@ from rpg.fallout.enums import *  # noqa
 from rpg.fallout.fields import MultipleChoiceField
 
 
+def get_medias(directory=''):
+    import os
+    images = []
+    dirname = os.path.join(settings.MEDIA_ROOT, directory)
+    for filename in os.listdir(dirname):
+        filepath = os.path.join(dirname, filename)
+        title = os.path.splitext(filename)[0].replace('_', ' ')
+        filename = os.path.join(directory, filename)
+        if os.path.isdir(filepath):
+            images.append((title, get_medias(filename)))
+        else:
+            images.append((title, filename))
+    return images
+
+
 class Campaign(CommonModel):
     """
-    Aventure
+    Campagne
     """
     name = models.CharField(max_length=200, verbose_name=_("nom"))
     title = models.CharField(max_length=200, blank=True, verbose_name=_("titre"))
@@ -1000,12 +1015,18 @@ class Loot(CommonModel):
         if equipment and equipment.item.type not in [ITEM_WEAPON, ITEM_ARMOR]:
             equipment.count += count
             equipment.save()
-            return equipment
-        return Equipment.objects.create(
-            character=character,
-            item=self.item,
-            count=count,
-            condition=self.condition)
+        else:
+            equipment = Equipment.objects.create(
+                character=character,
+                item=self.item,
+                count=count,
+                condition=self.condition)
+        if count >= self.count:
+            self.delete()
+        else:
+            self.count -= count
+            self.save()
+        return equipment
 
     def save(self, *args, **kwargs):
         if self.count <= 0:

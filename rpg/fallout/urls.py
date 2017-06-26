@@ -13,6 +13,8 @@ urlpatterns = [
 # API REST
 router = api.router
 api_urlpatterns = [
+    url(r'^campaign/(?P<campaign_id>\d+)/next/$', api.campaign_next_turn, name='campaign_next_turn'),
+    url(r'^campaign/(?P<campaign_id>\d+)/clear/$', api.campaign_clear_loot, name='campaign_clear_loot'),
     url(r'^campaign/(?P<campaign_id>\d+)/roll/$', api.campaign_roll, name='campaign_roll'),
     url(r'^character/(?P<character_id>\d+)/roll/$', api.character_roll, name='character_roll'),
     url(r'^character/(?P<character_id>\d+)/fight/$', api.character_fight, name='character_fight'),

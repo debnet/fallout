@@ -9,7 +9,7 @@ from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
 
 from rpg.fallout.enums import BODY_PARTS, DAMAGES_TYPES, LIST_EDITABLE_STATS, ROLL_STATS
-from rpg.fallout.models import MODELS, Character, DamageHistory, FightHistory, RollHistory
+from rpg.fallout.models import MODELS, Campaign, Character, DamageHistory, FightHistory, RollHistory
 
 
 # Affichage des statistiques calculées sur le personnage
@@ -28,6 +28,23 @@ disable_relation_fields(*MODELS)
 
 # Création des APIs REST standard pour les modèles de cette application
 router, all_serializers, all_viewsets = create_api(*MODELS)
+
+
+class NextTurnInputSerializer(BaseCustomSerializer):
+    seconds = serializers.IntegerField(default=0, initial=0, label=_("secondes"))
+    apply = serializers.BooleanField(default=True, initial=True, label=_("valider ?"))
+
+
+@api_view_with_serializer(['POST'], input_serializer=NextTurnInputSerializer, serializer=SimpleCharacterSerializer)
+def campaign_next_turn(request, campaign_id):
+    campaign = get_object_or_404(Campaign, pk=campaign_id)
+    return campaign.next_turn(**request.validated_data)
+
+
+@api_view_with_serializer(['POST'])
+def campaign_clear_loot(request, campaign_id):
+    campaign = get_object_or_404(Campaign, pk=campaign_id)
+    return campaign.clear_loot()
 
 
 class RollInputSerializer(BaseCustomSerializer):
