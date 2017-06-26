@@ -15,7 +15,7 @@ class LootInline(admin.TabularInline):
 class CampaignAdmin(CommonAdmin):
     fieldsets = (
         (_("Informations générales"), dict(
-            fields=('name', 'title', 'description', 'image', ),
+            fields=('name', 'title', 'description', 'image', 'thumbnail', ),
             classes=('wide', ),
         )),
         (_("Informations techniques"), dict(
@@ -32,6 +32,7 @@ class CampaignAdmin(CommonAdmin):
     list_display_links = ('name', )
     list_display = ('name', 'current_game_date', 'current_character', 'radiation', )
     list_editable = ('current_game_date', 'current_character', 'radiation', )
+    ordering = ('name', )
 
 
 class EquipmentInlineAdmin(EntityTabularInline):
@@ -52,7 +53,7 @@ class CharacterAdmin(EntityAdmin):
             classes=('wide', 'collapse', ),
         )),
         (_("Informations générales"), dict(
-            fields=('name', 'title', 'description', 'image', 'race', 'level', 'is_player', 'is_active', ),
+            fields=('name', 'title', 'description', 'image', 'thumbnail', 'race', 'level', 'is_player', 'is_active', ),
             classes=('wide', ),
         )),
         (_("Spécialités"), dict(
@@ -72,8 +73,9 @@ class CharacterAdmin(EntityAdmin):
         'name', 'race', 'level', 'is_player', 'is_active',
         'health', '_max_health', 'action_points', '_max_action_points', 'experience', 'karma')
     list_editable = ('health', 'action_points', 'experience', 'karma')
-    list_filter = ('campaign', 'user', 'race', 'is_player', 'is_active')
-    search_fields = ('name', 'title', 'description')
+    list_filter = ('campaign', 'user', 'race', 'is_player', 'is_active', )
+    search_fields = ('name', 'title', 'description', )
+    ordering = ('name', )
 
     def get_form(self, request, obj=None, **kwargs):
         form = super().get_form(request, obj, **kwargs)
@@ -102,7 +104,7 @@ class ItemModifierInline(admin.TabularInline):
 class ItemAdmin(EntityAdmin):
     fieldsets = (
         (_("Informations générales"), dict(
-            fields=('name', 'title', 'description', 'image', 'type', 'value', 'weight', 'is_quest', ),
+            fields=('name', 'title', 'description', 'image', 'thumbnail', 'type', 'value', 'weight', 'is_quest', ),
             classes=('wide', ),
         )),
         (_("Armes uniquement"), dict(
@@ -139,8 +141,9 @@ class ItemAdmin(EntityAdmin):
     list_display_links = ('name', )
     list_display = ('name', 'type', 'value', 'weight', 'is_quest', )
     list_editable = ()
-    list_filter = ('type', 'is_quest', 'is_melee', 'is_throwable')
-    search_fields = ('name', 'title', 'description')
+    list_filter = ('type', 'is_quest', 'is_melee', 'is_throwable', )
+    search_fields = ('name', 'title', 'description', )
+    ordering = ('name', )
 
     def get_queryset(self, request):
         return super().get_queryset(request).prefetch_related('modifiers')
@@ -158,6 +161,7 @@ class EquipmentAdmin(EntityAdmin):
     list_display = ('character', 'item', 'slot', 'count', 'condition', 'clip_count', )
     list_editable = ('slot', 'count', 'condition', 'clip_count', )
     list_filter = ('character', 'item', 'slot', )
+    ordering = ('character', 'item', )
 
     def get_queryset(self, request):
         return super().get_queryset(request).select_related('item')
@@ -172,7 +176,7 @@ class EffectModifierInline(admin.TabularInline):
 class EffectAdmin(EntityAdmin):
     fieldsets = (
         (_("Informations générales"), dict(
-            fields=('name', 'title', 'description', 'image', 'chance', 'duration', ),
+            fields=('name', 'title', 'description', 'image', 'thumbnail', 'chance', 'duration', ),
             classes=('wide', ),
         )),
         (_("Dégâts temporels"), dict(
@@ -186,6 +190,7 @@ class EffectAdmin(EntityAdmin):
     list_display = ('name', )
     list_editable = ()
     list_filter = ()
+    ordering = ('name', )
 
     def get_queryset(self, request):
         return super().get_queryset(request).prefetch_related('modifiers')
@@ -203,6 +208,7 @@ class ActiveEffectAdmin(EntityAdmin):
     list_display = ()
     list_editable = ()
     list_filter = ()
+    ordering = ('character', 'effect', )
 
 
 class LootTemplateItemInline(EntityTabularInline):
@@ -214,7 +220,7 @@ class LootTemplateItemInline(EntityTabularInline):
 class LootTemplateAdmin(EntityAdmin):
     fieldsets = (
         (None, dict(
-            fields=('name', 'title', 'description', 'image', ),
+            fields=('name', 'title', 'description', 'image', 'thumbnail', ),
             classes=('wide', ),
         )),
     )
@@ -224,6 +230,7 @@ class LootTemplateAdmin(EntityAdmin):
     list_display = ('name', )
     list_editable = ()
     list_filter = ()
+    ordering = ('name', )
 
     def get_queryset(self, request):
         return super().get_queryset(request).prefetch_related('items')

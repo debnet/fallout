@@ -10,19 +10,24 @@
                         <span class="card-title">{{ info.name }}</span>
                         {% if info.title %}<small class="card-subtitle mb-2 text-muted">{{ info.title }}</small>{% endif %}
                     </div>
-                    {% with image=item.item.image %}
-                        {% if image %}
-                            <img class="card-img-top m-1 img-fluid img-thumbnail mx-auto d-block"
+                    {% with image=item.item.image thumbnail=item.item.thumbnail %}
+                        {% if thumbnail %}
+                            <img class="card-img-top m-1 img-fluid mx-auto d-block" src="{{ thumbnail }}">
+                        {% elif image %}
+                            <img class="card-img-top m-1 img-fluid mx-auto d-block"
                                  height="{{ image.height }}" width="{{ image.width }}" src="{{ image.url }}">
                         {% endif %}
                     {% endwith %}
                     <div class="card-block">
                         <p class="card-text">
-                            {% if info.description %}
-                            <small class="text-muted">{{ info.description }}</small>
+                            <small class="badge badge-primary">{{ item.charge|floatformat:2 }} {% trans "kg." %}</small>
+                            <small class="badge badge-warning">{{ item.value|floatformat:2 }} {% trans "$" %}</small>
+                            {% if info.clip_size %}
+                            <small class="badge badge-danger">{{ item.clip_count }} / {{ info.clip_size }}</small>
                             {% endif %}
-                            <small class="text-primary">{{ item.charge }} kg.</small>
-                            <small class="text-warning">{{ item.value }} &euro;</small>
+                            {% if info.description %}
+                                <small class="text-muted">{{ info.description }}</small>
+                            {% endif %}
                         </p>
                         {% with condition=item.current_condition %}
                             {% if condition %}
@@ -55,7 +60,7 @@
                                     {% endif %}
                                 {% endif %}
                                 {% if info.clip_size and item.clip_count < info.clip_size %}
-                                    <button class="btn btn-sm btn-info m-1" type="submit"
+                                    <button class="btn btn-sm btn-success m-1" type="submit"
                                             name="reload">{% trans "Recharger" %}</button>
                                 {% endif %}
                                 <div class="form-check m-1">

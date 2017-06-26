@@ -19,4 +19,5 @@ api_urlpatterns = [
     url(r'^character/(?P<character_id>\d+)/roll/$', api.character_roll, name='character_roll'),
     url(r'^character/(?P<character_id>\d+)/fight/$', api.character_fight, name='character_fight'),
     url(r'^character/(?P<character_id>\d+)/burst/$', api.character_burst, name='character_burst'),
+    url(r'^loot/(?P<loot_id>\d+)/take/$', api.loot_take, name='loot_take'),
 ] + router.urls

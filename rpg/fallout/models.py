@@ -9,24 +9,37 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import F, Q, Sum
 from django.utils.translation import ugettext as _
+from multiselectfield import MultiSelectField
 
 from rpg.fallout.constants import *  # noqa
 from rpg.fallout.enums import *  # noqa
-from rpg.fallout.fields import MultipleChoiceField
 
 
-def get_medias(directory=''):
+def get_thumbnails(directory=''):
+    """
+    Scanne les images le répertoire "medias" à la recherche de miniatures
+    :param directory: Répertoire à scanner
+    :return: Liste des images
+    """
     import os
+    import sys
+    if any(command in sys.argv for command in ['makemigrations', 'migrate']):
+        return
     images = []
-    dirname = os.path.join(settings.MEDIA_ROOT, directory)
-    for filename in os.listdir(dirname):
-        filepath = os.path.join(dirname, filename)
-        title = os.path.splitext(filename)[0].replace('_', ' ')
-        filename = os.path.join(directory, filename)
-        if os.path.isdir(filepath):
-            images.append((title, get_medias(filename)))
-        else:
-            images.append((title, filename))
+    try:
+        dirname = os.path.join(settings.MEDIA_ROOT, 'thumbnail', directory)
+        for filename in os.listdir(dirname):
+            filepath = os.path.join(dirname, filename)
+            name, ext = os.path.splitext(filename)
+            title = name.replace('_', ' ')
+            filename = os.path.join(directory, filename)
+            if os.path.isdir(filepath):
+                images.append((title, get_thumbnails(filename)))
+            elif ext.lower() in ['.jpg', '.jpeg', '.gif', '.png']:
+                url = os.path.join(settings.MEDIA_URL, 'thumbnail', filename).replace('\\', '/')
+                images.append((url, title))
+    except:
+        pass
     return images
 
 
@@ -38,6 +51,7 @@ class Campaign(CommonModel):
     title = models.CharField(max_length=200, blank=True, verbose_name=_("titre"))
     description = models.TextField(blank=True, verbose_name=_("description"))
     image = models.ImageField(blank=True, upload_to='campaign', verbose_name=_("image"))
+    thumbnail = models.CharField(blank=True, max_length=100, choices=get_thumbnails('campaign'), verbose_name=_("miniature"))
     start_game_date = models.DateTimeField(verbose_name=_("date de début"))
     current_game_date = models.DateTimeField(verbose_name=_("date courante"))
     current_character = models.ForeignKey(
@@ -239,6 +253,7 @@ class Character(Entity, Stats):
     title = models.CharField(max_length=200, blank=True, verbose_name=_("titre"))
     description = models.TextField(blank=True, verbose_name=_("description"))
     image = models.ImageField(blank=True, upload_to='character', verbose_name=_("image"))
+    thumbnail = models.CharField(blank=True, max_length=100, choices=get_thumbnails('character'), verbose_name=_("miniature"))
     race = models.CharField(max_length=12, choices=RACES, default=RACE_HUMAN, db_index=True, verbose_name=_("race"))
     level = models.PositiveSmallIntegerField(default=1, verbose_name=_("niveau"))
     is_player = models.BooleanField(default=False, db_index=True, verbose_name=_("joueur ?"))
@@ -258,13 +273,9 @@ class Character(Entity, Stats):
     sleep = models.FloatField(default=0.0, verbose_name=_("sommeil"))
     regeneration = models.FloatField(default=0.0, verbose_name=_("regénération"))
     # Tag skills
-    tag_skills = MultipleChoiceField(max_length=200, choices=SKILLS, blank=True, verbose_name=_("spécialités"))
+    tag_skills = MultiSelectField(max_length=200, choices=SKILLS, blank=True, verbose_name=_("spécialités"))
     # Statistics cache
     _stats = {}
-
-    # Surcharge du display pour les choix multiples
-    def get_tag_skills_display(self):
-        return ', '.join([str(label) for code, label in SKILLS if code in self.tag_skills])
 
     def get_stats(self, stats, from_stats=True):
         return [(code, label, getattr(self.stats if from_stats else self, code, 0)) for code, label in stats]
@@ -723,6 +734,7 @@ class Item(Entity):
     title = models.CharField(max_length=200, blank=True, verbose_name=_("titre"))
     description = models.TextField(blank=True, verbose_name=_("description"))
     image = models.ImageField(blank=True, upload_to='item', verbose_name=_("image"))
+    thumbnail = models.CharField(blank=True, max_length=100, choices=get_thumbnails('item'), verbose_name=_("miniature"))
     type = models.CharField(max_length=6, choices=ITEM_TYPES, verbose_name=_("type"))
     value = models.PositiveIntegerField(default=0, verbose_name=_("valeur"))
     weight = models.FloatField(default=0.0, verbose_name=_("poids"))
@@ -881,8 +893,8 @@ class Equipment(Entity):
                 raise ValidationError(dict(item=_("Cette arme est incompatible avec les munitions équipées.")))
 
     def save(self, *args, **kwargs):
-        self.condition = max(0.0, min(1.0, self.condition or 1.0)) if self.slot in [ITEM_WEAPON, ITEM_ARMOR] else None
-        self.clip_count = max(0, self.clip_count or 0) if self.slot == ITEM_WEAPON and not self.item.is_melee else None
+        self.condition = max(0.0, min(1.0, self.condition or 1.0)) if self.item.type in [ITEM_WEAPON, ITEM_ARMOR] else None
+        self.clip_count = max(0, self.clip_count or 0) if self.item.type == ITEM_WEAPON and not self.item.is_melee else None
         return super().save(*args, **kwargs)
 
     def __str__(self) -> str:
@@ -902,6 +914,7 @@ class Effect(Entity):
     title = models.CharField(max_length=200, blank=True, verbose_name=_("titre"))
     description = models.TextField(blank=True, verbose_name=_("description"))
     image = models.ImageField(blank=True, upload_to='effect', verbose_name=_("image"))
+    thumbnail = models.CharField(blank=True, max_length=100, choices=get_thumbnails('effect'), verbose_name=_("miniature"))
     chance = models.PositiveSmallIntegerField(default=100, verbose_name=_("chance"))
     duration = models.DurationField(blank=True, null=True, verbose_name=_("durée"))
     # Timed effects
@@ -1049,6 +1062,7 @@ class LootTemplate(Entity):
     title = models.CharField(max_length=200, blank=True, verbose_name=_("titre"))
     description = models.TextField(blank=True, verbose_name=_("description"))
     image = models.ImageField(blank=True, upload_to='loot', verbose_name=_("image"))
+    thumbnail = models.CharField(blank=True, max_length=100, choices=get_thumbnails('loot'), verbose_name=_("miniature"))
 
     def create(self, campaign: 'Campaign', character: 'Character'=None):
         """

@@ -9,7 +9,7 @@ from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
 
 from rpg.fallout.enums import BODY_PARTS, DAMAGES_TYPES, LIST_EDITABLE_STATS, ROLL_STATS
-from rpg.fallout.models import MODELS, Campaign, Character, DamageHistory, FightHistory, RollHistory
+from rpg.fallout.models import MODELS, Campaign, Character, Item, Loot, DamageHistory, FightHistory, RollHistory
 
 
 # Affichage des statistiques calculées sur le personnage
@@ -130,3 +130,26 @@ class DamageHistorySerializer(CommonModelSerializer):
 def character_damage(request, character_id):
     character = get_object_or_404(Character, pk=character_id)
     return character.damage(**request.validated_data)
+
+
+class LootTakeInputSerializer(CommonModelSerializer):
+    character = serializers.PrimaryKeyRelatedField(queryset=Character.objects.order_by('name'), label=_("personnage"))
+    count = serializers.IntegerField(default=1, initial=1, label=_("nombre"))
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        loot_id = getattr(self.context.get('view'), 'kwargs', {}).get('loot_id')
+        if loot_id:
+            character_field = self.fields['character']
+            character_field.queryset = character_field.queryset.filter(campaign__loots=loot_id)
+
+
+class EquipmentSerializer(CommonModelSerializer):
+    character = SimpleCharacterSerializer(read_only=True, label=_("personnage"))
+    item = create_model_serializer(Item)(read_only=True, label=_("objet"))
+
+
+@api_view_with_serializer(['POST'], input_serializer=LootTakeInputSerializer, serializer=EquipmentSerializer)
+def loot_take(request, loot_id):
+    loot = get_object_or_404(Loot, pk=loot_id)
+    return loot.take(**request.validated_data)

@@ -11,7 +11,7 @@
                     <td><label for="{{ code }}-modifier">{% trans "modificateur" %}</label></td>
                     <td class="text-right">
                         <input id="{{ code }}-modifier" class="form-control form-control-sm tiny" type="number"
-                               name="modifier" value="0" />
+                               name="modifier" value="" />
                     </td>
                 </tr>
             {% endif %}
@@ -20,7 +20,7 @@
                     <td>{{ s.1 }}</td>
                     <td class="text-right">
                         {% if view %}
-                            <strong>{{ s.2|floatformat:0 }}{% if s.3 is not None %} / {{ s.3|floatformat:0 }}{% endif %}</strong>
+                            <strong>{{ s.2|floatformat:0 }}{% if s.3 is not None %}&nbsp;/&nbsp;{{ s.3|floatformat:0 }}{% endif %}</strong>
                         {% elif request.user.is_superuser %}
                             <button class="btn btn-sm btn-primary tiny" type="submit" name="stats" value="{{ s.0 }}">{{ s.2|floatformat:0 }}</button>
                         {% endif %}

@@ -43,17 +43,17 @@ def view_character(request, character_id):
         if data.get('type') == 'roll':
             roll_history = character.roll(
                 data.get('stats'),
-                int(data.get('modifier')))
+                int(data.get('modifier') or 0))
         elif data.get('type') == 'fight':
             fight_history = character.fight(
                 target=data.get('target'),
                 target_part=data.get('bodypart'),
                 target_range=int(data.get('range')),
-                hit_modifier=int(data.get('modifier')))
+                hit_modifier=int(data.get('modifier') or 0))
         elif data.get('type') == 'burst':
             fight_history = character.burst(
                 targets=zip(data.get('targets'), data.get('ranges')),
-                hit_modifier=int(data.get('modifier')))
+                hit_modifier=int(data.get('modifier') or 0))
         elif data.get('type') == 'damage':
             print(data)  # TODO: for testing purpose only
 
