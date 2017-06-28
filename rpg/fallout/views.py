@@ -12,7 +12,7 @@ def view_index(request):
 
 
 @login_required
-@render_to('fallout/campaign.html')
+@render_to('fallout/campaign/campaign.html')
 def view_campaign(request, campaign_id):
     campaign = Campaign.objects.filter(id=campaign_id).first()
     characters = Character.objects.filter(campaign=campaign)
@@ -27,7 +27,7 @@ def view_campaign(request, campaign_id):
 
 
 @login_required
-@render_to('fallout/character.html')
+@render_to('fallout/character/character.html')
 def view_character(request, character_id):
     characters = Character.objects.select_related()
     if not request.user.is_superuser:

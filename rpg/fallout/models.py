@@ -302,7 +302,7 @@ class Character(Entity, Stats):
                 rvalue = lvalue
                 lvalue = self.used_skill_points
             elif code == STATS_EXPERIENCE:
-                rvalue = sum(l * BASE_XP for l in range(1, self.level + 1))
+                rvalue = self.required_experience
             elif code in LIST_NEEDS:
                 rvalue = 1000
             results.append((code, label, lvalue, rvalue))
@@ -336,15 +336,30 @@ class Character(Entity, Stats):
     def used_skill_points(self):
         return sum(getattr(self, skill) * (0.5 if skill in self.tag_skills else 1) for skill in LIST_SKILLS)
 
+    @property
+    def required_experience(self):
+        return sum(l * BASE_XP for l in range(1, self.level + 1))
+
     def modify_value(self, name, value):
         value = getattr(self, name, 0) + value
         setattr(self, name, value)
         return value
 
-    def check_level(self) -> int:
+    def add_experience(self, amount: int=0):
+        """
+        Ajoute de l'expérience à ce personnage
+        :param amount: Quantité d'expérience ajoutée
+        :return: Niveau actuel, expérience requise jusqu'au niveau suivant
+        """
+        if amount:
+            self.experience += amount
+            self.save()
+        return self.level, self.required_experience
+
+    def check_level(self) -> Tuple[int, int]:
         """
         Vérification du niveau en fonction de l'expérience
-        :return: Niveau actuel
+        :return: Niveau actuel, expérience requise jusqu'au niveau suivant
         """
         needed_xp = 0
         level = 2
@@ -360,7 +375,7 @@ class Character(Entity, Stats):
             if not self.level % self.stats.perk_rate:
                 self.perk_points += 1
             level += 1
-        return level
+        return level, needed_xp
 
     def randomize(self, level: int=None, rate: float=0.0) -> None:
         """
@@ -864,11 +879,16 @@ class Equipment(Entity):
             return int(self.condition * 100)
         return None
 
-    def equip(self):
+    def equip(self, action=False):
         """
         Permet d'équiper ou de déséquiper un objet
+        :param action: Consommera des points d'action
         :return: Equipement
         """
+        # TODO: algorithme à revoir :
+        # - si objet déjà équipé : déséquiper objet précédent
+        # - si arme ou munitions : vérifier et vider le chargeur avant
+        # - garder l'état précédent pour rollback en cas d'erreur de validation
         if self.slot:
             self.slot = None
         elif self.item.type in SLOT_ITEM_TYPES:

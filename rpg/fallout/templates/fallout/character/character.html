@@ -1,0 +1,74 @@
+{% extends "fallout/base.html" %}
+{% load i18n %}
+
+{% block navbar %}
+    {% with campaign=character.campaign %}
+        {% include "fallout/navbar.html" %}
+    {% endwith %}
+{% endblock %}
+
+{% block actions %}
+    {% if request.user.is_superuser %}
+        <ul class="nav navbar-nav navbar-right">
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle"
+                   id="actions-navbar" href="#" data-toggle="dropdown"
+                   aria-haspopup="true" aria-expanded="false">{% trans "Actions" %}</a>
+                <div class="dropdown-menu" aria-labelledby="actions-navbar">
+                    <a class="dropdown-item" href="{% url 'admin:fallout_character_add' %}?campaign={{ character.campaign_id }}">
+                        {% trans "Ajouter" %}</a>
+                    {% if character %}
+                        <a class="dropdown-item" href="{% url 'admin:fallout_character_change' character.id %}">
+                            {% trans "Modifier" %}</a>
+                    {% endif %}
+                </div>
+            </li>
+        </ul>
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+    {% if roll %}
+        {% include "fallout/character/alerts/roll.html" %}
+    {% endif %}
+    {% if character %}
+        <div class="content">
+            <h3 class="display-4">
+                {{ character.name }}
+                {% if character.title %}<small class="text-muted">{{ character.title }}</small>{% endif %}
+            </h3>
+            <p class="lead">
+                {% if not character.is_player %}<span class="badge badge-info">{% trans "PNJ" %}</span>{% endif %}
+                <strong>{% trans "Niveau" %} {{ character.level }}</strong>
+                {% if character.description %} {{ character.description }}{% endif %}
+            </p>
+        </div>
+        <div role="tabpanel" id="tabs">
+            <ul class="nav nav-tabs tab" id="character-tabs" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link{% if 'stats' in request.GET %} active{% endif %}" id="stats-tab" data-toggle="tab"
+                       href="#stats" role="tab">{% trans "Statistiques" %}</a>
+                </li>
+                {% if equipment or inventory %}
+                    <li class="nav-item">
+                        <a class="nav-link{% if 'items' in request.GET %} active{% endif %}" id="items-tab" data-toggle="tab"
+                           href="#items" role="tab">{% trans "Objets" %}</a>
+                    </li>
+                {% endif %}
+                {% if request.user.is_superuser %}
+                    <li class="nav-item">
+                        <a class="nav-link{% if 'actions' in request.GET %} active{% endif %}" id="actions-tab" data-toggle="tab"
+                           href="#actions" role="tab">{% trans "Actions" %}</a>
+                    </li>
+                {% endif %}
+            </ul>
+            <div class="tab-content">
+                {% include "fallout/character/panels/stats.html" %}
+                {% if equipment or inventory %}
+                    {% include "fallout/character/panels/items.html" %}
+                {% endif %}
+                {% include "fallout/character/panels/actions.html" %}
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}

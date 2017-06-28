@@ -1,0 +1,26 @@
+{% load i18n %}
+
+<div class="tab-pane fade{% if 'actions' in request.GET %} active show{% endif %}" id="actions" role="tabpanel">
+    <div class="row">
+        <div class="col">
+            {% with code="damage" multiple=False %}
+                {% include "fallout/character/forms/damage.html" %}
+            {% endwith %}
+        </div>
+        <div class="col">
+            {% with code="action" %}
+                {% include "fallout/character/forms/action.html" %}
+            {% endwith %}
+        </div>
+        <div class="col">
+            {% with code="fight" burst=False %}
+                {% include "fallout/character/forms/attack.html" %}
+            {% endwith %}
+        </div>
+        <div class="col">
+            {% with code="burst" burst=True %}
+                {% include "fallout/character/forms/attack.html" %}
+            {% endwith %}
+        </div>
+    </div>
+</div>

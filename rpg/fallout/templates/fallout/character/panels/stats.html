@@ -1,0 +1,26 @@
+{% load i18n %}
+
+<div class="tab-pane fade{% if 'stats' in request.GET %} active show{% endif %}" id="stats" role="tabpanel">
+    <div class="row">
+        <div class="col">
+            {% with code="general" label=_("Etat général") stats=character.general_stats view=True %}
+                {% include "fallout/character/forms/stats.html" %}
+            {% endwith %}
+        </div>
+        <div class="col">
+            {% with code="special" label=_("S.P.E.C.I.A.L.") stats=character.special %}
+                {% include "fallout/character/forms/stats.html" %}
+            {% endwith %}
+        </div>
+        <div class="col">
+            {% with code="skill" label=_("Compétences") stats=character.skills %}
+                {% include "fallout/character/forms/stats.html" %}
+            {% endwith %}
+        </div>
+        <div class="col">
+            {% with code="other" label=_("Autres") stats=character.other_stats view=True %}
+                {% include "fallout/character/forms/stats.html" %}
+            {% endwith %}
+        </div>
+    </div>
+</div>

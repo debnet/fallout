@@ -26,8 +26,7 @@
                 {% endfor %}
             {% endif %}
             <tr>
-                <td><label for="damagetype-list">{% trans "type" %}</label></td>
-                <td class="text-right">
+                <td colspan="2">
                     <select class="form-control form-control-sm" id="{{ code }}-damagetype-list" name="damagetype">
                         {% for code, label in damage_types %}
                             <option value="{{ code }}">{{ label }}</option>
@@ -36,7 +35,7 @@
                 </td>
             </tr>
             <tr>
-                <td><label for="{{ code }}-damage-bonus">{% trans "dégâts fixes" %}</label></td>
+                <td><label for="{{ code }}-damage-bonus">{% trans "valeur fixe" %}</label></td>
                 <td class="text-right">
                     <input id="{{ code }}-damage-bonus" class="form-control form-control-sm tiny" type="number"
                            name="modifier" value="0" />
