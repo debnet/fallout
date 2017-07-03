@@ -5,6 +5,7 @@ from typing import Dict, Iterable, List, Tuple, Union
 
 from common.models import CommonModel, Entity
 from django.conf import settings
+from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import F, Q, Sum
@@ -41,6 +42,20 @@ def get_thumbnails(directory=''):
     except:
         pass
     return images
+
+
+class Player(AbstractUser):
+    """
+    Joueur
+    """
+    phone_number = models.CharField(max_length=20, verbose_name=_("numéro de téléphone"))
+
+    def __str__(self):
+        return self.nickname or self.first_name or self.username
+
+    class Meta:
+        verbose_name = _("joueur")
+        verbose_name_plural = _("joueurs")
 
 
 class Campaign(CommonModel):
@@ -879,6 +894,14 @@ class Equipment(Entity):
             return int(self.condition * 100)
         return None
 
+    def get_equipment(self, slot: str) -> Union['Equipment', None]:
+        """
+        Permet de récupérer un équipement du personnage dans un slot
+        :param slot: Slot (ou type) d'objet
+        :return: Equipement ou rien
+        """
+        return Equipment.objects.filter(character_id=self.character_id, slot=slot).first()
+
     def equip(self, action=False):
         """
         Permet d'équiper ou de déséquiper un objet
@@ -889,12 +912,32 @@ class Equipment(Entity):
         # - si objet déjà équipé : déséquiper objet précédent
         # - si arme ou munitions : vérifier et vider le chargeur avant
         # - garder l'état précédent pour rollback en cas d'erreur de validation
+        assert self.item.type in SLOT_ITEM_TYPES, _("Il n'est pas possible de s'équiper de ce type d'objet.")
+        save_item = self.to_dict()
         if self.slot:
+            if self.clip_count:
+                ammo = self.get_equipment(ITEM_AMMO)
+                if ammo:
+                    ammo.count += self.clip_count
+                    ammo.save()
+            elif self.slot == ITEM_AMMO:
+                weapon = self.get_equipment(ITEM_WEAPON)
+                if weapon:
+                    self.count += weapon.clip_count
+                    self.save()
             self.slot = None
-        elif self.item.type in SLOT_ITEM_TYPES:
+        else:
+            item = self.get_equipment(self.item.type)
+            if item:
+                save_item = item.to_dict()
+                # TODO:
             self.slot = self.item.type
-        self.full_clean()
-        self.save()
+        try:
+            self.full_clean()
+        except ValidationError:
+            self.__dict__.update(save_item)
+        if self.modified:
+            self.save()
         return self
 
     def clean(self):
@@ -1244,6 +1287,7 @@ class FightHistory(CommonModel):
 
 
 MODELS = (
+    Player,
     Campaign,
     Character,
     Item,

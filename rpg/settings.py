@@ -31,13 +31,16 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # Requirements
     'pytz',
     'corsheaders',
     'rest_framework',
     'rest_framework.authtoken',
     'common',
     'multiselectfield',
+    # Applications
     'rpg.fallout',
+    # Debug
     'debug_toolbar',
 )
 
@@ -154,5 +157,15 @@ REST_FRAMEWORK = {
     'HYPERLINKED': True,
 }
 
+# Login URLs
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'
+
+# User substitution
+AUTH_USER_MODEL = 'fallout.Player'
+
+# SMS
+SMS_GATEWAY_URL = 'http://smsgateway.me/api/v3/messages/send'
+SMS_GATEWAY_LOGIN = ''
+SMS_GATEWAY_PASSWORD = ''
+SMS_GATEWAY_DEVICE = 0

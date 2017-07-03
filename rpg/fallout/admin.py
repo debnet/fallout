@@ -1,9 +1,16 @@
 # coding: utf-8
 from common.admin import CommonAdmin, EntityAdmin, EntityTabularInline
 from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin
 from django.utils.translation import ugettext as _
 
 from rpg.fallout.models import *  # noqa
+
+
+@admin.register(Player)
+class PlayerAdmin(UserAdmin):
+    fieldsets = UserAdmin.fieldsets + (
+        (_("Fallout"), {'fields': ('phone_number', )}), )
 
 
 class LootInline(admin.TabularInline):
