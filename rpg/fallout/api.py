@@ -9,7 +9,8 @@ from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
 
 from rpg.fallout.enums import BODY_PARTS, DAMAGES_TYPES, LIST_EDITABLE_STATS, ROLL_STATS
-from rpg.fallout.models import MODELS, Campaign, Character, Item, Loot, DamageHistory, FightHistory, RollHistory
+from rpg.fallout.models import (
+    MODELS, Campaign, Character, Loot, Equipment, ActiveEffect, DamageHistory, FightHistory, RollHistory)
 
 
 # Affichage des statistiques calculées sur le personnage
@@ -73,18 +74,18 @@ class BaseFightInputSerializer(BaseCustomSerializer):
     target = serializers.PrimaryKeyRelatedField(queryset=Character.objects.order_by('name'), label=_("cible"))
     target_range = serializers.IntegerField(default=1, initial=0, label=_("distance"))
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        character_id = int(getattr(self.context.get('view'), 'kwargs', {}).get('character_id', 0))
+        if character_id:
+            target_field = self.fields['target']
+            target_field.queryset = target_field.queryset.exclude(id=character_id).filter(
+                campaign_id=Character.objects.values_list('campaign_id', flat=True).get(id=character_id))
+
 
 class FightInputSerializer(BaseFightInputSerializer):
     target_part = serializers.ChoiceField(choices=BODY_PARTS, allow_blank=True, label=_("partie du corps ciblée"))
     hit_modifier = serializers.IntegerField(default=0, initial=0, label=_("modificateur"))
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        character_id = getattr(self.context.get('view'), 'kwargs', {}).get('character_id')
-        if character_id:
-            defender_field = self.fields['defender']
-            defender_field.queryset = defender_field.queryset.exclude(id=character_id).filter(
-                campaign_id=Character.objects.values_list('campaign_id', flat=True).get(id=character_id))
 
 
 class BurstInputSerializer(BaseCustomSerializer):
@@ -121,9 +122,27 @@ class DamageInputSerializer(BaseCustomSerializer):
     resistance_modifier = serializers.FloatField(default=1.0, initial=1.0, label=_("modificateur de resistance"))
 
 
+class MultiDamageInputSerializer(DamageInputSerializer):
+    characters = serializers.PrimaryKeyRelatedField(
+        queryset=Character.objects.order_by('name'), many=True, label=_("personnages"))
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        campaign_id = int(getattr(self.context.get('view'), 'kwargs', {}).get('campaign_id', 0))
+        characters_field = self.fields['characters']
+        characters_field.child_relation.queryset = \
+            characters_field.child_relation.queryset.filter(campaign_id=campaign_id or None)
+
+
 @to_model_serializer(DamageHistory)
 class DamageHistorySerializer(CommonModelSerializer):
     character = SimpleCharacterSerializer(read_only=True, label=_("personnage"))
+
+
+@api_view_with_serializer(['POST'], input_serializer=MultiDamageInputSerializer, serializer=DamageHistorySerializer)
+def campaign_damage(request, campaign_id):
+    characters = Character.objects.filter(pk__in=request.validated_data.pop('characters', []))
+    return [character.damage(**request.validated_data) for character in characters]
 
 
 @api_view_with_serializer(['POST'], input_serializer=DamageInputSerializer, serializer=DamageHistorySerializer)
@@ -138,15 +157,57 @@ class LootTakeInputSerializer(CommonModelSerializer):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        loot_id = getattr(self.context.get('view'), 'kwargs', {}).get('loot_id')
+        loot_id = int(getattr(self.context.get('view'), 'kwargs', {}).get('loot_id', 0))
         if loot_id:
             character_field = self.fields['character']
             character_field.queryset = character_field.queryset.filter(campaign__loots=loot_id)
 
 
+@to_model_serializer(Equipment)
 class EquipmentSerializer(CommonModelSerializer):
     character = SimpleCharacterSerializer(read_only=True, label=_("personnage"))
-    item = create_model_serializer(Item)(read_only=True, label=_("objet"))
+
+
+@to_model_serializer(ActiveEffect)
+class ActiveEffectSerializer(CommonModelSerializer):
+    character = SimpleCharacterSerializer(read_only=True, label=_("personnage"))
+
+
+class ActionInputSerializer(BaseCustomSerializer):
+    action = serializers.BooleanField(default=False, initial=False, label=_("action ?"))
+
+
+@api_view_with_serializer(['POST'], input_serializer=ActionInputSerializer, serializer=EquipmentSerializer)
+def equipment_equip(request, equipment_id):
+    equipment = get_object_or_404(Equipment, pk=equipment_id)
+    return equipment.equip(**request.validated_data)
+
+
+@api_view_with_serializer(['POST'], input_serializer=ActionInputSerializer, serializer=ActiveEffectSerializer)
+def equipment_use(request, equipment_id):
+    equipment = get_object_or_404(Equipment, pk=equipment_id)
+    return equipment.use(**request.validated_data)
+
+
+@api_view_with_serializer(['POST'], input_serializer=ActionInputSerializer, serializer=EquipmentSerializer)
+def equipment_reload(request, equipment_id):
+    equipment = get_object_or_404(Equipment, pk=equipment_id)
+    return equipment.reload(**request.validated_data)
+
+
+class ActionWithQuantityInputSerializer(ActionInputSerializer):
+    quantity = serializers.IntegerField(default=1, initial=1, label=_("quantité"))
+
+
+@to_model_serializer(Loot)
+class LootSerializer(CommonModelSerializer):
+    pass
+
+
+@api_view_with_serializer(['POST'], input_serializer=ActionWithQuantityInputSerializer, serializer=LootSerializer)
+def equipment_drop(request, equipment_id):
+    equipment = get_object_or_404(Equipment, pk=equipment_id)
+    return equipment.drop(**request.validated_data)
 
 
 @api_view_with_serializer(['POST'], input_serializer=LootTakeInputSerializer, serializer=EquipmentSerializer)

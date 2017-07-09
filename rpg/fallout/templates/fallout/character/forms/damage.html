@@ -27,7 +27,8 @@
             {% endif %}
             <tr>
                 <td colspan="2">
-                    <select class="form-control form-control-sm" id="{{ code }}-damagetype-list" name="damagetype">
+                    <select class="form-control form-control-sm" id="{{ code }}-damage-type"
+                            name="damage_type">
                         {% for code, label in damage_types %}
                             <option value="{{ code }}">{{ label }}</option>
                         {% endfor %}
@@ -35,24 +36,24 @@
                 </td>
             </tr>
             <tr>
-                <td><label for="{{ code }}-damage-bonus">{% trans "valeur fixe" %}</label></td>
+                <td><label for="{{ code }}-raw-damage">{% trans "valeur fixe" %}</label></td>
                 <td class="text-right">
-                    <input id="{{ code }}-damage-bonus" class="form-control form-control-sm tiny" type="number"
-                           name="modifier" value="0" />
+                    <input id="{{ code }}-raw-damage" class="form-control form-control-sm tiny" type="number"
+                           name="raw_damage" value="0" />
                 </td>
             </tr>
             <tr>
-                <td><label for="{{ code }}-damage-dice-count">{% trans "nombre de dés" %}</label></td>
+                <td><label for="{{ code }}-dice-count">{% trans "nombre de dés" %}</label></td>
                 <td class="text-right">
-                    <input id="{{ code }}-damage-dice-count" class="form-control form-control-sm tiny" type="number"
-                           name="modifier" value="0" />
+                    <input id="{{ code }}-dice-count" class="form-control form-control-sm tiny" type="number"
+                           name="dice_count" value="0" />
                 </td>
             </tr>
             <tr>
-                <td><label for="{{ code }}-damage-dice-value">{% trans "valeur de dé" %}</label></td>
+                <td><label for="{{ code }}-dice-value">{% trans "valeur de dé" %}</label></td>
                 <td class="text-right">
-                    <input for="{{ code }}-damage-dice-value" class="form-control form-control-sm tiny" type="number"
-                           name="modifier" value="0" />
+                    <input for="{{ code }}-dice-value" class="form-control form-control-sm tiny" type="number"
+                           name="dice_value" value="0" />
                 </td>
             </tr>
         </tbody>

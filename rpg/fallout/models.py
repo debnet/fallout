@@ -31,8 +31,7 @@ def get_thumbnails(directory=''):
         dirname = os.path.join(settings.MEDIA_ROOT, 'thumbnail', directory)
         for filename in os.listdir(dirname):
             filepath = os.path.join(dirname, filename)
-            name, ext = os.path.splitext(filename)
-            title = name.replace('_', ' ')
+            title, ext = os.path.splitext(filename.replace('_', ' '))
             filename = os.path.join(directory, filename)
             if os.path.isdir(filepath):
                 images.append((title, get_thumbnails(filename)))
@@ -48,7 +47,8 @@ class Player(AbstractUser):
     """
     Joueur
     """
-    phone_number = models.CharField(max_length=20, verbose_name=_("numéro de téléphone"))
+    nickname = models.CharField(max_length=100, blank=True, verbose_name=_("surnom"))
+    phone_number = models.CharField(max_length=20, blank=True, verbose_name=_("numéro de téléphone"))
 
     def __str__(self):
         return self.nickname or self.first_name or self.username
@@ -455,7 +455,7 @@ class Character(Entity, Stats):
         history.save()
         return history
 
-    def loot(self, empty=True):
+    def loot(self, empty: bool=True) -> List['Loot']:
         """
         Transforme l'équipement de ce personnage en butin
         :param empty: Vide l'inventaire du joueur ?
@@ -894,50 +894,124 @@ class Equipment(Entity):
             return int(self.condition * 100)
         return None
 
-    def get_equipment(self, slot: str) -> Union['Equipment', None]:
-        """
-        Permet de récupérer un équipement du personnage dans un slot
-        :param slot: Slot (ou type) d'objet
-        :return: Equipement ou rien
-        """
-        return Equipment.objects.filter(character_id=self.character_id, slot=slot).first()
-
-    def equip(self, action=False):
+    def equip(self, action: bool=False) -> 'Equipment':
         """
         Permet d'équiper ou de déséquiper un objet
         :param action: Consommera des points d'action
         :return: Equipement
         """
-        # TODO: algorithme à revoir :
-        # - si objet déjà équipé : déséquiper objet précédent
-        # - si arme ou munitions : vérifier et vider le chargeur avant
-        # - garder l'état précédent pour rollback en cas d'erreur de validation
-        assert self.item.type in SLOT_ITEM_TYPES, _("Il n'est pas possible de s'équiper de ce type d'objet.")
-        save_item = self.to_dict()
-        if self.slot:
-            if self.clip_count:
-                ammo = self.get_equipment(ITEM_AMMO)
+        assert self.item.is_equipable, _(
+            "Il n'est pas possible de s'équiper de ce type d'objet.")
+        assert not action or self.character.action_points < AP_COST_EQUIP, _(
+            "Le personnage ne possède plus assez de points d'actions pour s'équiper de cet objet.")
+
+        def get_equipment(equipment: 'Equipment', slot: str) -> Union['Equipment', None]:
+            return Equipment.objects.filter(character_id=equipment.character_id, slot=slot).first()
+
+        def handle_equipment(equipment: 'Equipment') -> None:
+            if equipment.clip_count:
+                ammo = get_equipment(equipment, ITEM_AMMO)
                 if ammo:
-                    ammo.count += self.clip_count
+                    ammo.count += equipment.clip_count
                     ammo.save()
-            elif self.slot == ITEM_AMMO:
-                weapon = self.get_equipment(ITEM_WEAPON)
+            elif equipment.slot == ITEM_AMMO:
+                weapon = get_equipment(equipment, ITEM_WEAPON)
                 if weapon:
-                    self.count += weapon.clip_count
-                    self.save()
-            self.slot = None
+                    equipment.count += weapon.clip_count
+                    equipment.save()
+            equipment.slot = None
+
+        if self.slot:
+            handle_equipment(self)
         else:
-            item = self.get_equipment(self.item.type)
+            item = get_equipment(self, self.item.type)
             if item:
-                save_item = item.to_dict()
-                # TODO:
+                handle_equipment(item)
+                item.save()
             self.slot = self.item.type
+        self.full_clean()
+        self.save()
+        if action:
+            self.character.action_points -= AP_COST_EQUIP
+            self.character.save()
+        return self
+
+    def use(self, action: bool=False) -> List['ActiveEffect']:
+        """
+        Permet d'utiliser un objet
+        :param action: Consommera des points d'action
+        :return: Liste des effets
+        """
+        assert self.item.is_usable, _(
+            "Il n'est pas possible d'utiliser ce type d'objet.")
+        assert not action or self.character.action_points < AP_COST_USE, _(
+            "Le personnage ne possède plus assez de points d'actions pour utiliser cet objet.")
+        assert self.count > 0, _(
+            "Le personnage doit posséder au moins un exemplaire de cet objet pour l'utiliser.")
+        effects = []
+        for effect in self.item.effects.all():
+            effects.append(ActiveEffect.objects.update_or_create(
+                character=self.character, effect=effect,
+                defaults=dict(start_date=None, end_date=None, next_date=None)))
+        self.count -= 1
+        self.save()
+        if action:
+            self.character.action_points -= AP_COST_USE
+            self.character.save()
+        return effects
+
+    def drop(self, quantity: int=1, action: bool=False) -> 'Loot':
+        """
+        Permet de jeter un ou plusieurs objets
+        :param quantity: Quantité
+        :param action: Consommera des points d'action
+        :return: Butin
+        """
+        assert self.count >= quantity, _(
+            "Le personnage doit posséder la quantité d'objets qu'il souhaite jeter.")
+        assert not action or self.character.action_points < AP_COST_USE, _(
+            "Le personnage ne possède plus assez de points d'actions pour jeter cet objet.")
         try:
-            self.full_clean()
-        except ValidationError:
-            self.__dict__.update(save_item)
-        if self.modified:
-            self.save()
+            assert self.item.type not in [ITEM_WEAPON, ITEM_ARMOR]
+            loot = Loot.objects.get(campaign=self.character.campaign, item=self.item)
+            loot.count += quantity
+            loot.save()
+        except (AssertionError, Loot.DoesNotExist):
+            loot = Loot.objects.create(
+                campaign=self.character.campaign,
+                item=self.item,
+                count=quantity,
+                condition=self.condition)
+        self.count -= quantity
+        self.save()
+        if action:
+            self.character.action_points -= AP_COST_USE
+            self.character.save()
+        return loot
+
+    def reload(self, action: bool=False) -> 'Equipment':
+        """
+        Permet de recharger une arme
+        :param action: Consommera des points d'action
+        :return: Equipement
+        """
+        assert self.slot == ITEM_WEAPON and self.item.clip_size, _(
+            "Cet objet n'est pas une arme équipée ou ne peut être rechargé.")
+        assert not action or self.character.action_points < self.item.ap_cost_reload, _(
+            "Le personnage ne possède plus assez de points d'actions pour jeter cet objet.")
+        ammo = Equipment.objects.filter(character_id=self.character_id, slot=ITEM_AMMO).first()
+        assert ammo and ammo.count > 0, _(
+            "Il n'y a aucun type de munition équipé ou le nombre de munitions disponibles est insuffisant.")
+        assert ammo.item in self.item.ammunitions.all(), _(
+            "Cette arme est incompatible avec le type de munition équipé.")
+        needed_ammo = min(self.item.clip_size - self.clip_count, ammo.count)
+        ammo.count -= needed_ammo
+        ammo.save()
+        self.clip_count += needed_ammo
+        self.save()
+        if action:
+            self.character.action_points -= self.item.ap_cost_reload
+            self.character.save()
         return self
 
     def clean(self):
@@ -956,6 +1030,8 @@ class Equipment(Entity):
                 raise ValidationError(dict(item=_("Cette arme est incompatible avec les munitions équipées.")))
 
     def save(self, *args, **kwargs):
+        if self.count < 0 and self.item.type not in SLOT_ITEM_TYPES:
+            return self.delete()
         self.condition = max(0.0, min(1.0, self.condition or 1.0)) if self.item.type in [ITEM_WEAPON, ITEM_ARMOR] else None
         self.clip_count = max(0, self.clip_count or 0) if self.item.type == ITEM_WEAPON and not self.item.is_melee else None
         return super().save(*args, **kwargs)
@@ -1143,16 +1219,24 @@ class LootTemplate(Entity):
                 character = Character.objects.get(pk=int(character))
             chance_modifier = character.stats.luck
         assert not character or campaign.id == character.campaign_id, _(
-            "Le personnage doit être dans la même campagne.")
+            "Le personnage concerné doit être dans la même campagne que le butin a créer.")
         for template in self.items.all():
             chance = randint(1, 100 - randint(0, chance_modifier))
             if chance > template.chance:
                 continue
-            loots.append(Loot.objects.create(
-                campaign=campaign,
-                item=template.item,
-                count=randint(template.min_count, template.max_count),
-                condition=randint(template.min_condition * 100, template.max_condition * 100) / 100))
+            try:
+                assert template.item.type not in [ITEM_WEAPON, ITEM_ARMOR]
+                loot = Loot.objects.get(campaign=campaign, item=template.item)
+                loot.count += randint(template.min_count, template.max_count)
+                loot.save()
+                loots.append(loot)
+            except (AssertionError, Loot.DoesNotExist):
+                loot = Loot.objects.create(
+                    campaign=campaign,
+                    item=template.item,
+                    count=randint(template.min_count, template.max_count),
+                    condition=randint(template.min_condition * 100, template.max_condition * 100) / 100)
+                loots.append(loot)
         return loots
 
     def __str__(self) -> str:

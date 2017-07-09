@@ -10,7 +10,7 @@ from rpg.fallout.models import *  # noqa
 @admin.register(Player)
 class PlayerAdmin(UserAdmin):
     fieldsets = UserAdmin.fieldsets + (
-        (_("Fallout"), {'fields': ('phone_number', )}), )
+        (_("Fallout"), {'fields': ('nickname', 'phone_number', )}), )
 
 
 class LootInline(admin.TabularInline):
@@ -159,12 +159,15 @@ class ItemAdmin(EntityAdmin):
 @admin.register(Equipment)
 class EquipmentAdmin(EntityAdmin):
     fieldsets = (
-        (None, dict(
-            fields=('character', 'item', 'slot', 'count', 'condition', 'clip_count', ),
+        (_("Informations générales"), dict(
+            fields=('character', 'item', 'slot', ),
+            classes=('wide', ),
+        )),
+        (_("Etats"), dict(
+            fields=('count', 'condition', 'clip_count', ),
             classes=('wide', ),
         )),
     )
-    # TODO:
     list_display = ('character', 'item', 'slot', 'count', 'condition', 'clip_count', )
     list_editable = ('slot', 'count', 'condition', 'clip_count', )
     list_filter = ('character', 'item', 'slot', )
@@ -192,7 +195,6 @@ class EffectAdmin(EntityAdmin):
         )),
     )
     inlines = [EffectModifierInline]
-    # TODO:
     list_display_links = ('name', )
     list_display = ('name', )
     list_editable = ()
@@ -206,12 +208,11 @@ class EffectAdmin(EntityAdmin):
 @admin.register(ActiveEffect)
 class ActiveEffectAdmin(EntityAdmin):
     fieldsets = (
-        (None, dict(
+        (_("Informations générales"), dict(
             fields=('character', 'effect', 'start_date', 'end_date', 'next_date', ),
             classes=('wide', ),
         )),
     )
-    # TODO:
     list_display = ()
     list_editable = ()
     list_filter = ()
@@ -226,13 +227,12 @@ class LootTemplateItemInline(EntityTabularInline):
 @admin.register(LootTemplate)
 class LootTemplateAdmin(EntityAdmin):
     fieldsets = (
-        (None, dict(
+        (_("Informations générales"), dict(
             fields=('name', 'title', 'description', 'image', 'thumbnail', ),
             classes=('wide', ),
         )),
     )
     inlines = [LootTemplateItemInline]
-    # TODO: afficher un contenu potentiel du butin
     list_display_links = ('name', )
     list_display = ('name', )
     list_editable = ()

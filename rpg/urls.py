@@ -30,8 +30,7 @@ if 'common' in settings.INSTALLED_APPS:
     from common.api.urls import urlpatterns as common_api
     urlpatterns += [
         url(r'^common/', include(common_urls, namespace='common')),
-        url(r'^api/common/', include(common_api, namespace='common-api')),
-    ]
+        url(r'^api/common/', include(common_api, namespace='common-api'))]
 
 # Debug
 if settings.DEBUG:
@@ -43,6 +42,4 @@ if settings.DEBUG:
     # Django Debug Toolbar
     if 'debug_toolbar' in settings.INSTALLED_APPS:
         import debug_toolbar
-        urlpatterns += [
-            url(r'^debug/', include(debug_toolbar.urls)),
-        ]
+        urlpatterns += [url(r'^debug/', include(debug_toolbar.urls))]

@@ -250,6 +250,9 @@ UNARMED_CRITICAL_DAMAGE = 3.0
 
 # Action points cost
 AP_COST_FIGHT = 5  # Fight unarmed
+AP_COST_EQUIP = 4  # Equip item
+AP_COST_USE = 3  # Use item
+AP_COST_DROP = 3  # Drop item
 
 # Turn time
 TURN_TIME = 30
