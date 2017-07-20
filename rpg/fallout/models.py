@@ -396,7 +396,7 @@ class Character(Entity, Stats):
         """
         Randomise les statistiques d'un personnage jusqu'à un certain niveau
         :param level: Niveau du personnage à forcer
-        :param rate: Pourcentage des points à répartir sur les compétences ciblées
+        :param rate: Pourcentage des points à répartir sur les spécialités
         :return: Rien
         """
         # Experience points for the targetted level
@@ -407,13 +407,13 @@ class Character(Entity, Stats):
         # Randomly distribute a fraction of the skill points on tag skills
         skill_points = self.skill_points
         for i in range(int(skill_points * rate)):
-            self.modified(choice(self.tag_skills), 2)
+            self.modify_value(choice(self.tag_skills), 2)
             skill_points -= 1
         # Randomly distribute remaining skill points on other skills
-        other_skills = (set(LIST_SKILLS) - self.tag_skills) if rate else LIST_SKILLS
+        other_skills = list(set(LIST_SKILLS) - set(self.tag_skills)) if rate else LIST_SKILLS
         while skill_points:
             skill = choice(other_skills)
-            self.modified(skill, 2 if skill in self.tag_skills else 1)
+            self.modify_value(skill, 2 if skill in self.tag_skills else 1)
             skill_points -= 1
         # Reset health and action points to their maximum
         self.health = self.stats.max_health

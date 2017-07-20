@@ -2,8 +2,11 @@
 from common.admin import CommonAdmin, EntityAdmin, EntityTabularInline
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
+from django.http import HttpResponseRedirect
+from django.shortcuts import render
 from django.utils.translation import ugettext as _
 
+from rpg.fallout.forms import RandomizeCharacterForm
 from rpg.fallout.models import *  # noqa
 
 
@@ -83,6 +86,7 @@ class CharacterAdmin(EntityAdmin):
     list_filter = ('campaign', 'user', 'race', 'is_player', 'is_active', )
     search_fields = ('name', 'title', 'description', )
     ordering = ('name', )
+    actions = ('randomize', )
 
     def get_form(self, request, obj=None, **kwargs):
         form = super().get_form(request, obj, **kwargs)
@@ -95,6 +99,21 @@ class CharacterAdmin(EntityAdmin):
                 if field_name in obj.tag_skills:
                     field.help_text += _(" (Spécialité +{}) ").format(TAG_SKILL_BONUS)
         return form
+
+    def randomize(self, request, queryset):
+        if 'randomize' in request.POST:
+            form = RandomizeCharacterForm(request.POST)
+            if form.is_valid():
+                for character in queryset:
+                    character.randomize(level=form.cleaned_data['level'], rate=form.cleaned_data['rate'])
+                self.message_user(request, _(
+                    "Les compétences des personnages sélectionnés ont été générés avec succès."))
+                return HttpResponseRedirect(request.get_full_path())
+        else:
+            form = RandomizeCharacterForm()
+        return render(request, 'fallout/admin/randomize.html', {
+            'form': form, 'characters': queryset, 'actions': request.POST.getlist(admin.ACTION_CHECKBOX_NAME)})
+    randomize.short_description = _("Générer aléatoirement les compétences")
 
     def get_queryset(self, request):
         return super().get_queryset(request)\
