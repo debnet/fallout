@@ -1,28 +1,46 @@
 # coding: utf-8
 from common.admin import CommonAdmin, EntityAdmin, EntityTabularInline
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.contrib.auth.admin import UserAdmin
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.utils.translation import ugettext as _
 
-from rpg.fallout.forms import RandomizeCharacterForm
+from rpg.fallout.forms import *  # noqa
 from rpg.fallout.models import *  # noqa
+
+
+# Niveaux des messages en fonction du jet de compétence (success, critical)
+ROLL_LEVELS = {
+    (False, True): messages.ERROR,
+    (False, False): messages.WARNING,
+    (True, False): messages.SUCCESS,
+    (True, True): messages.INFO,
+}
 
 
 @admin.register(Player)
 class PlayerAdmin(UserAdmin):
+    """
+    Administration des joueurs
+    """
     fieldsets = UserAdmin.fieldsets + (
         (_("Fallout"), {'fields': ('nickname', 'phone_number', )}), )
 
 
 class LootInline(admin.TabularInline):
+    """
+    Administration intégrée des butins
+    """
     model = Loot
     extra = 1
 
 
 @admin.register(Campaign)
 class CampaignAdmin(CommonAdmin):
+    """
+    Administration des campagnes
+    """
     fieldsets = (
         (_("Informations générales"), dict(
             fields=('name', 'title', 'description', 'image', 'thumbnail', ),
@@ -46,17 +64,26 @@ class CampaignAdmin(CommonAdmin):
 
 
 class EquipmentInlineAdmin(EntityTabularInline):
+    """
+    Administration intégrée des équipements
+    """
     model = Equipment
     extra = 1
 
 
 class ActiveEffectInlineAdmin(EntityTabularInline):
+    """
+    Administration intégrée des effets actifs
+    """
     model = ActiveEffect
     extra = 1
 
 
 @admin.register(Character)
 class CharacterAdmin(EntityAdmin):
+    """
+    Administration des personnages
+    """
     fieldsets = tuple([
         (_("Informations techniques"), dict(
             fields=('user', 'campaign', ),
@@ -86,9 +113,12 @@ class CharacterAdmin(EntityAdmin):
     list_filter = ('campaign', 'user', 'race', 'is_player', 'is_active', )
     search_fields = ('name', 'title', 'description', )
     ordering = ('name', )
-    actions = ('randomize', )
+    actions = ('randomize', 'roll', )
 
     def get_form(self, request, obj=None, **kwargs):
+        """
+        Surcharge du formulaire pour afficher les données réelles des statistiques pour chaque champ
+        """
         form = super().get_form(request, obj, **kwargs)
         if obj:
             for field_name, field in form.base_fields.items():
@@ -101,33 +131,67 @@ class CharacterAdmin(EntityAdmin):
         return form
 
     def randomize(self, request, queryset):
+        """
+        Action spécifique pour randomiser les compétences d'un personnage
+        """
         if 'randomize' in request.POST:
             form = RandomizeCharacterForm(request.POST)
             if form.is_valid():
-                for character in queryset:
-                    character.randomize(level=form.cleaned_data['level'], rate=form.cleaned_data['rate'])
-                self.message_user(request, _(
-                    "Les compétences des personnages sélectionnés ont été générés avec succès."))
+                for character in queryset.order_by('name'):
+                    character.randomize(**form.cleaned_data)
+                self.message_user(
+                    request,
+                    message=_("Les compétences des personnages sélectionnés ont été générés avec succès."),
+                    level=messages.SUCCESS)
                 return HttpResponseRedirect(request.get_full_path())
         else:
             form = RandomizeCharacterForm()
-        return render(request, 'fallout/admin/randomize.html', {
+        return render(request, 'fallout/character/admin/randomize.html', {
             'form': form, 'characters': queryset, 'actions': request.POST.getlist(admin.ACTION_CHECKBOX_NAME)})
     randomize.short_description = _("Générer aléatoirement les compétences")
 
+    def roll(self, request, queryset):
+        """
+        Action spécifique pour effectuer un lancer de compétence
+        """
+        if 'roll' in request.POST:
+            form = RollCharacterForm(request.POST)
+            if form.is_valid():
+                for character in queryset.order_by('name'):
+                    result = character.roll(**form.cleaned_data)
+                    self.message_user(
+                        request,
+                        _("{character} - {roll}").format(character=character, roll=result.long_label),
+                        level=ROLL_LEVELS[(result.success, result.critical)])
+                return HttpResponseRedirect(request.get_full_path())
+        else:
+            form = RollCharacterForm()
+        return render(request, 'fallout/character/admin/roll.html', {
+            'form': form, 'characters': queryset, 'actions': request.POST.getlist(admin.ACTION_CHECKBOX_NAME)})
+    roll.short_description = _("Faire un jet de compétence")
+
     def get_queryset(self, request):
+        """
+        Surcharge du queryset par défaut
+        """
         return super().get_queryset(request)\
             .select_related('user', 'campaign')\
             .prefetch_related('equipments', 'active_effects')
 
 
 class ItemModifierInline(admin.TabularInline):
+    """
+    Administration intégrée des modificateurs d'objets
+    """
     model = ItemModifier
     extra = 1
 
 
 @admin.register(Item)
 class ItemAdmin(EntityAdmin):
+    """
+    Administration des objets
+    """
     fieldsets = (
         (_("Informations générales"), dict(
             fields=('name', 'title', 'description', 'image', 'thumbnail', 'type', 'value', 'weight', 'is_quest', ),
@@ -172,11 +236,17 @@ class ItemAdmin(EntityAdmin):
     ordering = ('name', )
 
     def get_queryset(self, request):
+        """
+        Surcharge du queryset par défault
+        """
         return super().get_queryset(request).prefetch_related('modifiers')
 
 
 @admin.register(Equipment)
 class EquipmentAdmin(EntityAdmin):
+    """
+    Administration des équipements
+    """
     fieldsets = (
         (_("Informations générales"), dict(
             fields=('character', 'item', 'slot', ),
@@ -193,16 +263,25 @@ class EquipmentAdmin(EntityAdmin):
     ordering = ('character', 'item', )
 
     def get_queryset(self, request):
+        """
+        Surcharge du queryset par défaut
+        """
         return super().get_queryset(request).select_related('item')
 
 
 class EffectModifierInline(admin.TabularInline):
+    """
+    Administration intégrée des modificateurs d'effets
+    """
     model = EffectModifier
     extra = 1
 
 
 @admin.register(Effect)
 class EffectAdmin(EntityAdmin):
+    """
+    Administration des effets
+    """
     fieldsets = (
         (_("Informations générales"), dict(
             fields=('name', 'title', 'description', 'image', 'thumbnail', 'chance', 'duration', ),
@@ -221,11 +300,17 @@ class EffectAdmin(EntityAdmin):
     ordering = ('name', )
 
     def get_queryset(self, request):
+        """
+        Surcharge du queryset par défaut
+        """
         return super().get_queryset(request).prefetch_related('modifiers')
 
 
 @admin.register(ActiveEffect)
 class ActiveEffectAdmin(EntityAdmin):
+    """
+    Administration des effets actifs
+    """
     fieldsets = (
         (_("Informations générales"), dict(
             fields=('character', 'effect', 'start_date', 'end_date', 'next_date', ),
@@ -239,12 +324,18 @@ class ActiveEffectAdmin(EntityAdmin):
 
 
 class LootTemplateItemInline(EntityTabularInline):
+    """
+    Administration intégrée des templates de butins
+    """
     model = LootTemplateItem
     extra = 1
 
 
 @admin.register(LootTemplate)
 class LootTemplateAdmin(EntityAdmin):
+    """
+    Administration des butins
+    """
     fieldsets = (
         (_("Informations générales"), dict(
             fields=('name', 'title', 'description', 'image', 'thumbnail', ),
@@ -259,11 +350,17 @@ class LootTemplateAdmin(EntityAdmin):
     ordering = ('name', )
 
     def get_queryset(self, request):
+        """
+        Surcharge du queryset par défaut
+        """
         return super().get_queryset(request).prefetch_related('items')
 
 
 @admin.register(RollHistory)
 class RollHistoryAdmin(CommonAdmin):
+    """
+    Administration des historiques de jets de compétences
+    """
     fieldsets = (
         (_("Informations techniques"), dict(
             fields=('game_date', 'character', ),
@@ -283,6 +380,9 @@ class RollHistoryAdmin(CommonAdmin):
 
 @admin.register(DamageHistory)
 class DamageHistoryAdmin(CommonAdmin):
+    """
+    Administration des historiques de dégâts
+    """
     fieldsets = (
         (_("Informations techniques"), dict(
             fields=('game_date', 'character', ),
@@ -309,11 +409,17 @@ class DamageHistoryAdmin(CommonAdmin):
 
 
 class DamageHistoryInline(admin.StackedInline):
+    """
+    Administration intégrée des historiques de dégâts
+    """
     model = DamageHistory
 
 
 @admin.register(FightHistory)
 class FightHistoryAdmin(CommonAdmin):
+    """
+    Administration des historiques de combats
+    """
     fieldsets = (
         (_("Informations techniques"), dict(
             fields=('game_date', ),
@@ -345,8 +451,14 @@ class FightHistoryAdmin(CommonAdmin):
     date_hierarchy = 'date'
 
     def real_damage(self, obj):
+        """
+        Dégâts réels
+        """
         return getattr(obj.damage, 'real_damage', None)
     real_damage.short_description = _("dégâts")
 
     def get_queryset(self, request):
+        """
+        Surcharge du queryset par défaut
+        """
         return super().get_queryset(request).select_related('damage')

@@ -32,49 +32,76 @@ router, all_serializers, all_viewsets = create_api(*MODELS)
 
 
 class NextTurnInputSerializer(BaseCustomSerializer):
+    """
+    Serializer d'entrée pour changer le tour des personnages dans une campagne
+    """
     seconds = serializers.IntegerField(default=0, initial=0, label=_("secondes"))
     apply = serializers.BooleanField(default=True, initial=True, label=_("valider ?"))
 
 
 @api_view_with_serializer(['POST'], input_serializer=NextTurnInputSerializer, serializer=SimpleCharacterSerializer)
 def campaign_next_turn(request, campaign_id):
+    """
+    API pour changer le tour des personnages
+    """
     campaign = get_object_or_404(Campaign, pk=campaign_id)
     return campaign.next_turn(**request.validated_data)
 
 
 @api_view_with_serializer(['POST'])
 def campaign_clear_loot(request, campaign_id):
+    """
+    API pour supprimer tous les butins de la campagne
+    """
     campaign = get_object_or_404(Campaign, pk=campaign_id)
     return campaign.clear_loot()
 
 
 class RollInputSerializer(BaseCustomSerializer):
+    """
+    Serializer d'entrée pour les jets de compétence
+    """
     stats = serializers.ChoiceField(choices=ROLL_STATS, label=_("statistique"))
     modifier = serializers.IntegerField(default=0, initial=0, label=_("modificateur"))
 
 
 @to_model_serializer(RollHistory)
 class RollHistorySerializer(CommonModelSerializer):
+    """
+    Serializer de sortie pour l'affichage des historiques de jets de compétence
+    """
     character = SimpleCharacterSerializer(read_only=True, label=_("personnage"))
 
 
 @api_view_with_serializer(['POST'], input_serializer=RollInputSerializer, serializer=RollHistorySerializer)
 def campaign_roll(request, campaign_id):
+    """
+    API pour effectuer un jet de compétence l'ensemble des personnages d'une campagne
+    """
     filters = dict(campaign_id=campaign_id) if campaign_id else dict(campaign__isnull=True)
     return [character.roll(**request.validated_data) for character in Character.objects.filter(**filters)]
 
 
 @api_view_with_serializer(['POST'], input_serializer=RollInputSerializer, serializer=RollHistorySerializer)
 def character_roll(request, character_id):
+    """
+    API pour effectuer un jet de compétence sur un personnage
+    """
     character = get_object_or_404(Character, pk=character_id)
     return character.roll(**request.validated_data)
 
 
 class BaseFightInputSerializer(BaseCustomSerializer):
+    """
+    Serializer d'entrée de base pour les attaques
+    """
     target = serializers.PrimaryKeyRelatedField(queryset=Character.objects.order_by('name'), label=_("cible"))
     target_range = serializers.IntegerField(default=1, initial=0, label=_("distance"))
 
     def __init__(self, *args, **kwargs):
+        """
+        Initialisateur spécifique pour restreindre la liste des personnages à ceux de la campagne ciblée
+        """
         super().__init__(*args, **kwargs)
         character_id = int(getattr(self.context.get('view'), 'kwargs', {}).get('character_id', 0))
         if character_id:
@@ -84,17 +111,26 @@ class BaseFightInputSerializer(BaseCustomSerializer):
 
 
 class FightInputSerializer(BaseFightInputSerializer):
+    """
+    Serializer d'entrée pour les attaques
+    """
     target_part = serializers.ChoiceField(choices=BODY_PARTS, allow_blank=True, label=_("partie du corps ciblée"))
     hit_modifier = serializers.IntegerField(default=0, initial=0, label=_("modificateur"))
 
 
 class BurstInputSerializer(BaseCustomSerializer):
+    """
+    Serializer d'entrée pour les attaques en rafales
+    """
     targets = BaseFightInputSerializer(many=True, label=_("cibles"))
     hit_modifier = serializers.IntegerField(default=0, initial=0, label=_("modificateur"))
 
 
 @to_model_serializer(FightHistory)
 class FightHistorySerializer(CommonModelSerializer):
+    """
+    Serializer de sortie pour les attaques
+    """
     attacker = SimpleCharacterSerializer(read_only=True, label=_("attaquant"))
     defender = SimpleCharacterSerializer(read_only=True, label=_("défenseur"))
     damage = create_model_serializer(DamageHistory)(read_only=True, label=_("dégâts"))
@@ -102,18 +138,27 @@ class FightHistorySerializer(CommonModelSerializer):
 
 @api_view_with_serializer(['POST'], input_serializer=FightInputSerializer, serializer=FightHistorySerializer)
 def character_fight(request, character_id):
+    """
+    API permettant d'attaquer un autre personnage
+    """
     attacker = get_object_or_404(Character, pk=character_id)
     return attacker.fight(**request.validated_data)
 
 
 @api_view_with_serializer(['POST'], input_serializer=BurstInputSerializer, serializer=FightHistorySerializer)
 def character_burst(request, character_id):
+    """
+    API permettant d'effectuer une attaque en rafale sur un ou plusieurs personnages
+    """
     attacker = get_object_or_404(Character, pk=character_id)
     targets = [(t.get('target'), t.get('target_range')) for t in request.validated_data.get('targets', {})]
     return attacker.burst(targets=targets, hit_modifier=request.validated_data.get('hit_modifier'))
 
 
 class DamageInputSerializer(BaseCustomSerializer):
+    """
+    Serializer d'entrée pour infliger des dégâts à un seul personnages
+    """
     raw_damage = serializers.IntegerField(default=0, initial=0, label=_("dégâts bruts"))
     dice_count = serializers.IntegerField(default=0, initial=0, label=_("nombre de dés"))
     dice_value = serializers.IntegerField(default=0, initial=0, label=_("valeur de dé"))
@@ -123,10 +168,16 @@ class DamageInputSerializer(BaseCustomSerializer):
 
 
 class MultiDamageInputSerializer(DamageInputSerializer):
+    """
+    Serializer d'entrée pour infliger des dégâts à de multiples personnages
+    """
     characters = serializers.PrimaryKeyRelatedField(
         queryset=Character.objects.order_by('name'), many=True, label=_("personnages"))
 
     def __init__(self, *args, **kwargs):
+        """
+        Initialisateur spécifique pour restreindre la liste des personnages à ceux de la campagne ciblée
+        """
         super().__init__(*args, **kwargs)
         campaign_id = int(getattr(self.context.get('view'), 'kwargs', {}).get('campaign_id', 0))
         characters_field = self.fields['characters']
@@ -136,26 +187,41 @@ class MultiDamageInputSerializer(DamageInputSerializer):
 
 @to_model_serializer(DamageHistory)
 class DamageHistorySerializer(CommonModelSerializer):
+    """
+    Serializer de sortie des historiques de dégâts
+    """
     character = SimpleCharacterSerializer(read_only=True, label=_("personnage"))
 
 
 @api_view_with_serializer(['POST'], input_serializer=MultiDamageInputSerializer, serializer=DamageHistorySerializer)
 def campaign_damage(request, campaign_id):
+    """
+    API permettant d'infliger des dégâts à plusieurs personnages de la campagne
+    """
     characters = Character.objects.filter(pk__in=request.validated_data.pop('characters', []))
     return [character.damage(**request.validated_data) for character in characters]
 
 
 @api_view_with_serializer(['POST'], input_serializer=DamageInputSerializer, serializer=DamageHistorySerializer)
 def character_damage(request, character_id):
+    """
+    API permettant d'infliger des dégâts à un seul personnage
+    """
     character = get_object_or_404(Character, pk=character_id)
     return character.damage(**request.validated_data)
 
 
 class LootTakeInputSerializer(CommonModelSerializer):
+    """
+    Serializer d'entrée pour ramasser un butin
+    """
     character = serializers.PrimaryKeyRelatedField(queryset=Character.objects.order_by('name'), label=_("personnage"))
     count = serializers.IntegerField(default=1, initial=1, label=_("nombre"))
 
     def __init__(self, *args, **kwargs):
+        """
+        Initialisateur spécifique pour restreindre la liste des personnages à ceux de la campagne ciblée
+        """
         super().__init__(*args, **kwargs)
         loot_id = int(getattr(self.context.get('view'), 'kwargs', {}).get('loot_id', 0))
         if loot_id:
@@ -165,52 +231,82 @@ class LootTakeInputSerializer(CommonModelSerializer):
 
 @to_model_serializer(Equipment)
 class EquipmentSerializer(CommonModelSerializer):
+    """
+    Serializer de sortie pour afficher des équipements
+    """
     character = SimpleCharacterSerializer(read_only=True, label=_("personnage"))
 
 
 @to_model_serializer(ActiveEffect)
 class ActiveEffectSerializer(CommonModelSerializer):
+    """
+    Serializer de sortie pour afficher des effets actifs sur un personnage
+    """
     character = SimpleCharacterSerializer(read_only=True, label=_("personnage"))
 
 
 class ActionInputSerializer(BaseCustomSerializer):
+    """
+    Serializer d'entrée pour toutes les actions
+    """
     action = serializers.BooleanField(default=False, initial=False, label=_("action ?"))
 
 
 @api_view_with_serializer(['POST'], input_serializer=ActionInputSerializer, serializer=EquipmentSerializer)
 def equipment_equip(request, equipment_id):
+    """
+    API permettant de s'équiper ou de déséquiper d'un équipement de l'inventaire
+    """
     equipment = get_object_or_404(Equipment, pk=equipment_id)
     return equipment.equip(**request.validated_data)
 
 
 @api_view_with_serializer(['POST'], input_serializer=ActionInputSerializer, serializer=ActiveEffectSerializer)
 def equipment_use(request, equipment_id):
+    """
+    API permettant d'utiliser un objet (si applicable)
+    """
     equipment = get_object_or_404(Equipment, pk=equipment_id)
     return equipment.use(**request.validated_data)
 
 
 @api_view_with_serializer(['POST'], input_serializer=ActionInputSerializer, serializer=EquipmentSerializer)
 def equipment_reload(request, equipment_id):
+    """
+    API permettant de recharger une arme à feu (si applicable)
+    """
     equipment = get_object_or_404(Equipment, pk=equipment_id)
     return equipment.reload(**request.validated_data)
 
 
 class ActionWithQuantityInputSerializer(ActionInputSerializer):
+    """
+    Serializer d'entrée pour effectuer une action impliquant une quantité
+    """
     quantity = serializers.IntegerField(default=1, initial=1, label=_("quantité"))
 
 
 @to_model_serializer(Loot)
 class LootSerializer(CommonModelSerializer):
+    """
+    Serializer des butins
+    """
     pass
 
 
 @api_view_with_serializer(['POST'], input_serializer=ActionWithQuantityInputSerializer, serializer=LootSerializer)
 def equipment_drop(request, equipment_id):
+    """
+    API permettant de séparer d'un équipement et d'en faire un butin
+    """
     equipment = get_object_or_404(Equipment, pk=equipment_id)
     return equipment.drop(**request.validated_data)
 
 
 @api_view_with_serializer(['POST'], input_serializer=LootTakeInputSerializer, serializer=EquipmentSerializer)
 def loot_take(request, loot_id):
+    """
+    API permettant de ramasser un butin
+    """
     loot = get_object_or_404(Loot, pk=loot_id)
     return loot.take(**request.validated_data)

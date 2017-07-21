@@ -1283,9 +1283,28 @@ class RollHistory(CommonModel):
 
     @property
     def label(self) -> str:
+        """
+        Libellé du jet
+        """
         return ' '.join((
             [_("échec"), _("réussite")][self.success],
             ['', _("critique")][self.critical])).strip()
+
+    @property
+    def long_label(self) -> str:
+        """
+        Libellé long du jet
+        """
+        message = _("{label} du jet de {stats} : {roll} pour {value}")
+        if self.modifier:
+            message = _("{label} du jet de {stats} : {roll} pour {value} ({modifier:+d}={total})")
+        return message.format(
+            stats=self.get_stats_display(),
+            label=self.label,
+            roll=self.roll,
+            value=self.value,
+            modifier=self.modifier,
+            total=self.value + self.modifier)
 
     def __str__(self) -> str:
         return _("({character}) jet de {stats} : {result}").format(
