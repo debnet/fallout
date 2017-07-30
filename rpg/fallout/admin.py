@@ -113,7 +113,7 @@ class CharacterAdmin(EntityAdmin):
     list_filter = ('campaign', 'user', 'race', 'is_player', 'is_active', )
     search_fields = ('name', 'title', 'description', )
     ordering = ('name', )
-    actions = ('randomize', 'roll', )
+    actions = ('duplicate', 'randomize', 'roll', 'fight', 'burst', )
 
     def get_form(self, request, obj=None, **kwargs):
         """
@@ -129,6 +129,14 @@ class CharacterAdmin(EntityAdmin):
                 if field_name in obj.tag_skills:
                     field.help_text += _(" (Spécialité +{}) ").format(TAG_SKILL_BONUS)
         return form
+
+    def duplicate(self, request, queryset):
+        """
+        Action de duplication
+        """
+        for element in queryset:
+            element.duplicate()
+        self.message_user(request, message=_("Les personnages sélectionnés ont été dupliqués."))
 
     def randomize(self, request, queryset):
         """
@@ -159,16 +167,44 @@ class CharacterAdmin(EntityAdmin):
             if form.is_valid():
                 for character in queryset.order_by('name'):
                     result = character.roll(**form.cleaned_data)
-                    self.message_user(
-                        request,
-                        _("{character} - {roll}").format(character=character, roll=result.long_label),
-                        level=ROLL_LEVELS[(result.success, result.critical)])
+                    self.message_user(request, str(result), level=ROLL_LEVELS[(result.success, result.critical)])
                 return HttpResponseRedirect(request.get_full_path())
         else:
             form = RollCharacterForm()
         return render(request, 'fallout/character/admin/roll.html', {
             'form': form, 'characters': queryset, 'actions': request.POST.getlist(admin.ACTION_CHECKBOX_NAME)})
     roll.short_description = _("Faire un jet de compétence")
+
+    def fight(self, request, queryset):
+        """
+        Action spécifique pour attaquer un autre personnage
+        """
+        if 'fight' in request.POST:
+            form = FightCharacterForm(request.POST)
+            if form.is_valid():
+                for character in queryset.order_by('name'):
+                    try:
+                        result = character.fight(**form.cleaned_data)
+                        self.message_user(request, str(result), level=ROLL_LEVELS[(result.success, result.critical)])
+                    except Exception as error:
+                        self.message_user(
+                            request,
+                            _("{character} : {error}").format(character=character, error=str(error)),
+                            level=messages.ERROR)
+                return HttpResponseRedirect(request.get_full_path())
+        else:
+            form = FightCharacterForm()
+        return render(request, 'fallout/character/admin/fight.html', {
+            'form': form, 'characters': queryset, 'actions': request.POST.getlist(admin.ACTION_CHECKBOX_NAME)})
+    fight.short_description = _("Attaquer un autre personnage")
+
+    def burst(self, request, queryset):
+        pass  # TODO:
+    burst.short_description = _("Attaquer en rafale plusieurs personnages")
+
+    def loot(self, request, queryset):
+        pass  # TODO:
+    loot.short_description = _("Lâcher tous les équipements")
 
     def get_queryset(self, request):
         """
@@ -234,6 +270,15 @@ class ItemAdmin(EntityAdmin):
     list_filter = ('type', 'is_quest', 'is_melee', 'is_throwable', )
     search_fields = ('name', 'title', 'description', )
     ordering = ('name', )
+    actions = ('duplicate', )
+
+    def duplicate(self, request, queryset):
+        """
+        Action de duplication
+        """
+        for element in queryset:
+            element.duplicate()
+        self.message_user(request, message=_("Les objets sélectionnés ont été dupliqués."))
 
     def get_queryset(self, request):
         """
@@ -298,6 +343,15 @@ class EffectAdmin(EntityAdmin):
     list_editable = ()
     list_filter = ()
     ordering = ('name', )
+    actions = ('duplicate', )
+
+    def duplicate(self, request, queryset):
+        """
+        Action de duplication
+        """
+        for element in queryset:
+            element.duplicate()
+        self.message_user(request, message=_("Les effets sélectionnés ont été dupliqués."))
 
     def get_queryset(self, request):
         """
@@ -348,6 +402,15 @@ class LootTemplateAdmin(EntityAdmin):
     list_editable = ()
     list_filter = ()
     ordering = ('name', )
+    actions = ('duplicate', )
+
+    def duplicate(self, request, queryset):
+        """
+        Action de duplication
+        """
+        for element in queryset:
+            element.duplicate()
+        self.message_user(request, message=_("Les modèles de butins sélectionnés ont été dupliqués."))
 
     def get_queryset(self, request):
         """
@@ -436,17 +499,17 @@ class FightHistoryAdmin(CommonAdmin):
         (_("Combat"), dict(
             fields=(
                 'status', 'burst', 'hit_count', 'hit_modifier', 'hit_chance',
-                'hit_roll', 'hit_success', 'hit_critical', 'damage', ),
+                'hit_roll', 'success', 'critical', 'damage', ),
             classes=('wide', ),
         )),
     )
     list_display = (
         'date', 'game_date', 'attacker', 'defender',
-        'hit_success', 'hit_critical', 'status', 'real_damage', )
+        'success', 'critical', 'status', 'real_damage', )
     list_editable = ()
     list_filter = (
         'date', 'game_date', 'attacker', 'defender',
-        'hit_success', 'hit_critical', 'status', )
+        'success', 'critical', 'status', )
     ordering = ('-date', )
     date_hierarchy = 'date'
 

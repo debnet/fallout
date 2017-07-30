@@ -194,7 +194,7 @@ class Stats(models.Model):
     skill_points_per_level = models.SmallIntegerField(default=0, verbose_name=_("compétences par niveau"))
     perk_rate = models.SmallIntegerField(default=0, verbose_name=_("niveaux pour un talent"))
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.character.name
 
     @staticmethod
@@ -455,7 +455,7 @@ class Character(Entity, Stats):
         history.save()
         return history
 
-    def loot(self, empty: bool=True) -> List['Loot']:
+    def loot(self, empty: bool=True) -> Union[None, List['Loot']]:
         """
         Transforme l'équipement de ce personnage en butin
         :param empty: Vide l'inventaire du joueur ?
@@ -574,9 +574,9 @@ class Character(Entity, Stats):
         history.hit_chance = int(max(attacker_hit_chance, 0))
         history.status = STATUS_HIT_FAILED
         attacker_hit_roll = history.hit_roll = randint(1, 100)
-        history.hit_success = attacker_hit_roll <= history.hit_chance
-        history.hit_critical = attacker_hit_roll >= CRITICAL_FAIL_D100
-        if history.hit_success:
+        history.success = attacker_hit_roll <= history.hit_chance
+        history.critical = attacker_hit_roll >= CRITICAL_FAIL_D100
+        if history.success:
             # Critical chance
             critical_chance = getattr(self.stats, 'critical_chance', 0)
             critical_chance += critical_modifier
@@ -584,7 +584,7 @@ class Character(Entity, Stats):
             critical_chance *= getattr(attacker_ammo, 'critical_modifier', 1.0)
             # Apply damage
             history.status = STATUS_HIT_SUCCEED
-            history.hit_critical = critical = attacker_hit_roll < critical_chance
+            history.critical = critical = attacker_hit_roll < critical_chance
             attacker_damage_type = getattr(attacker_weapon, 'damage_type', DAMAGE_NORMAL)
             damage = 0
             for item in [attacker_weapon, attacker_ammo]:
@@ -702,6 +702,26 @@ class Character(Entity, Stats):
         """
         for effect in self.active_effects.all():
             effect.apply()
+
+    def duplicate(self, equipments: bool=True, effects: bool=True) -> 'Character':
+        """
+        Duplique ce personnage
+        :param equipments: Duplique également les équipements
+        :param effects: Duplique également les effets
+        :return: Personnage
+        """
+        assert self.pk, _("Ce personnage doit être préalablement enregistré avant d'être dupliqué.")
+        character_id = self.pk
+        self.save(force_insert=True)
+        if equipments:
+            for equipment in Equipment.objects.filter(character_id=character_id):
+                equipment.character_id = self.pk
+                equipment.save(force_insert=True)
+        if effects:
+            for effect in ActiveEffect.objects.filter(character_id=character_id):
+                effect.character_id = self.pk
+                effect.save(force_insert=True)
+        return self
 
     def save(self, *args, **kwargs):
         # Regeneration
@@ -838,6 +858,19 @@ class Item(Entity):
 
     def get_resistance(self, damage_type: str=DAMAGE_NORMAL):
         return getattr(self, damage_type + '_resistance', 0.0)
+
+    def duplicate(self) -> 'Item':
+        """
+        Duplique cet objet
+        :return: Objet
+        """
+        assert self.pk, _("Cet objet doit être préalablement enregistré avant d'être dupliqué.")
+        item_id = self.pk
+        self.save(force_insert=True)
+        for modifier in ItemModifier.objects.filter(item_id=item_id):
+            modifier.item_id = self.pk
+            modifier.save(force_insert=True)
+        return self
 
     def __str__(self) -> str:
         return self.name
@@ -1082,6 +1115,19 @@ class Effect(Entity):
             dice_value=self.damage_dice_value,
             damage_type=self.damage_type)
 
+    def duplicate(self) -> 'Effect':
+        """
+        Duplique cet effet
+        :return: Effet
+        """
+        assert self.pk, _("Cet effet doit être préalablement enregistré avant d'être dupliqué.")
+        effect_id = self.pk
+        self.save(force_insert=True)
+        for modifier in EffectModifier.objects.filter(effect_id=effect_id):
+            modifier.effect_id = self.pk
+            modifier.save(force_insert=True)
+        return self
+
     def __str__(self) -> str:
         return self.name
 
@@ -1239,6 +1285,19 @@ class LootTemplate(Entity):
                 loots.append(loot)
         return loots
 
+    def duplicate(self) -> 'LootTemplate':
+        """
+        Duplique ce modèle de butin
+        :return: Modèle de butin
+        """
+        assert self.pk, _("Ce modèle de butin doit être préalablement enregistré avant d'être dupliqué.")
+        template_id = self.pk
+        self.save(force_insert=True)
+        for item in LootTemplateItem.objects.filter(template_id=template_id):
+            item.template_id = self.pk
+            item.save(force_insert=True)
+        return self
+
     def __str__(self) -> str:
         return self.name
 
@@ -1307,10 +1366,9 @@ class RollHistory(CommonModel):
             total=self.value + self.modifier)
 
     def __str__(self) -> str:
-        return _("({character}) jet de {stats} : {result}").format(
+        return _("({character}) - {label}").format(
             character=str(self.character),
-            stats=self.get_stats_display(),
-            result=self.label)
+            label=self.label)
 
     class Meta:
         verbose_name = _("historique de jet")
@@ -1340,7 +1398,7 @@ class DamageHistory(CommonModel):
     real_damage = models.SmallIntegerField(default=0, verbose_name=_("dégâts réels"))
 
     def __str__(self) -> str:
-        return _("({character}) {damage_type} : {damage}").format(
+        return _("({character}) - {damage_type} : {damage}").format(
             character=str(self.character),
             damage_type=self.get_damage_type_display(),
             damage=self.real_damage)
@@ -1374,15 +1432,35 @@ class FightHistory(CommonModel):
     hit_modifier = models.SmallIntegerField(default=0, verbose_name=_("modif. de précision"))
     hit_chance = models.SmallIntegerField(default=0, verbose_name=_("précision"))
     hit_roll = models.PositiveSmallIntegerField(default=0, verbose_name=_("jet de précision"))
-    hit_success = models.BooleanField(default=False, verbose_name=_("touché ?"))
-    hit_critical = models.BooleanField(default=False, verbose_name=_("critique ?"))
+    success = models.BooleanField(default=False, verbose_name=_("touché ?"))
+    critical = models.BooleanField(default=False, verbose_name=_("critique ?"))
     status = models.CharField(max_length=15, choices=FIGHT_STATUS, blank=True, verbose_name=_("status"))
     damage = models.OneToOneField(
         'DamageHistory', blank=True, null=True, on_delete=models.CASCADE, related_name='fight',
         verbose_name=_("historique des dégâts"), limit_choices_to={'fight__isnull': True})
 
+    @property
+    def label(self) -> str:
+        """
+        Libellé du combat
+        """
+        return ' '.join((
+            [_("échec"), _("réussite")][self.success],
+            ['', _("critique")][self.critical])).strip()
+
+    @property
+    def long_label(self) -> str:
+        """
+        Libellé long du combat
+        :return:
+        """
+        if self.status:
+            return _("{label} : {status}").format(label=self.label, status=self.get_status_display())
+        return _("{label} : {damage} dégât(s) infligé(s)").format(label=self.label, damage=self.damage.real_damage)
+
     def __str__(self) -> str:
-        return "{} vs. {}".format(self.attacker, self.defender)
+        return _("{attacker} vs. {defender} - {label}").format(
+            attacker=self.attacker, defender=self.defender, label=self.long_label)
 
     class Meta:
         verbose_name = _("historique de combat")

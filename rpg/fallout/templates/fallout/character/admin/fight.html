@@ -1,0 +1,21 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block content %}
+    <h1>{% trans "Attaquer un autre personnage" %}</h1>
+    <p>{% trans "Les personnages suivants vont attaquer :" %}</p>
+    <ul>
+        {% for character in characters %}
+            <li>{{ character }}</li>
+        {% endfor %}
+    </ul>
+    <form action="" method="post">
+        {{ form.as_p }}
+        {% csrf_token %}
+        {% for action in actions %}
+            <input type="hidden" name="_selected_action" value="{{ action }}" />
+        {% endfor %}
+        <input type="hidden" name="action" value="fight" />
+        <button type="submit" name="fight">{% trans "Valider" %}</button>
+    </form>
+{% endblock %}
