@@ -30,12 +30,12 @@ def view_campaign(request, campaign_id):
 @login_required
 @render_to('fallout/character/character.html')
 def view_character(request, character_id):
-    characters = Character.objects.select_related()
+    characters = Character.objects.select_related().filter(is_active=True).order_by('is_player')
     if not request.user.is_superuser:
         characters = characters.filter(user=request.user)
     character = characters.filter(id=character_id).first()
-    equipment = character.equipments.select_related('item').exclude(slot='')
-    inventory = character.equipments.select_related('item').filter(slot='')
+    equipment = character.equipments.select_related('item').prefetch_related('item__modifiers').exclude(slot='')
+    inventory = character.equipments.select_related('item').prefetch_related('item__modifiers').filter(slot='')
     # Actions
     errors = None
     roll_history = fight_history = damage_history = None

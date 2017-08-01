@@ -124,7 +124,7 @@ class Campaign(CommonModel):
 
     def get_absolute_url(self):
         from django.urls import reverse
-        return reverse('fallout_campaign', args=[str(self.id)])
+        return reverse('fallout_campaign', args=[str(self.pk)])
 
     def __str__(self) -> str:
         return self.name
@@ -292,19 +292,54 @@ class Character(Entity, Stats):
     # Statistics cache
     _stats = {}
 
-    def get_stats(self, stats, from_stats=True):
+    @staticmethod
+    def reset_stats(character: Union[int, 'Character']):
+        """
+        Réinitialise le calcul des statistiques pour un personnage
+        """
+        if isinstance(character, Character):
+            character = character.pk
+        Character._stats.pop(character, None)
+
+    @property
+    def stats(self) -> Stats:
+        """
+        Retourne les statistiques calculées courantes
+        :return: Statistiques
+        """
+        stats = Character._stats.get(self.pk) or Stats.get(self)
+        if self.pk:
+            Character._stats[self.pk] = stats
+        return stats
+
+    def _get_stats(self, stats: List[Tuple[str, str]], from_stats: bool=True) -> List[Tuple[str, str, Union[int, float]]]:
+        """
+        Fonction interne pour retourner les valeurs des statistiques ciblées
+        :param stats: Tuple de statistiques (code, libellé)
+        :param from_stats: Récupère la valeur calculée et pas la valeur brute enregistrée
+        :return: Liste des statistiques avec leur valeur
+        """
         return [(code, label, getattr(self.stats if from_stats else self, code, 0)) for code, label in stats]
 
     @property
-    def special(self):
-        return self.get_stats(SPECIALS)
+    def special(self) -> List[Tuple[str, str, Union[int, float]]]:
+        """
+        Retourne le S.P.E.C.I.A.L.
+        """
+        return self._get_stats(SPECIALS)
 
     @property
-    def skills(self):
-        return self.get_stats(SKILLS)
+    def skills(self) -> List[Tuple[str, str, Union[int, float]]]:
+        """
+        Retourne les compétences
+        """
+        return self._get_stats(SKILLS)
 
     @property
-    def general_stats(self):
+    def general_stats(self) -> List[Tuple[str, str, Union[int, float]]]:
+        """
+        Retourne les statistiques générales
+        """
         results = []
         for code, label in GENERAL_STATS:
             lvalue = getattr(self, code, 0)
@@ -325,37 +360,55 @@ class Character(Entity, Stats):
         return results
 
     @property
-    def secondary_stats(self):
-        return self.get_stats(SECONDARY_STATS)
+    def secondary_stats(self) -> List[Tuple[str, str, Union[int, float]]]:
+        """
+        Retourne les statistiques secondaires
+        """
+        return self._get_stats(SECONDARY_STATS)
 
     @property
-    def resistances(self):
-        return self.get_stats(RESISTANCES)
+    def resistances(self) -> List[Tuple[str, str, Union[int, float]]]:
+        """
+        Retourne les résistances
+        """
+        return self._get_stats(RESISTANCES)
 
     @property
-    def other_stats(self):
+    def other_stats(self) -> List[Tuple[str, str, Union[int, float]]]:
+        """
+        Retourne les autres statistiques
+        :return:
+        """
         return self.secondary_stats + self.resistances
 
     @property
-    def stats(self) -> Stats:
-        stats = Character._stats.get(self.id) or Stats.get(self)
-        if self.id:
-            Character._stats[self.id] = stats
-        return stats
-
-    @property
-    def charge(self):
+    def charge(self) -> float:
+        """
+        Retourne la charge totale de l'équipement
+        """
         return self.equipments.aggregate(charge=Sum(F('count') * F('item__weight'))).get('charge') or 0
 
     @property
-    def used_skill_points(self):
-        return sum(getattr(self, skill) * (0.5 if skill in self.tag_skills else 1) for skill in LIST_SKILLS)
+    def used_skill_points(self) -> float:
+        """
+        Retourne le nombre de points de compétences utilisées
+        """
+        return sum(getattr(self, skill) * (0.5 if skill in self.tag_skills else 1.0) for skill in LIST_SKILLS)
 
     @property
-    def required_experience(self):
+    def required_experience(self) -> int:
+        """
+        Retourne le nombre de points d'expérience nécessaires pour passer au niveau suivant
+        """
         return sum(l * BASE_XP for l in range(1, self.level + 1))
 
-    def modify_value(self, name, value):
+    def modify_value(self, name: str, value: Union[int, float]) -> Union[int, float]:
+        """
+        Permet de modifier la valeur d'une statistique
+        :param name: Nom de la statistique
+        :param value: Valeur
+        :return: Valeur actuelle
+        """
         value = getattr(self, name, 0) + value
         setattr(self, name, value)
         return value
@@ -724,18 +777,21 @@ class Character(Entity, Stats):
         return self
 
     def save(self, *args, **kwargs):
+        """
+        Sauvegarde du personnage
+        """
         # Regeneration
         if self.regeneration >= 1.0:
             healing = int(self.regeneration)
             self.regeneration -= healing
             self.health = self.health + healing
         # Detect if character is at max health/ap in case of level up or stats modifications
-        has_max_health = not self.id or self.health == self.stats.max_health
-        has_max_action_points = not self.id or self.action_points == self.stats.max_action_points
+        has_max_health = not self.pk or self.health == self.stats.max_health
+        has_max_action_points = not self.pk or self.action_points == self.stats.max_action_points
         # Check and increase level
         self.check_level()
         # Remove stats in cache
-        Character._stats.pop(self.id, None)
+        Character.reset_stats(self.pk)
         # Fixing health and action points
         self.health = self.stats.max_health if has_max_health else \
             max(0, min(self.health, self.stats.max_health))
@@ -744,8 +800,11 @@ class Character(Entity, Stats):
         super().save(*args, **kwargs)
 
     def get_absolute_url(self):
+        """
+        Retourne l'URL vers la page du personnage
+        """
         from django.urls import reverse
-        return reverse('fallout_character', args=[str(self.id)])
+        return reverse('fallout_character', args=[str(self.pk)])
 
     def __str__(self) -> str:
         return self.name
@@ -846,17 +905,29 @@ class Item(Entity):
         return damage
 
     @property
-    def is_equipable(self):
+    def is_equipable(self) -> bool:
+        """
+        Objet équipable ?
+        """
         return self.type in [ITEM_WEAPON, ITEM_AMMO, ITEM_ARMOR]
 
     @property
-    def is_usable(self):
+    def is_usable(self) -> bool:
+        """
+        Objet utilisable ?
+        """
         return self.type in [ITEM_FOOD, ITEM_CHEM]
 
-    def get_threshold(self, damage_type: str=DAMAGE_NORMAL):
+    def get_threshold(self, damage_type: str=DAMAGE_NORMAL) -> int:
+        """
+        Récupère le seuil de dégâts d'un type particulier
+        """
         return getattr(self, damage_type + '_threshold', 0)
 
-    def get_resistance(self, damage_type: str=DAMAGE_NORMAL):
+    def get_resistance(self, damage_type: str=DAMAGE_NORMAL) -> float:
+        """
+        Récupère la résistance aux dégâts d'un type
+        """
         return getattr(self, damage_type + '_resistance', 0.0)
 
     def duplicate(self) -> 'Item':
@@ -906,15 +977,24 @@ class Equipment(Entity):
     condition = models.FloatField(blank=True, null=True, verbose_name=_("état"))
 
     @property
-    def value(self):
+    def value(self) -> float:
+        """
+        Valeur de l'objet en fonction de son état
+        """
         return self.item.value * self.count * (self.condition or 1)
 
     @property
-    def charge(self):
+    def charge(self) -> float:
+        """
+        Taille de l'équipement en fonction de son nombre
+        """
         return self.item.weight * self.count
 
     @property
-    def compatible_ammunition(self):
+    def compatible_ammunition(self) -> Union[None, List['Item']]:
+        """
+        Munitions compatibles
+        """
         if self.slot or self.item.type != ITEM_AMMO:
             return
         weapon = self.character.equipments.filter(slot=ITEM_WEAPON) \
@@ -922,7 +1002,10 @@ class Equipment(Entity):
         return weapon and self.item in weapon.item.ammunitions.all()
 
     @property
-    def current_condition(self):
+    def current_condition(self) -> Union[None, int]:
+        """
+        Etat actuel
+        """
         if self.condition is not None:
             return int(self.condition * 100)
         return None
@@ -1048,21 +1131,30 @@ class Equipment(Entity):
         return self
 
     def clean(self):
+        """
+        Validation de l'objet
+        """
         if self.slot:
-            if self.character.equipments.exclude(id=self.id).filter(slot=self.slot).exists():
+            if self.character.equipments.exclude(id=self.pk).filter(slot=self.slot).exists():
                 raise ValidationError(dict(slot=_("Un autre objet est déjà présent à cet emplacement.")))
             if self.slot != self.item.type:
                 raise ValidationError(dict(slot=_("L'emplacement doit correspondre au type d'objet.")))
         if self.slot == ITEM_AMMO:
             equipment = self.character.equipments.select_related('item').filter(slot=ITEM_WEAPON).first()
-            if equipment and not equipment.item.ammunitions.filter(id=self.item.id).exists():
+            if equipment and not equipment.item.ammunitions.filter(id=self.item.pk).exists():
                 raise ValidationError(dict(item=_("Ces munitions sont incompatibles avec l'arme équipée.")))
         elif self.slot == ITEM_WEAPON:
             equipment = self.character.equipments.select_related('item').filter(slot=ITEM_AMMO).first()
-            if equipment and not self.item.ammunitions.filter(id=equipment.item.id).exists():
+            if equipment and not self.item.ammunitions.filter(id=equipment.item.pk).exists():
                 raise ValidationError(dict(item=_("Cette arme est incompatible avec les munitions équipées.")))
 
     def save(self, *args, **kwargs):
+        """
+        Sauvegarde de l'objet
+        """
+        Character.reset_stats(self.character_id or self.character)
+        if self.character_id or self.character:
+            Character._stats.pop(self.character_id or self.character.pk, None)
         if self.count < 0 and self.item.type not in SLOT_ITEM_TYPES:
             return self.delete()
         self.condition = max(0.0, min(1.0, self.condition or 1.0)) if self.item.type in [ITEM_WEAPON, ITEM_ARMOR] else None
@@ -1109,6 +1201,9 @@ class Effect(Entity):
 
     @property
     def damage_config(self) -> Dict[str, Union[str, int]]:
+        """
+        Dégâts de l'effet
+        """
         return dict(
             raw_damage=self.raw_damage,
             dice_count=self.damage_dice_count,
@@ -1161,6 +1256,9 @@ class ActiveEffect(Entity):
     next_date = models.DateTimeField(blank=True, null=True, verbose_name=_("date suivante"))
 
     def apply(self):
+        """
+        Applique l'effet au personnage
+        """
         if not self.next_date and self.effect.interval:
             self.next_date = self.start_date
         if not self.character.campaign and not self.next_date:
@@ -1172,6 +1270,10 @@ class ActiveEffect(Entity):
         self.save()
 
     def save(self, *args, **kwargs):
+        """
+        Sauvegarde l'effet actif
+        """
+        Character.reset_stats(self.character_id or self.character)
         if not self.start_date and self.character.campaign:
             self.start_date = self.character.campaign.current_game_date
         if not self.end_date and self.start_date and self.effect.duration:
@@ -1227,6 +1329,9 @@ class Loot(CommonModel):
         return equipment
 
     def save(self, *args, **kwargs):
+        """
+        Sauvegarde le butin
+        """
         if self.count <= 0:
             return self.delete(*args, **kwargs)
         super().save(*args, **kwargs)
@@ -1241,7 +1346,7 @@ class Loot(CommonModel):
 
 class LootTemplate(Entity):
     """
-    Modèle de butin
+    Modèle de butin1
     """
     name = models.CharField(max_length=200, verbose_name=_("nom"))
     title = models.CharField(max_length=200, blank=True, verbose_name=_("titre"))
@@ -1264,7 +1369,7 @@ class LootTemplate(Entity):
             if isinstance(character, (int, str)):
                 character = Character.objects.get(pk=int(character))
             chance_modifier = character.stats.luck
-        assert not character or campaign.id == character.campaign_id, _(
+        assert not character or campaign.pk == character.campaign_id, _(
             "Le personnage concerné doit être dans la même campagne que le butin a créer.")
         for template in self.items.all():
             chance = randint(1, 100 - randint(0, chance_modifier))

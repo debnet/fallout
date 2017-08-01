@@ -25,21 +25,29 @@
                             {% if info.clip_size %}
                             <small class="badge badge-danger">{{ item.clip_count }} / {{ info.clip_size }}</small>
                             {% endif %}
+                            {% for modifier in info.modifiers.all %}
+                                <small class="badge {% if modifier.value > 0 %}badge-success{% else %}badge-danger{% endif %}">
+                                    {% if modifier.value > 0 %}+{% endif %}{{ modifier.value }}
+                                    {{ modifier.get_stats_display }}
+                                </small>
+                            {% endfor %}
+                            {% with condition=item.current_condition %}
+                                {% if condition %}
+                                    <div class="progress">
+                                        <div role="progressbar" style="width: {{ condition }}%;" aria-valuenow="{{ condition }}"
+                                             aria-valuemin="0" aria-valuemax="100" class="progress-bar progress-bar-striped
+                                             bg-{% if condition < 25 %}danger{% elif condition < 50 %}warning{% else %}success{% endif %}">
+                                            {{ condition }}%
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            {% endwith %}
+                        </p>
+                        <p class="card-text">
                             {% if info.description %}
                                 <small class="text-muted">{{ info.description }}</small>
                             {% endif %}
                         </p>
-                        {% with condition=item.current_condition %}
-                            {% if condition %}
-                                <div class="progress">
-                                    <div role="progressbar" style="width: {{ condition }}%;" aria-valuenow="{{ condition }}"
-                                         aria-valuemin="0" aria-valuemax="100" class="progress-bar progress-bar-striped
-                                         bg-{% if condition < 25 %}danger{% elif condition < 50 %}warning{% else %}success{% endif %}">
-                                        {{ condition }}%
-                                    </div>
-                                </div>
-                            {% endif %}
-                        {% endwith %}
                     </div>
                     {% if request.user.is_superuser %}
                         <div class="card-footer">
