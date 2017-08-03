@@ -115,6 +115,9 @@ class Campaign(CommonModel):
         return next_character
 
     def save(self, *args, **kwargs):
+        """
+        Sauvegarde la campagne
+        """
         difference = (self._copy.get('current_game_date') or self.current_game_date) - self.current_game_date
         hours = round(difference.seconds / 3600, 2)
         if hours <= 0:
@@ -123,6 +126,9 @@ class Campaign(CommonModel):
         return super().save(*args, **kwargs)
 
     def get_absolute_url(self):
+        """
+        Retourne l'URL vers la page de la campagne
+        """
         from django.urls import reverse
         return reverse('fallout_campaign', args=[str(self.pk)])
 
@@ -663,11 +669,7 @@ class Character(Entity, Stats):
                 if not item:
                     continue
                 for effect in item.effects.all():
-                    if randint(1, 100) >= effect.chance:
-                        continue
-                    ActiveEffect.objects.get_or_create(
-                        character=target, effect=effect,
-                        defaults=dict(start_date=history.game_date))
+                    effect.apply(target)
             target.apply_effects()  # Apply effects immediatly
         # Clip count & weapon condition
         if attacker_weapon_equipment and attacker_weapon:
@@ -1187,6 +1189,10 @@ class Effect(Entity):
     raw_damage = models.PositiveSmallIntegerField(default=0, verbose_name=_("dégâts bruts"))
     damage_dice_count = models.PositiveSmallIntegerField(default=0, verbose_name=_("nombre de dés"))
     damage_dice_value = models.PositiveSmallIntegerField(default=0, verbose_name=_("valeur de dé"))
+    # Next effect
+    next_effect = models.ForeignKey(
+        'Effect', blank=True, null=True, on_delete=models.CASCADE,
+        verbose_name=_("effet suivant"), related_name='+')
 
     @property
     def base_damage(self) -> int:
@@ -1209,6 +1215,20 @@ class Effect(Entity):
             dice_count=self.damage_dice_count,
             dice_value=self.damage_dice_value,
             damage_type=self.damage_type)
+
+    def apply(self, character: 'Character') -> Union[None, 'ActiveEffect']:
+        """
+        Applique l'effet à un personnage
+        :param character: Personnage
+        :return: Effect actif
+        """
+        assert character.campaign is not None or self.duration is None, _(
+            "Le personnage doit faire partie d'une campagne pour lui appliquer un effet sur la durée.")
+        if randint(1, 100) >= self.chance:
+            return None
+        return ActiveEffect.objects.get_or_create(
+            character=character, effect=self,
+            defaults=dict(start_date=getattr(character.campaign, 'current_game_date', None)))
 
     def duplicate(self) -> 'Effect':
         """
@@ -1279,6 +1299,8 @@ class ActiveEffect(Entity):
         if not self.end_date and self.start_date and self.effect.duration:
             self.end_date = self.start_date + self.effect.duration
         if self.character.campaign and self.end_date and self.end_date <= self.character.campaign.current_game_date:
+            if self.effect.next_effect:
+                self.effect.next_effect.apply(self.character)
             return self.delete(*args, **kwargs)
         super().save(*args, **kwargs)
 

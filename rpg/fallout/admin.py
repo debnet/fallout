@@ -333,7 +333,7 @@ class EffectAdmin(EntityAdmin):
             classes=('wide', ),
         )),
         (_("Dégâts temporels"), dict(
-            fields=('interval', 'damage_type', 'raw_damage', 'damage_dice_count', 'damage_dice_value', ),
+            fields=('interval', 'damage_type', 'raw_damage', 'damage_dice_count', 'damage_dice_value', 'next_effect', ),
             classes=('wide', 'collapse', ),
         )),
     )
