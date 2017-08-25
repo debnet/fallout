@@ -9,12 +9,18 @@ from rpg.fallout.models import Campaign, Character
 
 @login_required
 def view_index(request):
+    """
+    Page d'accueil
+    """
     return view_campaign(request, 0)
 
 
 @login_required
 @render_to('fallout/campaign/campaign.html')
 def view_campaign(request, campaign_id):
+    """
+    Vue principale des campagnes
+    """
     campaign = Campaign.objects.filter(id=campaign_id).first()
     characters = Character.objects.filter(campaign=campaign)
     if not request.user.is_superuser:
@@ -30,7 +36,10 @@ def view_campaign(request, campaign_id):
 @login_required
 @render_to('fallout/character/character.html')
 def view_character(request, character_id):
-    characters = Character.objects.select_related().filter(is_active=True).order_by('is_player')
+    """
+    Vue principale des personnages
+    """
+    characters = Character.objects.select_related('user', 'campaign').filter(is_active=True).order_by('is_player')
     if not request.user.is_superuser:
         characters = characters.filter(user=request.user)
     character = characters.filter(id=character_id).first()
@@ -48,11 +57,11 @@ def view_character(request, character_id):
                     data.get('stats'),
                     int(data.get('modifier') or 0))
             elif data.get('type') == 'fight':
-                fight_history = character.fight(
+                fight_history = [character.fight(
                     target=data.get('target'),
                     target_part=data.get('target_part'),
                     target_range=int(data.get('target_range')),
-                    hit_modifier=int(data.get('hit_modifier') or 0))
+                    hit_modifier=int(data.get('hit_modifier') or 0))]
             elif data.get('type') == 'burst':
                 fight_history = character.burst(
                     targets=zip(data.get('targets'), data.get('ranges')),

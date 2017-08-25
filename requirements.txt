@@ -1,10 +1,11 @@
-Django==1.11.3
+Django==1.11.4
 Pillow==4.2.1
+common-framework==2017.8.28
 coverage==4.4.1
 django-cors-headers==2.1.0
 django-debug-toolbar==1.8
-django-multiselectfield==0.1.7
-djangorestframework==3.6.3
+django-multiselectfield==0.1.8
+djangorestframework==3.6.4
 flake8==3.2.1
 python-dateutil==2.6.1
 pip==9.0.1
@@ -12,4 +13,3 @@ pytz==2017.2
 requests==2.18.1
 setuptools==36.2.0
 wheel==0.29.0
--e git+https://git-web.sa-cim.fr/nouvelleoffre/common-framework.git#egg=common-framework

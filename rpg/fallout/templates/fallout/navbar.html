@@ -18,7 +18,12 @@
         <div class="dropdown-menu" aria-labelledby="campaign-navbar">
             {% for character in characters %}
                 <a class="dropdown-item" href="{% url 'fallout_character' character.id %}">
-                    {% if not character.is_player %}<small class="badge badge-info">{% trans "PNJ" %}</small>{% endif %}
+                    {% if not character.is_player %}
+                        <small class="badge badge-info">{% trans "PNJ" %}</small>
+                    {% endif %}
+                    {% if character.campaign.current_character == character %}
+                        <small class="badge badge-success">{% trans "Actif" %}</small>
+                    {% endif %}
                     {{ character.name }}
                 </a>
             {% endfor %}

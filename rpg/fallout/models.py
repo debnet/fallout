@@ -727,7 +727,7 @@ class Character(Entity, Stats):
         damage_threshold = self.stats.damage_threshold + threshold_modifier
         damage_resistance = self.stats.damage_resistance + getattr(self.stats, DAMAGE_RESISTANCE.get(damage_type), 0.0)
         damage_resistance += resistance_modifier
-        total_damage = total_damage * (-1.0 if damage_type == DAMAGE_HEAL else 1.0)
+        total_damage *= (-1.0 if damage_type == DAMAGE_HEAL else 1.0)
         total_damage -= max(damage_threshold, 0)
         total_damage *= (1.0 - min(damage_resistance, 1.0))
         total_damage = int(total_damage)
@@ -1467,6 +1467,62 @@ class RollHistory(CommonModel):
     success = models.BooleanField(default=False, verbose_name=_("succès ?"))
     critical = models.BooleanField(default=False, verbose_name=_("critique ?"))
 
+    class RollStats:
+        """
+        Statistiques des jets
+        """
+        def __init__(self, character: Union['Character', int], code: str, label: str):
+            self.character = character
+            self.code = code
+            self.label = label
+            self.count = 0
+            self.stats = {(1, 1): 0, (1, 0): 0, (0, 0): 0, (0, 1): 0}
+
+        def add(self, success: bool, critical: bool):
+            """
+            Ajoute un jet aux statistiques
+            :param success: Succès ?
+            :param critical: Critique ?
+            :return: Rien
+            """
+            self.count += 1
+            self.stats[success, critical] += 1
+
+        @property
+        def all(self) -> List[Tuple[float, str]]:
+            """
+            Ventilation des statistiques par succès/échec
+            :return: Liste ventilée par classe CSS et pourcentage
+            """
+            return [(
+                round(value / self.count, 2) * 100.0,
+                RollHistory._css_classes[key]
+            ) for key, value in self.stats.items()]
+
+    @staticmethod
+    def get_stats(character: Union['Character', int]):
+        """
+        Récupère les statistiques de jets
+        :param character: Personnage
+        :return: Liste des statistiques de jets
+        """
+        from collections import OrderedDict
+        stats = OrderedDict()
+        for code, label in SPECIALS + SKILLS:
+            stats[code] = RollHistory.RollStats(character, code, label)
+        for roll in RollHistory.objects.filter(character=character).iterator():
+            stats[roll.stats].add(roll.success, roll.critical)
+        return list(stats.values())
+
+    _css_classes = {(1, 1): 'info', (1, 0): 'success', (0, 0): 'warning', (0, 1): 'danger'}
+
+    @property
+    def css_class(self) -> str:
+        """
+        Classe CSS associée
+        """
+        return self._css_classes[self.success, self.critical]
+
     @property
     def label(self) -> str:
         """
@@ -1565,6 +1621,15 @@ class FightHistory(CommonModel):
     damage = models.OneToOneField(
         'DamageHistory', blank=True, null=True, on_delete=models.CASCADE, related_name='fight',
         verbose_name=_("historique des dégâts"), limit_choices_to={'fight__isnull': True})
+
+    @property
+    def css_class(self) -> str:
+        return {
+            (True, True): 'info',
+            (True, False): 'success',
+            (False, False): 'warning',
+            (False, True): 'danger',
+        }[self.success, self.critical]
 
     @property
     def label(self) -> str:

@@ -31,6 +31,11 @@
     {% if roll %}
         {% include "fallout/character/alerts/roll.html" %}
     {% endif %}
+    {% if fight %}
+        {% for fight in fight %}
+            {% include "fallout/character/alerts/fight.html" %}
+        {% endfor %}
+    {% endif %}
     {% if character %}
         <div class="content">
             <h3 class="display-4">
@@ -38,7 +43,12 @@
                 {% if character.title %}<small class="text-muted">{{ character.title }}</small>{% endif %}
             </h3>
             <p class="lead">
-                {% if not character.is_player %}<span class="badge badge-info">{% trans "PNJ" %}</span>{% endif %}
+                {% if character.campaign.current_character == character %}
+                    <span class="badge badge-success">{% trans "Actif" %}</span>
+                {% endif %}
+                {% if not character.is_player %}
+                    <span class="badge badge-info">{% trans "PNJ" %}</span>
+                {% endif %}
                 <strong>{% trans "Niveau" %} {{ character.level }}</strong>
                 {% if character.description %} {{ character.description }}{% endif %}
             </p>
