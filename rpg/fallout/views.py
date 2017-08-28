@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 
 from rpg.fallout.enums import BODY_PARTS, DAMAGES_TYPES
-from rpg.fallout.models import Campaign, Character
+from rpg.fallout.models import Campaign, Character, RollHistory
 
 
 @login_required
@@ -76,6 +76,8 @@ def view_character(request, character_id):
             errors = e.error_list
         except Exception as e:
             errors = [str(e)]
+    # Statistics
+    rollstats = RollHistory.get_stats(character)
 
     return {
         # Lists
@@ -85,6 +87,8 @@ def view_character(request, character_id):
         'character': character,
         'equipment': equipment,
         'inventory': inventory,
+        # Statistics
+        'rollstats': rollstats,
         # Action history
         'roll': roll_history,
         'fight': fight_history,

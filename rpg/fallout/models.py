@@ -1495,7 +1495,7 @@ class RollHistory(CommonModel):
             :return: Liste ventilée par classe CSS et pourcentage
             """
             return [(
-                round(value / self.count, 2) * 100.0,
+                round(value / self.count if self.count else 0, 2) * 100.0,
                 RollHistory._css_classes[key]
             ) for key, value in self.stats.items()]
 

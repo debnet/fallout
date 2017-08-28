@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n l10n %}
 
 <div class="d-flex align-items-stretch flex-wrap row no-gutters">
     {% for item in items %}
@@ -34,10 +34,12 @@
                             {% with condition=item.current_condition %}
                                 {% if condition %}
                                     <div class="progress">
+                                        {% localize off %}
                                         <div role="progressbar" style="width: {{ condition }}%;" aria-valuenow="{{ condition }}"
                                              aria-valuemin="0" aria-valuemax="100" class="progress-bar progress-bar-striped
                                              bg-{% if condition < 25 %}danger{% elif condition < 50 %}warning{% else %}success{% endif %}">
-                                            {{ condition }}%
+                                        {% endlocalize %}
+                                            {{ condition|floatformat:0 }}%
                                         </div>
                                     </div>
                                 {% endif %}

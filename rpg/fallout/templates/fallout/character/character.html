@@ -71,6 +71,10 @@
                            href="#actions" role="tab">{% trans "Actions" %}</a>
                     </li>
                 {% endif %}
+                <li class="nav-item">
+                    <a class="nav-link{% if 'infos' in request.GET %} active{% endif %}" id="infos-tab" data-toggle="tab"
+                       href="#infos" role="tab">{% trans "Informations" %}</a>
+                </li>
             </ul>
             <div class="tab-content">
                 {% include "fallout/character/panels/stats.html" %}
@@ -78,6 +82,7 @@
                     {% include "fallout/character/panels/items.html" %}
                 {% endif %}
                 {% include "fallout/character/panels/actions.html" %}
+                {% include "fallout/character/panels/infos.html" %}
             </div>
         </div>
     {% endif %}
