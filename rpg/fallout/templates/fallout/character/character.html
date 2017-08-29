@@ -38,6 +38,12 @@
     {% endif %}
     {% if character %}
         <div class="content">
+            {% if character.campaign %}
+                <form class="float-right" method="post" action="{{ request.get_full_path }}">
+                    {% csrf_token %}
+                    <button class="btn btn-success" name="next">{% trans "Tour suivant" %}</button>
+                </form>
+            {% endif %}
             <h3 class="display-4">
                 {{ character.name }}
                 {% if character.title %}<small class="text-muted">{{ character.title }}</small>{% endif %}
@@ -54,26 +60,26 @@
             </p>
         </div>
         <div role="tabpanel" id="tabs">
-            <ul class="nav nav-tabs tab" id="character-tabs" role="tablist">
+            <ul class="nav nav-tabs nav-justified tab" id="character-tabs" role="tablist">
                 <li class="nav-item">
-                    <a class="nav-link{% if 'stats' in request.GET %} active{% endif %}" id="stats-tab" data-toggle="tab"
-                       href="#stats" role="tab">{% trans "Statistiques" %}</a>
+                    <a class="nav-link{% if 'stats' in request.GET %} active{% endif %}" id="stats-tab"
+                       data-toggle="tab" href="#stats" role="tab">{% trans "Personnage" %}</a>
                 </li>
                 {% if equipment or inventory %}
                     <li class="nav-item">
-                        <a class="nav-link{% if 'items' in request.GET %} active{% endif %}" id="items-tab" data-toggle="tab"
-                           href="#items" role="tab">{% trans "Objets" %}</a>
+                        <a class="nav-link{% if 'items' in request.GET %} active{% endif %}" id="items-tab"
+                           data-toggle="tab" href="#items" role="tab">{% trans "Objets" %}</a>
                     </li>
                 {% endif %}
                 {% if request.user.is_superuser %}
                     <li class="nav-item">
-                        <a class="nav-link{% if 'actions' in request.GET %} active{% endif %}" id="actions-tab" data-toggle="tab"
-                           href="#actions" role="tab">{% trans "Actions" %}</a>
+                        <a class="nav-link{% if 'actions' in request.GET %} active{% endif %}" id="actions-tab"
+                           data-toggle="tab" href="#actions" role="tab">{% trans "Actions" %}</a>
                     </li>
                 {% endif %}
                 <li class="nav-item">
-                    <a class="nav-link{% if 'infos' in request.GET %} active{% endif %}" id="infos-tab" data-toggle="tab"
-                       href="#infos" role="tab">{% trans "Informations" %}</a>
+                    <a class="nav-link{% if 'infos' in request.GET %} active{% endif %}" id="infos-tab"
+                       data-toggle="tab" href="#infos" role="tab">{% trans "Statistiques" %}</a>
                 </li>
             </ul>
             <div class="tab-content">

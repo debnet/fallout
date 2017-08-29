@@ -33,8 +33,7 @@
                 {% else %}
                     <tr>
                         <td colspan="2">
-                            <select class="form-control form-control-sm" id="{{ code }}-target"
-                                    name="target">
+                            <select class="form-control form-control-sm" id="{{ code }}-target" name="target">
                                 {% for character in characters %}
                                     <option value="{{ character.id }}">{{ character.name }}</option>
                                 {% endfor %}
@@ -46,9 +45,8 @@
                     <tr>
                         <td><label for="{{ code }}-target-part">{% trans "cible" %}</label></td>
                         <td class="text-right">
-                            <select class="form-control form-control-sm" id="{{ code }}-target-part"
-                                    name="target_part">
-                                <option>{% trans "non ciblé" %}</option>
+                            <select class="form-control form-control-sm" id="{{ code }}-target-part" name="target_part">
+                                <option value="">{% trans "non ciblé" %}</option>
                                 {% for code, label in body_parts %}
                                     <option value="{{ code }}">{{ label }}</option>
                                 {% endfor %}
@@ -73,7 +71,13 @@
             </tbody>
             <tfoot class="thead-inverse">
                 <tr>
-                    <th class="text-right" colspan="2">
+                    <th class="align-middle">
+                        <label class="form-check-label">
+                            <input class="form-check-input" type="checkbox" name="action" checked="checked">
+                            {% trans "action" %}
+                        </label>
+                    </th>
+                    <th class="text-right">
                         <button class="btn btn-sm btn-primary" type="submit">{% trans "OK" %}</button>
                     </th>
                 </tr>

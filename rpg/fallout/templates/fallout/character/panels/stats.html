@@ -1,6 +1,6 @@
 {% load i18n %}
 
-<div class="tab-pane fade{% if 'stats' in request.GET %} active show{% endif %}" id="stats" role="tabpanel">
+<div class="tab-pane fade{% if not request.GET %} active show{% endif %}" id="stats" role="tabpanel">
     <div class="row">
         <div class="col">
             {% with code="general" label=_("Etat général") stats=character.general_stats view=True %}

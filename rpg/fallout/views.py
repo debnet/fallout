@@ -2,6 +2,7 @@
 from common.utils import render_to
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
+from django.shortcuts import redirect
 
 from rpg.fallout.enums import BODY_PARTS, DAMAGES_TYPES
 from rpg.fallout.models import Campaign, Character, RollHistory
@@ -39,6 +40,15 @@ def view_character(request, character_id):
     """
     Vue principale des personnages
     """
+    action = request.method == 'POST'
+    data = request.POST
+    # Prochain tour
+    if action and 'next' in data:
+        campaign = Campaign.objects.filter(characters=character_id).first()
+        if campaign:
+            next_character = campaign.next_turn()
+            return redirect('fallout_character', next_character.id)
+    # Données
     characters = Character.objects.select_related('user', 'campaign').filter(is_active=True).order_by('is_player')
     if not request.user.is_superuser:
         characters = characters.filter(user=request.user)
@@ -49,9 +59,8 @@ def view_character(request, character_id):
     errors = None
     roll_history = fight_history = damage_history = None
     characters = characters.filter(campaign_id=character.campaign_id if character else None)
-    if character and request.user.is_superuser and request.method == 'POST':
+    if action and character and request.user.is_superuser:
         try:
-            data = request.POST
             if data.get('type') == 'roll':
                 roll_history = character.roll(
                     data.get('stats'),
@@ -61,11 +70,13 @@ def view_character(request, character_id):
                     target=data.get('target'),
                     target_part=data.get('target_part'),
                     target_range=int(data.get('target_range')),
-                    hit_modifier=int(data.get('hit_modifier') or 0))]
+                    hit_modifier=int(data.get('hit_modifier') or 0),
+                    action=bool(data.get('action', False)))]
             elif data.get('type') == 'burst':
                 fight_history = character.burst(
                     targets=zip(data.get('targets'), data.get('ranges')),
-                    hit_modifier=int(data.get('hit_modifier') or 0))
+                    hit_modifier=int(data.get('hit_modifier') or 0),
+                    action=bool(data.get('action', False)))
             elif data.get('type') == 'damage':
                 damage_history = character.damage(
                     raw_damage=int(data.get('raw_damage')),

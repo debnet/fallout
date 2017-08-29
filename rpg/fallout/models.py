@@ -1,4 +1,5 @@
 # coding: utf-8
+from collections import OrderedDict as odict
 from datetime import timedelta
 from random import randint, choice
 from typing import Dict, Iterable, List, Tuple, Union
@@ -537,11 +538,13 @@ class Character(Entity, Stats):
             equipements.delete()
         return loots
 
-    def burst(self, targets: Iterable[Tuple['Character', int]], hit_modifier: int=0) -> List['FightHistory']:
+    def burst(self, targets: Iterable[Tuple['Character', int]], hit_modifier: int=0,
+              action: bool=True) -> List['FightHistory']:
         """
         Permet de lancer une attaque en rafale sur un groupe d'ennemis
         :param targets: Liste de personnages ciblés avec leur distance relative (en cases) pour chacun dans un tuple
         :param hit_modifier: Modificateurs complémentaires de précision (lumière, couverture, etc...)
+        :param action: Consomme les points d'action de l'attaquant ?
         :return: Liste d'historiques de combat
         """
         histories = []
@@ -551,12 +554,14 @@ class Character(Entity, Stats):
             "L'attaquant ne possède pas d'arme ou celle-ci ne permet pas d'attaque en rafale.")
         for hit in range(attacker_weapon.burst_count):
             target, target_range = choice(targets)
-            history = self.fight(target, is_burst=True, target_range=target_range, hit_modifier=hit_modifier, hit=hit)
+            history = self.fight(
+                target, is_burst=True, target_range=target_range,
+                hit_modifier=hit_modifier, action=action, hit=hit)
             histories.append(history)
         return histories
 
-    def fight(self, target: 'Character', is_burst: bool=False, target_range: int=1,
-              hit_modifier: int=0, target_part: BODY_PARTS=None, hit: int=0) -> 'FightHistory':
+    def fight(self, target: 'Character', is_burst: bool=False, target_range: int=1, hit_modifier: int=0,
+              target_part: BODY_PARTS=None, action: bool=True, hit: int=0) -> 'FightHistory':
         """
         Calcul un round de combat entre deux personnages
         :param target: Personnage ciblé
@@ -564,6 +569,7 @@ class Character(Entity, Stats):
         :param target_range: Distance (en cases) entre les deux personnages
         :param hit_modifier: Modificateurs complémentaires de précision (lumière, couverture, etc...)
         :param target_part: Partie du corps ciblée par l'attaquant (ou torse par défaut)
+        :param action: Consomme les points d'action de l'attaquant ?
         :param hit: Compteur de coups lors d'une attaque en rafale
         :return: Historique de combat
         """
@@ -587,13 +593,14 @@ class Character(Entity, Stats):
             history.status = STATUS_WEAPON_BROKEN
         # Action points
         ap_cost = 0
-        if not is_burst:
-            ap_cost_type = 'ap_cost_target' if target_part else 'ap_cost_normal'
-            ap_cost = getattr(attacker_weapon, ap_cost_type, None) or AP_COST_FIGHT
-        elif not hit:
-            ap_cost = getattr(attacker_weapon, 'ap_cost_burst', None) or AP_COST_FIGHT
-        if ap_cost > self.action_points:
-            history.status = STATUS_NOT_ENOUGH_AP
+        if action:
+            if not is_burst:
+                ap_cost_type = 'ap_cost_target' if target_part else 'ap_cost_normal'
+                ap_cost = getattr(attacker_weapon, ap_cost_type, None) or AP_COST_FIGHT
+            elif not hit:
+                ap_cost = getattr(attacker_weapon, 'ap_cost_burst', None) or AP_COST_FIGHT
+            if ap_cost > self.action_points:
+                history.status = STATUS_NOT_ENOUGH_AP
         # Premature end of fight
         if history.status:
             history.save()
@@ -1476,7 +1483,7 @@ class RollHistory(CommonModel):
             self.code = code
             self.label = label
             self.count = 0
-            self.stats = {(1, 1): 0, (1, 0): 0, (0, 0): 0, (0, 1): 0}
+            self.stats = odict((((1, 1), 0), ((1, 0), 0), ((0, 0), 0), ((0, 1), 0)))
 
         def add(self, success: bool, critical: bool):
             """
@@ -1489,13 +1496,14 @@ class RollHistory(CommonModel):
             self.stats[success, critical] += 1
 
         @property
-        def all(self) -> List[Tuple[float, str]]:
+        def all(self) -> List[Tuple[int, float, str]]:
             """
             Ventilation des statistiques par succès/échec
-            :return: Liste ventilée par classe CSS et pourcentage
+            :return: Liste ventilée par valeur, pourcentage et classe CSS
             """
             return [(
-                round(value / self.count if self.count else 0, 2) * 100.0,
+                value,
+                round((value / self.count) * 100 if self.count else 0),
                 RollHistory._css_classes[key]
             ) for key, value in self.stats.items()]
 
@@ -1514,7 +1522,7 @@ class RollHistory(CommonModel):
             stats[roll.stats].add(roll.success, roll.critical)
         return list(stats.values())
 
-    _css_classes = {(1, 1): 'info', (1, 0): 'success', (0, 0): 'warning', (0, 1): 'danger'}
+    _css_classes = odict((((1, 1), 'primary'), ((1, 0), 'success'), ((0, 0), 'warning'), ((0, 1), 'danger')))
 
     @property
     def css_class(self) -> str:
@@ -1622,14 +1630,14 @@ class FightHistory(CommonModel):
         'DamageHistory', blank=True, null=True, on_delete=models.CASCADE, related_name='fight',
         verbose_name=_("historique des dégâts"), limit_choices_to={'fight__isnull': True})
 
+    _css_classes = odict((((1, 1), 'primary'), ((1, 0), 'success'), ((0, 0), 'warning'), ((0, 1), 'danger')))
+
     @property
     def css_class(self) -> str:
-        return {
-            (True, True): 'info',
-            (True, False): 'success',
-            (False, False): 'warning',
-            (False, True): 'danger',
-        }[self.success, self.critical]
+        """
+        Classe CSS associée
+        """
+        return self._css_classes[self.success, self.critical]
 
     @property
     def label(self) -> str:
@@ -1646,7 +1654,7 @@ class FightHistory(CommonModel):
         Libellé long du combat
         :return:
         """
-        if self.status:
+        if not self.damage:
             return _("{label} : {status}").format(label=self.label, status=self.get_status_display())
         return _("{label} : {damage} dégât(s) infligé(s)").format(label=self.label, damage=self.damage.real_damage)
 

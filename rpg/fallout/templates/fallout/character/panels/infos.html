@@ -8,18 +8,24 @@
                 <li class="list-group-item">
                     <h6>
                         {{ roll.label }}
-                        <small class="text-muted">{% blocktrans %}{{ roll.count }} jet(s){% endblocktrans %}</small>
+                        <small class="text-muted">
+                            {% if roll.count %}
+                                {% blocktrans with count=roll.count %}({{ count }} jets){% endblocktrans %}
+                            {% else %}
+                                {% trans "(aucun jet)" %}
+                            {% endif %}
+                        </small>
                     </h6>
                     <div class="progress">
                         <div class="progress-bar"></div>
-                        {% for value, class in roll.all %}
+                        {% for value, width, class in roll.all %}
                             {% if value %}
                                 {% localize off %}
                                 <div class="progress-bar progress-bar-striped bg-{{ class }}" role="progressbar"
-                                     aria-valuenow="{{ value }}" aria-valuemin="0" aria-valuemax="0"
-                                     style="width: {{ value }}%">
+                                     aria-valuenow="{{ value }}" aria-valuemin="0" aria-valuemax="{{ roll.count }}"
+                                     style="width: {{ width }}%">
                                 {% endlocalize %}
-                                    {{ value|floatformat:0 }}%
+                                    {{ value }}
                                 </div>
                             {% endif %}
                         {% endfor %}
