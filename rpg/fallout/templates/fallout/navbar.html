@@ -30,3 +30,10 @@
         </div>
     </li>
 </ul>
+{% if campaign %}
+    <form method="post" action="{% url 'fallout_next_turn' campaign.id %}">
+        <label class="text-white">{{ campaign.current_game_date }} ({{ campaign.elapsed_time }})</label>
+        <button class="btn btn-success btn-sm" name="next">{% trans "Tour suivant" %}</button>
+        {% csrf_token %}
+    </form>
+{% endif %}

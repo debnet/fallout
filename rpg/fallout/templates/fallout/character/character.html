@@ -8,22 +8,9 @@
 {% endblock %}
 
 {% block actions %}
-    {% if request.user.is_superuser %}
-        <ul class="nav navbar-nav navbar-right">
-            <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle"
-                   id="actions-navbar" href="#" data-toggle="dropdown"
-                   aria-haspopup="true" aria-expanded="false">{% trans "Actions" %}</a>
-                <div class="dropdown-menu" aria-labelledby="actions-navbar">
-                    <a class="dropdown-item" href="{% url 'admin:fallout_character_add' %}?campaign={{ character.campaign_id }}">
-                        {% trans "Ajouter" %}</a>
-                    {% if character %}
-                        <a class="dropdown-item" href="{% url 'admin:fallout_character_change' character.id %}">
-                            {% trans "Modifier" %}</a>
-                    {% endif %}
-                </div>
-            </li>
-        </ul>
+    <a class="dropdown-item" href="{% url 'admin:fallout_character_add' %}?campaign={{ character.campaign_id }}">{% trans "Ajouter" %}</a>
+    {% if character %}
+        <a class="dropdown-item" href="{% url 'admin:fallout_character_change' character.id %}">{% trans "Modifier" %}</a>
     {% endif %}
 {% endblock %}
 
@@ -38,12 +25,6 @@
     {% endif %}
     {% if character %}
         <div class="content">
-            {% if character.campaign %}
-                <form class="float-right" method="post" action="{{ request.get_full_path }}">
-                    {% csrf_token %}
-                    <button class="btn btn-success" name="next">{% trans "Tour suivant" %}</button>
-                </form>
-            {% endif %}
             <h3 class="display-4">
                 {{ character.name }}
                 {% if character.title %}<small class="text-muted">{{ character.title }}</small>{% endif %}

@@ -8,6 +8,7 @@ urlpatterns = [
     url(r'^$', views.view_index, name='fallout_index'),
     url(r'^campaign/(?P<campaign_id>\d+)/$', views.view_campaign, name='fallout_campaign'),
     url(r'^character/(?P<character_id>\d+)/$', views.view_character, name='fallout_character'),
+    url(r'^next_turn/(?P<campaign_id>\d+)/$', views.next_turn, name='fallout_next_turn'),
 ]
 
 # API REST

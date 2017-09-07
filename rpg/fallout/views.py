@@ -42,12 +42,6 @@ def view_character(request, character_id):
     """
     action = request.method == 'POST'
     data = request.POST
-    # Prochain tour
-    if action and 'next' in data:
-        campaign = Campaign.objects.filter(characters=character_id).first()
-        if campaign:
-            next_character = campaign.next_turn()
-            return redirect('fallout_character', next_character.id)
     # Données
     characters = Character.objects.select_related('user', 'campaign').filter(is_active=True).order_by('is_player')
     if not request.user.is_superuser:
@@ -93,7 +87,7 @@ def view_character(request, character_id):
     return {
         # Lists
         'campaigns': Campaign.objects.order_by('name'),
-        'characters': characters.exclude(id=character_id).order_by('name'),
+        'characters': characters.order_by('name'),
         # Character
         'character': character,
         'equipment': equipment,
@@ -110,3 +104,18 @@ def view_character(request, character_id):
         # Errors
         'errors': errors,
     }
+
+
+def next_turn(request, campaign_id):
+    """
+    Action pour passer au tour suivant
+    """
+    action = request.method == 'POST'
+    data = request.POST
+    # Prochain tour
+    if action and 'next' in data:
+        campaign = Campaign.objects.filter(id=campaign_id).first()
+        if campaign:
+            next_character = campaign.next_turn()
+            return redirect('fallout_character', next_character.id)
+    return redirect('fallout_campaign', campaign_id)

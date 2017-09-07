@@ -78,6 +78,10 @@ class Campaign(CommonModel):
         related_name='+', verbose_name=_("effets actifs"))
     radiation = models.PositiveSmallIntegerField(default=0, verbose_name=_("rads par heure"))
 
+    @property
+    def elapsed_time(self):
+        return self.current_game_date - self.start_game_date
+
     def clear_loot(self):
         """
         Supprime les butins non réclamés de la campagne

@@ -12,30 +12,34 @@
             </thead>
             <tbody>
                 {% if burst %}
-                    {% for character in characters %}
-                        <tr class="check-control">
-                            <td>
-                                <label class="form-check-label">
-                                    <input class="form-check-input" type="checkbox"
-                                           name="targets" value="{{ character.id }}"
-                                           data-target="{{ code }}-target-range-{{ character.id }}">
-                                    {{ character.name }}
-                                </label>
-                            </td>
-                            <td class="text-right">
-                                <label for="{{ code }}-target-range-{{ character.id }}">{% trans "dst." %}</label>
-                                <input class="form-control form-control-sm tiny" type="number"
-                                       name="ranges" value="1" disabled
-                                       id="{{ code }}-target-range-{{ character.id }}" />
-                            </td>
-                        </tr>
+                    {% for c in characters %}
+                        {% if c != character %}
+                            <tr class="check-control">
+                                <td>
+                                    <label class="form-check-label">
+                                        <input class="form-check-input" type="checkbox"
+                                               name="targets" value="{{ c.id }}"
+                                               data-target="{{ code }}-target-range-{{ c.id }}">
+                                        {{ c.name }}
+                                    </label>
+                                </td>
+                                <td class="text-right">
+                                    <label for="{{ code }}-target-range-{{ c.id }}">{% trans "dst." %}</label>
+                                    <input class="form-control form-control-sm tiny" type="number"
+                                           name="ranges" value="1" disabled
+                                           id="{{ code }}-target-range-{{ c.id }}" />
+                                </td>
+                            </tr>
+                        {% endif %}
                     {% endfor %}
                 {% else %}
                     <tr>
                         <td colspan="2">
                             <select class="form-control form-control-sm" id="{{ code }}-target" name="target">
-                                {% for character in characters %}
-                                    <option value="{{ character.id }}">{{ character.name }}</option>
+                                {% for c in characters %}
+                                    {% if c != character %}
+                                        <option value="{{ c.id }}">{{ c.name }}</option>
+                                    {% endif %}
                                 {% endfor %}
                             </select>
                         </td>

@@ -10,15 +10,15 @@
                         <span class="card-title">{{ info.name }}</span>
                         {% if info.title %}<small class="card-subtitle mb-2 text-muted">{{ info.title }}</small>{% endif %}
                     </div>
-                    {% with image=item.item.image thumbnail=item.item.thumbnail %}
-                        {% if thumbnail %}
-                            <img class="card-img-top m-1 img-fluid mx-auto d-block" src="{{ thumbnail }}">
-                        {% elif image %}
-                            <img class="card-img-top m-1 img-fluid mx-auto d-block"
-                                 height="{{ image.height }}" width="{{ image.width }}" src="{{ image.url }}">
-                        {% endif %}
-                    {% endwith %}
-                    <div class="card-block">
+                    <div class="card-body">
+                        {% with image=item.item.image thumbnail=item.item.thumbnail %}
+                            {% if thumbnail %}
+                                <img class="img-fluid mx-auto d-block" src="{{ thumbnail }}">
+                            {% elif image %}
+                                <img class="img-fluid mx-auto d-block"
+                                     height="{{ image.height }}" width="{{ image.width }}" src="{{ image.url }}">
+                            {% endif %}
+                        {% endwith %}
                         <p class="card-text">
                             <small class="badge badge-primary">{{ item.charge|floatformat:2 }} {% trans "kg." %}</small>
                             <small class="badge badge-warning">{{ item.value|floatformat:2 }} {% trans "$" %}</small>
