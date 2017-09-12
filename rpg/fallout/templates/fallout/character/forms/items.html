@@ -1,21 +1,21 @@
 {% load i18n l10n %}
 
-<div class="d-flex align-items-stretch flex-wrap row no-gutters">
+<div class="row">
     {% for item in items %}
         {% with info=item.item %}
-            <div class="card-deck col-md-4 col-xs-6 p-1">
-                <div class="card">
+            <div class="col-md-4 col-sm-6 mb-3">
+                <div class="card h-100">
                     <div class="card-header">
-                        {% if item.count > 1 %}<span class="badge badge-default">{{ item.count }}</span>{% endif %}
                         <span class="card-title">{{ info.name }}</span>
                         {% if info.title %}<small class="card-subtitle mb-2 text-muted">{{ info.title }}</small>{% endif %}
+                        {% if item.count > 1 %}<span class="badge badge-dark float-right">{{ item.count }}</span>{% endif %}
                     </div>
                     <div class="card-body">
                         {% with image=item.item.image thumbnail=item.item.thumbnail %}
                             {% if thumbnail %}
-                                <img class="img-fluid mx-auto d-block" src="{{ thumbnail }}">
+                                <img class="img-fluid mx-auto d-block mb-2" src="{{ thumbnail }}">
                             {% elif image %}
-                                <img class="img-fluid mx-auto d-block"
+                                <img class="img-fluid mx-auto d-block mb-2"
                                      height="{{ image.height }}" width="{{ image.width }}" src="{{ image.url }}">
                             {% endif %}
                         {% endwith %}

@@ -73,13 +73,14 @@ class Campaign(CommonModel):
     current_character = models.ForeignKey(
         'Character', blank=True, null=True, on_delete=models.SET_NULL,
         related_name='+', verbose_name=_("personnage actif"))
-    active_effects = models.ManyToManyField(
-        'Effect', blank=True,
-        related_name='+', verbose_name=_("effets actifs"))
     radiation = models.PositiveSmallIntegerField(default=0, verbose_name=_("rads par heure"))
 
     @property
-    def elapsed_time(self):
+    def elapsed_time(self) -> timedelta:
+        """
+        Temps passé depuis le début de la campagne
+        :return:
+        """
         return self.current_game_date - self.start_game_date
 
     def clear_loot(self):
@@ -125,10 +126,11 @@ class Campaign(CommonModel):
         """
         difference = (self._copy.get('current_game_date') or self.current_game_date) - self.current_game_date
         hours = round(difference.seconds / 3600, 2)
+        super().save(*args, **kwargs)
         if hours <= 0:
             for character in self.characters.all():
                 character.update_needs(hours=hours, radiation=self.radiation)
-        return super().save(*args, **kwargs)
+                character.update_effects()
 
     def get_absolute_url(self):
         """
@@ -210,6 +212,11 @@ class Stats(models.Model):
 
     @staticmethod
     def get(character: 'Character') -> 'Stats':
+        """
+        Récupère toutes les statistiques à jour d'un personnage
+        :param character: Personnage
+        :return: Statistiques
+        """
         stats = Stats()
         stats.character = character
         # Get all character's stats
@@ -226,14 +233,11 @@ class Stats(models.Model):
                 if (mini or 0) <= getattr(character, stats_name, 0) < (maxi or float('+inf')):
                     stats._change_all_stats(**effects)
         # Equipment modifiers
-        for equipment in character.equipments.filter(slot__isnull=False)\
-                .select_related('item').prefetch_related('item__modifiers').all():
+        for equipment in character.equipment:
             for modifier in equipment.item.modifiers.all():
                 stats._change_stats(modifier.stats, modifier.value)
         # Active effects modifiers
-        for effect in character.active_effects.select_related('effect').prefetch_related('effect__modifiers').filter(
-                Q(start_date__isnull=True) | Q(start_date__gte=F('character__campaign__current_game_date')),
-                Q(end_date__isnull=True) | Q(end_date__lte=F('character__campaign__current_game_date'))):
+        for effect in character.effects:
             for modifier in effect.effect.modifiers.all():
                 stats._change_stats(modifier.stats, modifier.value)
         # Campaign effects modifiers
@@ -300,28 +304,51 @@ class Character(Entity, Stats):
     regeneration = models.FloatField(default=0.0, verbose_name=_("regénération"))
     # Tag skills
     tag_skills = MultiSelectField(max_length=200, choices=SKILLS, blank=True, verbose_name=_("spécialités"))
-    # Statistics cache
-    _stats = {}
-
-    @staticmethod
-    def reset_stats(character: Union[int, 'Character']):
-        """
-        Réinitialise le calcul des statistiques pour un personnage
-        """
-        if isinstance(character, Character):
-            character = character.pk
-        Character._stats.pop(character, None)
+    # Cache
+    _stats = _inventory = _equipment = _effects = None
 
     @property
     def stats(self) -> Stats:
         """
-        Retourne les statistiques calculées courantes
+        Retourne les statistiques calculées du personnage
         :return: Statistiques
         """
-        stats = Character._stats.get(self.pk) or Stats.get(self)
-        if self.pk:
-            Character._stats[self.pk] = stats
-        return stats
+        self._stats = self._stats or Stats.get(self)
+        return self._stats
+
+    @property
+    def inventory(self) -> 'EntityQuerySet[Equipment]':
+        """
+        Retourne le contenu de l'inventaire du personnage
+        :return: Equipements
+        """
+        self._inventory = \
+            self._inventory or self.equipments.select_related('item')\
+                .prefetch_related('item__modifiers', 'item__ammunitions').filter(slot='')
+        return self._inventory
+
+    @property
+    def equipment(self) -> 'EntityQuerySet[Equipment]':
+        """
+        Retourne les équipements du personnage
+        :return: Equipements
+        """
+        self._equipment = \
+            self._equipment or self.equipments.select_related('item')\
+                .prefetch_related('item__modifiers', 'item__ammunitions').exclude(slot='')
+        return self._equipment
+
+    @property
+    def effects(self) -> 'EntityQuerySet[Effect]':
+        """
+        Retourne les effets actifs du personnage
+        :return: Effets
+        """
+        self._effects = \
+            self._effects or self.active_effects.select_related('effect').prefetch_related('effect__modifiers').filter(
+                Q(start_date__isnull=True) | Q(start_date__lte=F('character__campaign__current_game_date')),
+                Q(end_date__isnull=True) | Q(end_date__gte=F('character__campaign__current_game_date')))
+        return self._effects
 
     def _get_stats(self, stats: List[Tuple[str, str]], from_stats: bool=True) -> List[Tuple[str, str, Union[int, float]]]:
         """
@@ -347,7 +374,7 @@ class Character(Entity, Stats):
         return self._get_stats(SKILLS)
 
     @property
-    def general_stats(self) -> List[Tuple[str, str, Union[int, float]]]:
+    def general_stats(self) -> List[Tuple[str, str, Union[int, float], Union[None, int, float]]]:
         """
         Retourne les statistiques générales
         """
@@ -681,7 +708,7 @@ class Character(Entity, Stats):
                     continue
                 for effect in item.effects.all():
                     effect.apply(target)
-            target.apply_effects()  # Apply effects immediatly
+            target.update_effects()  # Apply effects immediatly
         # Clip count & weapon condition
         if attacker_weapon_equipment and attacker_weapon:
             attacker_weapon_equipment.count -= 0 if attacker_weapon.is_throwable else 1
@@ -761,13 +788,12 @@ class Character(Entity, Stats):
         history.save()
         return history
 
-    def apply_effects(self):
+    def update_effects(self) -> List[Union[None, 'DamageHistory']]:
         """
         Force l'application des effets en cours
-        :return: Rien
+        :return: Liste des dégâts éventuels
         """
-        for effect in self.active_effects.all():
-            effect.apply()
+        return [effect.apply() for effect in self.effects]
 
     def duplicate(self, equipments: bool=True, effects: bool=True) -> 'Character':
         """
@@ -784,7 +810,7 @@ class Character(Entity, Stats):
                 equipment.character_id = self.pk
                 equipment.save(force_insert=True)
         if effects:
-            for effect in ActiveEffect.objects.filter(character_id=character_id):
+            for effect in CharacterEffect.objects.filter(character_id=character_id):
                 effect.character_id = self.pk
                 effect.save(force_insert=True)
         return self
@@ -803,13 +829,16 @@ class Character(Entity, Stats):
         has_max_action_points = not self.pk or self.action_points == self.stats.max_action_points
         # Check and increase level
         self.check_level()
-        # Remove stats in cache
-        Character.reset_stats(self.pk)
         # Fixing health and action points
         self.health = self.stats.max_health if has_max_health else \
             max(0, min(self.health, self.stats.max_health))
         self.action_points = self.stats.max_action_points if has_max_action_points else \
             max(0, min(self.action_points, self.stats.max_action_points))
+        # Remove current character on campaign if character is added or removed
+        for campaign_id in self.modified.get('campaign') or []:
+            if not campaign_id:
+                continue
+            Campaign.objects.filter(id=campaign_id).update(current_character=None)
         super().save(*args, **kwargs)
 
     def get_absolute_url(self):
@@ -1010,8 +1039,7 @@ class Equipment(Entity):
         """
         if self.slot or self.item.type != ITEM_AMMO:
             return
-        weapon = self.character.equipments.filter(slot=ITEM_WEAPON) \
-            .select_related('item').prefetch_related('item__ammunitions').first()
+        weapon = self.character.equipment.filter(slot=ITEM_WEAPON).first()
         return weapon and self.item in weapon.item.ammunitions.all()
 
     @property
@@ -1065,7 +1093,7 @@ class Equipment(Entity):
             self.character.save()
         return self
 
-    def use(self, action: bool=False) -> List['ActiveEffect']:
+    def use(self, action: bool=False) -> List['CharacterEffect']:
         """
         Permet d'utiliser un objet
         :param action: Consommera des points d'action
@@ -1079,7 +1107,7 @@ class Equipment(Entity):
             "Le personnage doit posséder au moins un exemplaire de cet objet pour l'utiliser.")
         effects = []
         for effect in self.item.effects.all():
-            effects.append(ActiveEffect.objects.update_or_create(
+            effects.append(CharacterEffect.objects.update_or_create(
                 character=self.character, effect=effect,
                 defaults=dict(start_date=None, end_date=None, next_date=None)))
         self.count -= 1
@@ -1165,7 +1193,6 @@ class Equipment(Entity):
         """
         Sauvegarde de l'objet
         """
-        Character.reset_stats(self.character_id or self.character)
         if self.character_id or self.character:
             Character._stats.pop(self.character_id or self.character.pk, None)
         if self.count < 0 and self.item.type not in SLOT_ITEM_TYPES:
@@ -1196,6 +1223,7 @@ class Effect(Entity):
     duration = models.DurationField(blank=True, null=True, verbose_name=_("durée"))
     # Timed effects
     interval = models.DurationField(blank=True, null=True, verbose_name=_("intervalle"))
+    damage_chance = models.PositiveSmallIntegerField(default=100, verbose_name=_("chance"))
     damage_type = models.CharField(max_length=10, blank=True, choices=DAMAGES_TYPES, verbose_name=_("type de dégâts"))
     raw_damage = models.PositiveSmallIntegerField(default=0, verbose_name=_("dégâts bruts"))
     damage_dice_count = models.PositiveSmallIntegerField(default=0, verbose_name=_("nombre de dés"))
@@ -1227,19 +1255,24 @@ class Effect(Entity):
             dice_value=self.damage_dice_value,
             damage_type=self.damage_type)
 
-    def apply(self, character: 'Character') -> Union[None, 'ActiveEffect']:
+    def apply(self, target: Union['Campaign', 'Character']) -> Union[None, 'CampaignEffect', 'CharacterEffect']:
         """
-        Applique l'effet à un personnage
-        :param character: Personnage
-        :return: Effect actif
+        Applique l'effet à un personnage ou une campagne
+        :param target: Personnage ou campagne
+        :return: Effect actif ou rien si l'effet ne s'applique pas
         """
-        assert character.campaign is not None or self.duration is None, _(
-            "Le personnage doit faire partie d'une campagne pour lui appliquer un effet sur la durée.")
         if randint(1, 100) >= self.chance:
             return None
-        return ActiveEffect.objects.get_or_create(
-            character=character, effect=self,
-            defaults=dict(start_date=getattr(character.campaign, 'current_game_date', None)))
+        if isinstance(target, Campaign):
+            return CampaignEffect.objects.get_or_create(
+                campaign=target, effect=self,
+                defaults=dict(start_date=target.current_game_date))
+        elif isinstance(target, Character):
+            assert self.duration is None or target.campaign is not None, _(
+                "Le personnage doit faire partie d'une campagne pour lui appliquer un effet sur la durée.")
+            return CharacterEffect.objects.get_or_create(
+                character=target, effect=self,
+                defaults=dict(start_date=getattr(target.campaign, 'current_game_date', None)))
 
     def duplicate(self) -> 'Effect':
         """
@@ -1278,49 +1311,109 @@ class EffectModifier(Modifier):
 
 class ActiveEffect(Entity):
     """
-    Effet actif sur un personnage
+    Effet actif
     """
-    character = models.ForeignKey('Character', on_delete=models.CASCADE, verbose_name=_("personnage"), related_name='active_effects')
-    effect = models.ForeignKey('Effect', on_delete=models.CASCADE, verbose_name=_("effet"), related_name='active_effects')
+    effect = models.ForeignKey('Effect', on_delete=models.CASCADE, verbose_name=_("effet"), related_name='+')
     start_date = models.DateTimeField(blank=True, null=True, verbose_name=_("date d'effet"))
     end_date = models.DateTimeField(blank=True, null=True, verbose_name=_("date d'arrêt"))
     next_date = models.DateTimeField(blank=True, null=True, verbose_name=_("date suivante"))
 
-    def apply(self):
+    class Meta:
+        abstract = True
+
+
+class CampaignEffect(ActiveEffect):
+    """
+    Effet actif dans une campagne
+    """
+    campaign = models.ForeignKey('Campaign', on_delete=models.CASCADE, verbose_name=_("campagne"), related_name='active_effects')
+
+    def apply(self) -> List[Union['DamageHistory', None]]:
         """
-        Applique l'effet au personnage
+        Applique l'effet aux personnages de la campagne
         """
+        damage = []
         if not self.next_date and self.effect.interval:
             self.next_date = self.start_date
-        if not self.character.campaign and not self.next_date:
+        if not self.next_date:
             return
-        game_date = self.character.campaign.current_game_date
+        game_date = self.campaign.current_game_date
         while self.next_date <= game_date:
-            self.character.damage(**self.effect.damage_config)
+            for character in self.campaign.characters.all():
+                damage.append(character.damage(**self.effect.damage_config))
             self.next_date += self.effect.interval
         self.save()
+        return damage
 
     def save(self, *args, **kwargs):
         """
         Sauvegarde l'effet actif
         """
-        Character.reset_stats(self.character_id or self.character)
-        if not self.start_date and self.character.campaign:
-            self.start_date = self.character.campaign.current_game_date
+        if not self.start_date:
+            self.start_date = self.campaign.current_game_date
         if not self.end_date and self.start_date and self.effect.duration:
             self.end_date = self.start_date + self.effect.duration
-        if self.character.campaign and self.end_date and self.end_date <= self.character.campaign.current_game_date:
+        if not self.next_date and self.start_date and self.effect.interval:
+            self.next_date = self.start_date + self.effect.interval
+        if self.end_date and self.end_date <= self.campaign.current_game_date:
             if self.effect.next_effect:
                 self.effect.next_effect.apply(self.character)
             return self.delete(*args, **kwargs)
         super().save(*args, **kwargs)
 
     def __str__(self) -> str:
+        return "({}) {}".format(str(self.campaign), str(self.effect))
+
+    class Meta:
+        verbose_name = _("effet de campagne")
+        verbose_name_plural = _("effets de campagne")
+
+
+class CharacterEffect(ActiveEffect):
+    """
+    Effet actif sur un personnage
+    """
+    character = models.ForeignKey('Character', on_delete=models.CASCADE, verbose_name=_("personnage"), related_name='active_effects')
+
+    def apply(self) -> Union['DamageHistory', None]:
+        """
+        Applique l'effet au personnage
+        """
+        damage = None
+        if not self.next_date and self.effect.interval:
+            self.next_date = self.start_date
+        if not self.character.campaign and not self.next_date:
+            return
+        game_date = self.character.campaign.current_game_date
+        while self.next_date <= game_date:
+            damage = self.character.damage(**self.effect.damage_config)
+            self.next_date += self.effect.interval
+        self.save()
+        return damage
+
+    def save(self, *args, **kwargs):
+        """
+        Sauvegarde l'effet actif
+        """
+        if not self.start_date and self.character.campaign:
+            self.start_date = self.character.campaign.current_game_date
+        if not self.end_date and self.start_date and self.effect.duration:
+            self.end_date = self.start_date + self.effect.duration
+        if self.character.campaign:
+            if not self.next_date and self.start_date and self.effect.interval:
+                self.next_date = self.start_date + self.effect.interval
+            if self.end_date and self.end_date <= self.character.campaign.current_game_date:
+                if self.effect.next_effect:
+                    self.effect.next_effect.apply(self.character)
+                return self.delete(*args, **kwargs)
+        super().save(*args, **kwargs)
+
+    def __str__(self) -> str:
         return "({}) {}".format(str(self.character), str(self.effect))
 
     class Meta:
-        verbose_name = _("effet en cours")
-        verbose_name_plural = _("effets en cours")
+        verbose_name = _("effet de personnage")
+        verbose_name_plural = _("effets de personnage")
 
 
 class Loot(CommonModel):
@@ -1680,7 +1773,8 @@ MODELS = (
     Equipment,
     Effect,
     EffectModifier,
-    ActiveEffect,
+    CampaignEffect,
+    CharacterEffect,
     Loot,
     LootTemplate,
     LootTemplateItem,

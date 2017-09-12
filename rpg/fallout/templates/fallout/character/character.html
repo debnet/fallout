@@ -52,6 +52,12 @@
                            data-toggle="tab" href="#items" role="tab">{% trans "Objets" %}</a>
                     </li>
                 {% endif %}
+                {% if effects %}
+                    <li class="nav-item">
+                        <a class="nav-link{% if 'effects' in request.GET %} active{% endif %}" id="items-tab"
+                           data-toggle="tab" href="#effects" role="tab">{% trans "Effets" %}</a>
+                    </li>
+                {% endif %}
                 {% if request.user.is_superuser %}
                     <li class="nav-item">
                         <a class="nav-link{% if 'actions' in request.GET %} active{% endif %}" id="actions-tab"
@@ -67,6 +73,9 @@
                 {% include "fallout/character/panels/stats.html" %}
                 {% if equipment or inventory %}
                     {% include "fallout/character/panels/items.html" %}
+                {% endif %}
+                {% if effects %}
+                    {% include "fallout/character/panels/effects.html" %}
                 {% endif %}
                 {% include "fallout/character/panels/actions.html" %}
                 {% include "fallout/character/panels/infos.html" %}

@@ -2,6 +2,7 @@
 from common.admin import CommonAdmin, EntityAdmin, EntityTabularInline
 from django.contrib import admin, messages
 from django.contrib.auth.admin import UserAdmin
+from django.db.models import Prefetch
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.utils.translation import ugettext as _
@@ -36,6 +37,14 @@ class LootInline(admin.TabularInline):
     extra = 1
 
 
+class CampaignEffectInlineAdmin(EntityTabularInline):
+    """
+    Administration intégrée des effets actifs
+    """
+    model = CampaignEffect
+    extra = 1
+
+
 @admin.register(Campaign)
 class CampaignAdmin(CommonAdmin):
     """
@@ -46,21 +55,30 @@ class CampaignAdmin(CommonAdmin):
             fields=('name', 'title', 'description', 'image', 'thumbnail', ),
             classes=('wide', ),
         )),
+        (_("Effets"), dict(
+            fields=('radiation', ),
+            classes=('wide', ),
+        )),
         (_("Informations techniques"), dict(
             fields=('start_game_date', 'current_game_date', 'current_character', ),
             classes=('wide', 'collapse', ),
         )),
-        (_("Effets"), dict(
-            fields=('active_effects', 'radiation', ),
-            classes=('wide', 'collapse', ),
-        )),
     )
-    inlines = [LootInline]
-    filter_horizontal = ('active_effects', )
+    inlines = [LootInline, CampaignEffectInlineAdmin]
+    filter_horizontal = ()
     list_display_links = ('name', )
     list_display = ('name', 'current_game_date', 'current_character', 'radiation', )
     list_editable = ('current_game_date', 'current_character', 'radiation', )
     ordering = ('name', )
+
+    def get_queryset(self, request):
+        """
+        Surcharge du queryset par défaut
+        """
+        # TODO: optimiser le nombre de requêtes des inlines
+        return super().get_queryset(request).prefetch_related(
+            Prefetch('loots', queryset=Loot.objects.select_related('campaign', 'item')),
+            Prefetch('active_effects', queryset=CampaignEffect.objects.select_related('campaign', 'effect')))
 
 
 class EquipmentInlineAdmin(EntityTabularInline):
@@ -71,11 +89,11 @@ class EquipmentInlineAdmin(EntityTabularInline):
     extra = 1
 
 
-class ActiveEffectInlineAdmin(EntityTabularInline):
+class CharacterEffectInlineAdmin(EntityTabularInline):
     """
     Administration intégrée des effets actifs
     """
-    model = ActiveEffect
+    model = CharacterEffect
     extra = 1
 
 
@@ -104,7 +122,7 @@ class CharacterAdmin(EntityAdmin):
             for title, fields in ALL_STATS
         )
     ])
-    inlines = [EquipmentInlineAdmin, ActiveEffectInlineAdmin]
+    inlines = [EquipmentInlineAdmin, CharacterEffectInlineAdmin]
     list_display_links = ('name', )
     list_display = (
         'name', 'race', 'level', 'is_player', 'is_active',
@@ -210,9 +228,10 @@ class CharacterAdmin(EntityAdmin):
         """
         Surcharge du queryset par défaut
         """
-        return super().get_queryset(request)\
-            .select_related('user', 'campaign')\
-            .prefetch_related('equipments', 'active_effects')
+        # TODO: optimiser le nombre de requêtes des inlines
+        return super().get_queryset(request).select_related('user', 'campaign').prefetch_related(
+            Prefetch('equipments', queryset=Equipment.objects.select_related('character', 'item')),
+            Prefetch('active_effects', queryset=CharacterEffect.objects.select_related('character', 'effect')))
 
 
 class ItemModifierInline(admin.TabularInline):
@@ -333,7 +352,9 @@ class EffectAdmin(EntityAdmin):
             classes=('wide', ),
         )),
         (_("Dégâts temporels"), dict(
-            fields=('interval', 'damage_type', 'raw_damage', 'damage_dice_count', 'damage_dice_value', 'next_effect', ),
+            fields=(
+                'interval', 'damage_chance', 'damage_type', 'raw_damage',
+                'damage_dice_count', 'damage_dice_value', 'next_effect', ),
             classes=('wide', 'collapse', ),
         )),
     )
@@ -342,6 +363,7 @@ class EffectAdmin(EntityAdmin):
     list_display = ('name', )
     list_editable = ()
     list_filter = ()
+    search_fields = ('name', 'title', 'description', )
     ordering = ('name', )
     actions = ('duplicate', )
 
@@ -360,10 +382,27 @@ class EffectAdmin(EntityAdmin):
         return super().get_queryset(request).prefetch_related('modifiers')
 
 
-@admin.register(ActiveEffect)
-class ActiveEffectAdmin(EntityAdmin):
+@admin.register(CampaignEffect)
+class CampaignEffectAdmin(EntityAdmin):
     """
-    Administration des effets actifs
+    Administration des effets actifs sur les campagnes
+    """
+    fieldsets = (
+        (_("Informations générales"), dict(
+            fields=('campaign', 'effect', 'start_date', 'end_date', 'next_date', ),
+            classes=('wide', ),
+        )),
+    )
+    list_display = ('campaign', 'effect', 'start_date', 'end_date', 'next_date', )
+    list_editable = ()
+    list_filter = ()
+    ordering = ('campaign', 'effect', )
+
+
+@admin.register(CharacterEffect)
+class CharacterEffectAdmin(EntityAdmin):
+    """
+    Administration des effets actifs sur les personnages
     """
     fieldsets = (
         (_("Informations générales"), dict(
@@ -371,7 +410,7 @@ class ActiveEffectAdmin(EntityAdmin):
             classes=('wide', ),
         )),
     )
-    list_display = ()
+    list_display = ('character', 'effect', 'start_date', 'end_date', 'next_date', )
     list_editable = ()
     list_filter = ()
     ordering = ('character', 'effect', )
@@ -402,6 +441,7 @@ class LootTemplateAdmin(EntityAdmin):
     list_editable = ()
     list_filter = ()
     ordering = ('name', )
+    search_fields = ('name', 'title', 'description', )
     actions = ('duplicate', )
 
     def duplicate(self, request, queryset):

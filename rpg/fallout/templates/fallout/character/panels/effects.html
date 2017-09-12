@@ -1,0 +1,5 @@
+{% load i18n %}
+
+<div class="tab-pane fade{% if 'effects' in request.GET %} active show{% endif %}" id="effects" role="tabpanel">
+    {% include "fallout/character/forms/effects.html" %}
+</div>

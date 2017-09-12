@@ -47,8 +47,7 @@ def view_character(request, character_id):
     if not request.user.is_superuser:
         characters = characters.filter(user=request.user)
     character = characters.filter(id=character_id).first()
-    equipment = character.equipments.select_related('item').prefetch_related('item__modifiers').exclude(slot='')
-    inventory = character.equipments.select_related('item').prefetch_related('item__modifiers').filter(slot='')
+    equipment, inventory, effects = character.equipment, character.inventory, character.effects
     # Actions
     errors = None
     roll_history = fight_history = damage_history = None
@@ -68,7 +67,7 @@ def view_character(request, character_id):
                     action=bool(data.get('action', False)))]
             elif data.get('type') == 'burst':
                 fight_history = character.burst(
-                    targets=zip(data.get('targets'), data.get('ranges')),
+                    targets=zip(data.get('targets') or [], data.get('ranges') or []),
                     hit_modifier=int(data.get('hit_modifier') or 0),
                     action=bool(data.get('action', False)))
             elif data.get('type') == 'damage':
@@ -92,6 +91,7 @@ def view_character(request, character_id):
         'character': character,
         'equipment': equipment,
         'inventory': inventory,
+        'effects': effects,
         # Statistics
         'rollstats': rollstats,
         # Action history
@@ -116,6 +116,6 @@ def next_turn(request, campaign_id):
     if action and 'next' in data:
         campaign = Campaign.objects.filter(id=campaign_id).first()
         if campaign:
-            next_character = campaign.next_turn()
+            next_character = campaign.next_turn(seconds=int(data.get('seconds') or 0))
             return redirect('fallout_character', next_character.id)
     return redirect('fallout_campaign', campaign_id)

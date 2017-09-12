@@ -21,7 +21,7 @@
                     {% if not character.is_player %}
                         <small class="badge badge-info">{% trans "PNJ" %}</small>
                     {% endif %}
-                    {% if character.campaign.current_character == character %}
+                    {% if character.campaign.current_character_id == character.id %}
                         <small class="badge badge-success">{% trans "Actif" %}</small>
                     {% endif %}
                     {{ character.name }}
@@ -31,8 +31,18 @@
     </li>
 </ul>
 {% if campaign %}
-    <form method="post" action="{% url 'fallout_next_turn' campaign.id %}">
+    <form class="form-inline" method="post" action="{% url 'fallout_next_turn' campaign.id %}">
         <label class="text-white">{{ campaign.current_game_date }} ({{ campaign.elapsed_time }})</label>
+        <select class="custom-select-sm ml-1 mr-1" name="seconds">
+            <option value="0">{% trans "0 s" %}</option>
+            <option value="30" selected="selected">{% trans "30 s" %}</option>
+            <option value="60">{% trans "1 mn" %}</option>
+            <option value="120">{% trans "2 mn" %}</option>
+            <option value="300">{% trans "5 mn" %}</option>
+            <option value="600">{% trans "10 mn" %}</option>
+            <option value="1200">{% trans "20 mn" %}</option>
+            <option value="1800">{% trans "30 mn" %}</option>
+        </select>
         <button class="btn btn-success btn-sm" name="next">{% trans "Tour suivant" %}</button>
         {% csrf_token %}
     </form>

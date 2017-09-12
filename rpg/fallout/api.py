@@ -10,7 +10,7 @@ from rest_framework.generics import get_object_or_404
 
 from rpg.fallout.enums import BODY_PARTS, DAMAGES_TYPES, LIST_EDITABLE_STATS, ROLL_STATS
 from rpg.fallout.models import (
-    MODELS, Campaign, Character, Loot, Equipment, ActiveEffect, DamageHistory, FightHistory, RollHistory)
+    MODELS, Campaign, Character, Loot, Equipment, CharacterEffect, DamageHistory, FightHistory, RollHistory)
 
 
 # Affichage des statistiques calculées sur le personnage
@@ -237,8 +237,8 @@ class EquipmentSerializer(CommonModelSerializer):
     character = SimpleCharacterSerializer(read_only=True, label=_("personnage"))
 
 
-@to_model_serializer(ActiveEffect)
-class ActiveEffectSerializer(CommonModelSerializer):
+@to_model_serializer(CharacterEffect)
+class CharacterEffectSerializer(CommonModelSerializer):
     """
     Serializer de sortie pour afficher des effets actifs sur un personnage
     """
@@ -261,7 +261,7 @@ def equipment_equip(request, equipment_id):
     return equipment.equip(**request.validated_data)
 
 
-@api_view_with_serializer(['POST'], input_serializer=ActionInputSerializer, serializer=ActiveEffectSerializer)
+@api_view_with_serializer(['POST'], input_serializer=ActionInputSerializer, serializer=CharacterEffectSerializer)
 def equipment_use(request, equipment_id):
     """
     API permettant d'utiliser un objet (si applicable)

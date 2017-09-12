@@ -1,0 +1,54 @@
+{% load i18n l10n %}
+
+<div class="row">
+    {% for effect in effects %}
+        {% with info=effect.effect %}
+            <div class="col-md-4 col-sm-6 mb-3">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <span class="card-title">{{ info.name }}</span>
+                        {% if info.title %}<small class="card-subtitle mb-2 text-muted">{{ info.title }}</small>{% endif %}
+                    </div>
+                    <div class="card-body">
+                        {% with image=info.image thumbnail=info.thumbnail %}
+                            {% if thumbnail %}
+                                <img class="img-fluid mx-auto d-block mb-2" src="{{ thumbnail }}">
+                            {% elif image %}
+                                <img class="img-fluid mx-auto d-block mb-2"
+                                     height="{{ image.height }}" width="{{ image.width }}" src="{{ image.url }}">
+                            {% endif %}
+                        {% endwith %}
+                        <p class="card-text">
+                            {% for modifier in info.modifiers.all %}
+                                <small class="badge {% if modifier.value > 0 %}badge-success{% else %}badge-danger{% endif %}">
+                                    {% if modifier.value > 0 %}+{% endif %}{{ modifier.value }}
+                                    {{ modifier.get_stats_display }}
+                                </small>
+                            {% endfor %}
+                        </p>
+                        <p class="card-text">
+                            {% if info.description %}
+                                <small class="text-muted">{{ info.description }}</small>
+                            {% endif %}
+                        </p>
+                    </div>
+                    {% if request.user.is_superuser %}
+                        <div class="card-footer">
+                            <form class="form-inline" method="post" action="{{ request.path }}?items">
+                                <div class="form-check m-1">
+                                    <label class="form-check-label">
+                                        <input class="form-check-input" type="checkbox" name="action">
+                                        <small>{% trans "Action" %}</small>
+                                    </label>
+                                </div>
+                                <input type="hidden" name="type" value="effect" />
+                                <input type="hidden" name="item" value="{{ item.id }}" />
+                                {% csrf_token %}
+                            </form>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        {% endwith %}
+    {% endfor %}
+</div>

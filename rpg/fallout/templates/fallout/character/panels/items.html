@@ -2,16 +2,16 @@
 
 <div class="tab-pane fade{% if 'items' in request.GET %} active show{% endif %}" id="items" role="tabpanel">
     {% if equipment %}
-        <h4>{% trans "Equipement" %}</h4>
+        <h3>{% trans "Equipement" %}</h3>
         {% with items=equipment equiped=True %}
-            {% include "fallout/character/items.html" %}
+            {% include "fallout/character/forms/items.html" %}
         {% endwith %}
         <hr />
     {% endif %}
     {% if inventory %}
-        <h4>{% trans "Inventaire" %}</h4>
+        <h3>{% trans "Inventaire" %}</h3>
         {% with items=inventory equiped=False %}
-            {% include "fallout/character/items.html" %}
+            {% include "fallout/character/forms/items.html" %}
         {% endwith %}
     {% endif %}
 </div>
