@@ -2,7 +2,6 @@
 from common.admin import CommonAdmin, EntityAdmin, EntityTabularInline
 from django.contrib import admin, messages
 from django.contrib.auth.admin import UserAdmin
-from django.db.models import Prefetch
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.utils.translation import ugettext as _
@@ -70,15 +69,6 @@ class CampaignAdmin(CommonAdmin):
     list_display = ('name', 'current_game_date', 'current_character', 'radiation', )
     list_editable = ('current_game_date', 'current_character', 'radiation', )
     ordering = ('name', )
-
-    def get_queryset(self, request):
-        """
-        Surcharge du queryset par défaut
-        """
-        # TODO: optimiser le nombre de requêtes des inlines
-        return super().get_queryset(request).prefetch_related(
-            Prefetch('loots', queryset=Loot.objects.select_related('campaign', 'item')),
-            Prefetch('active_effects', queryset=CampaignEffect.objects.select_related('campaign', 'effect')))
 
 
 class EquipmentInlineAdmin(EntityTabularInline):
@@ -224,15 +214,6 @@ class CharacterAdmin(EntityAdmin):
         pass  # TODO:
     loot.short_description = _("Lâcher tous les équipements")
 
-    def get_queryset(self, request):
-        """
-        Surcharge du queryset par défaut
-        """
-        # TODO: optimiser le nombre de requêtes des inlines
-        return super().get_queryset(request).select_related('user', 'campaign').prefetch_related(
-            Prefetch('equipments', queryset=Equipment.objects.select_related('character', 'item')),
-            Prefetch('active_effects', queryset=CharacterEffect.objects.select_related('character', 'effect')))
-
 
 class ItemModifierInline(admin.TabularInline):
     """
@@ -299,12 +280,6 @@ class ItemAdmin(EntityAdmin):
             element.duplicate()
         self.message_user(request, message=_("Les objets sélectionnés ont été dupliqués."))
 
-    def get_queryset(self, request):
-        """
-        Surcharge du queryset par défault
-        """
-        return super().get_queryset(request).prefetch_related('modifiers')
-
 
 @admin.register(Equipment)
 class EquipmentAdmin(EntityAdmin):
@@ -325,12 +300,6 @@ class EquipmentAdmin(EntityAdmin):
     list_editable = ('slot', 'count', 'condition', 'clip_count', )
     list_filter = ('character', 'item', 'slot', )
     ordering = ('character', 'item', )
-
-    def get_queryset(self, request):
-        """
-        Surcharge du queryset par défaut
-        """
-        return super().get_queryset(request).select_related('item')
 
 
 class EffectModifierInline(admin.TabularInline):
@@ -374,12 +343,6 @@ class EffectAdmin(EntityAdmin):
         for element in queryset:
             element.duplicate()
         self.message_user(request, message=_("Les effets sélectionnés ont été dupliqués."))
-
-    def get_queryset(self, request):
-        """
-        Surcharge du queryset par défaut
-        """
-        return super().get_queryset(request).prefetch_related('modifiers')
 
 
 @admin.register(CampaignEffect)
@@ -451,12 +414,6 @@ class LootTemplateAdmin(EntityAdmin):
         for element in queryset:
             element.duplicate()
         self.message_user(request, message=_("Les modèles de butins sélectionnés ont été dupliqués."))
-
-    def get_queryset(self, request):
-        """
-        Surcharge du queryset par défaut
-        """
-        return super().get_queryset(request).prefetch_related('items')
 
 
 @admin.register(RollHistory)
@@ -559,9 +516,3 @@ class FightHistoryAdmin(CommonAdmin):
         """
         return getattr(obj.damage, 'real_damage', None)
     real_damage.short_description = _("dégâts")
-
-    def get_queryset(self, request):
-        """
-        Surcharge du queryset par défaut
-        """
-        return super().get_queryset(request).select_related('damage')

@@ -47,7 +47,7 @@ def view_character(request, character_id):
     if not request.user.is_superuser:
         characters = characters.filter(user=request.user)
     character = characters.filter(id=character_id).first()
-    equipment, inventory, effects = character.equipment, character.inventory, character.effects
+    inventory, effects = character.inventory, character.effects
     # Actions
     errors = None
     roll_history = fight_history = damage_history = None
@@ -58,14 +58,14 @@ def view_character(request, character_id):
                 roll_history = character.roll(
                     data.get('stats'),
                     int(data.get('modifier') or 0))
-            elif data.get('type') == 'fight':
+            elif data.get('type') == 'fight' and data.get('target'):
                 fight_history = [character.fight(
                     target=data.get('target'),
                     target_part=data.get('target_part'),
                     target_range=int(data.get('target_range')),
                     hit_modifier=int(data.get('hit_modifier') or 0),
                     action=bool(data.get('action', False)))]
-            elif data.get('type') == 'burst':
+            elif data.get('type') == 'burst' and data.get('targets'):
                 fight_history = character.burst(
                     targets=zip(data.get('targets') or [], data.get('ranges') or []),
                     hit_modifier=int(data.get('hit_modifier') or 0),
@@ -89,7 +89,6 @@ def view_character(request, character_id):
         'characters': characters.order_by('name'),
         # Character
         'character': character,
-        'equipment': equipment,
         'inventory': inventory,
         'effects': effects,
         # Statistics

@@ -233,7 +233,7 @@ class Stats(models.Model):
                 if (mini or 0) <= getattr(character, stats_name, 0) < (maxi or float('+inf')):
                     stats._change_all_stats(**effects)
         # Equipment modifiers
-        for equipment in character.equipment:
+        for equipment in character.inventory.exclude(slot=''):
             for modifier in equipment.item.modifiers.all():
                 stats._change_stats(modifier.stats, modifier.value)
         # Active effects modifiers
@@ -305,7 +305,17 @@ class Character(Entity, Stats):
     # Tag skills
     tag_skills = MultiSelectField(max_length=200, choices=SKILLS, blank=True, verbose_name=_("spécialités"))
     # Cache
-    _stats = _inventory = _equipment = _effects = None
+    _stats = {}
+    _inventory = _equipment = _effects = None
+
+    @staticmethod
+    def clear_cache(character: Union[int, 'Character']):
+        """
+        Réinitialise le calcul des statistiques pour un personnage
+        """
+        if isinstance(character, Character):
+            character = character.pk
+        Character._stats.pop(character, None)
 
     @property
     def stats(self) -> Stats:
@@ -313,39 +323,29 @@ class Character(Entity, Stats):
         Retourne les statistiques calculées du personnage
         :return: Statistiques
         """
-        self._stats = self._stats or Stats.get(self)
-        return self._stats
+        stats = Character._stats.get(self.pk) or Stats.get(self)
+        if self.pk:
+            Character._stats[self.pk] = stats
+        return stats
 
     @property
-    def inventory(self) -> 'EntityQuerySet[Equipment]':
+    def inventory(self) -> 'QuerySet[Equipment]':
         """
         Retourne le contenu de l'inventaire du personnage
         :return: Equipements
         """
-        self._inventory = \
-            self._inventory or self.equipments.select_related('item')\
-                .prefetch_related('item__modifiers', 'item__ammunitions').filter(slot='')
+        self._inventory = self._inventory if self._inventory is not None else \
+            self.equipments.select_related('item').prefetch_related('item__modifiers')
         return self._inventory
 
     @property
-    def equipment(self) -> 'EntityQuerySet[Equipment]':
-        """
-        Retourne les équipements du personnage
-        :return: Equipements
-        """
-        self._equipment = \
-            self._equipment or self.equipments.select_related('item')\
-                .prefetch_related('item__modifiers', 'item__ammunitions').exclude(slot='')
-        return self._equipment
-
-    @property
-    def effects(self) -> 'EntityQuerySet[Effect]':
+    def effects(self) -> 'QuerySet[CharacterEffect]':
         """
         Retourne les effets actifs du personnage
         :return: Effets
         """
-        self._effects = \
-            self._effects or self.active_effects.select_related('effect').prefetch_related('effect__modifiers').filter(
+        self._effects = self._effects if self._effects is not None else \
+            self.active_effects.select_related('effect').prefetch_related('effect__modifiers').filter(
                 Q(start_date__isnull=True) | Q(start_date__lte=F('character__campaign__current_game_date')),
                 Q(end_date__isnull=True) | Q(end_date__gte=F('character__campaign__current_game_date')))
         return self._effects
@@ -555,7 +555,7 @@ class Character(Entity, Stats):
         if not self.campaign:
             return None
         loots = []
-        equipements = self.equipments.select_related('item').all()
+        equipements = self.inventory
         for equipement in equipements:
             try:
                 assert equipement.item.type not in [ITEM_WEAPON, ITEM_ARMOR]
@@ -579,7 +579,7 @@ class Character(Entity, Stats):
         :return: Liste d'historiques de combat
         """
         histories = []
-        attacker_weapon_equipment = self.equipments.filter(slot=ITEM_WEAPON).first()
+        attacker_weapon_equipment = self.inventory.filter(slot=ITEM_WEAPON).first()
         attacker_weapon = getattr(attacker_weapon_equipment, 'item', None)
         assert attacker_weapon and attacker_weapon.burst_count != 0, _(
             "L'attaquant ne possède pas d'arme ou celle-ci ne permet pas d'attaque en rafale.")
@@ -609,17 +609,17 @@ class Character(Entity, Stats):
         history = FightHistory(attacker=self, defender=target, burst=is_burst, hit_count=hit + 1, range=target_range)
         history.game_date = self.campaign and self.campaign.current_game_date
         # Equipment
-        attacker_weapon_equipment = self.equipments.filter(slot=ITEM_WEAPON).first()
-        attacker_ammo_equipment = self.equipments.filter(slot=ITEM_AMMO).first()
-        defender_armor_equipment = target.equipments.filter(slot=ITEM_ARMOR).first()
+        attacker_weapon_equipment = self.inventory.filter(slot=ITEM_WEAPON).first()
+        attacker_ammo_equipment = self.inventory.filter(slot=ITEM_AMMO).first()
+        defender_armor_equipment = target.inventory.filter(slot=ITEM_ARMOR).first()
         attacker_weapon = history.attacker_weapon = getattr(attacker_weapon_equipment, 'item', None)
         attacker_ammo = history.attacker_ammo = getattr(attacker_ammo_equipment, 'item', None)
         defender_armor = history.defender_armor = getattr(defender_armor_equipment, 'item', None)
         # Fight conditions
         if attacker_weapon and attacker_weapon.clip_size and attacker_weapon_equipment.clip_count == 0:
-            history.fail = STATUS_NO_MORE_AMMO
+            history.status = STATUS_NO_MORE_AMMO
         elif target.health <= 0:
-            history.fail = STATUS_TARGET_DEAD
+            history.status = STATUS_TARGET_DEAD
         elif attacker_weapon_equipment and attacker_weapon_equipment.condition <= 0.0:
             history.status = STATUS_WEAPON_BROKEN
         # Action points
@@ -748,7 +748,7 @@ class Character(Entity, Stats):
             total_damage += randint(1, dice_value)
         base_damage = history.base_damage = total_damage
         # Armor threshold and resistance
-        armor_equipment = self.equipments.filter(slot=ITEM_ARMOR).first()
+        armor_equipment = self.inventory.filter(slot=ITEM_ARMOR).first()
         armor = history.armor = getattr(armor_equipment, 'item', None)
         armor_damage = 0
         if armor and armor_equipment:
@@ -829,13 +829,15 @@ class Character(Entity, Stats):
         has_max_action_points = not self.pk or self.action_points == self.stats.max_action_points
         # Check and increase level
         self.check_level()
+        # Remove stats in cache
+        Character.clear_cache(self.pk)
         # Fixing health and action points
         self.health = self.stats.max_health if has_max_health else \
             max(0, min(self.health, self.stats.max_health))
         self.action_points = self.stats.max_action_points if has_max_action_points else \
             max(0, min(self.action_points, self.stats.max_action_points))
         # Remove current character on campaign if character is added or removed
-        for campaign_id in self.modified.get('campaign') or []:
+        for campaign_id in self.modified.get('campaign_id') or []:
             if not campaign_id:
                 continue
             Campaign.objects.filter(id=campaign_id).update(current_character=None)
@@ -1019,6 +1021,14 @@ class Equipment(Entity):
     condition = models.FloatField(blank=True, null=True, verbose_name=_("état"))
 
     @property
+    def equiped(self) -> bool:
+        """
+        Identifie si l'objet est équipé
+        :return:
+        """
+        return self.slot != ''
+
+    @property
     def value(self) -> float:
         """
         Valeur de l'objet en fonction de son état
@@ -1039,7 +1049,7 @@ class Equipment(Entity):
         """
         if self.slot or self.item.type != ITEM_AMMO:
             return
-        weapon = self.character.equipment.filter(slot=ITEM_WEAPON).first()
+        weapon = self.character.inventory.filter(slot=ITEM_WEAPON).prefetch_related('ammunitions').first()
         return weapon and self.item in weapon.item.ammunitions.all()
 
     @property
@@ -1193,9 +1203,8 @@ class Equipment(Entity):
         """
         Sauvegarde de l'objet
         """
-        if self.character_id or self.character:
-            Character._stats.pop(self.character_id or self.character.pk, None)
-        if self.count < 0 and self.item.type not in SLOT_ITEM_TYPES:
+        Character.clear_cache(self.character_id)
+        if self.count <= 0 and self.item.type not in EQUIPABLE_ITEMS:
             return self.delete()
         self.condition = max(0.0, min(1.0, self.condition or 1.0)) if self.item.type in [ITEM_WEAPON, ITEM_ARMOR] else None
         self.clip_count = max(0, self.clip_count or 0) if self.item.type == ITEM_WEAPON and not self.item.is_melee else None
@@ -1349,6 +1358,8 @@ class CampaignEffect(ActiveEffect):
         """
         Sauvegarde l'effet actif
         """
+        for character_id in self.campaign.characters.values_list('pk', flat=True):
+            Character.clear_cache(character_id)
         if not self.start_date:
             self.start_date = self.campaign.current_game_date
         if not self.end_date and self.start_date and self.effect.duration:
@@ -1357,7 +1368,7 @@ class CampaignEffect(ActiveEffect):
             self.next_date = self.start_date + self.effect.interval
         if self.end_date and self.end_date <= self.campaign.current_game_date:
             if self.effect.next_effect:
-                self.effect.next_effect.apply(self.character)
+                self.effect.next_effect.apply(self.campaign)
             return self.delete(*args, **kwargs)
         super().save(*args, **kwargs)
 
@@ -1395,6 +1406,7 @@ class CharacterEffect(ActiveEffect):
         """
         Sauvegarde l'effet actif
         """
+        Character.clear_cache(self.character_id)
         if not self.start_date and self.character.campaign:
             self.start_date = self.character.campaign.current_game_date
         if not self.end_date and self.start_date and self.effect.duration:

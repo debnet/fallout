@@ -225,6 +225,7 @@ SLOT_ITEM_TYPES = (
     (ITEM_AMMO, _("munition")),
     (ITEM_ARMOR, _("armure")),
 )
+EQUIPABLE_ITEMS = [a for a, *b in SLOT_ITEM_TYPES]
 
 ITEM_FOOD = 'food'
 ITEM_CHEM = 'chem'
