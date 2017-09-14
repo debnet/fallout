@@ -74,6 +74,8 @@ class Campaign(CommonModel):
         'Character', blank=True, null=True, on_delete=models.SET_NULL,
         related_name='+', verbose_name=_("personnage actif"))
     radiation = models.PositiveSmallIntegerField(default=0, verbose_name=_("rads par heure"))
+    # Cache
+    _effects = None
 
     @property
     def elapsed_time(self) -> timedelta:
@@ -82,6 +84,18 @@ class Campaign(CommonModel):
         :return:
         """
         return self.current_game_date - self.start_game_date
+
+    @property
+    def effects(self) -> 'QuerySet[CampaignEffect]':
+        """
+        Retourne les effets actifs de la campagne
+        :return: Effets
+        """
+        self._effects = self._effects if self._effects is not None else \
+            self.active_effects.select_related('effect').prefetch_related('effect__modifiers').filter(
+                Q(start_date__isnull=True) | Q(start_date__lte=F('campaign__current_game_date')),
+                Q(end_date__isnull=True) | Q(end_date__gte=F('campaign__current_game_date')))
+        return self._effects
 
     def clear_loot(self):
         """
@@ -124,13 +138,13 @@ class Campaign(CommonModel):
         """
         Sauvegarde la campagne
         """
-        difference = (self._copy.get('current_game_date') or self.current_game_date) - self.current_game_date
+        difference = self.current_game_date - (self._copy.get('current_game_date') or self.current_game_date)
         hours = round(difference.seconds / 3600, 2)
-        super().save(*args, **kwargs)
-        if hours <= 0:
+        super().save(*args, **kwargs, update_fields=self.modified.keys())
+        if hours >= 0:
             for character in self.characters.all():
                 character.update_needs(hours=hours, radiation=self.radiation)
-                character.update_effects()
+                character.apply_effects(character)
 
     def get_absolute_url(self):
         """
@@ -237,12 +251,12 @@ class Stats(models.Model):
             for modifier in equipment.item.modifiers.all():
                 stats._change_stats(modifier.stats, modifier.value)
         # Active effects modifiers
-        for effect in character.effects:
+        for effect in character.effects.exclude(effect__modifiers__isnull=True):
             for modifier in effect.effect.modifiers.all():
                 stats._change_stats(modifier.stats, modifier.value)
         # Campaign effects modifiers
         if character.campaign:
-            for effect in character.campaign.active_effects.all():
+            for effect in character.campaign.effects.exclude(effect__modifiers__isnull=True):
                 for modifier in effect.modifiers.all():
                     stats._change_stats(modifier.stats, modifier.value)
         # Derivated statistics
@@ -522,11 +536,12 @@ class Character(Entity, Stats):
         """
         for stats_name, formula in COMPUTED_NEEDS:
             self.modify_value(stats_name, formula(self.stats, self) * hours)
-        self.damage(raw_damage=radiation * hours, damage_type=DAMAGE_RADIATION, save=False)
+        if radiation:
+            self.damage(raw_damage=radiation * hours, damage_type=DAMAGE_RADIATION, save=False)
         self.regeneration += self.stats.healing_rate * (hours / 24.0) * (
             HEALING_RATE_RESTING_MULT if self.is_resting else 1.0)
         if save:
-            self.save()
+            self.save(reset=False)
 
     def roll(self, stats: str, modifier: int=0) -> 'RollHistory':
         """
@@ -616,7 +631,9 @@ class Character(Entity, Stats):
         attacker_ammo = history.attacker_ammo = getattr(attacker_ammo_equipment, 'item', None)
         defender_armor = history.defender_armor = getattr(defender_armor_equipment, 'item', None)
         # Fight conditions
-        if attacker_weapon and attacker_weapon.clip_size and attacker_weapon_equipment.clip_count == 0:
+        if attacker_weapon and \
+                (attacker_weapon.clip_size and attacker_weapon_equipment.clip_count <= 0) or \
+                (attacker_weapon.is_throwable and attacker_weapon.count <= 0):
             history.status = STATUS_NO_MORE_AMMO
         elif target.health <= 0:
             history.status = STATUS_TARGET_DEAD
@@ -707,11 +724,11 @@ class Character(Entity, Stats):
                 if not item:
                     continue
                 for effect in item.effects.all():
-                    effect.apply(target)
-            target.update_effects()  # Apply effects immediatly
+                    effect.affect(target)
+            target.apply_effects()  # Apply effects immediatly
         # Clip count & weapon condition
         if attacker_weapon_equipment and attacker_weapon:
-            attacker_weapon_equipment.count -= 0 if attacker_weapon.is_throwable else 1
+            attacker_weapon_equipment.count -= 1 if attacker_weapon.is_throwable else 0
             attacker_weapon_equipment.clip_count -= 0 if attacker_weapon.is_melee else 1
             # TODO: weapon condition based on damage
             if not attacker_weapon.is_throwable:
@@ -788,12 +805,23 @@ class Character(Entity, Stats):
         history.save()
         return history
 
-    def update_effects(self) -> List[Union[None, 'DamageHistory']]:
+    def apply_effects(self, campaign: 'Campaign'=None) -> List[Union[None, 'DamageHistory']]:
         """
-        Force l'application des effets en cours
+        Applique les effets actifs de la campagne et du personnage
+        :param campaign: Campagne (pour application des effets associés)
         :return: Liste des dégâts éventuels
         """
-        return [effect.apply() for effect in self.effects]
+        damages = []
+        for effect in self.effects.filter(effect__interval__isnull=False):
+            damage = effect.apply()
+            if damage:
+                damages.append(damage)
+        if campaign:
+            for effect in self.campaign.effectss.filter(effect__interval__isnull=False):
+                damage = effect.apply(self)
+                if damage:
+                    damages.append(damage)
+        return damages
 
     def duplicate(self, equipments: bool=True, effects: bool=True) -> 'Character':
         """
@@ -815,9 +843,10 @@ class Character(Entity, Stats):
                 effect.save(force_insert=True)
         return self
 
-    def save(self, *args, **kwargs):
+    def save(self, *args, reset=True, **kwargs):
         """
         Sauvegarde du personnage
+        :param reset: Réinitialise le cache ?
         """
         # Regeneration
         if self.regeneration >= 1.0:
@@ -830,7 +859,8 @@ class Character(Entity, Stats):
         # Check and increase level
         self.check_level()
         # Remove stats in cache
-        Character.clear_cache(self.pk)
+        if reset:
+            Character.clear_cache(self.pk)
         # Fixing health and action points
         self.health = self.stats.max_health if has_max_health else \
             max(0, min(self.health, self.stats.max_health))
@@ -841,7 +871,7 @@ class Character(Entity, Stats):
             if not campaign_id:
                 continue
             Campaign.objects.filter(id=campaign_id).update(current_character=None)
-        super().save(*args, **kwargs)
+        super().save(*args, **kwargs, update_fields=self.modified.keys())
 
     def get_absolute_url(self):
         """
@@ -1206,9 +1236,10 @@ class Equipment(Entity):
         Character.clear_cache(self.character_id)
         if self.count <= 0 and self.item.type not in EQUIPABLE_ITEMS:
             return self.delete()
+        self.count = min(0, self.count) if self.count else None
         self.condition = max(0.0, min(1.0, self.condition or 1.0)) if self.item.type in [ITEM_WEAPON, ITEM_ARMOR] else None
         self.clip_count = max(0, self.clip_count or 0) if self.item.type == ITEM_WEAPON and not self.item.is_melee else None
-        return super().save(*args, **kwargs)
+        return super().save(*args, **kwargs, update_fields=self.modified.keys())
 
     def __str__(self) -> str:
         return "({}) {}".format(self.character, self.item)
@@ -1264,7 +1295,7 @@ class Effect(Entity):
             dice_value=self.damage_dice_value,
             damage_type=self.damage_type)
 
-    def apply(self, target: Union['Campaign', 'Character']) -> Union[None, 'CampaignEffect', 'CharacterEffect']:
+    def affect(self, target: Union['Campaign', 'Character']) -> Union[None, 'CampaignEffect', 'CharacterEffect']:
         """
         Applique l'effet à un personnage ou une campagne
         :param target: Personnage ou campagne
@@ -1337,22 +1368,27 @@ class CampaignEffect(ActiveEffect):
     """
     campaign = models.ForeignKey('Campaign', on_delete=models.CASCADE, verbose_name=_("campagne"), related_name='active_effects')
 
-    def apply(self) -> List[Union['DamageHistory', None]]:
+    def apply(self, character: Character=None) -> Dict['Character', List['DamageHistory']]:
         """
         Applique l'effet aux personnages de la campagne
+        :param character: Personnage auquel appliquer les effets (facultatif)
+        :return: Dégâts potentiels infligés
         """
-        damage = []
+        damages = {}
         if not self.next_date and self.effect.interval:
             self.next_date = self.start_date
         if not self.next_date:
             return
         game_date = self.campaign.current_game_date
         while self.next_date <= game_date:
-            for character in self.campaign.characters.all():
-                damage.append(character.damage(**self.effect.damage_config))
+            for character in [character] if character else self.campaign.characters.all():
+                damage = character.damage(**self.effect.damage_config)
+                if not damage:
+                    continue
+                damages[character] = damages.get(character, []) + [damage]
             self.next_date += self.effect.interval
         self.save()
-        return damage
+        return damages
 
     def save(self, *args, **kwargs):
         """
@@ -1368,9 +1404,9 @@ class CampaignEffect(ActiveEffect):
             self.next_date = self.start_date + self.effect.interval
         if self.end_date and self.end_date <= self.campaign.current_game_date:
             if self.effect.next_effect:
-                self.effect.next_effect.apply(self.campaign)
+                self.effect.next_effect.affect(self.campaign)
             return self.delete(*args, **kwargs)
-        super().save(*args, **kwargs)
+        super().save(*args, **kwargs, update_fields=self.modified.keys())
 
     def __str__(self) -> str:
         return "({}) {}".format(str(self.campaign), str(self.effect))
@@ -1416,9 +1452,9 @@ class CharacterEffect(ActiveEffect):
                 self.next_date = self.start_date + self.effect.interval
             if self.end_date and self.end_date <= self.character.campaign.current_game_date:
                 if self.effect.next_effect:
-                    self.effect.next_effect.apply(self.character)
+                    self.effect.next_effect.affect(self.character)
                 return self.delete(*args, **kwargs)
-        super().save(*args, **kwargs)
+        super().save(*args, **kwargs, update_fields=self.modified.keys())
 
     def __str__(self) -> str:
         return "({}) {}".format(str(self.character), str(self.effect))
@@ -1472,7 +1508,7 @@ class Loot(CommonModel):
         """
         if self.count <= 0:
             return self.delete(*args, **kwargs)
-        super().save(*args, **kwargs)
+        super().save(*args, **kwargs, update_fields=self.modified.keys())
 
     def __str__(self) -> str:
         return "({}) {}".format(str(self.campaign), str(self.item))
@@ -1776,6 +1812,7 @@ class FightHistory(CommonModel):
         verbose_name_plural = _("historiques des combats")
 
 
+# List of all models
 MODELS = (
     Player,
     Campaign,

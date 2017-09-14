@@ -163,3 +163,6 @@ SMS_GATEWAY_URL = 'http://smsgateway.me/api/v3/messages/send'
 SMS_GATEWAY_LOGIN = ''
 SMS_GATEWAY_PASSWORD = ''
 SMS_GATEWAY_DEVICE = 0
+
+# Common
+IGNORE_LOG = True

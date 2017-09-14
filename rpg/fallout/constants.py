@@ -298,7 +298,7 @@ COMPUTED_STATS = (
 
 # Computed needs per hour
 COMPUTED_NEEDS = {
-    ('dehydration', lambda s, c: min(1, 20 - s.endurance * 2)),
-    ('hunger', lambda s, c: min(1, 16 - s.endurance * 2)),
-    ('sleep', lambda s, c: min(1, 14 - s.endurance * 2)),
+    ('dehydration', lambda s, c: min(1, (20 - s.endurance) * 2)),
+    ('hunger', lambda s, c: min(1, (16 - s.endurance) * 2)),
+    ('sleep', lambda s, c: min(1, (14 - s.endurance) * 2)),
 }
