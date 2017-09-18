@@ -90,7 +90,9 @@ def view_character(request, character_id):
         # Character
         'character': character,
         'inventory': inventory,
-        'effects': effects,
+        # Effects
+        'character_effects': effects,
+        'campaign_effects': character.campaign.effects if character.campaign else None,
         # Statistics
         'rollstats': rollstats,
         # Action history

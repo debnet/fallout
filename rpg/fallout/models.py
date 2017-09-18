@@ -138,9 +138,10 @@ class Campaign(CommonModel):
         """
         Sauvegarde la campagne
         """
-        difference = self.current_game_date - (self._copy.get('current_game_date') or self.current_game_date)
-        hours = round(difference.seconds / 3600, 2)
-        super().save(*args, **kwargs, update_fields=self.modified.keys())
+        self.previous_game_date = (self._copy.get('current_game_date') or self.current_game_date)
+        difference = self.current_game_date - self.previous_game_date
+        hours = round(difference.seconds / 3600, 6)
+        super().save(*args, **kwargs, update_fields=self.modified.keys() if self.pk else None)
         if hours >= 0:
             for character in self.characters.all():
                 character.update_needs(hours=hours, radiation=self.radiation)
@@ -764,13 +765,16 @@ class Character(Entity, Stats):
         for i in range(dice_count):
             total_damage += randint(1, dice_value)
         base_damage = history.base_damage = total_damage
+        # Character already KO
+        if damage_type != DAMAGE_HEAL and self.health <= 0:
+            return history
         # Armor threshold and resistance
         armor_equipment = self.inventory.filter(slot=ITEM_ARMOR).first()
         armor = history.armor = getattr(armor_equipment, 'item', None)
         armor_damage = 0
         if armor and armor_equipment:
-            armor_threshold = armor.get_threshold(damage_type) + threshold_modifier
-            armor_resistance = armor.get_resistance(damage_type) * armor_equipment.condition + resistance_modifier
+            armor_threshold = armor.get_threshold(damage_type) * threshold_modifier
+            armor_resistance = armor.get_resistance(damage_type) * armor_equipment.condition * resistance_modifier
             total_damage -= max(armor_threshold, 0)
             total_damage *= (1.0 - min(armor_resistance, 1.0))
             armor_damage = max((base_damage - total_damage) * armor.condition_modifier, 0)
@@ -779,13 +783,14 @@ class Character(Entity, Stats):
             history.armor_resistance = armor_resistance
             history.armor_damage = armor_damage
         # Self threshold and resistance
-        damage_threshold = self.stats.damage_threshold + threshold_modifier
-        damage_resistance = self.stats.damage_resistance + getattr(self.stats, DAMAGE_RESISTANCE.get(damage_type), 0.0)
-        damage_resistance += resistance_modifier
+        damage_threshold = self.stats.damage_threshold * threshold_modifier
+        damage_resistance = self.stats.damage_resistance + getattr(
+            self.stats, DAMAGE_RESISTANCE.get(damage_type), 0.0) / 100.0
+        damage_resistance *= resistance_modifier
         total_damage *= (-1.0 if damage_type == DAMAGE_HEAL else 1.0)
         total_damage -= max(damage_threshold, 0)
         total_damage *= (1.0 - min(damage_resistance, 1.0))
-        total_damage = int(total_damage)
+        total_damage = round(total_damage)  # TODO: round, floor or ceil?
         # Apply damage on self
         if total_damage:
             if damage_type == DAMAGE_RADIATION:
@@ -817,8 +822,8 @@ class Character(Entity, Stats):
             if damage:
                 damages.append(damage)
         if campaign:
-            for effect in self.campaign.effectss.filter(effect__interval__isnull=False):
-                damage = effect.apply(self)
+            for effect in self.campaign.effects.filter(effect__interval__isnull=False):
+                damage = effect.apply()
                 if damage:
                     damages.append(damage)
         return damages
@@ -871,7 +876,7 @@ class Character(Entity, Stats):
             if not campaign_id:
                 continue
             Campaign.objects.filter(id=campaign_id).update(current_character=None)
-        super().save(*args, **kwargs, update_fields=self.modified.keys())
+        super().save(*args, **kwargs, update_fields=self.modified.keys() if self.pk else None)
 
     def get_absolute_url(self):
         """
@@ -1239,7 +1244,7 @@ class Equipment(Entity):
         self.count = min(0, self.count) if self.count else None
         self.condition = max(0.0, min(1.0, self.condition or 1.0)) if self.item.type in [ITEM_WEAPON, ITEM_ARMOR] else None
         self.clip_count = max(0, self.clip_count or 0) if self.item.type == ITEM_WEAPON and not self.item.is_melee else None
-        return super().save(*args, **kwargs, update_fields=self.modified.keys())
+        return super().save(*args, **kwargs, update_fields=self.modified.keys() if self.pk else None)
 
     def __str__(self) -> str:
         return "({}) {}".format(self.character, self.item)
@@ -1368,20 +1373,19 @@ class CampaignEffect(ActiveEffect):
     """
     campaign = models.ForeignKey('Campaign', on_delete=models.CASCADE, verbose_name=_("campagne"), related_name='active_effects')
 
-    def apply(self, character: Character=None) -> Dict['Character', List['DamageHistory']]:
+    def apply(self) -> Dict['Character', List['DamageHistory']]:
         """
         Applique l'effet aux personnages de la campagne
-        :param character: Personnage auquel appliquer les effets (facultatif)
         :return: Dégâts potentiels infligés
         """
         damages = {}
         if not self.next_date and self.effect.interval:
             self.next_date = self.start_date
         if not self.next_date:
-            return
+            return damages
         game_date = self.campaign.current_game_date
         while self.next_date <= game_date:
-            for character in [character] if character else self.campaign.characters.all():
+            for character in self.campaign.characters.all():
                 damage = character.damage(**self.effect.damage_config)
                 if not damage:
                     continue
@@ -1406,7 +1410,7 @@ class CampaignEffect(ActiveEffect):
             if self.effect.next_effect:
                 self.effect.next_effect.affect(self.campaign)
             return self.delete(*args, **kwargs)
-        super().save(*args, **kwargs, update_fields=self.modified.keys())
+        super().save(*args, **kwargs, update_fields=self.modified.keys() if self.pk else None)
 
     def __str__(self) -> str:
         return "({}) {}".format(str(self.campaign), str(self.effect))
@@ -1430,7 +1434,7 @@ class CharacterEffect(ActiveEffect):
         if not self.next_date and self.effect.interval:
             self.next_date = self.start_date
         if not self.character.campaign and not self.next_date:
-            return
+            return damage
         game_date = self.character.campaign.current_game_date
         while self.next_date <= game_date:
             damage = self.character.damage(**self.effect.damage_config)
@@ -1454,7 +1458,7 @@ class CharacterEffect(ActiveEffect):
                 if self.effect.next_effect:
                     self.effect.next_effect.affect(self.character)
                 return self.delete(*args, **kwargs)
-        super().save(*args, **kwargs, update_fields=self.modified.keys())
+        super().save(*args, **kwargs, update_fields=self.modified.keys() if self.pk else None)
 
     def __str__(self) -> str:
         return "({}) {}".format(str(self.character), str(self.effect))
@@ -1508,7 +1512,7 @@ class Loot(CommonModel):
         """
         if self.count <= 0:
             return self.delete(*args, **kwargs)
-        super().save(*args, **kwargs, update_fields=self.modified.keys())
+        super().save(*args, **kwargs, update_fields=self.modified.keys() if self.pk else None)
 
     def __str__(self) -> str:
         return "({}) {}".format(str(self.campaign), str(self.item))

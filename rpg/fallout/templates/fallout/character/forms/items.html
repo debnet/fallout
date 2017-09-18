@@ -59,7 +59,7 @@
                                         <button class="btn btn-sm btn-danger m-1" type="submit"
                                                 name="unequip">{% trans "Retirer" %}</button>
                                     {% else %}
-                                        {% if item.compatible_ammunition %}
+                                        {% if info.compatible_ammunition %}
                                             <button class="btn btn-sm btn-warning m-1" type="submit"
                                                     name="replace-ammo">{% trans "Remplacer" %}</button>
                                         {% elif info.is_equipable %}

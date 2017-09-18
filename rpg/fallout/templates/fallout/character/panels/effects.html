@@ -1,5 +1,15 @@
 {% load i18n %}
 
 <div class="tab-pane fade{% if 'effects' in request.GET %} active show{% endif %}" id="effects" role="tabpanel">
-    {% include "fallout/character/forms/effects.html" %}
+    {% if campaign_effects %}
+        <h4 class="text-center mb-3">{% trans "Général" %}</h4>
+        {% with effects=campaign_effects %}
+            {% include "fallout/character/forms/effects.html" %}
+        {% endwith %}
+        <hr />
+    {% endif %}
+    <h4 class="text-center mb-3">{% trans "Personnage" %}</h4>
+    {% with effects=character_effects %}
+        {% include "fallout/character/forms/effects.html" %}
+    {% endwith %}
 </div>
