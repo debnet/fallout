@@ -2,7 +2,7 @@
 from collections import OrderedDict as odict
 from datetime import timedelta
 from random import randint, choice
-from typing import Dict, Iterable, List, Tuple, Union
+from typing import Dict, Iterable, List, Optional, Tuple, Union
 
 from common.models import CommonModel, Entity
 from django.conf import settings
@@ -42,6 +42,29 @@ def get_thumbnails(directory=''):
     except:
         pass
     return images
+
+
+def get_class(value, maximum, classes=None, values=None, reverse=False, default='bold'):
+    """
+    Affecte une classe CSS à une valeur donnée
+    :param value: Valeur
+    :param maximum: Plafond
+    :param classes: Ensemble de classes CSS
+    :param values: Ensemble de valeurs de comparaison
+    :param reverse: Inverser l'ordre des classes
+    :param default: Classe par défaut
+    :return: Classe CSS
+    """
+    if not maximum:
+        return default
+    classes = classes or ('primary', 'success', 'warning', 'danger')
+    classes = reversed(classes) if reverse else classes
+    values = values or (0.75, 0.50, 0.25, 0.00)
+    rate = value / maximum
+    for c, v in zip(classes, values):
+        if rate >= v:
+            return c
+    return default
 
 
 class Player(AbstractUser):
@@ -372,35 +395,39 @@ class Character(Entity, Stats):
         :param from_stats: Récupère la valeur calculée et pas la valeur brute enregistrée
         :return: Liste des statistiques avec leur valeur
         """
-        return [(code, label, getattr(self.stats if from_stats else self, code, 0)) for code, label in stats]
+        for code, label in stats:
+            yield code, label, getattr(self.stats if from_stats else self, code, 0)
 
     @property
     def special(self) -> List[Tuple[str, str, Union[int, float]]]:
         """
         Retourne le S.P.E.C.I.A.L.
         """
-        return self._get_stats(SPECIALS)
+        for code, label, value in self._get_stats(SPECIALS):
+            yield code, label, value
 
     @property
     def skills(self) -> List[Tuple[str, str, Union[int, float]]]:
         """
         Retourne les compétences
         """
-        return self._get_stats(SKILLS)
+        for code, label, value in self._get_stats(SKILLS):
+            yield code, label, value
 
     @property
-    def general_stats(self) -> List[Tuple[str, str, Union[int, float], Union[None, int, float]]]:
+    def general_stats(self) -> List[Tuple[str, str, Union[int, float], Optional[Union[int, float]], Optional[str]]]:
         """
         Retourne les statistiques générales
         """
-        results = []
         for code, label in GENERAL_STATS:
             lvalue = getattr(self, code, 0)
-            rvalue = None
+            rvalue, rclass = None, None
             if code == STATS_HEALTH:
                 rvalue = getattr(self.stats, STATS_MAX_HEALTH, 0)
+                rclass = get_class(lvalue, rvalue)
             elif code == STATS_ACTION_POINTS:
                 rvalue = getattr(self.stats, STATS_MAX_ACTION_POINTS, 0)
+                rclass = get_class(lvalue, rvalue)
             elif code == STATS_SKILL_POINTS:
                 rvalue = lvalue
                 lvalue = self.used_skill_points
@@ -408,23 +435,26 @@ class Character(Entity, Stats):
                 rvalue = self.required_experience
             elif code in LIST_NEEDS:
                 rvalue = 1000
-            results.append((code, label, lvalue, rvalue))
-        results.append((STATS_CARRY_WEIGHT, _("charge"), self.charge, self.stats.carry_weight))
-        return results
+                rclass = get_class(lvalue, rvalue, reverse=True)
+            yield code, label, lvalue, rvalue, rclass
+        yield (STATS_CARRY_WEIGHT, _("charge"), self.charge, self.stats.carry_weight,
+               get_class(self.charge, self.stats.carry_weight, reverse=True))
 
     @property
     def secondary_stats(self) -> List[Tuple[str, str, Union[int, float]]]:
         """
         Retourne les statistiques secondaires
         """
-        return self._get_stats(SECONDARY_STATS)
+        for code, label, value in self._get_stats(SECONDARY_STATS):
+            yield code, label, value
 
     @property
     def resistances(self) -> List[Tuple[str, str, Union[int, float]]]:
         """
         Retourne les résistances
         """
-        return self._get_stats(RESISTANCES)
+        for code, label, value in self._get_stats(RESISTANCES):
+            yield code, label, value, None, get_class(value, 100)
 
     @property
     def other_stats(self) -> List[Tuple[str, str, Union[int, float]]]:
@@ -432,7 +462,12 @@ class Character(Entity, Stats):
         Retourne les autres statistiques
         :return:
         """
-        return self.secondary_stats + self.resistances
+        for element in self.secondary_stats:
+            if element[0] in (STATS_MAX_HEALTH, STATS_MAX_ACTION_POINTS, STATS_CARRY_WEIGHT):
+                continue
+            yield element
+        for element in self.resistances:
+            yield element
 
     @property
     def charge(self) -> float:
@@ -562,7 +597,7 @@ class Character(Entity, Stats):
         history.save()
         return history
 
-    def loot(self, empty: bool=True) -> Union[None, List['Loot']]:
+    def loot(self, empty: bool=True) -> Optional[List['Loot']]:
         """
         Transforme l'équipement de ce personnage en butin
         :param empty: Vide l'inventaire du joueur ?
@@ -810,7 +845,7 @@ class Character(Entity, Stats):
         history.save()
         return history
 
-    def apply_effects(self, campaign: 'Campaign'=None) -> List[Union[None, 'DamageHistory']]:
+    def apply_effects(self, campaign: 'Campaign'=None) -> List['DamageHistory']:
         """
         Applique les effets actifs de la campagne et du personnage
         :param campaign: Campagne (pour application des effets associés)
@@ -1078,7 +1113,7 @@ class Equipment(Entity):
         return self.item.weight * self.count
 
     @property
-    def compatible_ammunition(self) -> Union[None, List['Item']]:
+    def compatible_ammunition(self) -> Optional[List['Item']]:
         """
         Munitions compatibles
         """
@@ -1088,7 +1123,7 @@ class Equipment(Entity):
         return weapon and self.item in weapon.item.ammunitions.all()
 
     @property
-    def current_condition(self) -> Union[None, int]:
+    def current_condition(self) -> Optional[int]:
         """
         Etat actuel
         """
@@ -1107,7 +1142,7 @@ class Equipment(Entity):
         assert not action or self.character.action_points < AP_COST_EQUIP, _(
             "Le personnage ne possède plus assez de points d'actions pour s'équiper de cet objet.")
 
-        def get_equipment(equipment: 'Equipment', slot: str) -> Union['Equipment', None]:
+        def get_equipment(equipment: 'Equipment', slot: str) -> Optional['Equipment']:
             return Equipment.objects.filter(character_id=equipment.character_id, slot=slot).first()
 
         def handle_equipment(equipment: 'Equipment') -> None:
@@ -1300,7 +1335,7 @@ class Effect(Entity):
             dice_value=self.damage_dice_value,
             damage_type=self.damage_type)
 
-    def affect(self, target: Union['Campaign', 'Character']) -> Union[None, 'CampaignEffect', 'CharacterEffect']:
+    def affect(self, target: Union['Campaign', 'Character']) -> Optional[Union['CampaignEffect', 'CharacterEffect']]:
         """
         Applique l'effet à un personnage ou une campagne
         :param target: Personnage ou campagne
@@ -1426,7 +1461,7 @@ class CharacterEffect(ActiveEffect):
     """
     character = models.ForeignKey('Character', on_delete=models.CASCADE, verbose_name=_("personnage"), related_name='active_effects')
 
-    def apply(self) -> Union['DamageHistory', None]:
+    def apply(self) -> Optional['DamageHistory']:
         """
         Applique l'effet au personnage
         """

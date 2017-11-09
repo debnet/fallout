@@ -20,7 +20,7 @@
                     <td>{{ s.1 }}</td>
                     <td class="text-right">
                         {% if view %}
-                            <strong>{{ s.2|floatformat:0 }}{% if s.3 is not None %}&nbsp;/&nbsp;{{ s.3|floatformat:0 }}{% endif %}</strong>
+                            <strong class="text-{{ s.4 }}">{{ s.2|floatformat:0 }}{% if s.3 is not None %}&nbsp;/&nbsp;{{ s.3|floatformat:0 }}{% endif %}</strong>
                         {% elif request.user.is_superuser %}
                             <button class="btn btn-sm btn-primary tiny" type="submit" name="stats" value="{{ s.0 }}">{{ s.2|floatformat:0 }}</button>
                         {% endif %}
