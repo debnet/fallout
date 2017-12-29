@@ -15,14 +15,6 @@
 {% endblock %}
 
 {% block content %}
-    {% if roll %}
-        {% include "fallout/character/alerts/roll.html" %}
-    {% endif %}
-    {% if fight %}
-        {% for fight in fight %}
-            {% include "fallout/character/alerts/fight.html" %}
-        {% endfor %}
-    {% endif %}
     {% if character %}
         <div class="content">
             <h3 class="display-4">
@@ -51,10 +43,10 @@
                        data-toggle="tab" href="#items" role="tab">{% trans "Inventaire" %}</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link{% if 'effects' in request.GET %} active{% endif %}" id="items-tab"
+                    <a class="nav-link{% if 'effects' in request.GET %} active{% endif %}" id="effects-tab"
                        data-toggle="tab" href="#effects" role="tab">{% trans "Effets" %}</a>
                 </li>
-                {% if request.user.is_superuser %}
+                {% if authorized %}
                     <li class="nav-item">
                         <a class="nav-link{% if 'actions' in request.GET %} active{% endif %}" id="actions-tab"
                            data-toggle="tab" href="#actions" role="tab">{% trans "Actions" %}</a>

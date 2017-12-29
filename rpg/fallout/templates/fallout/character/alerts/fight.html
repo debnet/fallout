@@ -1,9 +1,0 @@
-{% load i18n %}
-
-<div class="alert alert-{{ fight.css_class }} alert-dismissible fade show" role="alert">
-    <button type="button" class="close" data-dismiss="alert" aria-label="{% trans "Fermer" %}">
-        <span aria-hidden="true">&times;</span>
-    </button>
-    <h4 class="alert-heading">{{ fight.attacker }} vs. {{ fight.defender }}</h4>
-    {{ fight.long_label }}
-</div>

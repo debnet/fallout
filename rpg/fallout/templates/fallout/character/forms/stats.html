@@ -2,16 +2,18 @@
 
 <form method="post" action="{{ request.path }}">
     <table class="table table-sm table-striped">
-        <thead class="thead-inverse">
+        <thead class="thead-dark">
             <th class="text-center" colspan="2">{{ label }}</th>
         </thead>
         <tbody>
-            {% if not view or not request.user.is_superuser %}
+            {% if not view or not authorized %}
                 <tr>
-                    <td><label for="{{ code }}-modifier">{% trans "modificateur" %}</label></td>
+                    <td>
+                        <label for="{{ code }}-modifier" class="d-inline">{% trans "modificateur" %}</label>
+                    </td>
                     <td class="text-right">
-                        <input id="{{ code }}-modifier" class="form-control form-control-sm tiny" type="number"
-                               name="modifier" value="" />
+                        <input id="{{ code }}-modifier" class="form-control form-control-sm tiny"
+                               type="number" name="modifier" value="" />
                     </td>
                 </tr>
             {% endif %}
@@ -19,10 +21,14 @@
                 <tr>
                     <td>{{ s.1 }}</td>
                     <td class="text-right">
-                        {% if view %}
-                            <strong class="text-{{ s.4 }}">{{ s.2|floatformat:0 }}{% if s.3 is not None %}&nbsp;/&nbsp;{{ s.3|floatformat:0 }}{% endif %}</strong>
-                        {% elif request.user.is_superuser %}
-                            <button class="btn btn-sm btn-primary tiny" type="submit" name="stats" value="{{ s.0 }}">{{ s.2|floatformat:0 }}</button>
+                        {% if view or not authorized %}
+                            <strong class="text-{{ s.4 }}">
+                                {{ s.2|floatformat:0 }}{% if s.3 is not None %}&nbsp;/&nbsp;{{ s.3|floatformat:0 }}{% endif %}
+                            </strong>
+                        {% elif authorized %}
+                            <button class="btn btn-sm btn-{{ s.4 }} tiny" type="submit" name="stats" value="{{ s.0 }}">
+                                <strong>{{ s.2|floatformat:0 }}</strong>
+                            </button>
                         {% endif %}
                     </td>
                 </tr>

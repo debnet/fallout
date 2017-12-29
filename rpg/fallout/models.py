@@ -9,7 +9,7 @@ from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models import F, Q, Sum
+from django.db.models import F, Q, Sum, FloatField
 from django.utils.translation import ugettext as _
 from multiselectfield import MultiSelectField
 
@@ -36,15 +36,15 @@ def get_thumbnails(directory=''):
             filename = os.path.join(directory, filename)
             if os.path.isdir(filepath):
                 images.append((title, get_thumbnails(filename)))
-            elif ext.lower() in ['.jpg', '.jpeg', '.gif', '.png']:
+            elif ext.lower() in ('.jpg', '.jpeg', '.gif', '.png'):
                 url = os.path.join(settings.MEDIA_URL, 'thumbnail', filename).replace('\\', '/')
                 images.append((url, title))
     except:
         pass
-    return images
+    return sorted(images)
 
 
-def get_class(value, maximum, classes=None, values=None, reverse=False, default='bold'):
+def get_class(value, maximum, classes=None, values=None, reverse=False, default='muted'):
     """
     Affecte une classe CSS à une valeur donnée
     :param value: Valeur
@@ -59,7 +59,7 @@ def get_class(value, maximum, classes=None, values=None, reverse=False, default=
         return default
     classes = classes or ('primary', 'success', 'warning', 'danger')
     classes = reversed(classes) if reverse else classes
-    values = values or (0.75, 0.50, 0.25, 0.00)
+    values = values or (1.000, 0.666, 0.333, 0.000)
     rate = value / maximum
     for c, v in zip(classes, values):
         if rate >= v:
@@ -91,6 +91,9 @@ class Campaign(CommonModel):
     description = models.TextField(blank=True, verbose_name=_("description"))
     image = models.ImageField(blank=True, upload_to='campaign', verbose_name=_("image"))
     thumbnail = models.CharField(blank=True, max_length=100, choices=get_thumbnails('campaign'), verbose_name=_("miniature"))
+    game_master = models.ForeignKey(
+        'Player', blank=True, null=True, on_delete=models.SET_NULL,
+        related_name='+', verbose_name=_("maître du jeu"))
     start_game_date = models.DateTimeField(verbose_name=_("date de début"))
     current_game_date = models.DateTimeField(verbose_name=_("date courante"))
     current_character = models.ForeignKey(
@@ -153,8 +156,9 @@ class Campaign(CommonModel):
             self.current_character = next_character
             self.save()
             # Reset character action points
-            self.current_character.action_points = self.current_character.stats.max_action_points
-            self.current_character.save()
+            if self.current_character.action_points != self.current_character.stats.max_action_points:
+                self.current_character.action_points = self.current_character.stats.max_action_points
+                self.current_character.save()
         return next_character
 
     def save(self, *args, **kwargs):
@@ -164,11 +168,13 @@ class Campaign(CommonModel):
         self.previous_game_date = (self._copy.get('current_game_date') or self.current_game_date)
         difference = self.current_game_date - self.previous_game_date
         hours = round(difference.seconds / 3600, 6)
-        super().save(*args, **kwargs, update_fields=self.modified.keys() if self.pk else None)
-        if hours >= 0:
-            for character in self.characters.all():
-                character.update_needs(hours=hours, radiation=self.radiation)
-                character.apply_effects(character)
+        super().save(*args, **kwargs)
+        if hours <= 0:
+            return
+        for character in self.characters.all():
+            character.update_needs(hours=hours, radiation=self.radiation, save=False)
+            character.apply_effects(character, save=False)
+            character.save()
 
     def get_absolute_url(self):
         """
@@ -342,6 +348,8 @@ class Character(Entity, Stats):
     regeneration = models.FloatField(default=0.0, verbose_name=_("regénération"))
     # Tag skills
     tag_skills = MultiSelectField(max_length=200, choices=SKILLS, blank=True, verbose_name=_("spécialités"))
+    # Others
+    money = models.PositiveIntegerField(default=0, verbose_name=_("argent"))
     # Cache
     _stats = {}
     _inventory = _equipment = _effects = None
@@ -404,7 +412,7 @@ class Character(Entity, Stats):
         Retourne le S.P.E.C.I.A.L.
         """
         for code, label, value in self._get_stats(SPECIALS):
-            yield code, label, value
+            yield code, label, value, None, get_class(value, maximum=10)
 
     @property
     def skills(self) -> List[Tuple[str, str, Union[int, float]]]:
@@ -412,7 +420,7 @@ class Character(Entity, Stats):
         Retourne les compétences
         """
         for code, label, value in self._get_stats(SKILLS):
-            yield code, label, value
+            yield code, label, value, None, get_class(value, maximum=100)
 
     @property
     def general_stats(self) -> List[Tuple[str, str, Union[int, float], Optional[Union[int, float]], Optional[str]]]:
@@ -454,7 +462,7 @@ class Character(Entity, Stats):
         Retourne les résistances
         """
         for code, label, value in self._get_stats(RESISTANCES):
-            yield code, label, value, None, get_class(value, 100)
+            yield code, label, value, None, get_class(value, maximum=100)
 
     @property
     def other_stats(self) -> List[Tuple[str, str, Union[int, float]]]:
@@ -474,7 +482,9 @@ class Character(Entity, Stats):
         """
         Retourne la charge totale de l'équipement
         """
-        return self.equipments.aggregate(charge=Sum(F('count') * F('item__weight'))).get('charge') or 0
+        return self.equipments.aggregate(
+            charge=Sum(F('quantity') * F('item__weight'), output_field=FloatField())
+        ).get('charge') or 0
 
     @property
     def used_skill_points(self) -> float:
@@ -501,15 +511,17 @@ class Character(Entity, Stats):
         setattr(self, name, value)
         return value
 
-    def add_experience(self, amount: int=0):
+    def add_experience(self, amount: int=0, save: bool=True):
         """
         Ajoute de l'expérience à ce personnage
         :param amount: Quantité d'expérience ajoutée
+        :param save: Sauvegarder les modifications sur le personnage ?
         :return: Niveau actuel, expérience requise jusqu'au niveau suivant
         """
         if amount:
             self.experience += amount
-            self.save()
+            if save:
+                self.save()
         return self.level, self.required_experience
 
     def check_level(self) -> Tuple[int, int]:
@@ -562,11 +574,12 @@ class Character(Entity, Stats):
         # Save the changes
         self.save()
 
-    def update_needs(self, hours: float=0.0, radiation: int=0, save: bool=True) -> None:
+    def update_needs(self, hours: float=0.0, radiation: int=0, resting: bool=True, save: bool=True) -> None:
         """
         Mise à jour des besoins
         :param hours: Nombre d'heures passées
         :param radiation: Radioactivité actuelle (en rads / heure)
+        :param resting: Personnage en train de se reposer ?
         :param save: Sauvegarder les modifications sur le personnage ?
         :return: Rien
         """
@@ -575,7 +588,7 @@ class Character(Entity, Stats):
         if radiation:
             self.damage(raw_damage=radiation * hours, damage_type=DAMAGE_RADIATION, save=False)
         self.regeneration += self.stats.healing_rate * (hours / 24.0) * (
-            HEALING_RATE_RESTING_MULT if self.is_resting else 1.0)
+            HEALING_RATE_RESTING_MULT if (resting or self.is_resting) else 1.0)
         if save:
             self.save(reset=False)
 
@@ -590,11 +603,12 @@ class Character(Entity, Stats):
         history.game_date = self.campaign and self.campaign.current_game_date
         is_special = stats in LIST_SPECIALS
         history.value = getattr(self.stats, stats, 0)
-        history.roll = randint(1, 10 if is_special else 100 - randint(0, self.stats.luck))
-        history.success = history.roll < (history.value + history.modifier)
+        history.roll = randint(1, 10 if is_special else (100 - randint(0, self.stats.luck)))
+        history.success = history.roll <= (history.value + history.modifier)
         history.critical = (history.roll <= (1 if is_special else self.stats.luck)) if history.success \
             else (history.roll >= (CRITICAL_FAIL_D10 if is_special else CRITICAL_FAIL_D100))
         history.save()
+        self.add_experience(XP_GAIN_ROLL[history.success])
         return history
 
     def loot(self, empty: bool=True) -> Optional[List['Loot']]:
@@ -611,7 +625,7 @@ class Character(Entity, Stats):
             try:
                 assert equipement.item.type not in [ITEM_WEAPON, ITEM_ARMOR]
                 loot = Loot.objects.get(campaign=self.campaign, item=equipement.item)
-                loot.count += equipement.count
+                loot.quantity += equipement.quantity
                 loot.save()
             except (AssertionError, Loot.DoesNotExist):
                 loot = Loot.objects.create(campaign=self.campaign, item=equipement.item, condition=equipement.condition)
@@ -669,7 +683,7 @@ class Character(Entity, Stats):
         # Fight conditions
         if attacker_weapon and \
                 (attacker_weapon.clip_size and attacker_weapon_equipment.clip_count <= 0) or \
-                (attacker_weapon.is_throwable and attacker_weapon.count <= 0):
+                (attacker_weapon.is_throwable and attacker_weapon.quantity <= 0):
             history.status = STATUS_NO_MORE_AMMO
         elif target.health <= 0:
             history.status = STATUS_TARGET_DEAD
@@ -726,6 +740,7 @@ class Character(Entity, Stats):
         attacker_hit_roll = history.hit_roll = randint(1, 100)
         history.success = attacker_hit_roll <= history.hit_chance
         history.critical = attacker_hit_roll >= CRITICAL_FAIL_D100
+        self.add_experience(max(target.level - target.level, 1) * XP_GAIN_FIGHT[history.success], save=False)
         if history.success:
             # Critical chance
             critical_chance = getattr(self.stats, 'critical_chance', 0)
@@ -735,7 +750,8 @@ class Character(Entity, Stats):
             # Apply damage
             history.status = STATUS_HIT_SUCCEED
             history.critical = critical = attacker_hit_roll < critical_chance
-            attacker_damage_type = getattr(attacker_weapon, 'damage_type', DAMAGE_NORMAL)
+            attacker_damage_type = getattr(attacker_ammo, 'damage_type', None)
+            attacker_damage_type = attacker_damage_type or getattr(attacker_weapon, 'damage_type', DAMAGE_NORMAL)
             damage = 0
             for item in [attacker_weapon, attacker_ammo]:
                 if not item:
@@ -750,7 +766,7 @@ class Character(Entity, Stats):
                 damage *= UNARMED_CRITICAL_DAMAGE if attacker_skill == SKILL_UNARMED else 1.0
             threshold_modifier = getattr(attacker_weapon, 'threshold_modifier', 0)
             threshold_modifier += getattr(attacker_ammo, 'threshold_modifier', 0)
-            resistance_modifier = getattr(attacker_weapon, 'resistance_modifier', 0.0)
+            resistance_modifier = 1.0 + getattr(attacker_weapon, 'resistance_modifier', 0.0)
             resistance_modifier += getattr(attacker_ammo, 'resistance_modifier', 0.0)
             history.damage = target.damage(
                 raw_damage=damage, damage_type=attacker_damage_type, save=True,
@@ -764,8 +780,9 @@ class Character(Entity, Stats):
             target.apply_effects()  # Apply effects immediatly
         # Clip count & weapon condition
         if attacker_weapon_equipment and attacker_weapon:
-            attacker_weapon_equipment.count -= 1 if attacker_weapon.is_throwable else 0
-            attacker_weapon_equipment.clip_count -= 0 if attacker_weapon.is_melee else 1
+            attacker_weapon_equipment.quantity -= 1 if attacker_weapon.is_throwable else 0
+            if not attacker_weapon.is_melee:
+                attacker_weapon_equipment.clip_count -= 1
             # TODO: weapon condition based on damage
             if not attacker_weapon.is_throwable:
                 attacker_weapon_equipment.condition -= attacker_weapon_equipment.condition * (
@@ -845,20 +862,21 @@ class Character(Entity, Stats):
         history.save()
         return history
 
-    def apply_effects(self, campaign: 'Campaign'=None) -> List['DamageHistory']:
+    def apply_effects(self, campaign: 'Campaign'=None, save: bool=True) -> List['DamageHistory']:
         """
         Applique les effets actifs de la campagne et du personnage
         :param campaign: Campagne (pour application des effets associés)
-        :return: Liste des dégâts éventuels
+        :param save: Sauvegarde les données relatives aux personnages
+        :return: Liste des dégâts éventuellement subis
         """
         damages = []
         for effect in self.effects.filter(effect__interval__isnull=False):
-            damage = effect.apply()
+            damage = effect.apply(save=save)
             if damage:
                 damages.append(damage)
         if campaign:
             for effect in self.campaign.effects.filter(effect__interval__isnull=False):
-                damage = effect.apply()
+                damage = effect.apply(save=save)
                 if damage:
                     damages.append(damage)
         return damages
@@ -911,7 +929,7 @@ class Character(Entity, Stats):
             if not campaign_id:
                 continue
             Campaign.objects.filter(id=campaign_id).update(current_character=None)
-        super().save(*args, **kwargs, update_fields=self.modified.keys() if self.pk else None)
+        super().save(*args, **kwargs)
 
     def get_absolute_url(self):
         """
@@ -1057,6 +1075,29 @@ class Item(Entity):
             modifier.save(force_insert=True)
         return self
 
+    def give(self, character: Union['Character', int], quantity: int=1,
+             condition: float=1.0) -> Union[List['Equipment'], 'Equipment']:
+        """
+        Donne un ou plusieurs exemplaire de cet objet à un joueur ciblé
+        :param character: Joueur
+        :param quantity: Quantité
+        :param condition: Etat
+        :return: Equipement(s)
+        """
+        if self.type in [ITEM_WEAPON, ITEM_ARMOR]:
+            equipments = []
+            for i in range(quantity):
+                equipments.append(Equipment.objects.create(
+                    character=character, item=self, quantity=1, condition=condition))
+            return equipments if len(equipments) > 2 else next(iter(equipments), None)
+        else:
+            equipment, created = Equipment.objects.get_or_create(
+                character=character, item=self, defaults=dict(quantity=quantity, condition=condition))
+            if not created:
+                equipment.quantity += quantity
+                equipment.save()
+            return equipment
+
     def __str__(self) -> str:
         return self.name
 
@@ -1079,14 +1120,14 @@ class ItemModifier(Modifier):
         verbose_name_plural = _("modificateurs d'objets")
 
 
-class Equipment(Entity):
+class Equipment(CommonModel):
     """
     Equipement
     """
     character = models.ForeignKey('Character', on_delete=models.CASCADE, related_name='equipments', verbose_name=_("personnage"))
     item = models.ForeignKey('Item', on_delete=models.CASCADE, related_name='+', verbose_name=_("objet"))
     slot = models.CharField(max_length=6, choices=SLOT_ITEM_TYPES, blank=True, verbose_name=_("emplacement"))
-    count = models.PositiveIntegerField(default=1, verbose_name=_("nombre"))
+    quantity = models.PositiveIntegerField(default=1, verbose_name=_("quantité"))
     clip_count = models.PositiveSmallIntegerField(blank=True, null=True, verbose_name=_("munitions"))
     condition = models.FloatField(blank=True, null=True, verbose_name=_("état"))
 
@@ -1103,14 +1144,14 @@ class Equipment(Entity):
         """
         Valeur de l'objet en fonction de son état
         """
-        return self.item.value * self.count * (self.condition or 1)
+        return self.item.value * self.quantity * (self.condition or 1)
 
     @property
     def charge(self) -> float:
         """
         Taille de l'équipement en fonction de son nombre
         """
-        return self.item.weight * self.count
+        return self.item.weight * self.quantity
 
     @property
     def compatible_ammunition(self) -> Optional[List['Item']]:
@@ -1149,14 +1190,16 @@ class Equipment(Entity):
             if equipment.clip_count:
                 ammo = get_equipment(equipment, ITEM_AMMO)
                 if ammo:
-                    ammo.count += equipment.clip_count
+                    ammo.quantity += equipment.clip_count
                     ammo.save()
+                    equipment.clip_count = 0
             elif equipment.slot == ITEM_AMMO:
                 weapon = get_equipment(equipment, ITEM_WEAPON)
                 if weapon:
-                    equipment.count += weapon.clip_count
-                    equipment.save()
-            equipment.slot = None
+                    equipment.quantity += weapon.clip_count
+                    weapon.clip_count = 0
+                    weapon.save()
+            equipment.slot = ''
 
         if self.slot:
             handle_equipment(self)
@@ -1183,14 +1226,14 @@ class Equipment(Entity):
             "Il n'est pas possible d'utiliser ce type d'objet.")
         assert not action or self.character.action_points < AP_COST_USE, _(
             "Le personnage ne possède plus assez de points d'actions pour utiliser cet objet.")
-        assert self.count > 0, _(
+        assert self.quantity > 0, _(
             "Le personnage doit posséder au moins un exemplaire de cet objet pour l'utiliser.")
         effects = []
         for effect in self.item.effects.all():
             effects.append(CharacterEffect.objects.update_or_create(
                 character=self.character, effect=effect,
                 defaults=dict(start_date=None, end_date=None, next_date=None)))
-        self.count -= 1
+        self.quantity -= 1
         self.save()
         if action:
             self.character.action_points -= AP_COST_USE
@@ -1204,22 +1247,22 @@ class Equipment(Entity):
         :param action: Consommera des points d'action
         :return: Butin
         """
-        assert self.count >= quantity, _(
+        assert self.quantity >= quantity, _(
             "Le personnage doit posséder la quantité d'objets qu'il souhaite jeter.")
         assert not action or self.character.action_points < AP_COST_USE, _(
             "Le personnage ne possède plus assez de points d'actions pour jeter cet objet.")
         try:
             assert self.item.type not in [ITEM_WEAPON, ITEM_ARMOR]
             loot = Loot.objects.get(campaign=self.character.campaign, item=self.item)
-            loot.count += quantity
+            loot.quantity += quantity
             loot.save()
         except (AssertionError, Loot.DoesNotExist):
             loot = Loot.objects.create(
                 campaign=self.character.campaign,
                 item=self.item,
-                count=quantity,
+                quantity=quantity,
                 condition=self.condition)
-        self.count -= quantity
+        self.quantity -= quantity
         self.save()
         if action:
             self.character.action_points -= AP_COST_USE
@@ -1237,12 +1280,12 @@ class Equipment(Entity):
         assert not action or self.character.action_points < self.item.ap_cost_reload, _(
             "Le personnage ne possède plus assez de points d'actions pour jeter cet objet.")
         ammo = Equipment.objects.filter(character_id=self.character_id, slot=ITEM_AMMO).first()
-        assert ammo and ammo.count > 0, _(
+        assert ammo and ammo.quantity > 0, _(
             "Il n'y a aucun type de munition équipé ou le nombre de munitions disponibles est insuffisant.")
         assert ammo.item in self.item.ammunitions.all(), _(
             "Cette arme est incompatible avec le type de munition équipé.")
-        needed_ammo = min(self.item.clip_size - self.clip_count, ammo.count)
-        ammo.count -= needed_ammo
+        needed_ammo = min(self.item.clip_size - self.clip_count, ammo.quantity)
+        ammo.quantity -= needed_ammo
         ammo.save()
         self.clip_count += needed_ammo
         self.save()
@@ -1274,12 +1317,12 @@ class Equipment(Entity):
         Sauvegarde de l'objet
         """
         Character.clear_cache(self.character_id)
-        if self.count <= 0 and self.item.type not in EQUIPABLE_ITEMS:
+        if self.quantity <= 0:
             return self.delete()
-        self.count = min(0, self.count) if self.count else None
+        self.quantity = max(0, self.quantity) if self.quantity else 0
         self.condition = max(0.0, min(1.0, self.condition or 1.0)) if self.item.type in [ITEM_WEAPON, ITEM_ARMOR] else None
         self.clip_count = max(0, self.clip_count or 0) if self.item.type == ITEM_WEAPON and not self.item.is_melee else None
-        return super().save(*args, **kwargs, update_fields=self.modified.keys() if self.pk else None)
+        return super().save(*args, **kwargs)
 
     def __str__(self) -> str:
         return "({}) {}".format(self.character, self.item)
@@ -1389,7 +1432,7 @@ class EffectModifier(Modifier):
         verbose_name_plural = _("modificateurs d'effets")
 
 
-class ActiveEffect(Entity):
+class ActiveEffect(CommonModel):
     """
     Effet actif
     """
@@ -1408,9 +1451,10 @@ class CampaignEffect(ActiveEffect):
     """
     campaign = models.ForeignKey('Campaign', on_delete=models.CASCADE, verbose_name=_("campagne"), related_name='active_effects')
 
-    def apply(self) -> Dict['Character', List['DamageHistory']]:
+    def apply(self, save: bool=True) -> Dict['Character', List['DamageHistory']]:
         """
         Applique l'effet aux personnages de la campagne
+        :param save: Sauvegarde les données relatives aux personnages ?
         :return: Dégâts potentiels infligés
         """
         damages = {}
@@ -1421,7 +1465,7 @@ class CampaignEffect(ActiveEffect):
         game_date = self.campaign.current_game_date
         while self.next_date <= game_date:
             for character in self.campaign.characters.all():
-                damage = character.damage(**self.effect.damage_config)
+                damage = character.damage(save=save, **self.effect.damage_config)
                 if not damage:
                     continue
                 damages[character] = damages.get(character, []) + [damage]
@@ -1444,8 +1488,9 @@ class CampaignEffect(ActiveEffect):
         if self.end_date and self.end_date <= self.campaign.current_game_date:
             if self.effect.next_effect:
                 self.effect.next_effect.affect(self.campaign)
-            return self.delete(*args, **kwargs)
-        super().save(*args, **kwargs, update_fields=self.modified.keys() if self.pk else None)
+            kwargs = {k: v for k, v in kwargs.items() if k.startswith('_')}
+            return self.delete(**kwargs)
+        super().save(*args, **kwargs)
 
     def __str__(self) -> str:
         return "({}) {}".format(str(self.campaign), str(self.effect))
@@ -1461,9 +1506,11 @@ class CharacterEffect(ActiveEffect):
     """
     character = models.ForeignKey('Character', on_delete=models.CASCADE, verbose_name=_("personnage"), related_name='active_effects')
 
-    def apply(self) -> Optional['DamageHistory']:
+    def apply(self, save: bool=True) -> Optional['DamageHistory']:
         """
         Applique l'effet au personnage
+        :param save: Sauvegarde les données relatives au personnage ?
+        :return: Liste des dégâts éventuellement subis
         """
         damage = None
         if not self.next_date and self.effect.interval:
@@ -1472,7 +1519,7 @@ class CharacterEffect(ActiveEffect):
             return damage
         game_date = self.character.campaign.current_game_date
         while self.next_date <= game_date:
-            damage = self.character.damage(**self.effect.damage_config)
+            damage = self.character.damage(save=save, **self.effect.damage_config)
             self.next_date += self.effect.interval
         self.save()
         return damage
@@ -1492,8 +1539,9 @@ class CharacterEffect(ActiveEffect):
             if self.end_date and self.end_date <= self.character.campaign.current_game_date:
                 if self.effect.next_effect:
                     self.effect.next_effect.affect(self.character)
-                return self.delete(*args, **kwargs)
-        super().save(*args, **kwargs, update_fields=self.modified.keys() if self.pk else None)
+                kwargs = {k: v for k, v in kwargs.items() if k.startswith('_')}
+                return self.delete(**kwargs)
+        super().save(*args, **kwargs)
 
     def __str__(self) -> str:
         return "({}) {}".format(str(self.character), str(self.effect))
@@ -1509,35 +1557,35 @@ class Loot(CommonModel):
     """
     campaign = models.ForeignKey('Campaign', on_delete=models.CASCADE, verbose_name=_("campagne"), related_name="loots")
     item = models.ForeignKey('Item', on_delete=models.CASCADE, verbose_name=_("objet"), related_name="loots")
-    count = models.PositiveIntegerField(default=1, verbose_name=_("nombre"))
-    condition = models.FloatField(default=1.0, verbose_name=_("état"))
+    quantity = models.PositiveIntegerField(default=1, verbose_name=_("quantité"))
+    condition = models.FloatField(blank=True, null=True, verbose_name=_("état"))
 
-    def take(self, character: 'Character', count=1):
+    def take(self, character: 'Character', quantity=1):
         """
         Permet à un personnage de prendre un ou plusieurs objets du butin
         :param character: Personnage
-        :param count: Nombre d'objets à prendre
+        :param quantity: Nombre d'objets à prendre
         :return: Equipement
         """
         if isinstance(character, (int, str)):
             character = Character.objects.get(pk=int(character))
         assert self.campaign_id == character.campaign_id, _(
             "Le personnage doit être dans la même campagne.")
-        count = max(0, min(count, self.count))
+        quantity = max(0, min(quantity, self.quantity))
         equipment = Equipment.objects.select_related('item').filter(character=character, item=self.item).first()
         if equipment and equipment.item.type not in [ITEM_WEAPON, ITEM_ARMOR]:
-            equipment.count += count
+            equipment.quantity += quantity
             equipment.save()
         else:
             equipment = Equipment.objects.create(
                 character=character,
                 item=self.item,
-                count=count,
+                quantity=quantity,
                 condition=self.condition)
-        if count >= self.count:
+        if quantity >= self.quantity:
             self.delete()
         else:
-            self.count -= count
+            self.quantity -= quantity
             self.save()
         return equipment
 
@@ -1545,9 +1593,10 @@ class Loot(CommonModel):
         """
         Sauvegarde le butin
         """
-        if self.count <= 0:
-            return self.delete(*args, **kwargs)
-        super().save(*args, **kwargs, update_fields=self.modified.keys() if self.pk else None)
+        if self.quantity <= 0:
+            kwargs = {k: v for k, v in kwargs.items() if k.startswith('_')}
+            return self.delete(**kwargs)
+        super().save(*args, **kwargs)
 
     def __str__(self) -> str:
         return "({}) {}".format(str(self.campaign), str(self.item))
@@ -1557,9 +1606,9 @@ class Loot(CommonModel):
         verbose_name_plural = _("butins")
 
 
-class LootTemplate(Entity):
+class LootTemplate(CommonModel):
     """
-    Modèle de butin1
+    Modèle de butin
     """
     name = models.CharField(max_length=200, verbose_name=_("nom"))
     title = models.CharField(max_length=200, blank=True, verbose_name=_("titre"))
@@ -1591,14 +1640,14 @@ class LootTemplate(Entity):
             try:
                 assert template.item.type not in [ITEM_WEAPON, ITEM_ARMOR]
                 loot = Loot.objects.get(campaign=campaign, item=template.item)
-                loot.count += randint(template.min_count, template.max_count)
+                loot.quantity += randint(template.min_quantity, template.max_quantity)
                 loot.save()
                 loots.append(loot)
             except (AssertionError, Loot.DoesNotExist):
                 loot = Loot.objects.create(
                     campaign=campaign,
                     item=template.item,
-                    count=randint(template.min_count, template.max_count),
+                    quantity=randint(template.min_quantity, template.max_quantity),
                     condition=randint(template.min_condition * 100, template.max_condition * 100) / 100)
                 loots.append(loot)
         return loots
@@ -1624,15 +1673,15 @@ class LootTemplate(Entity):
         verbose_name_plural = _("modèles des butins")
 
 
-class LootTemplateItem(Entity):
+class LootTemplateItem(CommonModel):
     """
     Objet de butin
     """
     template = models.ForeignKey('LootTemplate', on_delete=models.CASCADE, verbose_name=_("modèle"), related_name="items")
     item = models.ForeignKey('Item', on_delete=models.CASCADE, verbose_name=_("objet"), related_name="+")
     chance = models.PositiveSmallIntegerField(default=100, verbose_name=_("chance"))
-    min_count = models.PositiveIntegerField(default=1, verbose_name=_("nombre min."))
-    max_count = models.PositiveIntegerField(default=1, null=True, verbose_name=_("nombre max."))
+    min_quantity = models.PositiveIntegerField(default=1, verbose_name=_("nombre min."))
+    max_quantity = models.PositiveIntegerField(default=1, null=True, verbose_name=_("nombre max."))
     min_condition = models.FloatField(default=1.0, verbose_name=_("état min."))
     max_condition = models.FloatField(default=1.0, verbose_name=_("état max."))
 
@@ -1687,9 +1736,13 @@ class RollHistory(CommonModel):
             """
             return [(
                 value,
-                round((value / self.count) * 100 if self.count else 0),
-                RollHistory._css_classes[key]
+                round((value / self.count) * 100 if self.count else 0, 2),
+                settings.CSS_CLASSES[key],
             ) for key, value in self.stats.items()]
+
+        @property
+        def success_rate(self) -> float:
+            return round((self.stats[1, 0] + self.stats[1, 1]) / self.count, 2) * 100
 
     @staticmethod
     def get_stats(character: Union['Character', int]):
@@ -1698,22 +1751,26 @@ class RollHistory(CommonModel):
         :param character: Personnage
         :return: Liste des statistiques de jets
         """
-        from collections import OrderedDict
-        stats = OrderedDict()
+        stats = odict()
         for code, label in SPECIALS + SKILLS:
             stats[code] = RollHistory.RollStats(character, code, label)
-        for roll in RollHistory.objects.filter(character=character).iterator():
+        for roll in RollHistory.objects.only('stats', 'success', 'critical').filter(character=character).iterator():
             stats[roll.stats].add(roll.success, roll.critical)
         return list(stats.values())
-
-    _css_classes = odict((((1, 1), 'primary'), ((1, 0), 'success'), ((0, 0), 'warning'), ((0, 1), 'danger')))
 
     @property
     def css_class(self) -> str:
         """
         Classe CSS associée
         """
-        return self._css_classes[self.success, self.critical]
+        return settings.CSS_CLASSES[self.success, self.critical]
+
+    @property
+    def message_level(self) -> str:
+        """
+        Niveau de message
+        """
+        return {v: k for k, v in settings.MESSAGE_TAGS.items()}.get(self.css_class) or 10  # Debug
 
     @property
     def label(self) -> str:
@@ -1773,8 +1830,13 @@ class DamageHistory(CommonModel):
     real_damage = models.SmallIntegerField(default=0, verbose_name=_("dégâts réels"))
 
     def __str__(self) -> str:
-        return _("({character}) - {damage_type} : {damage}").format(
+        return _("({character}) - {label}").format(
             character=str(self.character),
+            label=self.label)
+
+    @property
+    def label(self) -> str:
+        return _("{damage} de {damage_type}").format(
             damage_type=self.get_damage_type_display(),
             damage=self.real_damage)
 
@@ -1814,14 +1876,19 @@ class FightHistory(CommonModel):
         'DamageHistory', blank=True, null=True, on_delete=models.CASCADE, related_name='fight',
         verbose_name=_("historique des dégâts"), limit_choices_to={'fight__isnull': True})
 
-    _css_classes = odict((((1, 1), 'primary'), ((1, 0), 'success'), ((0, 0), 'warning'), ((0, 1), 'danger')))
-
     @property
     def css_class(self) -> str:
         """
         Classe CSS associée
         """
-        return self._css_classes[self.success, self.critical]
+        return settings.CSS_CLASSES[self.success, self.critical]
+
+    @property
+    def message_level(self) -> str:
+        """
+        Niveau de message
+        """
+        return {v: k for k, v in settings.MESSAGE_TAGS.items()}.get(self.css_class) or ''
 
     @property
     def label(self) -> str:

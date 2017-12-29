@@ -239,7 +239,7 @@ BASE_XP = 1000
 # Tag skill bonus
 TAG_SKILL_BONUS = 20
 
-# Healing rate multiplicator when resting
+# Healing rate multiplier when resting
 HEALING_RATE_RESTING_MULT = 4.0
 
 # Range malus when fighting
@@ -253,6 +253,15 @@ AP_COST_FIGHT = 5  # Fight unarmed
 AP_COST_EQUIP = 4  # Equip item
 AP_COST_USE = 3  # Use item
 AP_COST_DROP = 3  # Drop item
+
+# Experience gains
+XP_GAIN_ROLL_FAIL = 1  # XP gain
+# for roll (fixed)
+XP_GAIN_ROLL_SUCCESS = 2  # XP gain for roll (fixed)
+XP_GAIN_ROLL = (XP_GAIN_ROLL_FAIL, XP_GAIN_ROLL_SUCCESS)
+XP_GAIN_FIGHT_MISS = 2  # XP gain for fight (multiplier)
+XP_GAIN_FIGHT_HIT = 3  # XP gain for fight (multiplier)
+XP_GAIN_FIGHT = (XP_GAIN_FIGHT_MISS, XP_GAIN_FIGHT_HIT)
 
 # Turn time
 TURN_TIME = 30

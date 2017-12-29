@@ -26,6 +26,7 @@ class PlayerAdmin(UserAdmin):
     """
     fieldsets = UserAdmin.fieldsets + (
         (_("Fallout"), {'fields': ('nickname', 'phone_number', )}), )
+    filter_horizontal = ('groups', 'user_permissions', )
 
 
 class LootInline(admin.TabularInline):
@@ -51,7 +52,7 @@ class CampaignAdmin(CommonAdmin):
     """
     fieldsets = (
         (_("Informations générales"), dict(
-            fields=('name', 'title', 'description', 'image', 'thumbnail', ),
+            fields=('name', 'title', 'description', 'image', 'thumbnail', 'game_master', ),
             classes=('wide', ),
         )),
         (_("Effets"), dict(
@@ -60,7 +61,7 @@ class CampaignAdmin(CommonAdmin):
         )),
         (_("Informations techniques"), dict(
             fields=('start_game_date', 'current_game_date', 'current_character', ),
-            classes=('wide', 'collapse', ),
+            classes=('wide', ),
         )),
     )
     inlines = [LootInline, CampaignEffectInlineAdmin]
@@ -98,7 +99,8 @@ class CharacterAdmin(EntityAdmin):
             classes=('wide', 'collapse', ),
         )),
         (_("Informations générales"), dict(
-            fields=('name', 'title', 'description', 'image', 'thumbnail', 'race', 'level', 'is_player', 'is_active', ),
+            fields=('name', 'title', 'description', 'image', 'thumbnail', 'race', 'level',
+                    'is_player', 'is_active', 'is_resting', 'money', ),
             classes=('wide', ),
         )),
         (_("Spécialités"), dict(
@@ -106,9 +108,7 @@ class CharacterAdmin(EntityAdmin):
             classes=('collapse', ),
         )),
         *(
-            (title, dict(
-                fields=tuple(a for a, b in fields),
-                classes=('wide', 'collapse', )))
+            (title, dict(fields=tuple(a for a, b in fields), classes=('wide', 'collapse', )))
             for title, fields in ALL_STATS
         )
     ])
@@ -175,7 +175,9 @@ class CharacterAdmin(EntityAdmin):
             if form.is_valid():
                 for character in queryset.order_by('name'):
                     result = character.roll(**form.cleaned_data)
-                    self.message_user(request, str(result), level=ROLL_LEVELS[(result.success, result.critical)])
+                    self.message_user(
+                        request, str(result),
+                        level=ROLL_LEVELS[(result.success, result.critical)])
                 return HttpResponseRedirect(request.get_full_path())
         else:
             form = RollCharacterForm()
@@ -193,7 +195,9 @@ class CharacterAdmin(EntityAdmin):
                 for character in queryset.order_by('name'):
                     try:
                         result = character.fight(**form.cleaned_data)
-                        self.message_user(request, str(result), level=ROLL_LEVELS[(result.success, result.critical)])
+                        self.message_user(
+                            request, str(result),
+                            level=ROLL_LEVELS[(result.success, result.critical)])
                     except Exception as error:
                         self.message_user(
                             request,
@@ -282,7 +286,7 @@ class ItemAdmin(EntityAdmin):
 
 
 @admin.register(Equipment)
-class EquipmentAdmin(EntityAdmin):
+class EquipmentAdmin(CommonAdmin):
     """
     Administration des équipements
     """
@@ -292,13 +296,13 @@ class EquipmentAdmin(EntityAdmin):
             classes=('wide', ),
         )),
         (_("Etats"), dict(
-            fields=('count', 'condition', 'clip_count', ),
+            fields=('quantity', 'condition', 'clip_count', ),
             classes=('wide', ),
         )),
     )
-    list_display = ('character', 'item', 'slot', 'count', 'condition', 'clip_count', )
-    list_editable = ('slot', 'count', 'condition', 'clip_count', )
-    list_filter = ('character', 'item', 'slot', )
+    list_display = ('character', 'item', 'slot', 'quantity', 'condition', 'clip_count', )
+    list_editable = ('slot', 'quantity', 'condition', 'clip_count', )
+    list_filter = ('character', 'slot', )
     ordering = ('character', 'item', )
 
 
@@ -346,7 +350,7 @@ class EffectAdmin(EntityAdmin):
 
 
 @admin.register(CampaignEffect)
-class CampaignEffectAdmin(EntityAdmin):
+class CampaignEffectAdmin(CommonAdmin):
     """
     Administration des effets actifs sur les campagnes
     """
@@ -363,7 +367,7 @@ class CampaignEffectAdmin(EntityAdmin):
 
 
 @admin.register(CharacterEffect)
-class CharacterEffectAdmin(EntityAdmin):
+class CharacterEffectAdmin(CommonAdmin):
     """
     Administration des effets actifs sur les personnages
     """
@@ -379,6 +383,23 @@ class CharacterEffectAdmin(EntityAdmin):
     ordering = ('character', 'effect', )
 
 
+@admin.register(Loot)
+class Loot(CommonAdmin):
+    """
+    Administration des butins
+    """
+    fieldsets = (
+        (_("Informations générales"), dict(
+            fields=('campaign', 'item', 'quantity', 'condition', ),
+            classes=('wide', ),
+        )),
+    )
+    list_display = ('campaign', 'item', 'quantity', 'condition', )
+    list_editable = ()
+    list_filter = ('campaign', )
+    ordering = ('campaign', 'item', )
+
+
 class LootTemplateItemInline(EntityTabularInline):
     """
     Administration intégrée des templates de butins
@@ -388,7 +409,7 @@ class LootTemplateItemInline(EntityTabularInline):
 
 
 @admin.register(LootTemplate)
-class LootTemplateAdmin(EntityAdmin):
+class LootTemplateAdmin(CommonAdmin):
     """
     Administration des butins
     """
@@ -431,7 +452,7 @@ class RollHistoryAdmin(CommonAdmin):
             classes=('wide', ),
         )),
     )
-    list_display = ('date', 'game_date', 'character', 'stats', 'value', 'success', 'critical', )
+    list_display = ('date', 'game_date', 'character', 'stats', 'roll', 'value', 'success', 'critical', )
     list_editable = ()
     list_filter = ('date', 'game_date', 'character', 'stats', 'success', 'critical', )
     ordering = ('-date', )

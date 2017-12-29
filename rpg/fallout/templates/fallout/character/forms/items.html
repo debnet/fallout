@@ -9,7 +9,6 @@
                         <div class="card-header">
                             <span class="card-title">{{ info.name }}</span>
                             {% if info.title %}<small class="card-subtitle mb-2 text-muted">{{ info.title }}</small>{% endif %}
-                            {% if item.count > 1 %}<span class="badge badge-dark float-right">{{ item.count }}</span>{% endif %}
                         </div>
                         <div class="card-body">
                             {% with image=item.item.image thumbnail=item.item.thumbnail %}
@@ -21,10 +20,13 @@
                                 {% endif %}
                             {% endwith %}
                             <p class="card-text">
-                                <small class="badge badge-primary">{{ item.charge|floatformat:2 }} {% trans "kg." %}</small>
+                                <small class="badge badge-primary">{{ item.charge|floatformat:2 }} {% trans "kg" %}</small>
                                 <small class="badge badge-warning">{{ item.value|floatformat:2 }} {% trans "$" %}</small>
                                 {% if info.clip_size %}
-                                <small class="badge badge-danger">{{ item.clip_count }} / {{ info.clip_size }}</small>
+                                    <small class="badge badge-danger">{{ item.clip_count }} / {{ info.clip_size }}</small>
+                                {% endif %}
+                                {% if item.quantity > 1 %}
+                                    <span class="badge badge-dark">&times; {{ item.quantity }}</span>
                                 {% endif %}
                                 {% for modifier in info.modifiers.all %}
                                     <small class="badge {% if modifier.value > 0 %}badge-success{% else %}badge-danger{% endif %}">
@@ -37,7 +39,7 @@
                                         <div class="progress">
                                             {% localize off %}
                                             <div role="progressbar" style="width: {{ condition }}%;" aria-valuenow="{{ condition }}"
-                                                 aria-valuemin="0" aria-valuemax="100" class="progress-bar progress-bar-striped
+                                                 aria-valuemin="0" aria-valuemax="100" class="progress-bar
                                                  bg-{% if condition < 25 %}danger{% elif condition < 50 %}warning{% else %}success{% endif %}">
                                             {% endlocalize %}
                                                 {{ condition|floatformat:0 }}%
@@ -52,32 +54,34 @@
                                 {% endif %}
                             </p>
                         </div>
-                        {% if request.user.is_superuser %}
+                        {% if authorized %}
                             <div class="card-footer">
-                                <form class="form-inline" method="post" action="{{ request.path }}?items">
+                                <form class="form-inline" method="post" action="{{ request.path }}">
                                     {% if item.equiped %}
                                         <button class="btn btn-sm btn-danger m-1" type="submit"
-                                                name="unequip">{% trans "Retirer" %}</button>
+                                                name="method" value="equip">{% trans "Retirer" %}</button>
+                                        {% if info.clip_size and item.clip_count < info.clip_size %}
+                                            <button class="btn btn-sm btn-success m-1" type="submit"
+                                                    name="method" value="reload">{% trans "Recharger" %}</button>
+                                        {% endif %}
                                     {% else %}
+                                        <button class="btn btn-sm btn-warning m-1" type="submit"
+                                                name="method" value="drop">{% trans "Lâcher" %}</button>
                                         {% if info.compatible_ammunition %}
                                             <button class="btn btn-sm btn-warning m-1" type="submit"
-                                                    name="replace-ammo">{% trans "Remplacer" %}</button>
+                                                    name="method" value="equip">{% trans "Remplacer" %}</button>
                                         {% elif info.is_equipable %}
-                                            <button class="btn btn-sm btn-info m-1" type="submit"
-                                                    name="equip">{% trans "Equiper" %}</button>
+                                            <button class="btn btn-sm btn-primary m-1" type="submit"
+                                                    name="method" value="equip">{% trans "Equiper" %}</button>
                                         {% elif info.is_usable %}
                                             <button class="btn btn-sm btn-success m-1" type="submit"
-                                                    name="use">{% trans "Utiliser" %}</button>
+                                                    name="method" value="use">{% trans "Utiliser" %}</button>
                                         {% endif %}
-                                    {% endif %}
-                                    {% if info.clip_size and item.clip_count < info.clip_size %}
-                                        <button class="btn btn-sm btn-success m-1" type="submit"
-                                                name="reload">{% trans "Recharger" %}</button>
                                     {% endif %}
                                     <div class="form-check m-1">
                                         <label class="form-check-label">
                                             <input class="form-check-input" type="checkbox" name="action">
-                                            <small>{% trans "Action" %}</small>
+                                            <small title="{% trans "Points d'action" %}">{% trans "AP" %}</small>
                                         </label>
                                     </div>
                                     <input type="hidden" name="type" value="item" />

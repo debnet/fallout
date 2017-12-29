@@ -32,17 +32,19 @@
                             {% endif %}
                         </p>
                     </div>
-                    {% if request.user.is_superuser %}
+                    {% if authorized %}
                         <div class="card-footer">
-                            <form class="form-inline" method="post" action="{{ request.path }}?items">
+                            <form class="form-inline" method="post" action="{{ request.path }}">
+                                <button class="btn btn-sm btn-danger m-1" type="submit"
+                                        name="method" value="remove">{% trans "Supprimer" %}</button>
                                 <div class="form-check m-1">
                                     <label class="form-check-label">
                                         <input class="form-check-input" type="checkbox" name="action">
-                                        <small>{% trans "Action" %}</small>
+                                        <small title="{% trans "Points d'action" %}">{% trans "AP" %}</small>
                                     </label>
                                 </div>
                                 <input type="hidden" name="type" value="effect" />
-                                <input type="hidden" name="item" value="{{ item.id }}" />
+                                <input type="hidden" name="effect" value="{{ effect.id }}" />
                                 {% csrf_token %}
                             </form>
                         </div>

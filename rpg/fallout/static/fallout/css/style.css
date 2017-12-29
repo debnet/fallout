@@ -11,3 +11,11 @@ body {
 .tab-pane {
     padding-top: 1em;
 }
+
+tr {
+    height: 2.5em;
+}
+
+td {
+    vertical-align:bottom!important;
+}

@@ -12,7 +12,7 @@ from rpg.fallout.urls import urlpatterns as fallout_urls, api_urlpatterns as fal
 admin.site.site_header = 'Fallout RPG'
 
 urlpatterns = [
-    url(r'^admin/', include(admin.site.urls)),
+    url(r'^admin/', admin.site.urls),
     url(r'^login/$', auth_views.LoginView.as_view(template_name='fallout/login.html')),
     url(r'^favicon\.ico$', RedirectView.as_view(url='/static/favicon.ico', permanent=True)),
     # Django REST Framework

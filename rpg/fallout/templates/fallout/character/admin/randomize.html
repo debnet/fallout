@@ -15,7 +15,7 @@
         {% for action in actions %}
             <input type="hidden" name="_selected_action" value="{{ action }}" />
         {% endfor %}
-        <input type="hidden" name="action" value="randomize" />
+        <input type="hidden" name="method" value="randomize" />
         <button type="submit" name="randomize">{% trans "Valider" %}</button>
     </form>
 {% endblock %}

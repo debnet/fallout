@@ -12,7 +12,75 @@ $('input[type=checkbox]').click(function(event) {
     input.prop('disabled', !checked);
 });
 
+$('a[data-toggle="tab"]').on('shown.bs.tab', function(event) {
+   localStorage.activePanel = event.target.id;
+});
+
 // Affichage du premier onglet par défaut
 if ($('.tab-pane.active').length === 0) {
-    $('.tab a:first').click();
+    var activePanel = $('#' + localStorage.activePanel);
+    if (activePanel) {
+        activePanel.click();
+    } else {
+        $('.tab a:first').click();
+    }
 }
+
+// Fonction de transformation des données pour l'autocomplétion
+function transformData(data, label, value, other) {
+    label = label || 'name';
+    value = value || 'id';
+    var result = [];
+    data['results'].forEach(function(e) {
+        result.push({
+            label: e[label] + (other ? ' (' + e[other] + ')' : ''),
+            value: e[value]
+        })
+    });
+    return result;
+}
+
+// Autocomplétion des objets
+$('#item-name').autocomplete({
+    source: function(request, response) {
+        $.ajax({
+            url: "/api/fallout/item/",
+            data: {
+                name__icontains: request.term,
+                fields: 'id,name,type',
+                order_by: 'name',
+                display: '1'
+            },
+            success: function(data) {
+                response(transformData(data, 'name', 'id', 'type_display'));
+            }
+        });
+    },
+    minLength: 2,
+    select: function(event, ui) {
+        $(this).val(ui.item.value);
+        $(this).closest('form').submit();
+    }
+});
+
+// Autocomplétion des effets
+$('#effect-name').autocomplete({
+    source: function(request, response) {
+        $.ajax({
+            url: "/api/fallout/effect/",
+            data: {
+                name__icontains: request.term,
+                fields: 'id,name',
+                order_by: 'name'
+            },
+            success: function(data) {
+                response(transformData(data));
+            }
+        });
+    },
+    minLength: 2,
+    select: function(event, ui) {
+        $(this).val(ui.item.value);
+        $(this).closest('form').submit();
+    }
+});

@@ -1,8 +1,8 @@
 {% load i18n %}
 
-<form method="post" action="{{ request.path }}?actions">
+<form method="post" action="{{ request.path }}">
     <table class="table table-sm table-striped">
-        <thead class="thead-inverse">
+        <thead class="thead-dark">
             <tr>
                 <th class="text-center" colspan="2">{% trans "Actions" %}</th>
             </tr>
@@ -11,6 +11,6 @@
 
         </tbody>
     </table>
-    <input type="hidden" name="type" value="action" />
+    <input type="hidden" name="type" value="ap" />
     {% csrf_token %}
 </form>

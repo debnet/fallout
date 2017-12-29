@@ -1,6 +1,8 @@
 # coding: utf-8
 import os
+from django.contrib import messages
 from django.utils.translation import ugettext_lazy as _
+
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -47,7 +49,6 @@ MIDDLEWARE = (
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
@@ -119,7 +120,7 @@ MEDIA_URL = '/medias/'
 MEDIA_ROOT = os.path.join(BASE_DIR, MEDIA_NAME)
 
 # Custom settings
-ENABLE_CELERY = False
+CELERY_ENABLE = False
 CORS_ORIGIN_ALLOW_ALL = True
 APPEND_SLASH = True
 
@@ -164,5 +165,17 @@ SMS_GATEWAY_LOGIN = ''
 SMS_GATEWAY_PASSWORD = ''
 SMS_GATEWAY_DEVICE = 0
 
-# Common
-IGNORE_LOG = True
+# Messages
+MESSAGE_TAGS = {
+    messages.DEBUG: 'light',
+    messages.INFO: 'info',
+    messages.SUCCESS: 'success',
+    messages.WARNING: 'warning',
+    messages.ERROR: 'danger',
+}
+CSS_CLASSES = {
+    (1, 1): 'info',
+    (1, 0): 'success',
+    (0, 0): 'warning',
+    (0, 1): 'danger',
+}

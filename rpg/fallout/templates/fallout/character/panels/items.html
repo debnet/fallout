@@ -1,6 +1,40 @@
 {% load i18n %}
 
-<div class="tab-pane fade{% if 'items' in request.GET %} active show{% endif %}" id="items" role="tabpanel">
+<div class="tab-pane fade" id="items" role="tabpanel">
+    {% if authorized %}
+        <form method="post" action="{{ request.path }}" class="form-inline justify-content-center">
+            <div class="form-row align-items-center">
+                <div class="col-auto">
+                    <label class="sr-only" for="item-quantity">{% trans "Quantité" %}</label>
+                    <div class="input-group mb-2 mb-sm-0">
+                        <div class="input-group-addon">{% trans "Quantité" %}</div>
+                        <input type="number" class="form-control" id="item-quantity"
+                               name="quantity" placeholder="{% trans "Qte" %}" value="1" style="width: 80px">
+                    </div>
+                </div>
+                <div class="col-auto">
+                    <label class="sr-only" for="item-condition">{% trans "Condition" %}</label>
+                    <div class="input-group mb-2 mb-sm-0">
+                        <div class="input-group-addon">{% trans "Condition" %}</div>
+                        <input type="number" class="form-control" id="item-condition"
+                               name="condition" placeholder="{% trans "Cond." %}" value="100" style="width: 80px">
+                    </div>
+                </div>
+                <div class="col-auto">
+                    <label class="sr-only" for="item-name">{% trans "Objet" %}</label>
+                    <input type="text" class="form-control mb-2 mb-sm-0" id="item-name"
+                           name="item" placeholder="{% trans "Objet" %}">
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-primary">{% trans "Ajouter" %}</button>
+                    <input type="hidden" name="method" value="add" />
+                    <input type="hidden" name="type" value="item" />
+                    {% csrf_token %}
+                </div>
+            </div>
+        </form>
+        <hr />
+    {% endif %}
     <h4 class="text-center mb-3">{% trans "Equipé" %}</h4>
     {% with items=inventory equiped=True %}
         {% include "fallout/character/forms/items.html" %}
