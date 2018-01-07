@@ -5,9 +5,12 @@
         <a class="nav-link dropdown-toggle" id="campaign-navbar" href="#" data-toggle="dropdown"
            aria-haspopup="true" aria-expanded="false">{{ campaign.name|default:_("Aucune campagne") }}</a>
         <div class="dropdown-menu" aria-labelledby="campaign-navbar">
-            <a class="dropdown-item" href="{% url 'fallout_index' %}">{% trans "Aucune campagne" %}</a>
+            <a class="dropdown-item text-secondary" href="{% url 'fallout_index' %}">{% trans "Aucune campagne" %}</a>
             {% for campaign in campaigns %}
-                <a class="dropdown-item" href="{% url 'fallout_campaign' campaign.id %}">{{ campaign.name }}</a>
+                <a class="dropdown-item" href="{% url 'fallout_campaign' campaign.id %}">
+                    {{ campaign.name }}
+                    {% if campaign.title %}<small class="text-muted">{{ campaign.title }}</small>{% endif %}
+                </a>
             {% endfor %}
         </div>
     </li>
@@ -25,6 +28,7 @@
                         <small class="badge badge-success">{% trans "Actif" %}</small>
                     {% endif %}
                     {{ character.name }}
+                    {% if character.title %}<small class="text-muted">{{ character.title }}</small>{% endif %}
                 </a>
             {% endfor %}
         </div>
@@ -34,8 +38,8 @@
     <form class="form-inline" method="post" action="{% url 'fallout_next_turn' campaign.id %}">
         <label class="text-white">{{ campaign.current_game_date }}</label>
         <select class="custom-select-sm ml-2 mr-2" name="seconds">
-            <option value="0">{% trans "0 s" %}</option>
-            <option value="30" selected="selected">{% trans "30 s" %}</option>
+            <option value="0" selected="selected">{% trans "0 s" %}</option>
+            <option value="30">{% trans "30 s" %}</option>
             <option value="60">{% trans "1 mn" %}</option>
             <option value="120">{% trans "2 mn" %}</option>
             <option value="300">{% trans "5 mn" %}</option>

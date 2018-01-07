@@ -252,7 +252,8 @@ UNARMED_CRITICAL_DAMAGE = 3.0
 AP_COST_FIGHT = 5  # Fight unarmed
 AP_COST_EQUIP = 4  # Equip item
 AP_COST_USE = 3  # Use item
-AP_COST_DROP = 3  # Drop item
+AP_COST_DROP = 2  # Drop item
+AP_COST_TAKE = 2  # Take item
 
 # Experience gains
 XP_GAIN_ROLL_FAIL = 1  # XP gain
@@ -307,7 +308,7 @@ COMPUTED_STATS = (
 
 # Computed needs per hour
 COMPUTED_NEEDS = {
-    ('dehydration', lambda s, c: min(1, (20 - s.endurance) * 2)),
-    ('hunger', lambda s, c: min(1, (16 - s.endurance) * 2)),
-    ('sleep', lambda s, c: min(1, (14 - s.endurance) * 2)),
+    ('dehydration', lambda s, c: max(1, (20 - s.endurance) * 2)),
+    ('hunger', lambda s, c: max(1, (16 - s.endurance) * 2)),
+    ('sleep', lambda s, c: max(1, (14 - s.endurance) * 2)),
 }

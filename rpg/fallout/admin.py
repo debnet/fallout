@@ -100,7 +100,7 @@ class CharacterAdmin(EntityAdmin):
         )),
         (_("Informations générales"), dict(
             fields=('name', 'title', 'description', 'image', 'thumbnail', 'race', 'level',
-                    'is_player', 'is_active', 'is_resting', 'money', ),
+                    'is_player', 'is_active', 'is_resting', ),
             classes=('wide', ),
         )),
         (_("Spécialités"), dict(

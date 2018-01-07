@@ -27,4 +27,5 @@ api_urlpatterns = [
     path(r'equipment/<int:equipment_id>/reload/', api.equipment_reload, name='equipment_reload'),
     path(r'equipment/<int:equipment_id>/drop/', api.equipment_drop, name='equipment_drop'),
     path(r'loot/<int:loot_id>/take/', api.loot_take, name='loot_take'),
+    path(r'loottemplate/<int:template_id>/open/', api.loottemplate_open, name='loottemplate_open'),
 ] + router.urls

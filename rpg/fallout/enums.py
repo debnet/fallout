@@ -272,6 +272,7 @@ STATUS_HIT_FAILED = 'hit_failed'
 STATUS_NOT_ENOUGH_AP = 'not_enough_ap'
 STATUS_NO_MORE_AMMO = 'no_more_ammo'
 STATUS_TARGET_DEAD = 'target_dead'
+STATUS_TARGET_KILLED = 'target_killed'
 STATUS_WEAPON_BROKEN = 'weapon_broken'
 FIGHT_STATUS = (
     (STATUS_HIT_SUCCEED, _("cible touchée")),
@@ -279,5 +280,6 @@ FIGHT_STATUS = (
     (STATUS_NOT_ENOUGH_AP, _("points d'action insuffisants")),
     (STATUS_NO_MORE_AMMO, _("munitions insuffisantes")),
     (STATUS_TARGET_DEAD, _("cible inconsciente")),
+    (STATUS_TARGET_KILLED, _("cible défaite")),
     (STATUS_WEAPON_BROKEN, _("arme défectueuse")),
 )

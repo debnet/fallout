@@ -1,6 +1,6 @@
-Django==2.0
-Pillow==4.3.0
-common-framework==2017.12.22
+Django==2.0.1
+Pillow==5.0.0
+common-framework==2018.1.6
 coverage==4.4.2
 django-cors-headers==2.1.0
 django-debug-toolbar==1.9.1

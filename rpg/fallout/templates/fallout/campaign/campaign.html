@@ -22,10 +22,82 @@
             </h3>
             {% if campaign.description %}<p class="lead">{{ campaign.description }}</p>{% endif %}
         </div>
-        <div class="row">
-            <div class="col">
-
-            </div>
+    {% else %}
+        <div class="container">
+            <h3 class="display-4">
+                {% trans "Aucune campagne" %}
+            </h3>
+            <p class="lead">
+                {% blocktrans %}
+                    Vous êtes actuellement sur la réserve de personnages qui ne sont associés à aucune campagne
+                    particulière ainsi la plupart des actions liées à une campagne (comme la gestion du temps et les
+                    effets) sont désactivés.
+                {% endblocktrans %}
+            </p>
         </div>
+    {% endif %}
+    <div role="tabpanel" id="tabs">
+        <ul class="nav nav-tabs nav-justified tab" id="actions-tabs" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link" data-toggle="tab" role="tab"
+                   id="campaign-infos-tab" href="#campaign-infos">{% trans "Campagne" %}</a>
+            </li>
+            {% if campaign %}
+                <li class="nav-item">
+                    <a class="nav-link" data-toggle="tab" role="tab"
+                       id="campaign-effects-tab" href="#campaign-effects">{% trans "Effets" %}</a>
+                </li>
+            {% endif %}
+            <li class="nav-item">
+                <a class="nav-link" data-toggle="tab" role="tab"
+                   id="campaign-loots-tab" href="#campaign-loots">{% trans "Butins" %}</a>
+            </li>
+        </ul>
+        <div class="tab-content">
+            {% include "fallout/campaign/panels/infos.html" %}
+            {% include "fallout/campaign/panels/effects.html" %}
+            {% include "fallout/campaign/panels/loots.html" %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    {% if campaign %}
+        <script type="application/javascript">
+            $(document).ready(function () {
+                $("#campaign-calendar").calendar({
+                    language: "{% trans "fr" %}",
+                    year: {{ campaign.current_game_date.year }},
+                    month: {{ campaign.current_game_date.month }},
+                    cell_border: true,
+                    show_days: true,
+                    nav_icon: {
+                      prev: '&lt;',
+                      next: '&gt;'
+                    },
+                    legend: [
+                        {
+                            type: "text",
+                            label: "{% trans "Maintenant" %}",
+                            badge: "00"
+                        }
+                    ],
+                    data: [
+                        {
+                            date: "{{ campaign.start_game_date|date:'Y-m-d' }}",
+                            badge: false,
+                            title: "{% trans "Début de la campagne" %}",
+                            footer: "{{ campaign.start_game_date }}"
+                        },
+                        {
+                            date: "{{ campaign.current_game_date|date:'Y-m-d' }}",
+                            badge: true,
+                            title: "{% trans "Maintenant" %}",
+                            footer: "{{ campaign.current_game_date }}"
+                        }
+                    ]
+                });
+            });
+        </script>
     {% endif %}
 {% endblock %}

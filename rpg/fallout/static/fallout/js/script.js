@@ -19,7 +19,7 @@ $('a[data-toggle="tab"]').on('shown.bs.tab', function(event) {
 // Affichage du premier onglet par défaut
 if ($('.tab-pane.active').length === 0) {
     var activePanel = $('#' + localStorage.activePanel);
-    if (activePanel) {
+    if (activePanel.length) {
         activePanel.click();
     } else {
         $('.tab a:first').click();
@@ -33,8 +33,8 @@ function transformData(data, label, value, other) {
     var result = [];
     data['results'].forEach(function(e) {
         result.push({
-            label: e[label] + (other ? ' (' + e[other] + ')' : ''),
-            value: e[value]
+            value: e[label] + (other ? ' (' + e[other] + ')' : ''),
+            id: e[value]
         })
     });
     return result;
@@ -58,9 +58,10 @@ $('#item-name').autocomplete({
     },
     minLength: 2,
     select: function(event, ui) {
-        $(this).val(ui.item.value);
-        $(this).closest('form').submit();
+        $('#' + $(this).data('for')).val(ui.item.id);
     }
+}).focus(function() {
+    $(this).select();
 });
 
 // Autocomplétion des effets
@@ -80,7 +81,31 @@ $('#effect-name').autocomplete({
     },
     minLength: 2,
     select: function(event, ui) {
-        $(this).val(ui.item.value);
-        $(this).closest('form').submit();
+        $('#' + $(this).data('for')).val(ui.item.id);
     }
+}).focus(function() {
+    $(this).select();
+});
+
+// Autocomplétion des butins
+$('#loot-name').autocomplete({
+    source: function(request, response) {
+        $.ajax({
+            url: "/api/fallout/loottemplate/",
+            data: {
+                name__icontains: request.term,
+                fields: 'id,name',
+                order_by: 'name'
+            },
+            success: function(data) {
+                response(transformData(data));
+            }
+        });
+    },
+    minLength: 2,
+    select: function(event, ui) {
+        $('#' + $(this).data('for')).val(ui.item.id);
+    }
+}).focus(function() {
+    $(this).select();
 });

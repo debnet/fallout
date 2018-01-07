@@ -10,7 +10,8 @@ from rest_framework.generics import get_object_or_404
 
 from rpg.fallout.enums import BODY_PARTS, DAMAGES_TYPES, LIST_EDITABLE_STATS, ROLL_STATS
 from rpg.fallout.models import (
-    MODELS, Campaign, Character, Loot, Equipment, CharacterEffect, DamageHistory, FightHistory, RollHistory)
+    MODELS, Campaign, Character, Equipment, CampaignEffect, CharacterEffect,
+    Loot, LootTemplate, DamageHistory, FightHistory, RollHistory)
 
 
 # Affichage des statistiques calculées sur le personnage
@@ -37,6 +38,7 @@ class NextTurnInputSerializer(BaseCustomSerializer):
     """
     seconds = serializers.IntegerField(default=0, initial=0, label=_("secondes"))
     apply = serializers.BooleanField(default=True, initial=True, label=_("valider ?"))
+    reset = serializers.BooleanField(default=False, initial=False, label=_("réinitialiser ?"))
 
 
 @api_view_with_serializer(['POST'], input_serializer=NextTurnInputSerializer, serializer=SimpleCharacterSerializer)
@@ -65,6 +67,18 @@ class RollInputSerializer(BaseCustomSerializer):
     modifier = serializers.IntegerField(default=0, initial=0, label=_("modificateur"))
 
 
+class CampaignRollInputSerializer(RollInputSerializer):
+    """
+    Serializer d'entrée pour les jets de compétence multiples
+    """
+    GROUPS = (
+        (0, _("Tous les personnages")),
+        (1, _("Personnages joueurs uniquement")),
+        (2, _("Personnages non joueurs uniquement")))
+    group = serializers.ChoiceField(choices=GROUPS, label=_("groupe"))
+    xp = serializers.BooleanField(default=False, initial=False, label=_("expérience"))
+
+
 @to_model_serializer(RollHistory)
 class RollHistorySerializer(CommonModelSerializer):
     """
@@ -73,12 +87,16 @@ class RollHistorySerializer(CommonModelSerializer):
     character = SimpleCharacterSerializer(read_only=True, label=_("personnage"))
 
 
-@api_view_with_serializer(['POST'], input_serializer=RollInputSerializer, serializer=RollHistorySerializer)
+@api_view_with_serializer(['POST'], input_serializer=CampaignRollInputSerializer, serializer=RollHistorySerializer)
 def campaign_roll(request, campaign_id):
     """
     API pour effectuer un jet de compétence l'ensemble des personnages d'une campagne
     """
+    group = request.validated_data.pop('group', None)
     filters = dict(campaign_id=campaign_id) if campaign_id else dict(campaign__isnull=True)
+    filters.update(is_active=True)
+    if group:
+        filters.update(is_player=(group == 1))
     return [character.roll(**request.validated_data) for character in Character.objects.filter(**filters)]
 
 
@@ -211,24 +229,6 @@ def character_damage(request, character_id):
     return character.damage(**request.validated_data)
 
 
-class LootTakeInputSerializer(CommonModelSerializer):
-    """
-    Serializer d'entrée pour ramasser un butin
-    """
-    character = serializers.PrimaryKeyRelatedField(queryset=Character.objects.order_by('name'), label=_("personnage"))
-    count = serializers.IntegerField(default=1, initial=1, label=_("nombre"))
-
-    def __init__(self, *args, **kwargs):
-        """
-        Initialisateur spécifique pour restreindre la liste des personnages à ceux de la campagne ciblée
-        """
-        super().__init__(*args, **kwargs)
-        loot_id = int(getattr(self.context.get('view'), 'kwargs', {}).get('loot_id', 0))
-        if loot_id:
-            character_field = self.fields['character']
-            character_field.queryset = character_field.queryset.filter(campaign__loots=loot_id)
-
-
 @to_model_serializer(Equipment)
 class EquipmentSerializer(CommonModelSerializer):
     """
@@ -303,6 +303,24 @@ def equipment_drop(request, equipment_id):
     return equipment.drop(**request.validated_data)
 
 
+class LootTakeInputSerializer(BaseCustomSerializer):
+    """
+    Serializer d'entrée pour ramasser un butin
+    """
+    character = serializers.PrimaryKeyRelatedField(queryset=Character.objects.order_by('name'), label=_("personnage"))
+    count = serializers.IntegerField(default=1, initial=1, label=_("nombre"))
+
+    def __init__(self, *args, **kwargs):
+        """
+        Initialisateur spécifique pour restreindre la liste des personnages à ceux de la campagne ciblée
+        """
+        super().__init__(*args, **kwargs)
+        loot_id = int(getattr(self.context.get('view'), 'kwargs', {}).get('loot_id', 0))
+        if loot_id:
+            character_field = self.fields['character']
+            character_field.queryset = character_field.queryset.filter(campaign__loots=loot_id)
+
+
 @api_view_with_serializer(['POST'], input_serializer=LootTakeInputSerializer, serializer=EquipmentSerializer)
 def loot_take(request, loot_id):
     """
@@ -310,3 +328,22 @@ def loot_take(request, loot_id):
     """
     loot = get_object_or_404(Loot, pk=loot_id)
     return loot.take(**request.validated_data)
+
+
+class LootTemplateOpenInputSerializer(BaseCustomSerializer):
+    """
+    Serializer d'entrée pour l'ouverture des butins
+    """
+    campaign = serializers.PrimaryKeyRelatedField(queryset=Campaign.objects.order_by('name'), label=_("campagne"))
+    character = serializers.PrimaryKeyRelatedField(
+        allow_empty=True, allow_null=True, queryset=Character.objects.order_by('name'), label=_("personnage"))
+
+
+@api_view_with_serializer(['POST'], input_serializer=LootTemplateOpenInputSerializer, serializer=LootSerializer)
+def loottemplate_open(request, template_id):
+    """
+    API permettant d'ouvrir un butin dans une campagne
+    """
+    loot_template = get_object_or_404(LootTemplate, pk=template_id)
+    return loot_template.create(**request.validated_data)
+

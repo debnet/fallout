@@ -1,0 +1,112 @@
+{% load i18n l10n custom %}
+
+<form method="post" action="{{ request.path }}">
+    {% if authorized and loots %}
+    <div class="form-row align-items-center form-inline justify-content-center mb-3">
+        <div class="col-auto">
+            <div class="input-group mb-2 mb-sm-0">
+                <div class="input-group-addon">
+                    <label for="player-list">{% trans "Joueur" %}</label>
+                </div>
+                <select name="player" id="player-list" class="custom-select">
+                    {% for character in characters %}
+                        {% if character.is_player %}
+                            <option value="{{ character.id }}">{{ character.name }}</option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="col-auto form-check">
+            <label class="form-check-label">
+                <input class="form-check-input" type="checkbox" name="action">
+                <span title="{% trans "Points d'action" %}">{% trans "PA" %}</span>
+            </label>
+        </div>
+    </div>
+    {% endif %}
+    <div class="row">
+        {% for loot in loots %}
+            {% with item=loot.item %}
+                <div class="col-md-4 col-sm-6 mb-3">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            {% if loot.quantity > 1 %}
+                                <span class="badge badge-dark">{{ loot.quantity }}</span>
+                            {% endif %}
+                            <span class="card-title">{{ item.name }}</span>
+                            {% if item.title %}<small class="card-subtitle mb-2 text-muted">{{ item.title }}</small>{% endif %}
+                        </div>
+                        <div class="card-body">
+                            {% with image=item.image thumbnail=item.thumbnail %}
+                                {% if thumbnail %}
+                                    <img class="img-fluid mx-auto d-block mb-2" src="{{ thumbnail }}">
+                                {% elif image %}
+                                    <img class="img-fluid mx-auto d-block mb-2"
+                                         height="{{ image.height }}" width="{{ image.width }}" src="{{ image.url }}">
+                                {% endif %}
+                            {% endwith %}
+                            <p class="card-text">
+                                <small class="badge badge-primary">{{ loot.charge|floatformat:2 }} {% trans "kg" %}</small>
+                                <small class="badge badge-warning">{{ loot.value|floatformat:2 }} {% trans "$" %}</small>
+                                {% for modifier in item.modifiers.all %}
+                                    <small class="badge {% if modifier.value > 0 %}badge-success{% else %}badge-danger{% endif %}">
+                                        {% if modifier.value > 0 %}+{% endif %}{{ modifier.value }}
+                                        {{ modifier.get_stats_display }}
+                                    </small>
+                                {% endfor %}
+                                {% with condition=loot.current_condition %}
+                                    {% if condition %}
+                                        <div class="progress">
+                                            {% localize off %}
+                                            <div role="progressbar" style="width: {{ condition }}%;" aria-valuenow="{{ condition }}"
+                                                 aria-valuemin="0" aria-valuemax="100" class="progress-bar
+                                                 bg-{% if condition < 25 %}danger{% elif condition < 50 %}warning{% else %}success{% endif %}">
+                                            {% endlocalize %}
+                                                {{ condition|floatformat:0 }}%
+                                            </div>
+                                        </div>
+                                    {% else %}
+                                        <div class="progress">
+                                            <div role="progressbar" style="width: 100%;" aria-valuenow="100"
+                                                 aria-valuemin="0" aria-valuemax="100"
+                                                 class="progress-bar progress-bar-striped bg-dark">
+                                                {% trans "incassable" %}
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                {% endwith %}
+                            </p>
+                            {% if item.description %}
+                                <p class="card-text">
+                                    <small class="text-muted">{{ item.description }}</small>
+                                </p>
+                            {% endif %}
+                        </div>
+                        {% if authorized %}
+                            <div class="card-footer">
+                                {% if loot.quantity > 1 %}
+                                    <label class="sr-only" for="quantity-{{ loot.id }}">{% trans "Quantité" %}</label>
+                                    <select name="quantity-{{ loot.id }}" id="quantity-{{ loot.id }}"
+                                            class="custom-select custom-select-sm mr-1">
+                                        {% for i in 0|range:loot.quantity %}
+                                            <option value="{{ i }}">{{ i }}</option>
+                                        {% endfor %}
+                                    </select>
+                                {% else %}
+                                    <input type="hidden" name="quantity-{{ loot.id }}" value="{{ loot.quantity }}" />
+                                {% endif %}
+                                <button class="btn btn-sm btn-success mr-1" type="submit"
+                                        name="method" value="take-{{ loot.id }}">{% trans "Prendre" %}</button>
+                                <button class="btn btn-sm btn-danger mr-1" type="submit"
+                                        name="method" value="delete-{{ loot.id }}">{% trans "Détruire" %}</button>
+                                <input type="hidden" name="type" value="loot" />
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endwith %}
+        {% endfor %}
+    </div>
+    {% csrf_token %}
+</form>

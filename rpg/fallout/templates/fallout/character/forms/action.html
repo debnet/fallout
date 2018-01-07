@@ -1,16 +1,49 @@
-{% load i18n %}
+{% load i18n custom %}
 
 <form method="post" action="{{ request.path }}">
     <table class="table table-sm table-striped">
         <thead class="thead-dark">
             <tr>
-                <th class="text-center" colspan="2">{% trans "Actions" %}</th>
+                <th class="text-center" colspan="2">{% trans "Personnage" %}</th>
             </tr>
         </thead>
         <tbody>
-
+            <tr>
+                <td>
+                    <label for="{{ code }}-health-points" class="d-inline">{% trans "points de vie" %}</label>
+                </td>
+                <td class="text-right">
+                    <select class="form-control form-control-sm tiny" id="{{ code }}-hp" name="hp">
+                        {% for i in character.stats.max_health|range:0 %}
+                            <option value="{{ i }}">{{ i }}{% if i == character.health %} *{% endif %}</option>
+                        {% endfor %}
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for="{{ code }}-action-points" class="d-inline">{% trans "points d'action" %}</label>
+                </td>
+                <td class="text-right">
+                    <select class="form-control form-control-sm tiny" id="{{ code }}-ap" name="ap">
+                        {% for i in character.stats.max_action_points|range:0 %}
+                            <option value="{{ i }}">{{ i }}{% if i == character.action_points %} *{% endif %}</option>
+                        {% endfor %}
+                    </select>
+                </td>
+            </tr>
         </tbody>
+        <tfoot class="thead-dark">
+            <tr>
+                <th class="text-right" colspan="2">
+                    <button class="btn btn-sm btn-success" type="submit"
+                            name="method" value="add">{% trans "Ajouter" %}</button>
+                    <button class="btn btn-sm btn-danger" type="submit"
+                            name="method" value="remove">{% trans "Retirer" %}</button>
+                </th>
+            </tr>
+        </tfoot>
     </table>
-    <input type="hidden" name="type" value="ap" />
+    <input type="hidden" name="type" value="action" />
     {% csrf_token %}
 </form>

@@ -1,0 +1,110 @@
+{% load i18n %}
+
+<div class="tab-pane fade" role="tabpanel" id="campaign-infos">
+    <div class="row">
+        <div class="col-12">
+            <div class="card mb-2">
+                {% if campaign %}
+                    <div class="card-body">
+                        <p class="card-text">
+                            <strong>{% trans "Maître du jeu :" %}</strong>
+                            {{ campaign.game_master|default:"Aucun" }}
+                        </p>
+                        <p class="card-text">
+                            <strong>{% trans "Personnage joueur :" %}</strong>
+                            {{ campaign.current_character|default:"Aucun" }}
+                        </p>
+                        <p class="card-text">
+                            <strong>{% trans "Date de début :" %}</strong>
+                            {{ campaign.start_game_date }}
+                        </p>
+                        <p class="card-text">
+                            <strong>{% trans "Date courante :" %}</strong>
+                            {{ campaign.current_game_date }}
+                        </p>
+                    </div>
+                {% endif %}
+                {% if authorized %}
+                    {% if campaign %}
+                        <div class="card-footer">
+                            <form method="post" action="{{ request.path }}" class="form-inline justify-content-center">
+                                <div class="form-row align-items-center">
+                                    <div class="col-auto input-group">
+                                        <input type="number" class="form-control" id="hours" name="hours"
+                                               placeholder="{% trans "h" %}" value="0" style="width: 60px"
+                                               aria-valuemin="0" min="0">
+                                        <div class="input-group-addon">
+                                            <label for="hours">{% trans "h" %}</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-auto input-group">
+                                        <input type="number" class="form-control" id="minutes" name="minutes"
+                                               placeholder="{% trans "m" %}" value="0" style="width: 60px"
+                                               aria-valuemin="0" min="0" aria-valuemax="59" max="59">
+                                        <div class="input-group-addon">
+                                            <label for="minutes">{% trans "m" %}</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-auto input-group">
+                                        <button type="submit" class="btn btn-primary"
+                                                name="method" value="add">{% trans "Avancer" %}</button>
+                                        <input type="hidden" name="type" value="time" />
+                                        {% csrf_token %}
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    {% endif %}
+                    <div class="card-footer">
+                        <form method="post" action="{{ request.path }}" class="form-inline justify-content-center">
+                            <div class="form-row align-items-center">
+                                <div class="col-auto input-group">
+                                    <label class="sr-only" for="group-list">{% trans "Type de personnage" %}</label>
+                                    <select name="group" id="group-list" class="custom-select">
+                                        <option value="">{% trans "Tous" %}</option>
+                                        <option value="pj">{% trans "PJ" %}</option>
+                                        <option value="pnj">{% trans "PNJ" %}</option>
+                                    </select>
+                                </div>
+                                <div class="col-auto input-group">
+                                    <label class="sr-only" for="stats-list">{% trans "Statistique" %}</label>
+                                    <select name="stats" id="stats-list" class="custom-select">
+                                        {% for title, substats in stats %}
+                                            <optgroup label="{{ title }}">
+                                                {% for value, label in substats %}
+                                                    <option value="{{ value }}">{{ label }}</option>
+                                                {% endfor %}
+                                            </optgroup>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-auto">
+                                    <label class="sr-only" for="stats-modifier">{% trans "Modificateur" %}</label>
+                                    <input type="number" class="form-control" id="stats-modifier"
+                                           name="modifier" placeholder="{% trans "Mod" %}" value="0" style="width: 80px">
+                                </div>
+                                <div class="col-auto">
+                                    <button type="submit" class="btn btn-primary"
+                                            name="method" value="roll">{% trans "Lancer" %}</button>
+                                    <input type="hidden" name="type" value="roll" />
+                                    {% csrf_token %}
+                                </div>
+                                <div class="col-auto">
+                                    <label class="form-check-label" class="d-inline" title="{% trans "Expérience" %}">
+                                        <input class="form-check-input" type="checkbox" name="xp">
+                                        {% trans "XP" %}
+                                    </label>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        {% if campaign %}
+            <div class="col-12">
+                <div id="campaign-calendar"></div>
+            </div>
+        {% endif %}
+    </div>
+</div>

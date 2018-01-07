@@ -53,7 +53,6 @@
                                 <button class="btn btn-sm btn-danger mr-1" type="submit"
                                         name="method" value="remove">{% trans "Supprimer" %}</button>
                                 <input type="hidden" name="type" value="effect" />
-                                <input type="hidden" name="scope" value="{{ scope }}" />
                                 <input type="hidden" name="effect-id" value="{{ effect.id }}" />
                                 {% csrf_token %}
                             </form>

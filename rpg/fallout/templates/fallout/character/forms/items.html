@@ -1,17 +1,20 @@
-{% load i18n l10n %}
+{% load i18n l10n custom %}
 
 <div class="row">
-    {% for item in items %}
-        {% if item.equiped == equiped %}
-            {% with info=item.item %}
+    {% for equip in items %}
+        {% if equip.equiped == equiped %}
+            {% with item=equip.item %}
                 <div class="col-md-4 col-sm-6 mb-3">
                     <div class="card h-100">
                         <div class="card-header">
-                            <span class="card-title">{{ info.name }}</span>
-                            {% if info.title %}<small class="card-subtitle mb-2 text-muted">{{ info.title }}</small>{% endif %}
+                            {% if equip.quantity > 1 %}
+                                <span class="badge badge-dark">{{ equip.quantity }}</span>
+                            {% endif %}
+                            <span class="card-title">{{ item.name }}</span>
+                            {% if item.title %}<small class="card-subtitle mb-2 text-muted">{{ item.title }}</small>{% endif %}
                         </div>
                         <div class="card-body">
-                            {% with image=item.item.image thumbnail=item.item.thumbnail %}
+                            {% with image=item.image thumbnail=item.thumbnail %}
                                 {% if thumbnail %}
                                     <img class="img-fluid mx-auto d-block mb-2" src="{{ thumbnail }}">
                                 {% elif image %}
@@ -20,21 +23,18 @@
                                 {% endif %}
                             {% endwith %}
                             <p class="card-text">
-                                <small class="badge badge-primary">{{ item.charge|floatformat:2 }} {% trans "kg" %}</small>
-                                <small class="badge badge-warning">{{ item.value|floatformat:2 }} {% trans "$" %}</small>
-                                {% if info.clip_size %}
-                                    <small class="badge badge-danger">{{ item.clip_count }} / {{ info.clip_size }}</small>
+                                <small class="badge badge-primary">{{ equip.charge|floatformat:2 }} {% trans "kg" %}</small>
+                                <small class="badge badge-warning">{{ equip.value|floatformat:2 }} {% trans "$" %}</small>
+                                {% if item.clip_size %}
+                                    <small class="badge badge-danger">{{ equip.clip_count }} / {{ item.clip_size }}</small>
                                 {% endif %}
-                                {% if item.quantity > 1 %}
-                                    <span class="badge badge-dark">&times; {{ item.quantity }}</span>
-                                {% endif %}
-                                {% for modifier in info.modifiers.all %}
+                                {% for modifier in item.modifiers.all %}
                                     <small class="badge {% if modifier.value > 0 %}badge-success{% else %}badge-danger{% endif %}">
                                         {% if modifier.value > 0 %}+{% endif %}{{ modifier.value }}
                                         {{ modifier.get_stats_display }}
                                     </small>
                                 {% endfor %}
-                                {% with condition=item.current_condition %}
+                                {% with condition=equip.current_condition %}
                                     {% if condition %}
                                         <div class="progress">
                                             {% localize off %}
@@ -45,47 +45,66 @@
                                                 {{ condition|floatformat:0 }}%
                                             </div>
                                         </div>
+                                    {% else %}
+                                        <div class="progress">
+                                            <div role="progressbar" style="width: 100%;" aria-valuenow="100"
+                                                 aria-valuemin="0" aria-valuemax="100"
+                                                 class="progress-bar progress-bar-striped bg-dark">
+                                                {% trans "incassable" %}
+                                            </div>
+                                        </div>
                                     {% endif %}
                                 {% endwith %}
                             </p>
-                            <p class="card-text">
-                                {% if info.description %}
-                                    <small class="text-muted">{{ info.description }}</small>
-                                {% endif %}
-                            </p>
+                            {% if item.description %}
+                                <p class="card-text">
+                                    <small class="text-muted">{{ item.description }}</small>
+                                </p>
+                            {% endif %}
                         </div>
                         {% if authorized %}
                             <div class="card-footer">
                                 <form class="form-inline" method="post" action="{{ request.path }}">
-                                    {% if item.equiped %}
-                                        <button class="btn btn-sm btn-danger m-1" type="submit"
+                                    {% if equip.equiped %}
+                                        <button class="btn btn-sm btn-danger mr-1" type="submit"
                                                 name="method" value="equip">{% trans "Retirer" %}</button>
-                                        {% if info.clip_size and item.clip_count < info.clip_size %}
-                                            <button class="btn btn-sm btn-success m-1" type="submit"
+                                        {% if item.clip_size and equip.clip_count < item.clip_size %}
+                                            <button class="btn btn-sm btn-success mr-1" type="submit"
                                                     name="method" value="reload">{% trans "Recharger" %}</button>
                                         {% endif %}
                                     {% else %}
-                                        <button class="btn btn-sm btn-warning m-1" type="submit"
+                                        {% if equip.quantity > 1 %}
+                                            <label class="sr-only" for="quantity-{{ loot.id }}">{% trans "Quantité" %}</label>
+                                            <select name="quantity" id="quantity-{{ loot.id }}"
+                                                    class="custom-select custom-select-sm mr-1">
+                                                {% for i in 0|range:equip.quantity %}
+                                                    <option value="{{ i }}">{{ i }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        {% else %}
+                                            <input type="hidden" name="quantity" value="{{ loot.quantity }}" />
+                                        {% endif %}
+                                        <button class="btn btn-sm btn-warning" type="submit"
                                                 name="method" value="drop">{% trans "Lâcher" %}</button>
-                                        {% if info.compatible_ammunition %}
-                                            <button class="btn btn-sm btn-warning m-1" type="submit"
+                                        {% if item.compatible_ammunition %}
+                                            <button class="btn btn-sm btn-warning mr-1" type="submit"
                                                     name="method" value="equip">{% trans "Remplacer" %}</button>
-                                        {% elif info.is_equipable %}
-                                            <button class="btn btn-sm btn-primary m-1" type="submit"
+                                        {% elif item.is_equipable %}
+                                            <button class="btn btn-sm btn-primary mr-1" type="submit"
                                                     name="method" value="equip">{% trans "Equiper" %}</button>
-                                        {% elif info.is_usable %}
-                                            <button class="btn btn-sm btn-success m-1" type="submit"
+                                        {% elif item.is_usable %}
+                                            <button class="btn btn-sm btn-success mr-1" type="submit"
                                                     name="method" value="use">{% trans "Utiliser" %}</button>
                                         {% endif %}
                                     {% endif %}
-                                    <div class="form-check m-1">
+                                    <div class="form-check ml-2">
                                         <label class="form-check-label">
                                             <input class="form-check-input" type="checkbox" name="action">
-                                            <small title="{% trans "Points d'action" %}">{% trans "AP" %}</small>
+                                            <small title="{% trans "Points d'action" %}">{% trans "PA" %}</small>
                                         </label>
                                     </div>
                                     <input type="hidden" name="type" value="item" />
-                                    <input type="hidden" name="item" value="{{ item.id }}" />
+                                    <input type="hidden" name="item-id" value="{{ equip.id }}" />
                                     {% csrf_token %}
                                 </form>
                             </div>
