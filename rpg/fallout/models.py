@@ -26,7 +26,7 @@ def get_thumbnails(directory=''):
     import os
     import sys
     if any(command in sys.argv for command in ('makemigrations', 'migrate')):
-        return
+        return []
     images = []
     try:
         dirname = os.path.join(settings.MEDIA_ROOT, 'thumbnail', directory)
