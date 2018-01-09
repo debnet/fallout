@@ -67,8 +67,8 @@
             $(document).ready(function () {
                 $("#campaign-calendar").calendar({
                     language: "{% trans "fr" %}",
-                    year: {{ campaign.current_game_date.year }},
-                    month: {{ campaign.current_game_date.month }},
+                    year: {{ campaign.current_game_date|date:'Y' }},
+                    month: {{ campaign.current_game_date|date:'m' }},
                     cell_border: true,
                     show_days: true,
                     nav_icon: {

@@ -362,7 +362,8 @@ class Character(Entity, Stats):
         """
         if isinstance(character, Character):
             character = character.pk
-        Character._stats.pop(int(character), None)
+        if character:
+            Character._stats.pop(int(character), None)
 
     @property
     def stats(self) -> Stats:
@@ -650,6 +651,7 @@ class Character(Entity, Stats):
                 target, is_burst=True, target_range=target_range,
                 hit_modifier=hit_modifier, action=action, hit=hit)
             histories.append(history)
+        self.save()
         return histories
 
     def fight(self, target: 'Character', is_burst: bool=False, target_range: int=1, hit_modifier: int=0,
@@ -782,7 +784,6 @@ class Character(Entity, Stats):
             attacker_weapon_equipment.quantity -= 1 if attacker_weapon.is_throwable else 0
             if not attacker_weapon.is_melee:
                 attacker_weapon_equipment.clip_count -= 1
-            # TODO: weapon condition based on damage
             if not attacker_weapon.is_throwable:
                 attacker_weapon_equipment.condition -= attacker_weapon_equipment.condition * (
                     getattr(attacker_weapon, 'condition_modifier', 0.0) +
@@ -790,7 +791,8 @@ class Character(Entity, Stats):
             attacker_weapon_equipment.save()
         # Save character and return history
         self.action_points -= ap_cost
-        self.save()
+        if not is_burst:
+            self.save()
         history.save()
         return history
 
