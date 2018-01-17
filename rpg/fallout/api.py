@@ -178,8 +178,8 @@ class DamageInputSerializer(BaseCustomSerializer):
     Serializer d'entrée pour infliger des dégâts à un seul personnages
     """
     raw_damage = serializers.IntegerField(default=0, initial=0, label=_("dégâts bruts"))
-    dice_count = serializers.IntegerField(default=0, initial=0, label=_("nombre de dés"))
-    dice_value = serializers.IntegerField(default=0, initial=0, label=_("valeur de dé"))
+    min_damage = serializers.IntegerField(default=0, initial=0, label=_("dégâts min."))
+    max_damage = serializers.IntegerField(default=0, initial=0, label=_("dégâts max."))
     damage_type = serializers.ChoiceField(choices=DAMAGES_TYPES, label=_("type de dégâts"))
     threshold_modifier = serializers.FloatField(default=1.0, initial=1.0, label=_("modificateur de seuil"))
     resistance_modifier = serializers.FloatField(default=1.0, initial=1.0, label=_("modificateur de resistance"))

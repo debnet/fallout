@@ -158,8 +158,8 @@ def view_character(request, character_id):
             elif type == 'damage':
                 result = character.damage(
                     raw_damage=int(data.get('raw_damage') or 0),
-                    dice_count=int(data.get('dice_count') or 0),
-                    dice_value=int(data.get('dice_value') or 0),
+                    min_damage=int(data.get('min_damage') or 0),
+                    max_damage=int(data.get('max_damage') or 0),
                     damage_type=int(data.get('damage_type') or 0))
                 messages.success(request, _(f"<strong>{result.character}</strong> {result.label}"))
             elif type == 'item':

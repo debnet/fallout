@@ -214,7 +214,7 @@ class Stats(models.Model):
     melee_damage = models.SmallIntegerField(default=0, verbose_name=_("attaque en mélée"))
     sequence = models.SmallIntegerField(default=0, verbose_name=_("initiative"))
     healing_rate = models.SmallIntegerField(default=0, verbose_name=_("taux de regénération"))
-    critical_chance = models.SmallIntegerField(default=0, verbose_name=_("chance de critique"))
+    critical_chance = models.SmallIntegerField(default=0, verbose_name=_("chances de critiques"))
     damage_threshold = models.SmallIntegerField(default=0, verbose_name=_("absorption de dégâts"))
     damage_resistance = models.FloatField(default=0.0, verbose_name=_("résistance aux dégâts"))
     # Resistances
@@ -796,27 +796,26 @@ class Character(Entity, Stats):
         history.save()
         return history
 
-    def damage(self, raw_damage: float=0.0, dice_count: int=0, dice_value: int=0, damage_type: str=DAMAGE_NORMAL,
+    def damage(self, raw_damage: float=0.0, min_damage: int=0, max_damage: int=0, damage_type: str=DAMAGE_NORMAL,
                threshold_modifier: float=1.0, resistance_modifier: float=1.0, save: bool=True) -> 'DamageHistory':
         """
         Inflige des dégâts au personnage
         :param raw_damage: Dégâts bruts
-        :param dice_count: Nombre de dés
-        :param dice_value: Valeur des dés
+        :param min_damage: Dégâts minimum
+        :param max_damage: Dégâts maximum
         :param damage_type: Type des dégâts
         :param threshold_modifier: Modificateur d'absorption de dégâts (appliqué à l'armure et au personnage)
         :param resistance_modifier: Modificateur de résistance aux dégâts (appliqué à l'armure et au personnage)
         :param save: Sauvegarder les modifications sur le personnage ?
         :return: Nombre de dégâts
         """
+        assert min_damage <= max_damage, _("Les bornes de dégâts min. et max. ne sont pas correctes.")
         history = DamageHistory(
             character=self, damage_type=damage_type, raw_damage=raw_damage,
-            damage_dice_count=dice_count, damage_dice_value=dice_value)
+            min_damage=min_damage, max_damage=max_damage)
         history.game_date = self.campaign and self.campaign.current_game_date
         # Base damage
-        total_damage = raw_damage
-        for i in range(dice_count):
-            total_damage += randint(1, dice_value)
+        total_damage = raw_damage + randint(min_damage, max_damage)
         base_damage = history.base_damage = total_damage
         # Character already KO
         if damage_type != DAMAGE_HEAL and self.health <= 0:
@@ -1008,10 +1007,10 @@ class Item(Entity):
     # Damage
     damage_type = models.CharField(max_length=10, blank=True, choices=DAMAGES_TYPES, verbose_name=_("type de dégâts"))
     raw_damage = models.PositiveSmallIntegerField(default=0, verbose_name=_("dégâts bruts"))
-    damage_dice_count = models.PositiveSmallIntegerField(default=0, verbose_name=_("nombre de dés"))
-    damage_dice_value = models.PositiveSmallIntegerField(default=0, verbose_name=_("valeur de dé"))
+    min_damage = models.PositiveSmallIntegerField(default=0, verbose_name=_("dégâts mini."))
+    max_damage = models.PositiveSmallIntegerField(default=0, verbose_name=_("dégâts max."))
     damage_modifier = models.FloatField(default=1.0, verbose_name=_("modif. de dégâts"))
-    critical_modifier = models.FloatField(default=1.0, verbose_name=_("modif. de coup critique"))
+    critical_modifier = models.FloatField(default=1.0, verbose_name=_("chances de critiques"))
     critical_damage = models.FloatField(default=1.0, verbose_name=_("dégâts critiques"))
     # Resistances
     armor_class = models.SmallIntegerField(default=0, verbose_name=_("esquive"))
@@ -1040,10 +1039,7 @@ class Item(Entity):
         Calcul unitaire des dégâts de base de l'objet
         :return: Nombre de dégâts de base
         """
-        damage = self.raw_damage
-        for i in range(self.damage_dice_count):
-            damage += randint(1, self.damage_dice_value)
-        return damage
+        return self.raw_damage + randint(self.min_damage, self.max_damage)
 
     @property
     def is_equipable(self) -> bool:
@@ -1366,8 +1362,8 @@ class Effect(Entity):
     damage_chance = models.PositiveSmallIntegerField(default=100, verbose_name=_("chance"))
     damage_type = models.CharField(max_length=10, blank=True, choices=DAMAGES_TYPES, verbose_name=_("type de dégâts"))
     raw_damage = models.PositiveSmallIntegerField(default=0, verbose_name=_("dégâts bruts"))
-    damage_dice_count = models.PositiveSmallIntegerField(default=0, verbose_name=_("nombre de dés"))
-    damage_dice_value = models.PositiveSmallIntegerField(default=0, verbose_name=_("valeur de dé"))
+    min_damage = models.PositiveSmallIntegerField(default=0, verbose_name=_("dégâts min."))
+    max_damage = models.PositiveSmallIntegerField(default=0, verbose_name=_("dégâts max."))
     # Next effect
     next_effect = models.ForeignKey(
         'Effect', blank=True, null=True, on_delete=models.CASCADE,
@@ -1379,10 +1375,7 @@ class Effect(Entity):
         Calcul unitaire des dégâts de base de l'effet
         :return: Nombre de dégâts de base
         """
-        damage = self.raw_damage
-        for i in range(self.damage_dice_count):
-            damage += randint(1, self.damage_dice_value)
-        return damage
+        return self.raw_damage + randint(self.min_damage, self.max_damage)
 
     @property
     def damage_config(self) -> Dict[str, Union[str, int]]:
@@ -1391,8 +1384,8 @@ class Effect(Entity):
         """
         return dict(
             raw_damage=self.raw_damage,
-            dice_count=self.damage_dice_count,
-            dice_value=self.damage_dice_value,
+            min_damage=self.min_damage,
+            max_damage=self.max_damage,
             damage_type=self.damage_type)
 
     def affect(self, target: Union['Campaign', 'Character']) -> Optional[Union['CampaignEffect', 'CharacterEffect']]:
@@ -1906,8 +1899,8 @@ class DamageHistory(CommonModel):
         related_name='+', verbose_name=_("personnage"))
     damage_type = models.CharField(max_length=10, blank=True, choices=DAMAGES_TYPES, verbose_name=_("type de dégâts"))
     raw_damage = models.PositiveSmallIntegerField(default=0, verbose_name=_("dégâts bruts"))
-    damage_dice_count = models.PositiveSmallIntegerField(default=0, verbose_name=_("nombre de dés"))
-    damage_dice_value = models.PositiveSmallIntegerField(default=0, verbose_name=_("valeur de dé"))
+    min_damage = models.PositiveSmallIntegerField(default=0, verbose_name=_("dégâts min."))
+    max_damage = models.PositiveSmallIntegerField(default=0, verbose_name=_("dégâts max."))
     base_damage = models.SmallIntegerField(default=0, verbose_name=_("dégâts de base"))
     armor = models.ForeignKey(
         'Item', blank=True, null=True, on_delete=models.CASCADE, limit_choices_to={'type': ITEM_ARMOR},

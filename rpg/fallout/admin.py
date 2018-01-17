@@ -246,7 +246,7 @@ class ItemAdmin(EntityAdmin):
         )),
         (_("Dégâts"), dict(
             fields=(
-                'damage_type', 'raw_damage', 'damage_dice_count', 'damage_dice_value',
+                'damage_type', 'raw_damage', 'min_damage', 'max_damage',
                 'damage_modifier', 'critical_modifier', 'critical_damage', ),
             classes=('wide', 'collapse', ),
         )),
@@ -327,7 +327,7 @@ class EffectAdmin(EntityAdmin):
         (_("Dégâts temporels"), dict(
             fields=(
                 'interval', 'damage_chance', 'damage_type', 'raw_damage',
-                'damage_dice_count', 'damage_dice_value', 'next_effect', ),
+                'min_damage', 'max_damage', 'next_effect', ),
             classes=('wide', 'collapse', ),
         )),
     )
@@ -470,7 +470,7 @@ class DamageHistoryAdmin(CommonAdmin):
             classes=('wide', ),
         )),
         (_("Dégâts de base"), dict(
-            fields=('damage_type', 'raw_damage', 'damage_dice_count', 'damage_dice_value', 'base_damage', ),
+            fields=('damage_type', 'raw_damage', 'min_damage', 'max_damage', 'base_damage', ),
             classes=('wide', ),
         )),
         (_("Etat de la protection"), dict(

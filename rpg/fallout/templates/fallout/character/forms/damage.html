@@ -47,20 +47,20 @@
             </tr>
             <tr>
                 <td>
-                    <label for="{{ code }}-dice-count" class="d-inline">{% trans "nombre de dés" %}</label>
+                    <label for="{{ code }}-min-damage" class="d-inline">{% trans "valeur min." %}</label>
                 </td>
                 <td class="text-right">
-                    <input id="{{ code }}-dice-count" class="form-control form-control-sm tiny"
-                           type="number" name="dice_count" value="0" />
+                    <input id="{{ code }}-min-damage" class="form-control form-control-sm tiny"
+                           type="number" name="min_damage" value="0" />
                 </td>
             </tr>
             <tr>
                 <td>
-                    <label for="{{ code }}-dice-value" class="d-inline">{% trans "valeur de dé" %}</label>
+                    <label for="{{ code }}-max-damage" class="d-inline">{% trans "valeur max." %}</label>
                 </td>
                 <td class="text-right">
-                    <input for="{{ code }}-dice-value" class="form-control form-control-sm tiny"
-                           type="number" name="dice_value" value="0" />
+                    <input for="{{ code }}-max-damage" class="form-control form-control-sm tiny"
+                           type="number" name="max_damage" value="0" />
                 </td>
             </tr>
         </tbody>
