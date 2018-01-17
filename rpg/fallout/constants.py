@@ -245,9 +245,6 @@ HEALING_RATE_RESTING_MULT = 4.0
 # Range malus when fighting
 FIGHT_RANGE_MALUS = 3
 
-# Unarmed critical damage multiplier
-UNARMED_CRITICAL_DAMAGE = 3.0
-
 # Action points cost
 AP_COST_FIGHT = 5  # Fight unarmed
 AP_COST_EQUIP = 4  # Equip item

@@ -703,6 +703,7 @@ class Character(Entity, Stats):
             return history
         # Chance to hit
         attacker_skill = getattr(attacker_weapon, 'skill', SKILL_UNARMED)
+        is_melee = attacker_skill in (SKILL_UNARMED, SKILL_MELEE_WEAPONS)
         attacker_hit_chance = getattr(self.stats, attacker_skill, 0)  # Base skill and min strength modifier
         attacker_hit_chance += min(20 * (self.stats.strength - getattr(attacker_weapon, 'min_strength', 0)), 0)
         attacker_weapon_melee = getattr(attacker_weapon, 'is_melee', True)
@@ -731,7 +732,7 @@ class Character(Entity, Stats):
         attacker_hit_chance += hit_modifier  # Other modifiers
         attacker_hit_chance *= getattr(attacker_weapon_equipment, 'condition', 1.0)  # Weapon condition
         # Hit chance is null if attacker is melee/unarmed and target is farther than weapon range
-        if target_range - attacker_hit_range > 0 and attacker_skill in (SKILL_UNARMED, SKILL_MELEE_WEAPONS):
+        if target_range - attacker_hit_range > 0 and is_melee:
             attacker_hit_chance = 0
         history.hit_modifier = int(hit_modifier)
         history.hit_chance = int(max(attacker_hit_chance, 0))
@@ -744,8 +745,10 @@ class Character(Entity, Stats):
             # Critical chance
             critical_chance = getattr(self.stats, 'critical_chance', 0)
             critical_chance += critical_modifier
-            critical_chance *= getattr(attacker_weapon, 'critical_modifier', 1.0)
-            critical_chance *= getattr(attacker_ammo, 'critical_modifier', 1.0)
+            critical_mult = 1.0 + (
+                getattr(attacker_weapon, 'critical_modifier', 0.0) +
+                getattr(attacker_ammo, 'critical_modifier', 0.0))
+            critical_chance *= critical_mult
             # Apply damage
             history.status = STATUS_HIT_SUCCEED
             history.critical = critical = attacker_hit_roll < critical_chance
@@ -756,13 +759,17 @@ class Character(Entity, Stats):
                 if not item:
                     continue
                 damage += item.base_damage
-            damage += self.stats.melee_damage if attacker_skill in (SKILL_UNARMED, SKILL_MELEE_WEAPONS) else 0
-            damage *= getattr(attacker_weapon, 'damage_modifier', 1.0)
-            damage *= getattr(attacker_ammo, 'damage_modifier', 1.0)
+            damage += self.stats.melee_damage if is_melee else 0
+            damage_mult = 1.0 + (
+                getattr(attacker_weapon, 'damage_modifier', 0.0) +
+                getattr(attacker_weapon, 'damage_modifier', 0.0))
+            damage *= damage_mult
             if critical:
-                damage *= getattr(attacker_weapon, 'critical_damage', 1.0)
-                damage *= getattr(attacker_ammo, 'critical_damage', 1.0)
-                damage *= UNARMED_CRITICAL_DAMAGE if attacker_skill == SKILL_UNARMED else 1.0
+                damage_mult = 1.0 + (
+                    getattr(attacker_weapon, 'critical_damage', 0.0) +
+                    getattr(attacker_ammo, 'critical_damage', 1.0) +
+                    ((self.stats.strength / 10.0) if is_melee else 1.0))
+                damage *= damage_mult
             threshold_modifier = getattr(attacker_weapon, 'threshold_modifier', 0)
             threshold_modifier += getattr(attacker_ammo, 'threshold_modifier', 0)
             resistance_modifier = 1.0 + getattr(attacker_weapon, 'resistance_modifier', 0.0)
@@ -1047,9 +1054,9 @@ class Item(Entity, DamageMixin):
     raw_damage = models.PositiveSmallIntegerField(default=0, verbose_name=_("dégâts bruts"))
     min_damage = models.PositiveSmallIntegerField(default=0, verbose_name=_("dégâts mini."))
     max_damage = models.PositiveSmallIntegerField(default=0, verbose_name=_("dégâts max."))
-    damage_modifier = models.FloatField(default=1.0, verbose_name=_("modif. de dégâts"))
-    critical_modifier = models.FloatField(default=1.0, verbose_name=_("chances de critiques"))
-    critical_damage = models.FloatField(default=1.0, verbose_name=_("dégâts critiques"))
+    damage_modifier = models.FloatField(default=0.0, verbose_name=_("modif. de dégâts"))
+    critical_modifier = models.FloatField(default=0.0, verbose_name=_("chances de critiques"))
+    critical_damage = models.FloatField(default=0.0, verbose_name=_("dégâts critiques"))
     # Resistances
     armor_class = models.SmallIntegerField(default=0, verbose_name=_("esquive"))
     condition_modifier = models.FloatField(default=0.0, verbose_name=_("modif. de condition"))
