@@ -974,7 +974,45 @@ class Modifier(CommonModel):
         abstract = True
 
 
-class Item(Entity):
+class DamageMixin:
+    """
+    Mixin pour les fonctions de dégâts
+    """
+
+    @property
+    def base_damage(self) -> int:
+        """
+        Calcul unitaire des dégâts de base de l'objet
+        :return: Nombre de dégâts de base
+        """
+        return randint(self.min_damage, self.max_damage) + self.raw_damage
+
+    @property
+    def label_damage(self) -> Optional[str]:
+        """
+        Retourne le libellé des dégâts de l'arme ou de la munition
+        :return: Représentation des dégâts ou rien si l'objet n'est pas une arme ou une munition
+        """
+        if self.type not in [ITEM_WEAPON, ITEM_AMMO]:
+            return None
+        damage = None
+        if self.min_damage or self.max_damage:
+            damage = f"{self.min_damage:02}-{self.max_damage:02}"
+        if self.raw_damage:
+            raw_damage = f"+{self.raw_damage}" if self.raw_damage >= 0 else str(self.raw_damage)
+            damage = f"{damage} ({raw_damage})" if damage else raw_damage
+        return damage
+
+    @property
+    def long_label_damage(self) -> Optional[str]:
+        """
+        Retourne le libellé (avec le type) des dégâts de l'arme ou de la munition
+        :return: Représentation des dégâts ou rien si l'objet n'est pas une arme ou une munition
+        """
+        return _(f"{self.label_damage} {self.get_damage_type_display()}")
+
+
+class Item(Entity, DamageMixin):
     """
     Objet
     """
@@ -1032,14 +1070,6 @@ class Item(Entity):
     ammunitions = models.ManyToManyField(
         'Item', blank=True, limit_choices_to={'type': ITEM_AMMO},
         related_name='weapons', verbose_name=_("types de munitions"))
-
-    @property
-    def base_damage(self) -> int:
-        """
-        Calcul unitaire des dégâts de base de l'objet
-        :return: Nombre de dégâts de base
-        """
-        return self.raw_damage + randint(self.min_damage, self.max_damage)
 
     @property
     def is_equipable(self) -> bool:
@@ -1127,7 +1157,7 @@ class ItemModifier(Modifier):
         related_name='modifiers', verbose_name=_("objet"))
 
     def __str__(self) -> str:
-        return "{} = {}".format(self.get_stats_display(), self.value)
+        return _(f"{self.get_stats_display()} = {self.value}")
 
     class Meta:
         verbose_name = _("modificateur d'objet")
@@ -1336,14 +1366,14 @@ class Equipment(CommonModel):
         return super().save(*args, **kwargs)
 
     def __str__(self) -> str:
-        return "({}) {}".format(self.character, self.item)
+        return _(f"({self.character}) {self.item}")
 
     class Meta:
         verbose_name = _("équipement")
         verbose_name_plural = _("équipements")
 
 
-class Effect(Entity):
+class Effect(Entity, DamageMixin):
     """
     Effet
     """
@@ -1368,14 +1398,6 @@ class Effect(Entity):
     next_effect = models.ForeignKey(
         'Effect', blank=True, null=True, on_delete=models.CASCADE,
         related_name='+', verbose_name=_("effet suivant"))
-
-    @property
-    def base_damage(self) -> int:
-        """
-        Calcul unitaire des dégâts de base de l'effet
-        :return: Nombre de dégâts de base
-        """
-        return self.raw_damage + randint(self.min_damage, self.max_damage)
 
     @property
     def damage_config(self) -> Dict[str, Union[str, int]]:
@@ -1437,7 +1459,7 @@ class EffectModifier(Modifier):
         related_name='modifiers', verbose_name=_("effet"))
 
     def __str__(self) -> str:
-        return "{} = {}".format(self.get_stats_display(), self.value)
+        return _(f"{self.get_stats_display()} = {self.value}")
 
     class Meta:
         verbose_name = _("modificateur d'effet")
@@ -1526,7 +1548,7 @@ class CampaignEffect(ActiveEffect):
         super().save(*args, **kwargs)
 
     def __str__(self) -> str:
-        return "({}) {}".format(str(self.campaign), str(self.effect))
+        return _(f"({self.campaign}) {self.effect}")
 
     class Meta:
         verbose_name = _("effet de campagne")
@@ -1579,7 +1601,7 @@ class CharacterEffect(ActiveEffect):
         super().save(*args, **kwargs)
 
     def __str__(self) -> str:
-        return "({}) {}".format(str(self.character), str(self.effect))
+        return _(f"({self.character}) {self.effect}")
 
     class Meta:
         verbose_name = _("effet de personnage")
@@ -1683,7 +1705,7 @@ class Loot(CommonModel):
         super().save(*args, **kwargs)
 
     def __str__(self) -> str:
-        return "({}) {}".format(str(self.campaign), str(self.item))
+        return _(f"({self.campaign}) {self.item}")
 
     class Meta:
         verbose_name = _("butin")
@@ -1765,7 +1787,7 @@ class LootTemplateItem(CommonModel):
     max_condition = models.FloatField(default=1.0, verbose_name=_("état max."))
 
     def __str__(self) -> str:
-        return "({}) {}".format(str(self.template), str(self.item))
+        return _(f"({self.template}) {self.item}")
 
     class Meta:
         verbose_name = _("objet de butin")
@@ -1879,9 +1901,7 @@ class RollHistory(CommonModel):
             total=self.value + self.modifier)
 
     def __str__(self) -> str:
-        return _("({character}) - {label}").format(
-            character=str(self.character),
-            label=self.label)
+        return _(f"({self.character}) - {self.label}")
 
     class Meta:
         verbose_name = _("historique de jet")
@@ -1913,15 +1933,11 @@ class DamageHistory(CommonModel):
     real_damage = models.SmallIntegerField(default=0, verbose_name=_("dégâts réels"))
 
     def __str__(self) -> str:
-        return _("({character}) - {label}").format(
-            character=str(self.character),
-            label=self.label)
+        return _(f"({self.character}) - {self.label}")
 
     @property
     def label(self) -> str:
-        return _("{damage} de {damage_type}").format(
-            damage_type=self.get_damage_type_display(),
-            damage=self.real_damage)
+        return _(f"{self.get_damage_type_display()} de {self.real_damage}")
 
     class Meta:
         verbose_name = _("historique de dégâts")
@@ -1993,12 +2009,11 @@ class FightHistory(CommonModel):
         :return:
         """
         if not self.damage:
-            return _("{label} : {status}").format(label=self.label, status=self.get_status_display())
-        return _("{label} : {damage} dégât(s) infligé(s)").format(label=self.label, damage=self.damage.real_damage)
+            return _(f"{self.label} : {self.get_status_display()}")
+        return _(f"{self.label} : {self.damage.real_damage} dégât(s) infligé(s)")
 
     def __str__(self) -> str:
-        return _("{attacker} vs. {defender} - {label}").format(
-            attacker=self.attacker, defender=self.defender, label=self.long_label)
+        return _(f"{self.attacker} vs. {self.defender} - {self.long_label}")
 
     class Meta:
         verbose_name = _("historique de combat")

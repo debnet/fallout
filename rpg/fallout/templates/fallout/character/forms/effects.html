@@ -46,6 +46,11 @@
                                 <small class="text-muted">{{ info.description }}</small>
                             </p>
                         {% endif %}
+                        {% if info.label_damage %}
+                            <p class="card-text">
+                                <small class="font-weight-bold">{{ info.long_label_damage }}</small>
+                            </p>
+                        {% endif %}
                     </div>
                     {% if authorized %}
                         <div class="card-footer">
