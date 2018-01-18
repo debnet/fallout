@@ -65,11 +65,11 @@ def view_campaign(request, campaign_id):
                         loot.save()
                 elif method.startswith('take'):
                     method, loot_id = method.split('-')
-                    player = int(data.get('player') or 0)
+                    character = int(data.get('character') or 0)
                     quantity = int(data.get(f'quantity-{loot_id}') or 0)
                     if quantity:
                         loot = Loot.objects.filter(pk=loot_id).first()
-                        loot.take(player, quantity)
+                        loot.take(character, quantity)
             elif type == 'effect':
                 effect_id, effect_name = data.get('effect-id'), data.get('effect-name')
                 if method == 'add':
@@ -78,9 +78,8 @@ def view_campaign(request, campaign_id):
             elif type == 'radiation':
                 if method == 'set':
                     radiation = int(data.get('radiation') or 0)
-                    if radiation:
-                        campaign.radiation = radiation
-                        campaign.save()
+                    campaign.radiation = radiation
+                    campaign.save()
             elif type == 'time':
                 if method == 'add':
                     hours, minutes = int(data.get('hours') or 0), int(data.get('minutes') or 0)
@@ -194,9 +193,8 @@ def view_character(request, character_id):
                     elif scope == 'campaign':
                         CampaignEffect.objects.filter(pk=effect_id).delete()
             elif type == 'action':
-                mult = -1 if method == 'remove' else 1 if method == 'add' else 0
-                character.health += int(data.get('hp') or 0) * mult
-                character.action_points += int(data.get('ap') or 0) * mult
+                character.health = int(data.get('hp'))
+                character.action_points += int(data.get('ap'))
                 character.save()
         except ValidationError as error:
             for field, errors in error.message_dict.items():

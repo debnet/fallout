@@ -5,16 +5,16 @@
         <form method="post" action="{{ request.path }}" class="form-inline justify-content-center">
             <div class="form-row align-items-center">
                 <div class="col-auto input-group">
-                    <div class="input-group-addon">
-                        <label for="item-quantity">{% trans "Quantité" %}</label>
+                    <div class="input-group-prepend">
+                        <label for="item-quantity" class="input-group-text">{% trans "Quantité" %}</label>
                     </div>
                     <input type="number" class="form-control" id="item-quantity"
                            name="quantity" placeholder="{% trans "Qte" %}" value="1" style="width: 80px"
                            aria-valuemin="1" min="1">
                 </div>
                 <div class="col-auto input-group">
-                    <div class="input-group-addon">
-                        <label for="item-condition">{% trans "Condition" %}</label>
+                    <div class="input-group-prepend">
+                        <label for="item-condition" class="input-group-text">{% trans "Condition" %}</label>
                     </div>
                     <input type="number" class="form-control" id="item-condition"
                            name="condition" placeholder="{% trans "Cond" %}" value="100" style="width: 80px"

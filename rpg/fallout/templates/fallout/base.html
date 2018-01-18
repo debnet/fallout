@@ -39,6 +39,8 @@
             </ul>
         {% endif %}
         {% block navbar %}{% endblock %}
+        <button type="button" class="btn btn-sm btn-secondary ml-2" data-toggle="modal" data-target="#diceroll"
+                title="{% trans "Lancer les dés (CTRL+B)" %}">{% trans "Dés" %}</button>
     </div>
 </nav>
 
@@ -54,11 +56,48 @@
     {% block content %}{% endblock %}
 </div>
 
+<div class="modal fade" id="diceroll" tabindex="-1" role="dialog" aria-labelledby="diceroll-label" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="diceroll-label">{% trans "Lancer les dés" %}</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="{% trans "Fermer" %}">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form action="" onsubmit="return roll();">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="diceroll-input">{% trans "Formule" %}</label>
+                        <input type="text" class="form-control form-control-lg text-center font-weight-bold"
+                               id="diceroll-input" aria-describedby="diceroll-help" autocomplete="off" />
+                        <small id="diceroll-help" class="form-text text-muted">
+                            <a href="https://en.wikipedia.org/wiki/Dice_notation" target="_blank">
+                                {% trans "Notation standard des lancers de dé" %}</a>
+                        </small>
+                    </div>
+                    <div class="form-group">
+                        <label for="diceroll-input">{% trans "Résultat" %}</label>
+                        <input type="text" class="form-control form-control-lg text-center font-weight-bold"
+                               id="diceroll-output" disabled />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">{% trans "Fermer" %}</button>
+                    <button type="submit" class="btn btn-primary">{% trans "Lancer" %}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script src="{% static "js/jquery.min.js" %}"></script>
 <script src="{% static "js/jquery-ui.min.js" %}"></script>
 <script src="{% static "js/popper.min.js" %}"></script>
 <script src="{% static "js/bootstrap.min.js" %}"></script>
 <script src="{% static "js/calendar.min.js" %}"></script>
+<script src="{% static "fallout/js/diceroll.js" %}"></script>
+<script src="{% static "fallout/js/key.js" %}"></script>
 <script src="{% static "fallout/js/script.js" %}"></script>
 {% block scripts %}{% endblock %}
 

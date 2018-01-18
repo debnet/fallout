@@ -6,22 +6,26 @@
             <div class="card mb-2">
                 {% if campaign %}
                     <div class="card-body">
-                        <p class="card-text">
-                            <strong>{% trans "Maître du jeu :" %}</strong>
-                            {{ campaign.game_master|default:"Aucun" }}
-                        </p>
-                        <p class="card-text">
-                            <strong>{% trans "Personnage joueur :" %}</strong>
-                            {{ campaign.current_character|default:"Aucun" }}
-                        </p>
-                        <p class="card-text">
-                            <strong>{% trans "Date de début :" %}</strong>
-                            {{ campaign.start_game_date }}
-                        </p>
-                        <p class="card-text">
-                            <strong>{% trans "Date courante :" %}</strong>
-                            {{ campaign.current_game_date }}
-                        </p>
+                        <div class="row">
+                            <p class="col card-text">
+                                <strong>{% trans "Maître du jeu :" %}</strong>
+                                {{ campaign.game_master|default:"Aucun" }}
+                            </p>
+                            <p class="col card-text">
+                                <strong>{% trans "Personnage joueur :" %}</strong>
+                                {{ campaign.current_character|default:"Aucun" }}
+                            </p>
+                        </div>
+                        <div class="row">
+                            <p class="col card-text">
+                                <strong>{% trans "Date de début :" %}</strong>
+                                {{ campaign.start_game_date }}
+                            </p>
+                            <p class="col card-text">
+                                <strong>{% trans "Date courante :" %}</strong>
+                                {{ campaign.current_game_date }}
+                            </p>
+                        </div>
                     </div>
                 {% endif %}
                 {% if authorized %}
@@ -33,16 +37,16 @@
                                         <input type="number" class="form-control" id="hours" name="hours"
                                                placeholder="{% trans "h" %}" value="0" style="width: 60px"
                                                aria-valuemin="0" min="0">
-                                        <div class="input-group-addon">
-                                            <label for="hours">{% trans "h" %}</label>
+                                        <div class="input-group-append">
+                                            <label for="hours" class="input-group-text">{% trans "h" %}</label>
                                         </div>
                                     </div>
                                     <div class="col-auto input-group">
                                         <input type="number" class="form-control" id="minutes" name="minutes"
                                                placeholder="{% trans "m" %}" value="0" style="width: 60px"
                                                aria-valuemin="0" min="0" aria-valuemax="59" max="59">
-                                        <div class="input-group-addon">
-                                            <label for="minutes">{% trans "m" %}</label>
+                                        <div class="input-group-append">
+                                            <label for="minutes" class="input-group-text">{% trans "m" %}</label>
                                         </div>
                                     </div>
                                     <div class="col-auto input-group">
@@ -58,7 +62,7 @@
                     <div class="card-footer">
                         <form method="post" action="{{ request.path }}" class="form-inline justify-content-center">
                             <div class="form-row align-items-center">
-                                <div class="col-auto input-group">
+                                <div class="col-auto">
                                     <label class="sr-only" for="group-list">{% trans "Type de personnage" %}</label>
                                     <select name="group" id="group-list" class="custom-select">
                                         <option value="">{% trans "Tous" %}</option>
@@ -66,7 +70,7 @@
                                         <option value="pnj">{% trans "PNJ" %}</option>
                                     </select>
                                 </div>
-                                <div class="col-auto input-group">
+                                <div class="col-auto">
                                     <label class="sr-only" for="stats-list">{% trans "Statistique" %}</label>
                                     <select name="stats" id="stats-list" class="custom-select">
                                         {% for title, substats in stats %}

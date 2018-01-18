@@ -52,9 +52,11 @@
     <form class="form-signin" method="post" action="{{ request.get_full_path }}">
         <h2 class="form-signin-heading">{% trans "Connectez-vous !" %}</h2>
         <label for="id_username" class="sr-only">{% trans "Nom d'utilisateur" %}</label>
-        <input type="username" name="username" id="id_username" class="form-control" placeholder="{% trans "Nom d'utilisateur" %}" required autofocus>
+        <input type="username" name="username" id="id_username" class="form-control"
+               placeholder="{% trans "Nom d'utilisateur" %}" required autofocus>
         <label for="id_password" class="sr-only">{% trans "Mot de passe" %}</label>
-        <input type="password" name="password" id="id_password" class="form-control" placeholder="{% trans "Mot de passe" %}" required>
+        <input type="password" name="password" id="id_password" class="form-control"
+               placeholder="{% trans "Mot de passe" %}" required>
         <button class="btn btn-lg btn-primary btn-block" type="submit">{% trans "Connexion" %}</button>
         <input type="hidden" name="next" value="{{ next }}" />
         {% csrf_token %}

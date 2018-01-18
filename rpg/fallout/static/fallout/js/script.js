@@ -109,3 +109,21 @@ $('#loot-name').autocomplete({
 }).focus(function() {
     $(this).select();
 });
+
+
+// Jets de dés
+var diceRoller = new DiceRoller();
+function roll() {
+    var value = $('#diceroll-input').val();
+    var roll = diceRoller.roll(value);
+    $('#diceroll-output').val(roll.getNotation());
+    return false;
+}
+
+$('#diceroll').on('shown.bs.modal', function () {
+    $('#diceroll-input').trigger('focus').select();
+});
+
+$.key('ctrl+b', function() {
+    $('#diceroll').modal();
+});
