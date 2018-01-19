@@ -194,7 +194,9 @@ def view_character(request, character_id):
                         CampaignEffect.objects.filter(pk=effect_id).delete()
             elif type == 'action':
                 character.health = int(data.get('hp'))
-                character.action_points += int(data.get('ap'))
+                character.action_points = int(data.get('ap'))
+                character.experience = int(data.get('xp'))
+                character.karma = int(data.get('karma'))
                 character.save()
         except ValidationError as error:
             for field, errors in error.message_dict.items():

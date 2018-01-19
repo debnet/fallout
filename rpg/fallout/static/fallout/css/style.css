@@ -3,19 +3,29 @@ body {
     padding-top: 5rem;
 }
 
-.tiny {
+/* Inputs */
+.itiny {
     width: 4em;
     display: inline-block;
 }
+.ismall {
+    width: 5em;
+    display: inline-block;
+}
+.imedium {
+    width: 6em;
+    display: inline-block;
+}
 
+/* Panels */
 .tab-pane {
     padding-top: 1em;
 }
 
+/* Tableaux */
 tr {
     height: 2.5em;
 }
-
 td {
     vertical-align:bottom!important;
 }

@@ -12,7 +12,7 @@
                         <label for="{{ code }}-modifier" class="d-inline">{% trans "modificateur" %}</label>
                     </td>
                     <td class="text-right">
-                        <input id="{{ code }}-modifier" class="form-control form-control-sm tiny"
+                        <input id="{{ code }}-modifier" class="form-control form-control-sm itiny"
                                type="number" name="modifier" value="" />
                     </td>
                 </tr>
@@ -26,7 +26,7 @@
                                 {{ s.2|floatformat:0 }}{% if s.3 is not None %}&nbsp;/&nbsp;{{ s.3|floatformat:0 }}{% endif %}
                             </strong>
                         {% elif authorized %}
-                            <button class="btn btn-sm btn-{{ s.4 }} tiny" type="submit" name="stats" value="{{ s.0 }}">
+                            <button class="btn btn-sm btn-{{ s.4 }} itiny" type="submit" name="stats" value="{{ s.0 }}">
                                 <strong>{{ s.2|floatformat:0 }}</strong>
                             </button>
                         {% endif %}

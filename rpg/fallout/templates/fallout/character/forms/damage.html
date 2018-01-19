@@ -19,8 +19,10 @@
                             </label>
                         </td>
                         <td class="text-right">
-                            <input class="form-control form-control-sm tiny" type="number"
-                                   name="range" value="1" disabled />
+                            <label class="form-check-label" class="sr-only"
+                                   for="{{ code }}-dst-{{ character.id }}">{% trans "Distance" %}</label>
+                            <input class="form-control form-control-sm itiny" type="number"
+                                   id="{{ code }}-dst-{{ character.id }}" name="range" value="1" disabled />
                         </td>
                     </tr>
                 {% endfor %}
@@ -41,7 +43,7 @@
                     <label for="{{ code }}-raw-damage" class="d-inline">{% trans "valeur fixe" %}</label>
                 </td>
                 <td class="text-right">
-                    <input id="{{ code }}-raw-damage" class="form-control form-control-sm tiny"
+                    <input id="{{ code }}-raw-damage" class="form-control form-control-sm itiny"
                            type="number" name="raw_damage" value="0" />
                 </td>
             </tr>
@@ -50,7 +52,7 @@
                     <label for="{{ code }}-min-damage" class="d-inline">{% trans "valeur min." %}</label>
                 </td>
                 <td class="text-right">
-                    <input id="{{ code }}-min-damage" class="form-control form-control-sm tiny"
+                    <input id="{{ code }}-min-damage" class="form-control form-control-sm itiny"
                            type="number" name="min_damage" value="0" />
                 </td>
             </tr>
@@ -59,7 +61,7 @@
                     <label for="{{ code }}-max-damage" class="d-inline">{% trans "valeur max." %}</label>
                 </td>
                 <td class="text-right">
-                    <input for="{{ code }}-max-damage" class="form-control form-control-sm tiny"
+                    <input id="{{ code }}-max-damage" class="form-control form-control-sm itiny"
                            type="number" name="max_damage" value="0" />
                 </td>
             </tr>
