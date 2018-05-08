@@ -12,10 +12,10 @@
     <form action="" method="post">
         {{ form.as_p }}
         {% csrf_token %}
-        {% for action in actions %}
-            <input type="hidden" name="_selected_action" value="{{ action }}" />
+        {% for target in targets %}
+            <input type="hidden" name="_selected_action" value="{{ target }}" />
         {% endfor %}
-        <input type="hidden" name="method" value="roll" />
+        <input type="hidden" name="action" value="roll" />
         <button type="submit" name="roll">{% trans "Valider" %}</button>
     </form>
 {% endblock %}

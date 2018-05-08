@@ -83,8 +83,7 @@ def view_campaign(request, campaign_id):
             elif type == 'time':
                 if method == 'add':
                     hours, minutes = int(data.get('hours') or 0), int(data.get('minutes') or 0)
-                    if hours or minutes:
-                        campaign.next_turn(seconds=hours * 3600 + minutes * 60, reset=True)
+                    campaign.next_turn(seconds=hours * 3600 + minutes * 60, reset=True)
             elif type == 'roll':
                 group, stats, modifier, xp = (
                     data.get('group'), data.get('stats'), int(data.get('modifier') or 0), 'xp' in data)

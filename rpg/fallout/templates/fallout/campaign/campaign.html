@@ -1,16 +1,17 @@
 {% extends "fallout/base.html" %}
 {% load i18n %}
+{% get_current_language as LANGUAGE_CODE %}
 
 {% block navbar %}
     {% include "fallout/navbar.html" %}
 {% endblock %}
 
 {% block actions %}
-    <a class="dropdown-item" href="{% url 'admin:fallout_campaign_add' %}">{% trans "Ajouter" %}</a>
+    <a class="dropdown-item" href="{% url 'admin:fallout_campaign_add' %}">{% trans "Ajouter un campagne" %}</a>
     {% if campaign %}
-    <a class="dropdown-item" href="{% url 'admin:fallout_campaign_change' campaign.id %}">{% trans "Modifier" %}</a>
+    <a class="dropdown-item" href="{% url 'admin:fallout_campaign_change' campaign.id %}">{% trans "Modifier la campagne" %}</a>
     {% endif %}
-    <a class="dropdown-item" href="{% url 'admin:fallout_character_add' %}?campaign={{ campaign.id }}">{% trans "Nouveau personnage" %}</a>
+    <a class="dropdown-item" href="{% url 'admin:fallout_character_add' %}?campaign={{ campaign.id }}">{% trans "Ajouter un personnage" %}</a>
 {% endblock %}
 
 {% block content %}
@@ -66,7 +67,7 @@
         <script type="application/javascript">
             $(document).ready(function () {
                 $("#campaign-calendar").calendar({
-                    language: "{% trans "fr" %}",
+                    language: "{{ LANGUAGE_CODE|default:'fr' }}",
                     year: {{ campaign.current_game_date|date:'Y' }},
                     month: {{ campaign.current_game_date|date:'m' }},
                     cell_border: true,

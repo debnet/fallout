@@ -117,7 +117,7 @@ class CharacterAdmin(EntityAdmin):
     list_display = (
         'name', 'race', 'level', 'is_player', 'is_active',
         'health', '_max_health', 'action_points', '_max_action_points', 'experience', 'karma')
-    list_editable = ('health', 'action_points', 'experience', 'karma')
+    list_editable = ('health', 'action_points', 'experience', 'karma', 'is_active',)
     list_filter = ('campaign', 'user', 'race', 'is_player', 'is_active', )
     search_fields = ('name', 'title', 'description', )
     ordering = ('name', )
@@ -145,6 +145,7 @@ class CharacterAdmin(EntityAdmin):
         for element in queryset:
             element.duplicate()
         self.message_user(request, message=_("Les personnages sélectionnés ont été dupliqués."))
+    duplicate.short_description = _("Dupliquer")
 
     def randomize(self, request, queryset):
         """
@@ -157,13 +158,13 @@ class CharacterAdmin(EntityAdmin):
                     character.randomize(**form.cleaned_data)
                 self.message_user(
                     request,
-                    message=_("Les compétences des personnages sélectionnés ont été générés avec succès."),
+                    message=_("Les compétences des personnages sélectionnés ont été générées avec succès."),
                     level=messages.SUCCESS)
                 return HttpResponseRedirect(request.get_full_path())
         else:
             form = RandomizeCharacterForm()
         return render(request, 'fallout/character/admin/randomize.html', {
-            'form': form, 'characters': queryset, 'actions': request.POST.getlist(admin.ACTION_CHECKBOX_NAME)})
+            'form': form, 'characters': queryset, 'targets': request.POST.getlist(admin.ACTION_CHECKBOX_NAME)})
     randomize.short_description = _("Générer aléatoirement les compétences")
 
     def roll(self, request, queryset):
@@ -182,7 +183,7 @@ class CharacterAdmin(EntityAdmin):
         else:
             form = RollCharacterForm()
         return render(request, 'fallout/character/admin/roll.html', {
-            'form': form, 'characters': queryset, 'actions': request.POST.getlist(admin.ACTION_CHECKBOX_NAME)})
+            'form': form, 'characters': queryset, 'targets': request.POST.getlist(admin.ACTION_CHECKBOX_NAME)})
     roll.short_description = _("Faire un jet de compétence")
 
     def fight(self, request, queryset):
@@ -207,7 +208,7 @@ class CharacterAdmin(EntityAdmin):
         else:
             form = FightCharacterForm()
         return render(request, 'fallout/character/admin/fight.html', {
-            'form': form, 'characters': queryset, 'actions': request.POST.getlist(admin.ACTION_CHECKBOX_NAME)})
+            'form': form, 'characters': queryset, 'targets': request.POST.getlist(admin.ACTION_CHECKBOX_NAME)})
     fight.short_description = _("Attaquer un autre personnage")
 
     def burst(self, request, queryset):
@@ -283,6 +284,7 @@ class ItemAdmin(EntityAdmin):
         for element in queryset:
             element.duplicate()
         self.message_user(request, message=_("Les objets sélectionnés ont été dupliqués."))
+    duplicate.short_description = _("Dupliquer")
 
 
 @admin.register(Equipment)
@@ -347,6 +349,7 @@ class EffectAdmin(EntityAdmin):
         for element in queryset:
             element.duplicate()
         self.message_user(request, message=_("Les effets sélectionnés ont été dupliqués."))
+    duplicate.short_description = _("Dupliquer")
 
 
 @admin.register(CampaignEffect)
@@ -435,6 +438,7 @@ class LootTemplateAdmin(CommonAdmin):
         for element in queryset:
             element.duplicate()
         self.message_user(request, message=_("Les modèles de butins sélectionnés ont été dupliqués."))
+    duplicate.short_description = _("Dupliquer")
 
 
 @admin.register(RollHistory)

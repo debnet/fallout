@@ -155,12 +155,6 @@ LOGIN_REDIRECT_URL = '/'
 # User substitution
 AUTH_USER_MODEL = 'fallout.Player'
 
-# SMS
-SMS_GATEWAY_URL = 'http://smsgateway.me/api/v3/messages/send'
-SMS_GATEWAY_LOGIN = ''
-SMS_GATEWAY_PASSWORD = ''
-SMS_GATEWAY_DEVICE = 0
-
 # Messages
 MESSAGE_TAGS = {
     messages.DEBUG: 'light',

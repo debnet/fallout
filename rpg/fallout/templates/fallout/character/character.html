@@ -8,9 +8,9 @@
 {% endblock %}
 
 {% block actions %}
-    <a class="dropdown-item" href="{% url 'admin:fallout_character_add' %}?campaign={{ character.campaign_id }}">{% trans "Ajouter" %}</a>
+    <a class="dropdown-item" href="{% url 'admin:fallout_character_add' %}?campaign={{ character.campaign_id }}">{% trans "Ajouter un personnage" %}</a>
     {% if character %}
-        <a class="dropdown-item" href="{% url 'admin:fallout_character_change' character.id %}">{% trans "Modifier" %}</a>
+        <a class="dropdown-item" href="{% url 'admin:fallout_character_change' character.id %}">{% trans "Modifier le personnage" %}</a>
     {% endif %}
 {% endblock %}
 
