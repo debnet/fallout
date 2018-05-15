@@ -35,7 +35,7 @@
                 {% else %}
                     <tr>
                         <td colspan="2">
-                            <select class="form-control form-control-sm" id="{{ code }}-target" name="target">
+                            <select class="form-control form-control-sm custom-select" id="{{ code }}-target" name="target">
                                 {% for c in characters %}
                                     {% if c != character %}
                                         <option value="{{ c.id }}">{{ c.name }}</option>
@@ -49,7 +49,7 @@
                     <tr>
                         <td><label for="{{ code }}-target-part" class="d-inline">{% trans "cible" %}</label></td>
                         <td class="text-right">
-                            <select class="form-control form-control-sm" id="{{ code }}-target-part" name="target_part">
+                            <select class="form-control form-control-sm custom-select" id="{{ code }}-target-part" name="target_part">
                                 <option value="">{% trans "non ciblé" %}</option>
                                 {% for code, label in body_parts %}
                                     <option value="{{ code }}">{{ label }}</option>

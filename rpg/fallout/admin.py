@@ -70,6 +70,8 @@ class CampaignAdmin(CommonAdmin):
     list_display = ('name', 'current_game_date', 'current_character', 'radiation', )
     list_editable = ('current_game_date', 'current_character', 'radiation', )
     ordering = ('name', )
+    save_on_top = True
+    actions_on_bottom = True
 
 
 class EquipmentInlineAdmin(EntityTabularInline):
@@ -122,6 +124,8 @@ class CharacterAdmin(EntityAdmin):
     search_fields = ('name', 'title', 'description', )
     ordering = ('name', )
     actions = ('duplicate', 'randomize', 'roll', 'fight', 'burst', )
+    save_on_top = True
+    actions_on_bottom = True
 
     def get_form(self, request, obj=None, **kwargs):
         """
@@ -276,6 +280,8 @@ class ItemAdmin(EntityAdmin):
     search_fields = ('name', 'title', 'description', )
     ordering = ('name', )
     actions = ('duplicate', )
+    save_on_top = True
+    actions_on_bottom = True
 
     def duplicate(self, request, queryset):
         """
@@ -306,6 +312,8 @@ class EquipmentAdmin(CommonAdmin):
     list_editable = ('slot', 'quantity', 'condition', 'clip_count', )
     list_filter = ('character', 'slot', )
     ordering = ('character', 'item', )
+    save_on_top = True
+    actions_on_bottom = True
 
 
 class EffectModifierInline(admin.TabularInline):
@@ -341,6 +349,8 @@ class EffectAdmin(EntityAdmin):
     search_fields = ('name', 'title', 'description', )
     ordering = ('name', )
     actions = ('duplicate', )
+    save_on_top = True
+    actions_on_bottom = True
 
     def duplicate(self, request, queryset):
         """
@@ -367,6 +377,8 @@ class CampaignEffectAdmin(CommonAdmin):
     list_editable = ()
     list_filter = ()
     ordering = ('campaign', 'effect', )
+    save_on_top = True
+    actions_on_bottom = True
 
 
 @admin.register(CharacterEffect)
@@ -384,6 +396,8 @@ class CharacterEffectAdmin(CommonAdmin):
     list_editable = ()
     list_filter = ()
     ordering = ('character', 'effect', )
+    save_on_top = True
+    actions_on_bottom = True
 
 
 @admin.register(Loot)
@@ -401,6 +415,8 @@ class Loot(CommonAdmin):
     list_editable = ()
     list_filter = ('campaign', )
     ordering = ('campaign', 'item', )
+    save_on_top = True
+    actions_on_bottom = True
 
 
 class LootTemplateItemInline(EntityTabularInline):
@@ -430,6 +446,8 @@ class LootTemplateAdmin(CommonAdmin):
     ordering = ('name', )
     search_fields = ('name', 'title', 'description', )
     actions = ('duplicate', )
+    save_on_top = True
+    actions_on_bottom = True
 
     def duplicate(self, request, queryset):
         """

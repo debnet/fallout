@@ -64,7 +64,7 @@
                             <div class="form-row align-items-center">
                                 <div class="col-auto">
                                     <label class="sr-only" for="group-list">{% trans "Type de personnage" %}</label>
-                                    <select name="group" id="group-list" class="custom-select">
+                                    <select name="group" id="group-list" class="form-control custom-select">
                                         <option value="">{% trans "Tous" %}</option>
                                         <option value="pj">{% trans "PJ" %}</option>
                                         <option value="pnj">{% trans "PNJ" %}</option>
@@ -72,7 +72,7 @@
                                 </div>
                                 <div class="col-auto">
                                     <label class="sr-only" for="stats-list">{% trans "Statistique" %}</label>
-                                    <select name="stats" id="stats-list" class="custom-select">
+                                    <select name="stats" id="stats-list" class="form-control custom-select">
                                         {% for title, substats in stats %}
                                             <optgroup label="{{ title }}">
                                                 {% for value, label in substats %}

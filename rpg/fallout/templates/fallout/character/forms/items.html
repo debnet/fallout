@@ -18,8 +18,7 @@
                                 {% if thumbnail %}
                                     <img class="img-fluid mx-auto d-block mb-2" src="{{ thumbnail }}">
                                 {% elif image %}
-                                    <img class="img-fluid mx-auto d-block mb-2"
-                                         height="{{ image.height }}" width="{{ image.width }}" src="{{ image.url }}">
+                                    <img class="img-fluid mx-auto d-block mb-2" height="{{ image.height }}" width="{{ image.width }}" src="{{ image.url }}">
                                 {% endif %}
                             {% endwith %}
                             <p class="card-text">
@@ -81,7 +80,7 @@
                                         {% if equip.quantity > 1 %}
                                             <label class="sr-only" for="quantity-{{ loot.id }}">{% trans "Quantité" %}</label>
                                             <select name="quantity" id="quantity-{{ loot.id }}"
-                                                    class="custom-select custom-select-sm mr-1">
+                                                    class="form-control custom-select mr-1">
                                                 {% for i in 0|range:equip.quantity %}
                                                     <option value="{{ i }}">{{ i }}</option>
                                                 {% endfor %}

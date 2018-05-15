@@ -15,6 +15,7 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^login/$', auth_views.LoginView.as_view(template_name='fallout/login.html')),
     url(r'^favicon\.ico$', RedirectView.as_view(url='/static/favicon.ico', permanent=True)),
+    url(r'^oauth/', include('oauth2_provider.urls', namespace='oauth')),
     # Django REST Framework
     url(r'^api/', include('rest_framework.urls', namespace='rest_framework')),
     url(r'^api/auth/', drf_views.obtain_auth_token, name='token'),

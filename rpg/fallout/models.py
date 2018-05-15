@@ -1004,7 +1004,7 @@ class DamageMixin:
             return None
         damage = None
         if self.min_damage or self.max_damage:
-            damage = f"{self.min_damage:02}-{self.max_damage:02}"
+            damage = f"{self.min_damage}-{self.max_damage}"
         if self.raw_damage:
             raw_damage = f"+{self.raw_damage}" if self.raw_damage >= 0 else str(self.raw_damage)
             damage = f"{damage} ({raw_damage})" if damage else raw_damage

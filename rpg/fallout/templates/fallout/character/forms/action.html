@@ -13,7 +13,7 @@
                     <label for="{{ code }}-hp" class="d-inline">{% trans "points de vie" %}</label>
                 </td>
                 <td class="text-right">
-                    <select class="form-control form-control-sm ismall" id="{{ code }}-hp" name="hp">
+                    <select class="form-control form-control-sm custom-select ismall" id="{{ code }}-hp" name="hp">
                         {% for i in character.stats.max_health|range:0 %}
                             {% if i == character.health %}
                                 <option value="{{ i }}" selected>{{ i }} *</option>
@@ -29,7 +29,7 @@
                     <label for="{{ code }}-ap" class="d-inline">{% trans "points d'action" %}</label>
                 </td>
                 <td class="text-right">
-                    <select class="form-control form-control-sm ismall" id="{{ code }}-ap" name="ap">
+                    <select class="form-control form-control-sm custom-select ismall" id="{{ code }}-ap" name="ap">
                         {% for i in character.stats.max_action_points|range:0 %}
                             {% if i == character.action_points %}
                                 <option value="{{ i }}" selected>{{ i }} *</option>

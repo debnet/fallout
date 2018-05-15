@@ -23,6 +23,8 @@
                 <a class="dropdown-item" href="{% url 'fallout_character' character.id %}">
                     {% if not character.is_player %}
                         <small class="badge badge-info">{% trans "PNJ" %}</small>
+                    {% else %}
+                        <span class="badge badge-warning">{% trans "PJ" %}</span>
                     {% endif %}
                     {% if character.campaign.current_character_id == character.id %}
                         <small class="badge badge-success">{% trans "Actif" %}</small>
@@ -37,7 +39,7 @@
 {% if campaign and authorized %}
     <form class="form-inline" method="post" action="{% url 'fallout_next_turn' campaign.id %}">
         <label class="text-white">{{ campaign.current_game_date }}</label>
-        <select class="formè-control form-control-sm custom-select-sm ml-2 mr-2" name="seconds">
+        <select class="form-control form-control-sm custom-select ml-2 mr-2" name="seconds">
             <option value="0" selected="selected">{% trans "0 s" %}</option>
             <option value="30">{% trans "30 s" %}</option>
             <option value="60">{% trans "1 mn" %}</option>

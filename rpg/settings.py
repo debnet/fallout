@@ -25,6 +25,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     # Requirements
     'pytz',
+    'oauth2_provider',
     'corsheaders',
     'rest_framework',
     'rest_framework.authtoken',
@@ -39,8 +40,9 @@ INSTALLED_APPS = (
 MIDDLEWARE = (
     # CORS Headers
     'corsheaders.middleware.CorsMiddleware',
-    # Default
+    # Debug
     'debug_toolbar.middleware.DebugToolbarMiddleware',
+    # Default
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -128,6 +130,7 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.TokenAuthentication',
         'rest_framework.authentication.SessionAuthentication',
+        'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
     ),
     'DEFAULT_RENDERER_CLASSES': (
         'rest_framework.renderers.JSONRenderer',

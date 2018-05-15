@@ -14,8 +14,7 @@
                             {% if thumbnail %}
                                 <img class="img-fluid mx-auto d-block mb-2" src="{{ thumbnail }}">
                             {% elif image %}
-                                <img class="img-fluid mx-auto d-block mb-2"
-                                     height="{{ image.height }}" width="{{ image.width }}" src="{{ image.url }}">
+                                <img class="img-fluid mx-auto d-block mb-2" height="{{ image.height }}" width="{{ image.width }}" src="{{ image.url }}">
                             {% endif %}
                         {% endwith %}
                         <p class="card-text">

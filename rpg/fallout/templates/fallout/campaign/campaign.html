@@ -7,7 +7,7 @@
 {% endblock %}
 
 {% block actions %}
-    <a class="dropdown-item" href="{% url 'admin:fallout_campaign_add' %}">{% trans "Ajouter un campagne" %}</a>
+    <a class="dropdown-item" href="{% url 'admin:fallout_campaign_add' %}">{% trans "Ajouter une campagne" %}</a>
     {% if campaign %}
     <a class="dropdown-item" href="{% url 'admin:fallout_campaign_change' campaign.id %}">{% trans "Modifier la campagne" %}</a>
     {% endif %}
@@ -17,17 +17,24 @@
 {% block content %}
     {% if campaign %}
         <div class="container">
-            <h3 class="display-4">
+            {% with image=campaign.image thumbnail=campaign.thumbnail %}
+                {% if thumbnail %}
+                    <img class="float-left mr-2" height="100" width="100" src="{{ thumbnail }}">
+                {% elif image %}
+                    <img class="float-left mr-2" height="100" width="100" src="{{ image.url }}">
+                {% endif %}
+            {% endwith %}
+            <h4 class="display-4">
                 {{ campaign.name }}
                 {% if campaign.title %}<small class="text-muted">{{ campaign.title }}</small>{% endif %}
-            </h3>
+            </h4>
             {% if campaign.description %}<p class="lead">{{ campaign.description }}</p>{% endif %}
         </div>
     {% else %}
         <div class="container">
-            <h3 class="display-4">
+            <h4 class="display-4">
                 {% trans "Aucune campagne" %}
-            </h3>
+            </h4>
             <p class="lead">
                 {% blocktrans %}
                     Vous êtes actuellement sur la réserve de personnages qui ne sont associés à aucune campagne

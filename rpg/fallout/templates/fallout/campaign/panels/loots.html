@@ -8,7 +8,7 @@
                     <div class="input-group-prepend">
                         <label for="loot-character-list" class="input-group-text">{% trans "Personnage" %}</label>
                     </div>
-                    <select name="character" id="loot-character-list" class="custom-select">
+                    <select name="character" id="loot-character-list" class="form-control custom-select">
                         <option value="">{% trans "Aucun" %}</option>
                         {% for character in characters %}
                             <option value="{{ character.id }}">{{ character.name }}</option>

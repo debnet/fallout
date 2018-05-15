@@ -30,7 +30,7 @@
             <tr>
                 <td colspan="2">
                     <label for="{{ code }}-damage-type" class="sr-only">{% trans "type" %}</label>
-                    <select class="form-control form-control-sm" id="{{ code }}-damage-type"
+                    <select class="form-control form-control-sm custom-select" id="{{ code }}-damage-type"
                             name="damage_type">
                         {% for code, label in damage_types %}
                             <option value="{{ code }}">{{ label }}</option>
