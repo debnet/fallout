@@ -25,14 +25,14 @@
         {% endif %}
         <div class="progress" style="height: 30px">
             <div class="progress-bar"></div>
-            {% with rad=campaign.radiation %}
-                {% if rad %}
+            {% with rads=campaign.radiation %}
+                {% if rads %}
                     {% localize off %}
-                    <div class="progress-bar progress-bar-striped progress-bar-animated bg-{% if rad > 50 %}danger{% elif rad > 25 %}warning{% else %}success{% endif %}"
-                         role="progressbar" aria-valuenow="{{ rad }}" aria-valuemin="0" aria-valuemax="{{ rad|max:100 }}"
-                         style="width: {{ rad }}%">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated bg-{% if rads > 50 %}danger{% elif rads > 20 %}warning{% else %}success{% endif %}"
+                         role="progressbar" aria-valuenow="{{ rads }}" aria-valuemin="0" aria-valuemax="{{ rads|max:100 }}"
+                         style="width: {{ rads }}%">
                     {% endlocalize %}
-                        {{ rad }}
+                        {{ rads }}
                     </div>
                 {% endif %}
             {% endwith %}

@@ -129,4 +129,7 @@ $(document).ready(function($) {
     $.key('ctrl+space', function () {
         $('#diceroll').modal();
     });
+
+    // Popups
+    $('[data-toggle="tooltip"]').tooltip();
 });

@@ -9,8 +9,8 @@ STATS_SKILL_POINTS = 'skill_points'
 STATS_PERK_POINTS = 'perk_points'
 STATS_EXPERIENCE = 'experience'
 STATS_KARMA = 'karma'
-STATS_IRRADIATION = 'irradiation'
-STATS_DEHYDRATION = 'dehydration'
+STATS_RADS = 'rads'
+STATS_THIRST = 'thirst'
 STATS_HUNGER = 'hunger'
 STATS_SLEEP = 'sleep'
 GENERAL_STATS = (
@@ -20,13 +20,13 @@ GENERAL_STATS = (
     (STATS_PERK_POINTS, _("points de talent")),
     (STATS_EXPERIENCE, _("expérience")),
     (STATS_KARMA, _("karma")),
-    (STATS_IRRADIATION, _("irradiation")),
-    (STATS_DEHYDRATION, _("soif")),
+    (STATS_RADS, _("rads")),
+    (STATS_THIRST, _("soif")),
     (STATS_HUNGER, _("faim")),
     (STATS_SLEEP, _("sommeil")),
 )
-LIST_GENERAL_STATS = [a for a, *b in GENERAL_STATS]
-LIST_NEEDS = [STATS_IRRADIATION, STATS_DEHYDRATION, STATS_HUNGER, STATS_SLEEP]
+LIST_GENERAL_STATS = dict(GENERAL_STATS)
+LIST_NEEDS = [STATS_RADS, STATS_THIRST, STATS_HUNGER, STATS_SLEEP]
 
 # S.P.E.C.I.A.L.
 SPECIAL_STRENGTH = 'strength'
@@ -45,7 +45,7 @@ SPECIALS = (
     (SPECIAL_AGILITY, _("agilité")),
     (SPECIAL_LUCK, _("chance")),
 )
-LIST_SPECIALS = [a for a, *b in SPECIALS]
+LIST_SPECIALS = dict(SPECIALS)
 
 # Secondary statistics
 STATS_MAX_HEALTH = 'max_health'
@@ -70,7 +70,7 @@ SECONDARY_STATS = (
     (STATS_DAMAGE_THRESHOLD, _("seuil de dégâts")),
     (STATS_DAMAGE_RESISTANCE, _("résistance aux dégâts")),
 )
-LIST_SECONDARY_STATS = [a for a, *b in SECONDARY_STATS]
+LIST_SECONDARY_STATS = dict(SECONDARY_STATS)
 
 # Skills
 SKILL_SMALL_GUNS = 'small_guns'
@@ -115,7 +115,7 @@ SKILLS = (
     (SKILL_SURVIVAL, _("survie")),
     (SKILL_KNOWLEDGE, _("connaissance")),
 )
-LIST_SKILLS = [a for a, *b in SKILLS]
+LIST_SKILLS = dict(SKILLS)
 
 # Resistances
 RESISTANCE_NORMAL = 'normal_resistance'
@@ -140,7 +140,7 @@ RESISTANCES = (
     (RESISTANCE_POISON, _("résistance aux poisons")),
     (RESISTANCE_RADIATION, _("résistance aux radiations")),
 )
-LIST_RESISTANCES = [a for a, *b in RESISTANCES]
+LIST_RESISTANCES = dict(RESISTANCES)
 
 # Damage
 DAMAGE_NORMAL = 'normal'
@@ -167,7 +167,7 @@ DAMAGES_TYPES = (
     (DAMAGE_RADIATION, _("dégâts de radiations")),
     (DAMAGE_HEAL, _("soins")),
 )
-LIST_DAMAGES = [a for a, *b in DAMAGES_TYPES]
+LIST_DAMAGES_TYPES = dict(DAMAGES_TYPES)
 PHYSICAL_DAMAGES = (DAMAGE_NORMAL, DAMAGE_LASER, DAMAGE_PLASMA, DAMAGE_EXPLOSIVE, DAMAGE_FIRE)
 
 # Damage / resistance
@@ -194,7 +194,7 @@ LEVELED_STATS = (
     (SKILL_POINTS_PER_LEVEL, _("compétences par niveau")),
     (PERK_RATE, _("niveaux pour un talent")),
 )
-LIST_LEVELED_STATS = [a for a, *b in LEVELED_STATS]
+LIST_LEVELED_STATS = dict(LEVELED_STATS)
 
 # Rollable statistics
 ROLL_STATS = (
@@ -203,9 +203,8 @@ ROLL_STATS = (
 )
 
 # All statistics
-ALL_STATS = (
-    [_("Etat général"), GENERAL_STATS],
-) + ROLL_STATS + (
+ALL_STATS = ROLL_STATS + (
+    (_("Etat général"), GENERAL_STATS),
     (_("Statistiques secondaires"), SECONDARY_STATS),
     (_("Résistances"), RESISTANCES),
     (_("Statistiques de niveau"), LEVELED_STATS),
@@ -213,8 +212,8 @@ ALL_STATS = (
 
 # Lists of statistics
 EDITABLE_STATS = SPECIALS + SKILLS + SECONDARY_STATS + RESISTANCES + LEVELED_STATS
-LIST_EDITABLE_STATS = [a for a, *b in EDITABLE_STATS]
-LIST_ALL_STATS = LIST_GENERAL_STATS + LIST_EDITABLE_STATS
+LIST_EDITABLE_STATS = dict(EDITABLE_STATS)
+LIST_ALL_STATS = dict(sum((stats for label, stats in ALL_STATS), ()))
 
 # Item type
 ITEM_WEAPON = 'weapon'
@@ -225,7 +224,7 @@ SLOT_ITEM_TYPES = (
     (ITEM_AMMO, _("munition")),
     (ITEM_ARMOR, _("armure")),
 )
-EQUIPABLE_ITEMS = [a for a, *b in SLOT_ITEM_TYPES]
+LIST_SLOT_ITEM_TYPES = dict(SLOT_ITEM_TYPES)
 
 ITEM_FOOD = 'food'
 ITEM_CHEM = 'chem'
@@ -235,6 +234,7 @@ ITEM_TYPES = SLOT_ITEM_TYPES + (
     (ITEM_CHEM, _("médicament")),
     (ITEM_MISC, _("autre")),
 )
+LIST_ITEM_TYPES = dict(ITEM_TYPES)
 
 # Races
 RACE_HUMAN = 'human'
@@ -251,6 +251,7 @@ RACES = (
     (RACE_ROBOT, _("robot")),
     (RACE_ANIMAL, _("animal")),
 )
+LIST_RACES = dict(RACES)
 
 # Body parts
 PART_TORSO = 'torso'
@@ -265,6 +266,7 @@ BODY_PARTS = (
     (PART_HEAD, _("tête")),
     (PART_EYES, _("yeux")),
 )
+LIST_BODY_PARTS = dict(BODY_PARTS)
 
 # Fight status
 STATUS_HIT_SUCCEED = 'hit_succeed'
@@ -283,3 +285,44 @@ FIGHT_STATUS = (
     (STATUS_TARGET_KILLED, _("cible défaite")),
     (STATUS_WEAPON_BROKEN, _("arme défectueuse")),
 )
+LIST_FIGHT_STATUS = dict(FIGHT_STATUS)
+
+# Radiation effects
+RADS_LABELS = {
+    (0, 199): _("Etat normal"),
+    (200, 399): _("Faiblement irradié"),
+    (400, 599): _("Modérément irradié"),
+    (600, 799): _("Fortement irradié"),
+    (800, 999): _("Dangereusement irradié"),
+    (1000, None): _("Mortellement irradié"),
+}
+
+# Dehydration effets
+THIRST_LABELS = {
+    (0, 199): _("Rassasié"),
+    (200, 399): _("Faiblement assoiffé"),
+    (400, 599): _("Modérément assoiffé"),
+    (600, 799): _("Fortement assoiffé"),
+    (800, 999): _("Dangereusement assoiffé"),
+    (1000, None): _("Mortellement assoiffé"),
+}
+
+# Hunger effects
+HUNGER_LABELS = {
+    (0, 199): _("Rassasié"),
+    (200, 399): _("Faiblement affamé"),
+    (400, 599): _("Modérément affamé"),
+    (600, 799): _("Fortement affamé"),
+    (800, 999): _("Dangereusement affamé"),
+    (1000, None): _("Mortellement affamé"),
+}
+
+# Sleep deprivation effects
+SLEEP_LABELS = {
+    (0, 199): _("Reposé"),
+    (200, 399): _("Faiblement fatigué"),
+    (400, 599): _("Modérément fatigué"),
+    (600, 799): _("Fortement fatigué"),
+    (800, 999): _("Dangereusement fatigué"),
+    (1000, None): _("Mortellement fatigué"),
+}

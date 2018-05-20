@@ -118,7 +118,7 @@ def view_character(request, character_id):
     """
     data = request.POST
     # Personnage
-    characters = Character.objects.select_related('user', 'campaign').filter(is_active=True).order_by('is_player')
+    characters = Character.objects.select_related('user', 'campaign').filter(is_active=True)
     if not request.user.is_superuser:
         characters = characters.filter(Q(user=request.user) | Q(campaign__game_master=request.user))
     character = characters.filter(id=character_id).first()
@@ -192,10 +192,12 @@ def view_character(request, character_id):
                     elif scope == 'campaign':
                         CampaignEffect.objects.filter(pk=effect_id).delete()
             elif type == 'action':
-                character.health = int(data.get('hp'))
-                character.action_points = int(data.get('ap'))
-                character.experience = int(data.get('xp'))
-                character.karma = int(data.get('karma'))
+                character.health, character.action_points = int(data.get('hp')), int(data.get('ap'))
+                character.experience, character.karma = int(data.get('xp')), int(data.get('karma'))
+                character.rads = int(data.get('rads'))
+                character.thirst = int(data.get('thirst'))
+                character.hunger = int(data.get('hunger'))
+                character.sleep = int(data.get('sleep'))
                 character.save()
         except ValidationError as error:
             for field, errors in error.message_dict.items():
@@ -211,7 +213,7 @@ def view_character(request, character_id):
         'authorized': authorized,
         # Lists
         'campaigns': Campaign.objects.order_by('name'),
-        'characters': characters.order_by('name'),
+        'characters': characters.order_by('is_player', 'name'),
         # Character
         'character': character,
         'inventory': inventory,

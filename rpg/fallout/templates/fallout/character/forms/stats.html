@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n tools %}
 
 <form method="post" action="{{ request.path }}">
     <table class="table table-sm table-striped">
@@ -22,7 +22,7 @@
                     <td>{{ s.1 }}</td>
                     <td class="text-right">
                         {% if view or not authorized %}
-                            <strong class="text-{{ s.4 }}">
+                            <strong class="text-{{ s.4 }}" title="{{ character.labels|get:s.0|default:"" }}" data-toggle="tooltip" data-placement="top">
                                 {{ s.2|floatformat:0 }}{% if s.3 is not None %}&nbsp;/&nbsp;{{ s.3|floatformat:0 }}{% endif %}
                             </strong>
                         {% elif authorized %}

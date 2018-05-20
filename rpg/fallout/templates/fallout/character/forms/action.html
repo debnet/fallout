@@ -13,7 +13,7 @@
                     <label for="{{ code }}-hp" class="d-inline">{% trans "points de vie" %}</label>
                 </td>
                 <td class="text-right">
-                    <select class="form-control form-control-sm custom-select ismall" id="{{ code }}-hp" name="hp">
+                    <select class="form-control form-control-sm custom-select imedium" id="{{ code }}-hp" name="hp">
                         {% for i in character.stats.max_health|range:0 %}
                             {% if i == character.health %}
                                 <option value="{{ i }}" selected>{{ i }} *</option>
@@ -29,7 +29,7 @@
                     <label for="{{ code }}-ap" class="d-inline">{% trans "points d'action" %}</label>
                 </td>
                 <td class="text-right">
-                    <select class="form-control form-control-sm custom-select ismall" id="{{ code }}-ap" name="ap">
+                    <select class="form-control form-control-sm custom-select imedium" id="{{ code }}-ap" name="ap">
                         {% for i in character.stats.max_action_points|range:0 %}
                             {% if i == character.action_points %}
                                 <option value="{{ i }}" selected>{{ i }} *</option>
@@ -56,6 +56,42 @@
                 <td class="text-right">
                     <input type="number" class="form-control form-control-sm imedium" id="{{ code }}-karma" name="karma"
                            value="{{ character.karma }}" min="-1000" aria-valuemin="-1000" max="1000" aria-valuemax="1000"/>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for="{{ code }}-rads" class="d-inline">{% trans "rads" %}</label>
+                </td>
+                <td class="text-right">
+                    <input type="number" class="form-control form-control-sm imedium" id="{{ code }}-rads" name="rads"
+                           value="{{ character.rads|floatformat:0 }}" min="0" aria-valuemin="0" max="1000" aria-valuemax="1000"/>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for="{{ code }}-thirst" class="d-inline">{% trans "soif" %}</label>
+                </td>
+                <td class="text-right">
+                    <input type="number" class="form-control form-control-sm imedium" id="{{ code }}-thirst" name="thirst"
+                           value="{{ character.thirst|floatformat:0 }}" min="0" aria-valuemin="0" max="1000" aria-valuemax="1000"/>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for="{{ code }}-hunger" class="d-inline">{% trans "faim" %}</label>
+                </td>
+                <td class="text-right">
+                    <input type="number" class="form-control form-control-sm imedium" id="{{ code }}-hunger" name="hunger"
+                           value="{{ character.hunger|floatformat:0 }}" min="0" aria-valuemin="0" max="1000" aria-valuemax="1000"/>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for="{{ code }}-sleep" class="d-inline">{% trans "sommeil" %}</label>
+                </td>
+                <td class="text-right">
+                    <input type="number" class="form-control form-control-sm imedium" id="{{ code }}-sleep" name="sleep"
+                           value="{{ character.sleep|floatformat:0 }}" min="0" aria-valuemin="0" max="1000" aria-valuemax="1000"/>
                 </td>
             </tr>
         </tbody>

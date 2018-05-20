@@ -139,7 +139,7 @@ class Campaign(CommonModel):
         """
         next_character = None
         if not reset:
-            characters = self.characters.filter(is_active=True)
+            characters = self.characters.filter(is_active=True).exclude(health__lte=0)
             characters = sorted(characters, key=lambda e: -e.stats.sequence)
             if self.current_character not in characters:
                 self.current_character = None
@@ -279,6 +279,7 @@ class Stats(models.Model):
             for (mini, maxi), effects in survival.items():
                 if (mini or 0) <= getattr(character, stats_name, 0) < (maxi or float('+inf')):
                     stats._change_all_stats(**effects)
+                    break
         # Equipment modifiers
         for equipment in character.inventory.exclude(slot=''):
             for modifier in equipment.item.modifiers.all():
@@ -344,8 +345,8 @@ class Character(Entity, Stats):
     experience = models.PositiveIntegerField(default=0, verbose_name=_("expérience"))
     karma = models.SmallIntegerField(default=0, verbose_name=_("karma"))
     # Needs
-    irradiation = models.FloatField(default=0.0, verbose_name=_("irradiation"))
-    dehydration = models.FloatField(default=0.0, verbose_name=_("soif"))
+    rads = models.FloatField(default=0.0, verbose_name=_("rads"))
+    thirst = models.FloatField(default=0.0, verbose_name=_("soif"))
     hunger = models.FloatField(default=0.0, verbose_name=_("faim"))
     sleep = models.FloatField(default=0.0, verbose_name=_("sommeil"))
     regeneration = models.FloatField(default=0.0, verbose_name=_("regénération"))
@@ -428,6 +429,7 @@ class Character(Entity, Stats):
     def general_stats(self) -> List[Tuple[str, str, Union[int, float], Optional[Union[int, float]], Optional[str]]]:
         """
         Retourne les statistiques générales
+        :return: code, label, valeur à gauche, valeur à droite, classe
         """
         for code, label in GENERAL_STATS:
             lvalue = getattr(self, code, 0)
@@ -445,7 +447,9 @@ class Character(Entity, Stats):
                 rvalue = self.required_experience
             elif code in LIST_NEEDS:
                 rvalue = 1000
-                rclass = get_class(lvalue, rvalue, reverse=True)
+                classes = ('primary', 'success', 'warning', 'danger', 'muted', 'muted')
+                values = (1.000, 0.800, 0.600, 0.400, 0.200, 0.000)
+                rclass = get_class(lvalue, rvalue, reverse=True, classes=classes, values=values)
             yield code, label, lvalue, rvalue, rclass
         yield (STATS_CARRY_WEIGHT, _("charge"), self.charge, self.stats.carry_weight,
                get_class(self.charge, self.stats.carry_weight, reverse=True))
@@ -501,6 +505,65 @@ class Character(Entity, Stats):
         Retourne le nombre de points d'expérience nécessaires pour passer au niveau suivant
         """
         return sum(l * BASE_XP for l in range(1, self.level + 1))
+
+    def get_need_label(self, need: str):
+        """
+        Retourne le libellé relatif au niveau d'un besoin
+        :param need: Code du besoin
+        :param value: Valeur du besoin
+        :return: Libellé
+        """
+        value = getattr(self, need, 0.0)
+        labels, effects = {
+            STATS_RADS: (RADS_LABELS, RADS_EFFECTS),
+            STATS_THIRST: (THIRST_LABELS, THIRST_EFFECTS),
+            STATS_HUNGER: (HUNGER_LABELS, HUNGER_EFFECTS),
+            STATS_SLEEP: (SLEEP_LABELS, SLEEP_EFFECTS),
+        }[need]
+        label = next(iter(label for (mini, maxi), label in labels.items() if mini <= value < (maxi or float('inf'))))
+        effects = next(iter(modifiers for (mini, maxi), modifiers in effects.items() if mini <= value < (maxi or float('inf'))))
+        effects = ", ".join(f"{modifier} {LIST_ALL_STATS[stats]}" for stats, (modifier, mini, maxi) in effects.items())
+        effects = effects or _("aucun malus")
+        if label:
+            return f"{label} ({effects})"
+        return effects
+
+    @property
+    def label_rads(self) -> str:
+        """
+        Libellé du niveau d'rads
+        """
+        return self.get_need_label(STATS_RADS)
+
+    @property
+    def label_thirst(self) -> str:
+        """
+        Libellé du niveau de soif
+        """
+        return self.get_need_label(STATS_THIRST)
+
+    @property
+    def label_hunger(self) -> str:
+        """
+        Libellé du niveau de faim
+        """
+        return self.get_need_label(STATS_HUNGER)
+
+    @property
+    def label_sleep(self) -> str:
+        """
+        Libellé du niveau de sommeil
+        """
+        return self.get_need_label(STATS_SLEEP)
+
+    @property
+    def labels(self):
+        return {
+            STATS_RADS: self.label_rads,
+            STATS_THIRST: self.label_thirst,
+            STATS_HUNGER: self.label_hunger,
+            STATS_SLEEP: self.label_sleep,
+        }
 
     def modify_value(self, name: str, value: Union[int, float]) -> Union[int, float]:
         """
@@ -588,18 +651,19 @@ class Character(Entity, Stats):
         for stats_name, formula in COMPUTED_NEEDS:
             self.modify_value(stats_name, formula(self.stats, self) * hours)
         if radiation:
-            self.damage(raw_damage=radiation * hours, damage_type=DAMAGE_RADIATION, save=False)
+            self.damage(raw_damage=radiation * hours, damage_type=DAMAGE_RADIATION, save=False, log=False)
         self.regeneration += self.stats.healing_rate * (hours / 24.0) * (
             HEALING_RATE_RESTING_MULT if (resting or self.is_resting) else 1.0)
         if save:
             self.save(reset=False)
 
-    def roll(self, stats: str, modifier: int=0, xp: bool=True) -> 'RollHistory':
+    def roll(self, stats: str, modifier: int=0, xp: bool=True, log: bool=True) -> 'RollHistory':
         """
         Réalise un jet de compétence pour un personnage
         :param stats: Code de la statistique
         :param modifier: Modificateur de jet éventuel
         :param xp: Gain d'expérience ?
+        :param log: Historise le jet ?
         :return: Historique de jet
         """
         history = RollHistory(character=self, stats=stats, modifier=modifier)
@@ -632,12 +696,13 @@ class Character(Entity, Stats):
         return loots
 
     def burst(self, targets: Iterable[Tuple['Character', int]], hit_modifier: int=0,
-              action: bool=True) -> List['FightHistory']:
+              action: bool=True, log: bool=True) -> List['FightHistory']:
         """
         Permet de lancer une attaque en rafale sur un groupe d'ennemis
         :param targets: Liste de personnages ciblés avec leur distance relative (en cases) pour chacun dans un tuple
         :param hit_modifier: Modificateurs complémentaires de précision (lumière, couverture, etc...)
         :param action: Consomme les points d'action de l'attaquant ?
+        :param log: Historise le combat ?
         :return: Liste d'historiques de combat
         """
         histories = []
@@ -649,13 +714,13 @@ class Character(Entity, Stats):
             target, target_range = choice(targets)
             history = self.fight(
                 target, is_burst=True, target_range=target_range,
-                hit_modifier=hit_modifier, action=action, hit=hit)
+                hit_modifier=hit_modifier, action=action, hit=hit, log=log)
             histories.append(history)
         self.save()
         return histories
 
     def fight(self, target: 'Character', is_burst: bool=False, target_range: int=1, hit_modifier: int=0,
-              target_part: BODY_PARTS=None, action: bool=True, hit: int=0) -> 'FightHistory':
+              target_part: BODY_PARTS=None, action: bool=True, hit: int=0, log: bool=True) -> 'FightHistory':
         """
         Calcul un round de combat entre deux personnages
         :param target: Personnage ciblé
@@ -665,6 +730,7 @@ class Character(Entity, Stats):
         :param target_part: Partie du corps ciblée par l'attaquant (ou torse par défaut)
         :param action: Consomme les points d'action de l'attaquant ?
         :param hit: Compteur de coups lors d'une attaque en rafale
+        :param log: Historise le combat ?
         :return: Historique de combat
         """
         if isinstance(target, (int, str)):
@@ -800,11 +866,12 @@ class Character(Entity, Stats):
         self.action_points -= ap_cost
         if not is_burst:
             self.save()
-        history.save()
+        if log:
+            history.save()
         return history
 
     def damage(self, raw_damage: float=0.0, min_damage: int=0, max_damage: int=0, damage_type: str=DAMAGE_NORMAL,
-               threshold_modifier: float=1.0, resistance_modifier: float=1.0, save: bool=True) -> 'DamageHistory':
+               threshold_modifier: float=1.0, resistance_modifier: float=1.0, save: bool=True, log: bool=True) -> 'DamageHistory':
         """
         Inflige des dégâts au personnage
         :param raw_damage: Dégâts bruts
@@ -814,6 +881,7 @@ class Character(Entity, Stats):
         :param threshold_modifier: Modificateur d'absorption de dégâts (appliqué à l'armure et au personnage)
         :param resistance_modifier: Modificateur de résistance aux dégâts (appliqué à l'armure et au personnage)
         :param save: Sauvegarder les modifications sur le personnage ?
+        :param log: Historise les dégâts ?
         :return: Nombre de dégâts
         """
         assert min_damage <= max_damage, _("Les bornes de dégâts min. et max. ne sont pas correctes.")
@@ -857,7 +925,7 @@ class Character(Entity, Stats):
         # Apply damage on self
         if total_damage:
             if damage_type == DAMAGE_RADIATION:
-                self.irradiation += total_damage
+                self.rads += total_damage
             else:
                 self.health -= total_damage
             if save:
@@ -870,7 +938,8 @@ class Character(Entity, Stats):
         history.damage_threshold = damage_threshold
         history.damage_resistance = damage_resistance
         history.real_damage = total_damage
-        history.save()
+        if log:
+            history.save()
         return history
 
     def apply_effects(self, campaign: 'Campaign'=None, save: bool=True) -> List['DamageHistory']:
@@ -930,10 +999,11 @@ class Character(Entity, Stats):
         # Remove stats in cache
         if reset:
             Character.clear_cache(self.pk)
+        stats = self.stats
         # Fixing health and action points
-        self.health = self.stats.max_health if has_max_health else \
+        self.health = self.stats.max_health if has_max_health and self.health > 0 else \
             max(0, min(self.health, self.stats.max_health))
-        self.action_points = self.stats.max_action_points if has_max_action_points else \
+        self.action_points = self.stats.max_action_points if has_max_action_points and self.action_points > 0 else \
             max(0, min(self.action_points, self.stats.max_action_points))
         # Remove current character on campaign if character is added or removed
         for campaign_id in self.modified.get('campaign_id') or []:

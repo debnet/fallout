@@ -106,24 +106,24 @@ RACES_STATS = {
 }
 
 # Radiation effects
-IRRADIATION_EFFECTS = {
-    (0, 149): {},
-    (150, 299): {
+RADS_EFFECTS = {
+    (0, 199): {},
+    (200, 399): {
         SPECIAL_STRENGTH: (-1, None, None),
     },
-    (300, 449): {
+    (400, 599): {
         STATS_HEALING_RATE: (-3, 0, None),
         SPECIAL_STRENGTH: (-1, 1, None),
         SPECIAL_AGILITY: (-1, 1, None),
     },
-    (450, 599): {
+    (600, 799): {
         STATS_HEALING_RATE: (-5, 0, None),
         STATS_MAX_HEALTH: (-5, 0, None),
         SPECIAL_STRENGTH: (-2, 1, None),
         SPECIAL_ENDURANCE: (-1, 1, None),
         SPECIAL_AGILITY: (-2, 1, None),
     },
-    (600, 999): {
+    (800, 999): {
         STATS_HEALING_RATE: (-10, 0, None),
         STATS_MAX_HEALTH: (-15, 0, None),
         SPECIAL_STRENGTH: (-4, 1, None),
@@ -134,19 +134,19 @@ IRRADIATION_EFFECTS = {
         SPECIAL_AGILITY: (-5, 1, None),
     },
     (1000, None): {
-        STATS_HEALING_RATE: (-10, 0, None),
-        STATS_MAX_HEALTH: (-20, 0, None),
+        STATS_HEALING_RATE: (-10, None, None),
+        STATS_MAX_HEALTH: (-20, None, None),
         SPECIAL_STRENGTH: (-6, 1, None),
         SPECIAL_PERCEPTION: (-5, 1, None),
         SPECIAL_ENDURANCE: (-5, 1, None),
         SPECIAL_CHARISMA: (-5, 1, None),
         SPECIAL_INTELLIGENCE: (-3, 1, None),
         SPECIAL_AGILITY: (-6, 1, None),
-    }
+    },
 }
 
 # Dehydration effets
-DEHYDRATION_EFFETS = {
+THIRST_EFFECTS = {
     (0, 199): {},
     (200, 399): {
         SPECIAL_ENDURANCE: (-1, 1, None),
@@ -160,15 +160,15 @@ DEHYDRATION_EFFETS = {
         SPECIAL_ENDURANCE: (-2, 1, None),
         SPECIAL_INTELLIGENCE: (-1, 1, None),
     },
-    (8000, 999): {
+    (800, 999): {
         SPECIAL_PERCEPTION: (-2, 1, None),
         SPECIAL_ENDURANCE: (-3, 1, None),
         SPECIAL_INTELLIGENCE: (-1, 1, None),
         SPECIAL_AGILITY: (-2, 1, None),
     },
     (1000, None): {
-        STATS_HEALTH: (-9999, 0, None),
-    }
+        STATS_HEALTH: (-9999, None, None),
+    },
 }
 
 # Hunger effects
@@ -186,14 +186,14 @@ HUNGER_EFFECTS = {
         SPECIAL_PERCEPTION: (-1, 1, None),
         SPECIAL_CHARISMA: (-2, 1, None),
     },
-    (8000, 999): {
+    (800, 999): {
         SPECIAL_STRENGTH: (-3, 1, None),
         SPECIAL_PERCEPTION: (-2, 1, None),
         SPECIAL_CHARISMA: (-2, 1, None),
     },
     (1000, None): {
-        STATS_HEALTH: (-9999, 0, None),
-    }
+        STATS_HEALTH: (-9999, None, None),
+    },
 }
 
 # Sleep deprivation effects
@@ -211,20 +211,20 @@ SLEEP_EFFECTS = {
         SPECIAL_INTELLIGENCE: (-2, 1, None),
         SPECIAL_AGILITY: (-3, 1, None),
     },
-    (8000, 999): {
+    (800, 999): {
         SPECIAL_ENDURANCE: (-2, 1, None),
         SPECIAL_INTELLIGENCE: (-2, 1, None),
         SPECIAL_AGILITY: (-3, 1, None),
     },
     (1000, None): {
-        STATS_HEALTH: (-9999, 0, None),
-    }
+        STATS_HEALTH: (-9999, None, None),
+    },
 }
 
 # Survival effects
 SURVIVAL_EFFECTS = (
-    (STATS_IRRADIATION, IRRADIATION_EFFECTS),
-    (STATS_DEHYDRATION, DEHYDRATION_EFFETS),
+    (STATS_RADS, RADS_EFFECTS),
+    (STATS_THIRST, THIRST_EFFECTS),
     (STATS_HUNGER, HUNGER_EFFECTS),
     (STATS_SLEEP, SLEEP_EFFECTS),
 )
@@ -305,7 +305,7 @@ COMPUTED_STATS = (
 
 # Computed needs per hour
 COMPUTED_NEEDS = {
-    ('dehydration', lambda s, c: max(1, (20 - s.endurance) * 2)),
+    ('thirst', lambda s, c: max(1, (20 - s.endurance) * 2)),
     ('hunger', lambda s, c: max(1, (16 - s.endurance) * 2)),
     ('sleep', lambda s, c: max(1, (14 - s.endurance) * 2)),
 }

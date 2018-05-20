@@ -34,7 +34,9 @@
                 {% else %}
                     <span class="badge badge-warning">{% trans "PJ" %}</span>
                 {% endif %}
-                {% if character.campaign.current_character == character %}
+                {% if character.health == 0 %}
+                    <span class="badge badge-danger">{% trans "KO" %}</span>
+                {% elif character.campaign.current_character == character %}
                     <span class="badge badge-success">{% trans "Actif" %}</span>
                 {% endif %}
                 <span class="font-weight-bold">{% trans "Niveau" %} {{ character.level }}</span>
