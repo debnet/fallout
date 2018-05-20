@@ -18,7 +18,7 @@ from fallout.constants import *  # noqa
 from fallout.enums import *  # noqa
 
 
-def get_thumbnails(directory=''):
+def get_thumbnails(directory: str='') -> List[Tuple[str, str]]:
     """
     Scanne les images le répertoire "medias" à la recherche de miniatures
     :param directory: Répertoire à scanner
@@ -45,7 +45,8 @@ def get_thumbnails(directory=''):
     return sorted(images)
 
 
-def get_class(value, maximum, classes=None, values=None, reverse=False, default='muted'):
+def get_class(value: Union[int, float], maximum: Union[int, float], classes: Tuple[str]=None,
+              values: Tuple[float]=None, reverse: bool=False, default: str='muted') -> str:
     """
     Affecte une classe CSS à une valeur donnée
     :param value: Valeur
@@ -113,7 +114,7 @@ class Campaign(CommonModel):
         return self.current_game_date - self.start_game_date
 
     @property
-    def effects(self) -> 'QuerySet[CampaignEffect]':
+    def effects(self) -> 'models.QuerySet[CampaignEffect]':
         """
         Retourne les effets actifs de la campagne
         :return: Effets
@@ -130,7 +131,8 @@ class Campaign(CommonModel):
         """
         return self.loots.all().delete()
 
-    def next_turn(self, seconds: int=TURN_TIME, resting: bool=False, apply: bool=True, reset: bool=False):
+    def next_turn(self, seconds: int=TURN_TIME, resting: bool=False,
+                  apply: bool=True, reset: bool=False) -> Optional['Character']:
         """
         Détermine qui est le prochain personnage à agir
         :param seconds: Temps utilisé (en secondes) par le personnage précédent pour son tour de jeu
@@ -408,7 +410,7 @@ class Character(Entity, Stats):
         return stats
 
     @property
-    def inventory(self) -> 'QuerySet[Equipment]':
+    def inventory(self) -> 'models.QuerySet[Equipment]':
         """
         Retourne le contenu de l'inventaire du personnage
         :return: Equipements
@@ -418,7 +420,7 @@ class Character(Entity, Stats):
         return self._inventory
 
     @property
-    def effects(self) -> 'QuerySet[CharacterEffect]':
+    def effects(self) -> 'models.QuerySet[CharacterEffect]':
         """
         Retourne les effets actifs du personnage
         :return: Effets
@@ -538,7 +540,7 @@ class Character(Entity, Stats):
         """
         return sum(l * BASE_XP for l in range(1, self.level + 1))
 
-    def get_need_label(self, need: str):
+    def get_need_label(self, need: str) -> str:
         """
         Retourne le libellé relatif au niveau d'un besoin
         :param need: Code du besoin
@@ -613,7 +615,7 @@ class Character(Entity, Stats):
         setattr(self, name, value)
         return value
 
-    def add_experience(self, amount: int=0, save: bool=True):
+    def add_experience(self, amount: int=0, save: bool=True) -> Tuple[int, int]:
         """
         Ajoute de l'expérience à ce personnage
         :param amount: Quantité d'expérience ajoutée
@@ -711,12 +713,13 @@ class Character(Entity, Stats):
         history.success = history.roll <= (history.value + history.modifier)
         history.critical = (history.roll <= (1 if is_special else self.stats.luck)) if history.success \
             else (history.roll >= (CRITICAL_FAIL_D10 if is_special else CRITICAL_FAIL_D100))
-        history.save()
+        if log:
+            history.save()
         if xp:
             self.add_experience(XP_GAIN_ROLL[history.success])
         return history
 
-    def loot(self, empty: bool=True) -> Optional[List['Loot']]:
+    def loot(self, empty: bool=True) -> List['Loot']:
         """
         Transforme l'équipement de ce personnage en butin
         :param empty: Vide l'inventaire du joueur ?
@@ -1123,14 +1126,14 @@ class DamageMixin:
         return randint(self.min_damage, self.max_damage) + self.raw_damage
 
     @property
-    def label_damage(self) -> Optional[str]:
+    def label_damage(self) -> str:
         """
         Retourne le libellé des dégâts de l'arme ou de la munition
         :return: Représentation des dégâts ou rien si l'objet n'est pas une arme ou une munition
         """
         if self.type not in [ITEM_WEAPON, ITEM_AMMO]:
-            return None
-        damage = None
+            return ''
+        damage = ''
         if self.min_damage or self.max_damage:
             damage = f"{self.min_damage}-{self.max_damage}"
         if self.raw_damage:
@@ -1139,11 +1142,13 @@ class DamageMixin:
         return damage
 
     @property
-    def long_label_damage(self) -> Optional[str]:
+    def long_label_damage(self) -> str:
         """
         Retourne le libellé (avec le type) des dégâts de l'arme ou de la munition
         :return: Représentation des dégâts ou rien si l'objet n'est pas une arme ou une munition
         """
+        if not self.long_label_damage:
+            return self.get_damage_type_display()
         return _(f"{self.label_damage} {self.get_damage_type_display()}")
 
 
