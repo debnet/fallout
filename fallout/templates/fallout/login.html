@@ -52,7 +52,7 @@
     <form class="form-signin" method="post" action="{{ request.get_full_path }}">
         <h2 class="form-signin-heading">{% trans "Connectez-vous !" %}</h2>
         <label for="id_username" class="sr-only">{% trans "Nom d'utilisateur" %}</label>
-        <input type="username" name="username" id="id_username" class="form-control"
+        <input type="text" name="username" id="id_username" class="form-control"
                placeholder="{% trans "Nom d'utilisateur" %}" required autofocus>
         <label for="id_password" class="sr-only">{% trans "Mot de passe" %}</label>
         <input type="password" name="password" id="id_password" class="form-control"
