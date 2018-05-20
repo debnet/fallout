@@ -6,8 +6,8 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.utils.translation import ugettext as _
 
-from rpg.fallout.forms import *  # noqa
-from rpg.fallout.models import *  # noqa
+from fallout.forms import *  # noqa
+from fallout.models import *  # noqa
 
 
 # Niveaux des messages en fonction du jet de compétence (success, critical)

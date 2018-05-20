@@ -6,7 +6,7 @@ from django.contrib.auth import views as auth_views
 from django.views.generic import RedirectView
 from rest_framework.authtoken import views as drf_views
 
-from rpg.fallout.urls import urlpatterns as fallout_urls, api_urlpatterns as fallout_api
+from fallout.urls import urlpatterns as fallout_urls, api_urlpatterns as fallout_api
 
 
 admin.site.site_header = 'Fallout RPG'

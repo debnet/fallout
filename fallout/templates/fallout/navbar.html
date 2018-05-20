@@ -6,15 +6,15 @@
            aria-haspopup="true" aria-expanded="false">{{ campaign.name|default:_("Aucune campagne") }}</a>
         <div class="dropdown-menu" aria-labelledby="campaign-navbar">
             <a class="dropdown-item text-secondary" href="{% url 'fallout_index' %}">{% trans "Aucune campagne" %}</a>
-            {% for campaign in campaigns %}
-                <a class="dropdown-item" href="{% url 'fallout_campaign' campaign.id %}">
-                    {% if character.campaign_id == campaign.id %}
-                        <small class="badge badge-success">{% trans "Actif" %}</small>
-                    {% endif %}
-                    {{ campaign.name }}
-                    {% if campaign.title %}<small class="text-muted">{{ campaign.title }}</small>{% endif %}
-                </a>
-            {% endfor %}
+            {% with current_campaign=campaign %}
+                {% for campaign in campaigns %}
+                    <a class="dropdown-item{% if campaign == current_campaign %} active{% endif %}"
+                       href="{% url 'fallout_campaign' campaign.id %}">
+                        {{ campaign.name }}
+                        {% if campaign.title %}<small class="text-muted">{{ campaign.title }}</small>{% endif %}
+                    </a>
+                {% endfor %}
+            {% endwith %}
         </div>
     </li>
     <li class="nav-item dropdown">
@@ -22,22 +22,25 @@
            id="campaign-navbar" href="#" data-toggle="dropdown"
            aria-haspopup="true" aria-expanded="false">{{ character.name|default:_("Personnages") }}</a>
         <div class="dropdown-menu" aria-labelledby="campaign-navbar">
-            {% for character in characters %}
-                <a class="dropdown-item" href="{% url 'fallout_character' character.id %}">
-                    {% if not character.is_player %}
-                        <small class="badge badge-info">{% trans "PNJ" %}</small>
-                    {% else %}
-                        <span class="badge badge-warning">{% trans "PJ" %}</span>
-                    {% endif %}
-                    {% if character.health == 0 %}
-                        <small class="badge badge-danger">{% trans "KO" %}</small>
-                    {% elif character.campaign.current_character_id == character.id %}
-                        <small class="badge badge-success">{% trans "Actif" %}</small>
-                    {% endif %}
-                    {{ character.name }}
-                    {% if character.title %}<small class="text-muted">{{ character.title }}</small>{% endif %}
-                </a>
-            {% endfor %}
+            {% with current_character=character %}
+                {% for character in characters %}
+                    <a class="dropdown-item{% if character == current_character %} active{% endif %}"
+                       href="{% url 'fallout_character' character.id %}">
+                        {% if not character.is_player %}
+                            <small class="badge badge-info">{% trans "PNJ" %}</small>
+                        {% else %}
+                            <span class="badge badge-warning">{% trans "PJ" %}</span>
+                        {% endif %}
+                        {% if character.health == 0 %}
+                            <small class="badge badge-danger">{% trans "KO" %}</small>
+                        {% elif character.campaign.current_character == character %}
+                            <small class="badge badge-success">{% trans "Actif" %}</small>
+                        {% endif %}
+                        {{ character.name }}
+                        {% if character.title %}<small class="text-muted">{{ character.title }}</small>{% endif %}
+                    </a>
+                {% endfor %}
+            {% endwith %}
         </div>
     </li>
 </ul>

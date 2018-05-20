@@ -5,6 +5,7 @@ from random import randint, choice
 from typing import Dict, Iterable, List, Optional, Tuple, Union
 
 from common.models import CommonModel, Entity
+from common.utils import to_object
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
@@ -13,8 +14,8 @@ from django.db.models import F, Q, Sum, FloatField
 from django.utils.translation import ugettext as _
 from multiselectfield import MultiSelectField
 
-from rpg.fallout.constants import *  # noqa
-from rpg.fallout.enums import *  # noqa
+from fallout.constants import *  # noqa
+from fallout.enums import *  # noqa
 
 
 def get_thumbnails(directory=''):
@@ -129,10 +130,11 @@ class Campaign(CommonModel):
         """
         return self.loots.all().delete()
 
-    def next_turn(self, seconds: int=TURN_TIME, apply: bool=True, reset: bool=False):
+    def next_turn(self, seconds: int=TURN_TIME, resting: bool=False, apply: bool=True, reset: bool=False):
         """
         Détermine qui est le prochain personnage à agir
         :param seconds: Temps utilisé (en secondes) par le personnage précédent pour son tour de jeu
+        :param resting: Temps de repos ?
         :param apply: Applique directement le changement sur la campagne
         :param reset: Réinitialise l'ordre de passage des personnages
         :return: Personnage suivant
@@ -156,7 +158,7 @@ class Campaign(CommonModel):
         if apply:
             self.current_game_date += timedelta(seconds=seconds)
             self.current_character = next_character
-            self.save()
+            self.save(resting=resting)
             # Reset character action points
             if self.current_character and \
                     self.current_character.action_points != self.current_character.stats.max_action_points:
@@ -164,7 +166,7 @@ class Campaign(CommonModel):
                 self.current_character.save()
         return next_character
 
-    def save(self, *args, **kwargs):
+    def save(self, resting=False, *args, **kwargs):
         """
         Sauvegarde la campagne
         """
@@ -175,7 +177,7 @@ class Campaign(CommonModel):
         if hours <= 0:
             return
         for character in self.characters.filter(is_active=True):
-            character.update_needs(hours=hours, radiation=self.radiation, save=False)
+            character.update_needs(hours=hours, radiation=self.radiation, resting=resting, save=False)
             character.apply_effects(character, save=False)
             character.save()
 
@@ -254,6 +256,11 @@ class Stats(models.Model):
     skill_points_per_level = models.SmallIntegerField(default=0, verbose_name=_("compétences par niveau"))
     perk_rate = models.SmallIntegerField(default=0, verbose_name=_("niveaux pour un talent"))
 
+    # Added at init
+    character = None
+    base = {}
+    modifiers = {}
+
     def __str__(self) -> str:
         return self.character.name
 
@@ -265,19 +272,33 @@ class Stats(models.Model):
         :return: Statistiques
         """
         stats = Stats()
+        stats.base = {}
+        stats.modifiers = {}
         stats.character = character
         # Get all character's stats
         for stats_name in LIST_EDITABLE_STATS:
+            stats.base[stats_name] = getattr(character, stats_name, 0)
             setattr(stats, stats_name, getattr(character, stats_name, 0))
         # Racial modifiers
-        stats._change_all_stats(**RACES_STATS.get(character.race, {}))
+        race_stats = RACES_STATS.get(character.race, {})
+        stats._change_all_stats(**race_stats)
+        for stats_name, (value, mini, maxi) in race_stats.items():
+            stats.base[stats_name] = stats.base.get(stats_name, 0) + value
         # Tag skills
         for skill in set(character.tag_skills):
+            stats.base[skill] = stats.base.get(skill, 0) + TAG_SKILL_BONUS
             stats._change_stats(skill, TAG_SKILL_BONUS)
+        # Base statistics
+        base_stats = to_object(stats.base)
+        base_stats.level = character.level
+        for stats_name, formula in COMPUTED_STATS:
+            result = stats.base[stats_name] = stats.base.get(stats_name, 0) + formula(base_stats, base_stats)
+            setattr(base_stats, stats_name, result)
+
         # Survival modifiers
         for stats_name, survival in SURVIVAL_EFFECTS:
             for (mini, maxi), effects in survival.items():
-                if (mini or 0) <= getattr(character, stats_name, 0) < (maxi or float('+inf')):
+                if (mini or 0) <= getattr(character, stats_name, 0) <= (maxi or float('+inf')):
                     stats._change_all_stats(**effects)
                     break
         # Equipment modifiers
@@ -296,6 +317,14 @@ class Stats(models.Model):
         # Derivated statistics
         for stats_name, formula in COMPUTED_STATS:
             stats._change_stats(stats_name, formula(stats, character))
+
+        # Modifiers
+        for stats_name in LIST_ALL_STATS:
+            from_base = stats.base.get(stats_name, 0)
+            from_stats = getattr(stats, stats_name, 0)
+            if from_base == from_stats:
+                continue
+            stats.modifiers[stats_name] = from_stats - from_base
         return stats
 
     def _change_all_stats(self, **stats: Dict[str, Tuple[int, int, int]]) -> None:
@@ -309,7 +338,8 @@ class Stats(models.Model):
         target = self if name in LIST_EDITABLE_STATS else self.character
         mini = mini if mini is not None else race_mini or float('-inf')
         maxi = maxi if maxi is not None else race_maxi or float('+inf')
-        setattr(target, name, min(max(getattr(target, name, 0) + value, mini), maxi))
+        result = min(max(getattr(target, name, 0) + value, mini), maxi)
+        setattr(target, name, result)
 
     class Meta:
         abstract = True
@@ -435,9 +465,11 @@ class Character(Entity, Stats):
             lvalue = getattr(self, code, 0)
             rvalue, rclass = None, None
             if code == STATS_HEALTH:
+                code = STATS_MAX_HEALTH
                 rvalue = getattr(self.stats, STATS_MAX_HEALTH, 0)
                 rclass = get_class(lvalue, rvalue)
             elif code == STATS_ACTION_POINTS:
+                code = STATS_MAX_ACTION_POINTS
                 rvalue = getattr(self.stats, STATS_MAX_ACTION_POINTS, 0)
                 rclass = get_class(lvalue, rvalue)
             elif code == STATS_SKILL_POINTS:
@@ -520,8 +552,8 @@ class Character(Entity, Stats):
             STATS_HUNGER: (HUNGER_LABELS, HUNGER_EFFECTS),
             STATS_SLEEP: (SLEEP_LABELS, SLEEP_EFFECTS),
         }[need]
-        label = next(iter(label for (mini, maxi), label in labels.items() if mini <= value < (maxi or float('inf'))))
-        effects = next(iter(modifiers for (mini, maxi), modifiers in effects.items() if mini <= value < (maxi or float('inf'))))
+        label = next(iter(label for (mini, maxi), label in labels.items() if mini <= value <= (maxi or float('inf'))))
+        effects = next(iter(modifiers for (mini, maxi), modifiers in effects.items() if mini <= value <= (maxi or float('inf'))))
         effects = ", ".join(f"{modifier} {LIST_ALL_STATS[stats]}" for stats, (modifier, mini, maxi) in effects.items())
         effects = effects or _("aucun malus")
         if label:
@@ -531,7 +563,7 @@ class Character(Entity, Stats):
     @property
     def label_rads(self) -> str:
         """
-        Libellé du niveau d'rads
+        Libellé du niveau de rads
         """
         return self.get_need_label(STATS_RADS)
 
@@ -564,6 +596,11 @@ class Character(Entity, Stats):
             STATS_HUNGER: self.label_hunger,
             STATS_SLEEP: self.label_sleep,
         }
+
+    @property
+    def modifiers(self):
+        for stats_name, value in self.stats.modifiers.items():
+            yield stats_name, LIST_ALL_STATS.get(stats_name), value
 
     def modify_value(self, name: str, value: Union[int, float]) -> Union[int, float]:
         """
@@ -981,6 +1018,23 @@ class Character(Entity, Stats):
                 effect.save(force_insert=True)
         return self
 
+    def levelup(self, stats: str, value: int=0, save: bool=True) -> int:
+        """
+        Permet d'augmenter le niveau d'une compétence
+        :param stats: Code de la compétence
+        :param value: Valeur
+        :param save: Sauvegarde le personne ?
+        :return: Valeur courante
+        """
+        assert self.skill_points, _("Ce personnage n'a pas de points de compétences à distribuer.")
+        assert value <= self.skill_points, _("Ce personnage n'a pas assez de points de compétences.")
+        assert stats in LIST_SKILLS, _("Cette compétence ne peut être améliorée.")
+        value = value * (2 if stats in self.tag_skills else 1)
+        setattr(self, stats, getattr(self, stats) + value)
+        if save:
+            self.save()
+        return getattr(self, stats)
+
     def save(self, *args, reset=True, **kwargs):
         """
         Sauvegarde du personnage
@@ -1000,16 +1054,20 @@ class Character(Entity, Stats):
         if reset:
             Character.clear_cache(self.pk)
         stats = self.stats
-        # Fixing health and action points
-        self.health = self.stats.max_health if has_max_health and self.health > 0 else \
-            max(0, min(self.health, self.stats.max_health))
-        self.action_points = self.stats.max_action_points if has_max_action_points and self.action_points > 0 else \
-            max(0, min(self.action_points, self.stats.max_action_points))
-        # Remove current character on campaign if character is added or removed
-        for campaign_id in self.modified.get('campaign_id') or []:
-            if not campaign_id:
-                continue
-            Campaign.objects.filter(id=campaign_id).update(current_character=None)
+        if self.pk:
+            # Fixing health and action points
+            self.health = self.stats.max_health if has_max_health and self.health > 0 else \
+                max(0, min(self.health, self.stats.max_health))
+            self.action_points = self.stats.max_action_points if has_max_action_points and self.action_points > 0 else \
+                max(0, min(self.action_points, self.stats.max_action_points))
+            # Remove current character on campaign if character is added or removed
+            for campaign_id in self.modified.get('campaign_id') or []:
+                if not campaign_id:
+                    continue
+                Campaign.objects.filter(id=campaign_id).update(current_character=None)
+        else:
+            self.health = self.stats.max_health
+            self.action_points = self.stats.max_action_points
         # Loot character if NPC
         if self.is_active and not self.health and not self.is_player:
             self.loot(empty=True)
@@ -1968,7 +2026,7 @@ class RollHistory(CommonModel):
         """
         message = _("{label} du jet de {stats} : {roll} pour {value}")
         if self.modifier:
-            message = _("{label} du jet de {stats} : {roll} pour {value} ({modifier:+d}={total})")
+            message = _("{label} du jet de {stats} : {roll} pour {total} ({value}{modifier:+d})")
         return message.format(
             stats=self.get_stats_display(),
             label=self.label,

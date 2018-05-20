@@ -8,8 +8,8 @@ from django.utils.translation import ugettext_lazy as _
 from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
 
-from rpg.fallout.enums import BODY_PARTS, DAMAGES_TYPES, LIST_EDITABLE_STATS, ROLL_STATS
-from rpg.fallout.models import (
+from fallout.enums import BODY_PARTS, DAMAGES_TYPES, LIST_EDITABLE_STATS, ROLL_STATS
+from fallout.models import (
     MODELS, Campaign, Character, Equipment, CampaignEffect, CharacterEffect,
     Loot, LootTemplate, DamageHistory, FightHistory, RollHistory)
 

@@ -32,7 +32,7 @@ INSTALLED_APPS = (
     'common',
     'multiselectfield',
     # Applications
-    'rpg.fallout',
+    'fallout',
     # Debug
     'debug_toolbar',
 )
@@ -95,7 +95,7 @@ LANGUAGES = (
 )
 
 LOCALE_PATHS = (
-    os.path.join(BASE_DIR, 'locale'),
+    os.path.join(BASE_DIR, 'fallout/locale'),
 )
 
 # Static files (CSS, JavaScript, Images)

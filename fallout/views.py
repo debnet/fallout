@@ -7,8 +7,8 @@ from django.db.models import Q
 from django.shortcuts import redirect
 from django.utils.translation import ugettext_lazy as _
 
-from rpg.fallout.enums import BODY_PARTS, DAMAGES_TYPES, ROLL_STATS
-from rpg.fallout.models import (
+from fallout.enums import BODY_PARTS, DAMAGES_TYPES, ROLL_STATS
+from fallout.models import (
     Campaign, Character, CampaignEffect, CharacterEffect, Effect,
     Equipment, Item, Loot, LootTemplate, RollHistory)
 
@@ -82,8 +82,9 @@ def view_campaign(request, campaign_id):
                     campaign.save()
             elif type == 'time':
                 if method == 'add':
-                    hours, minutes = int(data.get('hours') or 0), int(data.get('minutes') or 0)
-                    campaign.next_turn(seconds=hours * 3600 + minutes * 60, reset=True)
+                    hours, minutes, resting = (
+                        int(data.get('hours') or 0), int(data.get('minutes') or 0), 'resting' in data)
+                    campaign.next_turn(seconds=hours * 3600 + minutes * 60, resting=resting, reset=True)
             elif type == 'roll':
                 group, stats, modifier, xp = (
                     data.get('group'), data.get('stats'), int(data.get('modifier') or 0), 'xp' in data)
@@ -101,8 +102,8 @@ def view_campaign(request, campaign_id):
 
     return {
         'authorized': authorized,
-        'campaigns': Campaign.objects.exclude(id=campaign_id).order_by('name'),
-        'characters': characters.order_by('name'),
+        'campaigns': Campaign.objects.order_by('name'),
+        'characters': characters.order_by('-is_player', 'name'),
         'campaign': campaign,
         'loots': loots,
         # Enums
@@ -130,12 +131,16 @@ def view_character(request, character_id):
         try:
             type = data.get('type')
             method = data.get('method')
-            if type == 'roll':
-                result = character.roll(
-                    stats=data.get('stats'),
-                    modifier=int(data.get('modifier') or 0))
-                messages.add_message(request, result.message_level, _(
-                    f"<strong>{result.character}</strong> {result.long_label}"))
+            if type == 'stats':
+                if 'roll' in data:
+                    result = character.roll(
+                        stats=data.get('roll'),
+                        modifier=int(data.get('modifier') or 0))
+                    messages.add_message(request, result.message_level, _(
+                        f"<strong>{result.character}</strong> {result.long_label}"))
+                elif 'levelup' in data:
+                    stats = data.get('levelup')
+                    character.levelup(stats, 1)
             elif type == 'fight' and data.get('target'):
                 result = character.fight(
                     target=data.get('target'),
@@ -213,7 +218,7 @@ def view_character(request, character_id):
         'authorized': authorized,
         # Lists
         'campaigns': Campaign.objects.order_by('name'),
-        'characters': characters.order_by('is_player', 'name'),
+        'characters': characters.order_by('-is_player', 'name'),
         # Character
         'character': character,
         'inventory': inventory,

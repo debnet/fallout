@@ -55,6 +55,12 @@
                                         <input type="hidden" name="type" value="time" />
                                         {% csrf_token %}
                                     </div>
+                                    <div class="col-auto">
+                                        <label class="form-check-label" class="d-inline" title="{% trans "Repos" %}">
+                                            <input class="form-check-input" type="checkbox" name="resting">
+                                            {% trans "Repos" %}
+                                        </label>
+                                    </div>
                                 </div>
                             </form>
                         </div>

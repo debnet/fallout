@@ -1,7 +1,7 @@
 # coding: utf-8
 from django.urls import path
 
-from rpg.fallout import api, views
+from fallout import api, views
 
 
 urlpatterns = [

@@ -7,7 +7,7 @@ from django.db import migrations, models
 import django.db.models.deletion
 import django.utils.timezone
 import multiselectfield.db.fields
-import rpg.fallout.models
+import fallout.models
 import uuid
 
 
@@ -231,7 +231,7 @@ class Migration(migrations.Migration):
                 'verbose_name': 'effet',
                 'verbose_name_plural': 'effets',
             },
-            bases=(models.Model, rpg.fallout.models.DamageMixin),
+            bases=(models.Model, fallout.models.DamageMixin),
         ),
         migrations.CreateModel(
             name='EffectModifier',
@@ -341,7 +341,7 @@ class Migration(migrations.Migration):
                 'verbose_name': 'objet',
                 'verbose_name_plural': 'objets',
             },
-            bases=(models.Model, rpg.fallout.models.DamageMixin),
+            bases=(models.Model, fallout.models.DamageMixin),
         ),
         migrations.CreateModel(
             name='ItemModifier',

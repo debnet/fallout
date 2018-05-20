@@ -18,25 +18,40 @@
                 </tr>
             {% endif %}
             {% for s in stats %}
+                {% with title=character.labels|get:s.0|default:"" modifier=character.stats.modifiers|get:s.0 %}
                 <tr>
-                    <td>{{ s.1 }}</td>
+                    <td>
+                        {% if modifier %}
+                        <span class="{% if modifier > 0 %}text-success{% elif modifier < 0 %}text-danger{% endif %}"
+                              title="{{ modifier|default:"" }}" data-toggle="tooltip" data-placement="left">
+                            {% if modifier > 0 %}&blacktriangle;{% elif modifier < 0 %}&blacktriangledown;{% endif %}
+                        </span>
+                        {% endif %}
+                        {% if s.0 in character.tag_skills %}<strong>{{ s.1 }}</strong>{% else %}{{ s.1 }}{% endif %}
+                    </td>
                     <td class="text-right">
                         {% if view or not authorized %}
-                            <strong class="text-{{ s.4 }}" title="{{ character.labels|get:s.0|default:"" }}" data-toggle="tooltip" data-placement="top">
+                            <strong class="text-{{ s.4 }}" title="{{ title }}" data-toggle="tooltip" data-placement="top">
                                 {{ s.2|floatformat:0 }}{% if s.3 is not None %}&nbsp;/&nbsp;{{ s.3|floatformat:0 }}{% endif %}
                             </strong>
                         {% elif authorized %}
-                            <button class="btn btn-sm btn-{{ s.4 }} itiny" type="submit" name="stats" value="{{ s.0 }}">
+                            {% if levelup and character.skill_points > 0 %}
+                                <button class="btn btn-sm btn-dark" type="submit" name="levelup" value="{{ s.0 }}">
+                                    <strong>{% trans "+" %}</strong>
+                                </button>
+                            {% endif %}
+                            <button class="btn btn-sm btn-{{ s.4 }} itiny" type="submit" name="roll" value="{{ s.0 }}">
                                 <strong>{{ s.2|floatformat:0 }}</strong>
                             </button>
                         {% endif %}
                     </td>
                 </tr>
+                {% endwith %}
             {% endfor %}
         </tbody>
     </table>
     {% if not view %}
-        <input type="hidden" name="type" value="roll" />
+        <input type="hidden" name="type" value="stats" />
         {% csrf_token %}
     {% endif %}
 </form>

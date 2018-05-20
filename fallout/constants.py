@@ -1,5 +1,5 @@
 # encoding: utf-8
-from rpg.fallout.enums import *  # noqa
+from fallout.enums import *  # noqa
 
 
 # Body part modifiers (ranged, melee, critical)
@@ -30,7 +30,7 @@ RACES_STATS = {
         SPECIAL_INTELLIGENCE: (0, 1, 10),
         SPECIAL_AGILITY: (0, 1, 10),
         SPECIAL_LUCK: (0, 1, 10),
-        RESISTANCE_ELECTRICITY: (30, 0, 100),
+        RESISTANCE_ELECTRICITY: (30, -100, 100),
         PERK_RATE: (2, None, None),
     },
     RACE_GHOUL: {
@@ -41,8 +41,8 @@ RACES_STATS = {
         SPECIAL_INTELLIGENCE: (0, 2, 10),
         SPECIAL_AGILITY: (0, 1, 6),
         SPECIAL_LUCK: (0, 5, 12),
-        RESISTANCE_RADIATION: (80, 0, 100),
-        RESISTANCE_POISON: (30, 0, 100),
+        RESISTANCE_RADIATION: (80, -100, 100),
+        RESISTANCE_POISON: (30, -100, 100),
         PERK_RATE: (3, None, None),
     },
     RACE_SUPER_MUTANT: {
@@ -53,10 +53,10 @@ RACES_STATS = {
         SPECIAL_INTELLIGENCE: (0, 1, 8),
         SPECIAL_AGILITY: (0, 1, 8),
         SPECIAL_LUCK: (0, 1, 10),
-        STATS_DAMAGE_RESISTANCE: (25, 0, 100),
-        RESISTANCE_RADIATION: (50, 0, 100),
-        RESISTANCE_POISON: (20, 0, 100),
-        RESISTANCE_FIRE: (25, 0, 100),
+        STATS_DAMAGE_RESISTANCE: (25, -100, 100),
+        RESISTANCE_RADIATION: (50, -100, 100),
+        RESISTANCE_POISON: (20, -100, 100),
+        RESISTANCE_FIRE: (25, -100, 100),
         HIT_POINTS_PER_LEVEL: (2, None, None),
         PERK_RATE: (3, None, None),
     },
@@ -68,7 +68,7 @@ RACES_STATS = {
         SPECIAL_INTELLIGENCE: (0, 1, 4),
         SPECIAL_AGILITY: (0, 6, 16),
         SPECIAL_LUCK: (0, 1, 10),
-        STATS_DAMAGE_RESISTANCE: (40, 0, 100),
+        STATS_DAMAGE_RESISTANCE: (40, -100, 100),
         STATS_MELEE_DAMAGE: (5, None, None),
         STATS_DAMAGE_THRESHOLD: (4, None, None),
         HIT_POINTS_PER_LEVEL: (2, None, None),
@@ -82,14 +82,14 @@ RACES_STATS = {
         SPECIAL_INTELLIGENCE: (0, 1, 12),
         SPECIAL_AGILITY: (0, 1, 12),
         SPECIAL_LUCK: (0, 5, 5),
-        STATS_DAMAGE_RESISTANCE: (40, 0, 100),
+        STATS_DAMAGE_RESISTANCE: (40, -100, 100),
         STATS_HEALING_RATE: (0, 0, 0),
-        RESISTANCE_RADIATION: (100, 0, 100),
-        RESISTANCE_POISON: (100, 0, 100),
-        RESISTANCE_FIRE: (40, 0, 100),
-        RESISTANCE_ELECTRICITY: (-50, 0, 100),
-        RESISTANCE_GAZ_CONTACT: (100, 0, 100),
-        RESISTANCE_GAZ_INHALED: (100, 0, 100),
+        RESISTANCE_RADIATION: (100, -100, 100),
+        RESISTANCE_POISON: (100, -100, 100),
+        RESISTANCE_FIRE: (40, -100, 100),
+        RESISTANCE_ELECTRICITY: (-50, -100, 100),
+        RESISTANCE_GAZ_CONTACT: (100, -100, 100),
+        RESISTANCE_GAZ_INHALED: (100, -100, 100),
         HIT_POINTS_PER_LEVEL: (0, 0, 0),
         PERK_RATE: (10, None, None),
     },

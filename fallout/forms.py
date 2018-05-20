@@ -2,8 +2,8 @@
 from django import forms
 from django.utils.translation import ugettext_lazy as _
 
-from rpg.fallout.models import *  # noqa
-from rpg.fallout.enums import ROLL_STATS, BODY_PARTS
+from fallout.models import *  # noqa
+from fallout.enums import ROLL_STATS, BODY_PARTS
 
 
 class RandomizeCharacterForm(forms.Form):

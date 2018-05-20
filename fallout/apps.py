@@ -4,5 +4,5 @@ from django.utils.translation import ugettext_lazy as _
 
 
 class FalloutConfig(AppConfig):
-    name = 'rpg.fallout'
+    name = 'fallout'
     verbose_name = _("Fallout RPG")
