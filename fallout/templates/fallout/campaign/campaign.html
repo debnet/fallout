@@ -50,16 +50,16 @@
                 <a class="nav-link" data-toggle="tab" role="tab"
                    id="campaign-infos-tab" href="#campaign-infos">{% trans "Campagne" %}</a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link" data-toggle="tab" role="tab"
+                   id="campaign-loots-tab" href="#campaign-loots">{% trans "Butins" %}</a>
+            </li>
             {% if campaign %}
                 <li class="nav-item">
                     <a class="nav-link" data-toggle="tab" role="tab"
                        id="campaign-effects-tab" href="#campaign-effects">{% trans "Effets" %}</a>
                 </li>
             {% endif %}
-            <li class="nav-item">
-                <a class="nav-link" data-toggle="tab" role="tab"
-                   id="campaign-loots-tab" href="#campaign-loots">{% trans "Butins" %}</a>
-            </li>
         </ul>
         <div class="tab-content">
             {% include "fallout/campaign/panels/infos.html" %}

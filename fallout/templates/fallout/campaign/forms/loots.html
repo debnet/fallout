@@ -17,7 +17,7 @@
         </div>
         <div class="col-auto form-check ml-1">
             <label class="form-check-label">
-                <input class="form-check-input" type="checkbox" name="action">
+                <input class="form-check-input" type="checkbox" name="action" checked="checked">
                 <span title="{% trans "Points d'action" %}">{% trans "PA" %}</span>
             </label>
         </div>
@@ -26,7 +26,7 @@
     <div class="row">
         {% for loot in loots %}
             {% with item=loot.item %}
-                <div class="col-md-4 col-sm-6 mb-3">
+                <div class="col-md-3 col-sm-6 mb-3">
                     <div class="card h-100">
                         <div class="card-header">
                             {% if loot.quantity > 1 %}
@@ -38,9 +38,11 @@
                         <div class="card-body">
                             {% with image=item.image thumbnail=item.thumbnail %}
                                 {% if thumbnail %}
-                                    <img class="img-fluid mx-auto d-block mb-2" src="{{ thumbnail }}">
+                                    <div class="thumbnail rounded mb-2">
+                                        <img class="img-fluid mx-auto d-block rounded" src="{{ thumbnail }}">
+                                    </div>
                                 {% elif image %}
-                                    <img class="img-fluid mx-auto d-block mb-2" height="{{ image.height }}" width="{{ image.width }}" src="{{ image.url }}">
+                                    <img class="img-fluid mx-auto d-block rounded mb-2" src="{{ image.url }}">
                                 {% endif %}
                             {% endwith %}
                             <p class="card-text">
@@ -90,7 +92,7 @@
                                 {% if loot.quantity > 1 %}
                                     <label class="sr-only" for="quantity-{{ loot.id }}">{% trans "Quantité" %}</label>
                                     <select name="quantity-{{ loot.id }}" id="quantity-{{ loot.id }}"
-                                            class="form-control custom-select mr-1">
+                                            class="form-control form-control-sm custom-select ismall mr-1">
                                         {% for i in 0|range:loot.quantity %}
                                             <option value="{{ i }}">{{ i }}</option>
                                         {% endfor %}

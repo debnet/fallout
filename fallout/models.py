@@ -780,10 +780,8 @@ class Character(Entity, Stats):
         # Equipment
         attacker_weapon_equipment = self.inventory.filter(slot=ITEM_WEAPON).first()
         attacker_ammo_equipment = self.inventory.filter(slot=ITEM_AMMO).first()
-        defender_armor_equipment = target.inventory.filter(slot=ITEM_ARMOR).first()
         attacker_weapon = history.attacker_weapon = getattr(attacker_weapon_equipment, 'item', None)
         attacker_ammo = history.attacker_ammo = getattr(attacker_ammo_equipment, 'item', None)
-        defender_armor = history.defender_armor = getattr(defender_armor_equipment, 'item', None)
         # Fight conditions
         if attacker_weapon and \
                 (attacker_weapon.clip_size and attacker_weapon_equipment.clip_count <= 0) or \
@@ -805,8 +803,20 @@ class Character(Entity, Stats):
                 history.status = STATUS_NOT_ENOUGH_AP
         # Premature end of fight
         if history.status:
-            history.save()
+            if log:
+                history.save()
             return history
+        # Targetted body part modifiers and equipment
+        body_part = target_part
+        if not target_part:
+            for body_part, chance in BODY_PARTS_RANDOM_CHANCES:
+                if randint(1, 100) < chance:
+                    break
+        history.body_part = body_part = body_part or PART_TORSO
+        ranged_hit_modifier, melee_hit_modifier, critical_modifier = BODY_PARTS_MODIFIERS[history.body_part]
+        armor_slot = ITEM_HELMET if body_part in (PART_EYES, PART_HEAD) else ITEM_ARMOR
+        defender_armor_equipment = target.inventory.filter(slot=armor_slot).first()
+        defender_armor = history.defender_armor = getattr(defender_armor_equipment, 'item', None)
         # Chance to hit
         attacker_skill = getattr(attacker_weapon, 'skill', SKILL_UNARMED)
         is_melee = attacker_skill in (SKILL_UNARMED, SKILL_MELEE_WEAPONS)
@@ -820,19 +830,11 @@ class Character(Entity, Stats):
             attacker_range_stats = SPECIAL_STRENGTH if attacker_weapon_throwable else SPECIAL_PERCEPTION
             attacker_hit_range = max(getattr(attacker_weapon, 'range', 0) + getattr(attacker_ammo, 'range', 0), 0)
             attacker_hit_range += (2 * getattr(self.stats, attacker_range_stats, 0)) + 1
-        attacker_hit_chance -= min(target_range - attacker_hit_range, 0) * FIGHT_RANGE_MALUS  # Range modifiers
+        attacker_hit_chance -= max(target_range - attacker_hit_range, 0) * FIGHT_RANGE_MALUS  # Range modifiers
         attacker_hit_chance += getattr(attacker_weapon, 'hit_chance_modifier', 0)  # Weapon hit chance modifier
         attacker_hit_chance += getattr(attacker_ammo, 'hit_chance_modifier', 0)  # Ammo hit chance modifier
         attacker_hit_chance -= getattr(defender_armor, 'armor_class', 0)  # Defender armor class modifier
         attacker_hit_chance -= target.stats.armor_class  # Armor class
-        # Targetted body part modifiers
-        body_part = target_part
-        if not target_part:
-            for body_part, chance in BODY_PARTS_RANDOM_CHANCES:
-                if randint(1, 100) < chance:
-                    break
-        history.body_part = body_part or PART_TORSO
-        ranged_hit_modifier, melee_hit_modifier, critical_modifier = BODY_PARTS_MODIFIERS[history.body_part]
         if target_part:
             attacker_hit_chance += melee_hit_modifier if attacker_skill == SKILL_UNARMED else ranged_hit_modifier
         attacker_hit_chance += hit_modifier  # Other modifiers
@@ -881,7 +883,7 @@ class Character(Entity, Stats):
             resistance_modifier = 1.0 + getattr(attacker_weapon, 'resistance_modifier', 0.0)
             resistance_modifier += getattr(attacker_ammo, 'resistance_modifier', 0.0)
             history.damage = target.damage(
-                raw_damage=damage, damage_type=attacker_damage_type, save=True,
+                raw_damage=damage, damage_type=attacker_damage_type, body_part=body_part, save=True,
                 threshold_modifier=threshold_modifier, resistance_modifier=resistance_modifier)
             if not target.health:
                 history.status = STATUS_TARGET_KILLED
@@ -911,13 +913,15 @@ class Character(Entity, Stats):
         return history
 
     def damage(self, raw_damage: float=0.0, min_damage: int=0, max_damage: int=0, damage_type: str=DAMAGE_NORMAL,
-               threshold_modifier: float=1.0, resistance_modifier: float=1.0, save: bool=True, log: bool=True) -> 'DamageHistory':
+               body_part: str=PART_TORSO, threshold_modifier: float=1.0, resistance_modifier: float=1.0,
+               save: bool=True, log: bool=True) -> 'DamageHistory':
         """
         Inflige des dégâts au personnage
         :param raw_damage: Dégâts bruts
         :param min_damage: Dégâts minimum
         :param max_damage: Dégâts maximum
         :param damage_type: Type des dégâts
+        :param body_part: Partie du corps touchée
         :param threshold_modifier: Modificateur d'absorption de dégâts (appliqué à l'armure et au personnage)
         :param resistance_modifier: Modificateur de résistance aux dégâts (appliqué à l'armure et au personnage)
         :param save: Sauvegarder les modifications sur le personnage ?
@@ -936,7 +940,8 @@ class Character(Entity, Stats):
         if damage_type != DAMAGE_HEAL and self.health <= 0:
             return history
         # Armor threshold and resistance
-        armor_equipment = self.inventory.filter(slot=ITEM_ARMOR).first()
+        armor_slot = ITEM_HELMET if damage_type == DAMAGE_GAZ_INHALED or (body_part in (PART_EYES, PART_HEAD)) else ITEM_ARMOR
+        armor_equipment = self.inventory.filter(slot=armor_slot).first()
         armor = history.armor = getattr(armor_equipment, 'item', None)
         armor_damage = 0
         if armor and armor_equipment:
@@ -982,7 +987,7 @@ class Character(Entity, Stats):
             history.save()
         return history
 
-    def apply_effects(self, campaign: 'Campaign'=None, save: bool=True) -> List['DamageHistory']:
+    def apply_effects(self, campaign: Optional['Campaign']=None, save: bool=True) -> List['DamageHistory']:
         """
         Applique les effets actifs de la campagne et du personnage
         :param campaign: Campagne (pour application des effets associés)
@@ -1147,7 +1152,7 @@ class DamageMixin:
         Retourne le libellé (avec le type) des dégâts de l'arme ou de la munition
         :return: Représentation des dégâts ou rien si l'objet n'est pas une arme ou une munition
         """
-        if not self.long_label_damage:
+        if not self.label_damage:
             return self.get_damage_type_display()
         return _(f"{self.label_damage} {self.get_damage_type_display()}")
 
@@ -1216,7 +1221,7 @@ class Item(Entity, DamageMixin):
         """
         Objet équipable ?
         """
-        return self.type in (ITEM_AMMO, ITEM_ARMOR, ITEM_WEAPON)
+        return self.type in (ITEM_AMMO, ITEM_ARMOR, ITEM_HELMET, ITEM_WEAPON)
 
     @property
     def is_usable(self) -> bool:
@@ -1230,7 +1235,7 @@ class Item(Entity, DamageMixin):
         """
         Objet réparable ?
         """
-        return self.type in (ITEM_ARMOR, ITEM_WEAPON)
+        return self.type in (ITEM_ARMOR, ITEM_HELMET, ITEM_WEAPON)
 
     def get_threshold(self, damage_type: str=DAMAGE_NORMAL) -> int:
         """
@@ -1412,7 +1417,7 @@ class Equipment(CommonModel):
         """
         assert self.item.is_usable, _(
             "Il n'est pas possible d'utiliser ce type d'objet.")
-        assert not action or self.character.action_points < AP_COST_USE, _(
+        assert not action or self.character.action_points >= AP_COST_USE, _(
             "Le personnage ne possède plus assez de points d'actions pour utiliser cet objet.")
         assert self.quantity > 0, _(
             "Le personnage doit posséder au moins un exemplaire de cet objet pour l'utiliser.")
@@ -1437,7 +1442,7 @@ class Equipment(CommonModel):
         """
         assert self.quantity >= quantity, _(
             "Le personnage doit posséder la quantité d'objets qu'il souhaite jeter.")
-        assert not action or self.character.action_points < AP_COST_USE, _(
+        assert not action or self.character.action_points >= AP_COST_USE, _(
             "Le personnage ne possède plus assez de points d'actions pour jeter cet objet.")
         loot = Loot.create(
             campaign=self.character.campaign, item=self.item,
@@ -1457,7 +1462,7 @@ class Equipment(CommonModel):
         """
         assert self.slot == ITEM_WEAPON and self.item.clip_size, _(
             "Cet objet n'est pas une arme équipée ou ne peut être rechargé.")
-        assert not action or self.character.action_points < self.item.ap_cost_reload, _(
+        assert not action or self.character.action_points >= self.item.ap_cost_reload, _(
             "Le personnage ne possède plus assez de points d'actions pour jeter cet objet.")
         ammo = Equipment.objects.filter(character_id=self.character_id, slot=ITEM_AMMO).first()
         assert ammo and ammo.quantity > 0, _(
@@ -1471,6 +1476,23 @@ class Equipment(CommonModel):
         self.save()
         if action:
             self.character.action_points -= self.item.ap_cost_reload
+            self.character.save()
+        return self
+
+    def repair(self, value: Union[int, float]=100, action: bool=False) -> 'Equipment':
+        """
+        Permet de réparer un équipement détérioré
+        :param value: Valeur de réparation
+        :param action: Consommera des points d'action
+        :return: Equipement
+        """
+        assert self.item.is_repairable, _("Cet objet n'est pas réparable.")
+        assert not action or self.character.action_points >= AP_COST_REPAIR, _(
+            "Le personnage ne possède plus assez de points d'actions pour réparer cet objet.")
+        self.condition = (value / 100.0) if isinstance(value, int) else float(value)
+        self.save()
+        if action:
+            self.character.action_points -= AP_COST_REPAIR
             self.character.save()
         return self
 
@@ -2063,7 +2085,8 @@ class DamageHistory(CommonModel):
     max_damage = models.PositiveSmallIntegerField(default=0, verbose_name=_("dégâts max."))
     base_damage = models.SmallIntegerField(default=0, verbose_name=_("dégâts de base"))
     armor = models.ForeignKey(
-        'Item', blank=True, null=True, on_delete=models.CASCADE, limit_choices_to={'type': ITEM_ARMOR},
+        'Item', blank=True, null=True, on_delete=models.CASCADE,
+        limit_choices_to={'type__in': (ITEM_ARMOR, ITEM_HELMET)},
         related_name='+', verbose_name=_("protection"))
     armor_threshold = models.SmallIntegerField(default=0, verbose_name=_("absorption armure"))
     armor_resistance = models.FloatField(default=0.0, verbose_name=_("résistance armure"))
@@ -2097,13 +2120,16 @@ class FightHistory(CommonModel):
         'Character', on_delete=models.CASCADE,
         related_name='+', verbose_name=_("défenseur"))
     attacker_weapon = models.ForeignKey(
-        'Item', blank=True, null=True, on_delete=models.CASCADE, limit_choices_to={'type': ITEM_WEAPON},
+        'Item', blank=True, null=True, on_delete=models.CASCADE,
+        limit_choices_to={'type': ITEM_WEAPON},
         related_name='+', verbose_name=_("arme de l'attaquant"))
     attacker_ammo = models.ForeignKey(
-        'Item', blank=True, null=True, on_delete=models.CASCADE, limit_choices_to={'type': ITEM_AMMO},
+        'Item', blank=True, null=True, on_delete=models.CASCADE,
+        limit_choices_to={'type': ITEM_AMMO},
         related_name='+', verbose_name=_("munitions de l'attaquant"))
     defender_armor = models.ForeignKey(
-        'Item', blank=True, null=True, on_delete=models.CASCADE, limit_choices_to={'type': ITEM_ARMOR},
+        'Item', blank=True, null=True, on_delete=models.CASCADE,
+        limit_choices_to={'type__in': (ITEM_ARMOR, ITEM_HELMET)},
         related_name='+', verbose_name=_("protection du défenseur"))
     range = models.PositiveSmallIntegerField(default=0, verbose_name=_("distance"))
     body_part = models.CharField(max_length=5, choices=BODY_PARTS, verbose_name=_("partie du corps"))
@@ -2116,7 +2142,8 @@ class FightHistory(CommonModel):
     critical = models.BooleanField(default=False, verbose_name=_("critique ?"))
     status = models.CharField(max_length=15, choices=FIGHT_STATUS, blank=True, verbose_name=_("status"))
     damage = models.OneToOneField(
-        'DamageHistory', blank=True, null=True, on_delete=models.CASCADE, limit_choices_to={'fight__isnull': True},
+        'DamageHistory', blank=True, null=True, on_delete=models.CASCADE,
+        limit_choices_to={'fight__isnull': False},
         related_name='fight', verbose_name=_("historique des dégâts"))
 
     @property

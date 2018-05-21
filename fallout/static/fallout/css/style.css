@@ -29,3 +29,9 @@ tr {
 td {
     vertical-align:bottom!important;
 }
+
+/* Thumbnail images */
+.thumbnail {
+    background-color: black;
+    height: 200px;
+}

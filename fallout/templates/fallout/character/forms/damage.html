@@ -10,7 +10,7 @@
         <tbody>
             {% if multiple %}
                 {% for character in characters %}
-                    <tr class="check-control">
+                    <tr colspan="2">
                         <td>
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" id="{{ code }}-character-{{ c.id }}"
@@ -19,12 +19,6 @@
                                     {{ character.name }}
                                 </label>
                             </div>
-                        </td>
-                        <td class="text-right">
-                            <label class="form-check-label" class="sr-only"
-                                   for="{{ code }}-dst-{{ character.id }}">{% trans "Distance" %}</label>
-                            <input class="form-control form-control-sm ismall" type="number"
-                                   id="{{ code }}-dst-{{ character.id }}" name="range" value="1" disabled />
                         </td>
                     </tr>
                 {% endfor %}
@@ -35,6 +29,17 @@
                     <select class="form-control form-control-sm custom-select" id="{{ code }}-damage-type"
                             name="damage_type">
                         {% for code, label in damage_types %}
+                            <option value="{{ code }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td><label for="{{ code }}-body-part" class="d-inline">{% trans "cible" %}</label></td>
+                <td class="text-right">
+                    <select class="form-control form-control-sm custom-select" id="{{ code }}-body-part" name="body_part">
+                        <option value="">{% trans "non ciblé" %}</option>
+                        {% for code, label in body_parts %}
                             <option value="{{ code }}">{{ label }}</option>
                         {% endfor %}
                     </select>

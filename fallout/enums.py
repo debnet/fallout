@@ -219,10 +219,12 @@ LIST_ALL_STATS = dict(sum((stats for label, stats in ALL_STATS), ()))
 ITEM_WEAPON = 'weapon'
 ITEM_AMMO = 'ammo'
 ITEM_ARMOR = 'armor'
+ITEM_HELMET = 'helmet'
 SLOT_ITEM_TYPES = (
     (ITEM_WEAPON, _("arme")),
     (ITEM_AMMO, _("munition")),
     (ITEM_ARMOR, _("armure")),
+    (ITEM_HELMET, _("casque")),
 )
 LIST_SLOT_ITEM_TYPES = dict(SLOT_ITEM_TYPES)
 

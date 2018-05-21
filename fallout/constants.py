@@ -251,6 +251,7 @@ AP_COST_EQUIP = 4  # Equip item
 AP_COST_USE = 3  # Use item
 AP_COST_DROP = 2  # Drop item
 AP_COST_TAKE = 2  # Take item
+AP_COST_REPAIR = 5  # Repair item
 
 # Experience gains
 XP_GAIN_ROLL_FAIL = 1  # XP gain

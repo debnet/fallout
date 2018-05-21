@@ -163,7 +163,8 @@ def view_character(request, character_id):
                     raw_damage=int(data.get('raw_damage') or 0),
                     min_damage=int(data.get('min_damage') or 0),
                     max_damage=int(data.get('max_damage') or 0),
-                    damage_type=int(data.get('damage_type') or 0))
+                    damage_type=int(data.get('damage_type') or 0),
+                    body_part=int(data.get('body_part') or 0))
                 messages.success(request, _(f"<strong>{result.character}</strong> {result.label}"))
             elif type == 'item':
                 item_id, item_name = data.get('item-id'), data.get('item-name')
@@ -173,18 +174,20 @@ def view_character(request, character_id):
                     filter = dict(pk=item_id) if item_id else dict(name__icontains=item_name)
                     equip = Item.objects.filter(**filter).first()
                     equip.give(character=character, quantity=quantity, condition=condition)
-                elif method == 'equip':
-                    equip = Equipment.objects.filter(pk=item_id).first()
-                    equip.equip(action=bool(data.get('action', False)))
-                elif method == 'reload':
-                    equip = Equipment.objects.filter(pk=item_id).first()
-                    equip.reload(action=bool(data.get('action', False)))
-                elif method == 'use':
-                    equip = Equipment.objects.filter(pk=item_id).first()
-                    equip.use(action=bool(data.get('action', False)))
-                elif method == 'drop':
-                    equip = Equipment.objects.filter(pk=item_id).first()
-                    equip.drop(quantity=int(data.get('quantity') or 1), action=bool(data.get('action', False)))
+                else:
+                    action = bool(data.get('action', False))
+                    equip = Equipment.objects.select_related('character', 'item').filter(pk=item_id).first()
+                    character = equip.character
+                    if method == 'equip':
+                        equip.equip(action=action)
+                    elif method == 'reload':
+                        equip.reload(action=action)
+                    elif method == 'use':
+                        equip.use(action=action)
+                    elif method == 'repair':
+                        equip.repair(value=int(data.get('condition') or 100), action=action)
+                    elif method == 'drop':
+                        equip.drop(quantity=int(data.get('quantity') or 1), action=action)
             elif type == 'effect':
                 effect_id, effect_name = data.get('effect-id'), data.get('effect-name')
                 if method == 'add':
@@ -203,7 +206,6 @@ def view_character(request, character_id):
                 character.thirst = int(data.get('thirst'))
                 character.hunger = int(data.get('hunger'))
                 character.sleep = int(data.get('sleep'))
-                character.save()
         except ValidationError as error:
             for field, errors in error.message_dict.items():
                 for error in (errors if isinstance(errors, list) else [errors]):
