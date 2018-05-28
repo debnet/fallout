@@ -37,9 +37,9 @@ RACES_STATS = {
         SPECIAL_STRENGTH: (0, 1, 8),
         SPECIAL_PERCEPTION: (0, 4, 13),
         SPECIAL_ENDURANCE: (0, 1, 10),
-        SPECIAL_CHARISMA: (0, 1, 10),
+        SPECIAL_CHARISMA: (0, 1, 6),
         SPECIAL_INTELLIGENCE: (0, 2, 10),
-        SPECIAL_AGILITY: (0, 1, 6),
+        SPECIAL_AGILITY: (0, 1, 10),
         SPECIAL_LUCK: (0, 5, 12),
         RESISTANCE_RADIATION: (80, -100, 100),
         RESISTANCE_POISON: (30, -100, 100),
@@ -254,12 +254,11 @@ AP_COST_TAKE = 2  # Take item
 AP_COST_REPAIR = 5  # Repair item
 
 # Experience gains
-XP_GAIN_ROLL_FAIL = 1  # XP gain
-# for roll (fixed)
-XP_GAIN_ROLL_SUCCESS = 2  # XP gain for roll (fixed)
+XP_GAIN_ROLL_FAIL = 3  # XP gain for roll failure
+XP_GAIN_ROLL_SUCCESS = 2  # XP gain for roll success
 XP_GAIN_ROLL = (XP_GAIN_ROLL_FAIL, XP_GAIN_ROLL_SUCCESS)
-XP_GAIN_FIGHT_MISS = 2  # XP gain for fight (multiplier)
-XP_GAIN_FIGHT_HIT = 3  # XP gain for fight (multiplier)
+XP_GAIN_FIGHT_MISS = 3  # XP gain for fight failure (multiplier)
+XP_GAIN_FIGHT_HIT = 2  # XP gain for fight success (multiplier)
 XP_GAIN_FIGHT = (XP_GAIN_FIGHT_MISS, XP_GAIN_FIGHT_HIT)
 
 # Turn time

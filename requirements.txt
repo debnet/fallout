@@ -1,6 +1,6 @@
 Django==2.0.5
 Pillow==5.1.0
-common-framework==2018.5.10
+common-framework==2018.5.23
 django-cors-headers==2.2.0
 django-debug-toolbar==1.9.1
 django-multiselectfield==0.1.8

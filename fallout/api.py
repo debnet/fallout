@@ -10,7 +10,7 @@ from rest_framework.generics import get_object_or_404
 
 from fallout.enums import BODY_PARTS, DAMAGES_TYPES, LIST_EDITABLE_STATS, ROLL_STATS
 from fallout.models import (
-    MODELS, Campaign, Character, Equipment, CampaignEffect, CharacterEffect,
+    MODELS, Campaign, Character, Equipment, CharacterEffect,
     Loot, LootTemplate, DamageHistory, FightHistory, RollHistory)
 
 
@@ -182,8 +182,8 @@ class DamageInputSerializer(BaseCustomSerializer):
     max_damage = serializers.IntegerField(default=0, initial=0, label=_("dégâts max."))
     damage_type = serializers.ChoiceField(choices=DAMAGES_TYPES, label=_("type de dégâts"))
     body_part = serializers.ChoiceField(choices=BODY_PARTS, label=_("partie du corps"))
-    threshold_modifier = serializers.FloatField(default=1.0, initial=1.0, label=_("modificateur de seuil"))
-    resistance_modifier = serializers.FloatField(default=1.0, initial=1.0, label=_("modificateur de resistance"))
+    threshold_modifier = serializers.IntegerField(default=0, initial=0, label=_("modificateur de seuil"))
+    resistance_modifier = serializers.FloatField(default=0.0, initial=0.0, label=_("modificateur de resistance"))
 
 
 class MultiDamageInputSerializer(DamageInputSerializer):
@@ -347,4 +347,3 @@ def loottemplate_open(request, template_id):
     """
     loot_template = get_object_or_404(LootTemplate, pk=template_id)
     return loot_template.create(**request.validated_data)
-
