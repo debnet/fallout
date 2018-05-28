@@ -1132,8 +1132,6 @@ class DamageMixin:
         Retourne le libellé des dégâts de l'arme ou de la munition
         :return: Représentation des dégâts ou rien si l'objet n'est pas une arme ou une munition
         """
-        if self.type not in [ITEM_WEAPON, ITEM_AMMO]:
-            return ''
         damage = ''
         if self.min_damage or self.max_damage:
             damage = f"{self.min_damage}-{self.max_damage}"
@@ -1369,7 +1367,7 @@ class Equipment(CommonModel):
         """
         assert self.item.is_equipable, _(
             "Il n'est pas possible de s'équiper de ce type d'objet.")
-        assert not action or self.character.action_points < AP_COST_EQUIP, _(
+        assert not action or self.character.action_points >= AP_COST_EQUIP, _(
             "Le personnage ne possède plus assez de points d'actions pour s'équiper de cet objet.")
 
         def get_equipment(equipment: 'Equipment', slot: str) -> Optional['Equipment']:
@@ -1814,7 +1812,7 @@ class Loot(CommonModel):
             character = Character.objects.get(pk=character)
         assert self.campaign_id == character.campaign_id, _(
             "Le personnage doit être dans la même campagne.")
-        assert not action or character.action_points < AP_COST_TAKE, _(
+        assert not action or character.action_points >= AP_COST_TAKE, _(
             "Le personnage ne possède plus assez de points d'actions pour s'équiper de cet objet.")
         quantity = max(0, min(quantity, self.quantity))
         equipment = Equipment.objects.select_related('item').filter(character=character, item=self.item).first()
