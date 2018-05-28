@@ -1148,7 +1148,7 @@ class DamageMixin:
         """
         if not self.label_damage:
             return self.get_damage_type_display()
-        return _(f"{self.label_damage} {self.get_damage_type_display()}")
+        return f"{self.label_damage} {self.get_damage_type_display()}"
 
 
 class Item(Entity, DamageMixin):
@@ -1175,7 +1175,7 @@ class Item(Entity, DamageMixin):
     range = models.PositiveSmallIntegerField(default=0, verbose_name=_("modif. de portée"))
     hit_chance_modifier = models.SmallIntegerField(default=0, verbose_name=_("modif. de précision"))
     threshold_modifier = models.SmallIntegerField(default=0, verbose_name=_("modif. d'absorption"))
-    resistance_modifier = models.FloatField(default=0.0, verbose_name=_("modif. de resistance"))
+    resistance_modifier = models.FloatField(default=0.0, verbose_name=_("modif. de résistance"))
     # Action points
     ap_cost_reload = models.PositiveSmallIntegerField(default=0, verbose_name=_("coût PA recharge"))
     ap_cost_normal = models.PositiveSmallIntegerField(default=0, verbose_name=_("coût PA normal"))
@@ -1296,7 +1296,7 @@ class ItemModifier(Modifier):
         related_name='modifiers', verbose_name=_("objet"))
 
     def __str__(self) -> str:
-        return _(f"{self.get_stats_display()} = {self.value}")
+        return f"{self.get_stats_display()} = {self.value}"
 
     class Meta:
         verbose_name = _("modificateur d'objet")
@@ -1522,7 +1522,7 @@ class Equipment(CommonModel):
         return super().save(*args, **kwargs)
 
     def __str__(self) -> str:
-        return _(f"({self.character}) {self.item}")
+        return f"({self.character}) {self.item}"
 
     class Meta:
         verbose_name = _("équipement")
@@ -1615,7 +1615,7 @@ class EffectModifier(Modifier):
         related_name='modifiers', verbose_name=_("effet"))
 
     def __str__(self) -> str:
-        return _(f"{self.get_stats_display()} = {self.value}")
+        return f"{self.get_stats_display()} = {self.value}"
 
     class Meta:
         verbose_name = _("modificateur d'effet")
@@ -1704,7 +1704,7 @@ class CampaignEffect(ActiveEffect):
         super().save(*args, **kwargs)
 
     def __str__(self) -> str:
-        return _(f"({self.campaign}) {self.effect}")
+        return f"({self.campaign}) {self.effect}"
 
     class Meta:
         verbose_name = _("effet de campagne")
@@ -1757,7 +1757,7 @@ class CharacterEffect(ActiveEffect):
         super().save(*args, **kwargs)
 
     def __str__(self) -> str:
-        return _(f"({self.character}) {self.effect}")
+        return f"({self.character}) {self.effect}"
 
     class Meta:
         verbose_name = _("effet de personnage")
@@ -1861,7 +1861,7 @@ class Loot(CommonModel):
         super().save(*args, **kwargs)
 
     def __str__(self) -> str:
-        return _(f"({self.campaign}) {self.item}")
+        return f"({self.campaign}) {self.item}"
 
     class Meta:
         verbose_name = _("butin")
@@ -1943,7 +1943,7 @@ class LootTemplateItem(CommonModel):
     max_condition = models.FloatField(default=1.0, verbose_name=_("état max."))
 
     def __str__(self) -> str:
-        return _(f"({self.template}) {self.item}")
+        return f"({self.template}) {self.item}"
 
     class Meta:
         verbose_name = _("objet de butin")
@@ -2057,7 +2057,7 @@ class RollHistory(CommonModel):
             total=self.value + self.modifier)
 
     def __str__(self) -> str:
-        return _(f"({self.character}) - {self.label}")
+        return f"({self.character}) - {self.label}"
 
     class Meta:
         verbose_name = _("historique de jet")
@@ -2094,7 +2094,9 @@ class DamageHistory(CommonModel):
 
     @property
     def label(self) -> str:
-        return _(f"{self.get_damage_type_display()} de {self.real_damage}")
+        return _("{type} de {real_damage}").format(
+            type=self.get_damage_type_display(),
+            real_damage=self.real_damage)
 
     class Meta:
         verbose_name = _("historique de dégâts")
@@ -2170,11 +2172,14 @@ class FightHistory(CommonModel):
         :return:
         """
         if not self.damage:
-            return _(f"{self.label} : {self.get_status_display()}")
-        return _(f"{self.label} : {self.damage.real_damage} dégât(s) infligé(s)")
+            return _("{label} : {status}").format(
+                label=self.label, status=self.get_status_display())
+        return _("{label} : {real_damage} dégât(s) infligé(s)").format(
+            label=self.label, real_damage=self.damage.real_damage)
 
     def __str__(self) -> str:
-        return _(f"{self.attacker} vs. {self.defender} - {self.long_label}")
+        return _("{attacker} vs. {defender} - {long_label}").format(
+            attacker=self.attacker, defender=self.defender, long_label=self.long_label)
 
     class Meta:
         verbose_name = _("historique de combat")

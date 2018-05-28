@@ -309,7 +309,7 @@ class Migration(migrations.Migration):
                 ('range', models.PositiveSmallIntegerField(default=0, verbose_name='modif. de portée')),
                 ('hit_chance_modifier', models.SmallIntegerField(default=0, verbose_name='modif. de précision')),
                 ('threshold_modifier', models.SmallIntegerField(default=0, verbose_name="modif. d'absorption")),
-                ('resistance_modifier', models.FloatField(default=0.0, verbose_name='modif. de resistance')),
+                ('resistance_modifier', models.FloatField(default=0.0, verbose_name='modif. de résistance')),
                 ('ap_cost_reload', models.PositiveSmallIntegerField(default=0, verbose_name='coût PA recharge')),
                 ('ap_cost_normal', models.PositiveSmallIntegerField(default=0, verbose_name='coût PA normal')),
                 ('ap_cost_target', models.PositiveSmallIntegerField(default=0, verbose_name='coût PA ciblé')),

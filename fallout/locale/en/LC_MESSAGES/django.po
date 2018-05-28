@@ -19,1149 +19,1120 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 msgid "Fallout"
-msgstr ""
+msgstr "Fallout"
 
 msgid "Informations générales"
-msgstr ""
+msgstr "General informations"
 
 msgid "Effets"
-msgstr ""
+msgstr "Effects"
 
 msgid "Informations techniques"
-msgstr ""
+msgstr "Technical informations"
 
 msgid "Spécialités"
-msgstr ""
+msgstr "Speciality"
 
 msgid "Valeur actuelle : {}."
-msgstr ""
+msgstr "Current value: {}"
 
 msgid " (Spécialité +{}) "
-msgstr ""
+msgstr "(Speciality +{}) "
 
 msgid "Les personnages sélectionnés ont été dupliqués."
-msgstr ""
+msgstr "Selected characters were duplicated."
 
 msgid "Dupliquer"
-msgstr ""
+msgstr "Duplicate"
 
 msgid "Les compétences des personnages sélectionnés ont été générées avec succès."
-msgstr ""
+msgstr "Skills of selected characters were generated successfully."
 
 msgid "Générer aléatoirement les compétences"
-msgstr ""
+msgstr "Randomly generate skills"
 
 msgid "Faire un jet de compétence"
-msgstr ""
+msgstr "Make a skill role"
 
 #, python-brace-format
 msgid "{character} : {error}"
-msgstr ""
+msgstr "{character}: {error}"
 
 msgid "Attaquer un autre personnage"
-msgstr ""
+msgstr "Attack another character"
 
 msgid "Attaquer en rafale plusieurs personnages"
-msgstr ""
+msgstr "Burst attack many characters"
 
 msgid "Lâcher tous les équipements"
-msgstr ""
+msgstr "Drop all equipments"
 
 msgid "Armes uniquement"
-msgstr ""
+msgstr "Weapons only"
 
 msgid "Dégâts"
-msgstr ""
+msgstr "Damages"
 
 msgid "Protections uniquement"
-msgstr ""
+msgstr "Protections only"
 
 msgid "Effets et munitions"
-msgstr ""
+msgstr "Effects and ammunitions"
 
 msgid "Les objets sélectionnés ont été dupliqués."
-msgstr ""
+msgstr "Selected items were duplicated."
 
 msgid "Etats"
-msgstr ""
+msgstr "Status"
 
 msgid "Dégâts temporels"
-msgstr ""
+msgstr "Temporal damages"
 
 msgid "Les effets sélectionnés ont été dupliqués."
-msgstr ""
+msgstr "Selected effects were duplicated."
 
 msgid "Les modèles de butins sélectionnés ont été dupliqués."
-msgstr ""
+msgstr "Selected loot templates were duplicated."
 
 msgid "Jet"
-msgstr ""
+msgstr "Roll"
 
 msgid "Dégâts de base"
-msgstr ""
+msgstr "Base damage"
 
 msgid "Etat de la protection"
-msgstr ""
+msgstr "Protection condition"
 
 msgid "Etat du personnage"
-msgstr ""
+msgstr "Character condition"
 
 msgid "Attaquant"
-msgstr ""
+msgstr "Attacker"
 
 msgid "Défenseur"
-msgstr ""
+msgstr "Defender"
 
 msgid "Combat"
-msgstr ""
+msgstr "Fight"
 
 msgid "dégâts"
-msgstr ""
+msgstr "damages"
 
 msgid "secondes"
-msgstr ""
+msgstr "seconds"
 
 msgid "valider ?"
-msgstr ""
+msgstr "validate?"
 
 msgid "réinitialiser ?"
-msgstr ""
+msgstr "reinit?"
 
 msgid "statistique"
-msgstr ""
+msgstr "stats"
 
 msgid "modificateur"
-msgstr ""
+msgstr "modifier"
 
 msgid "Tous les personnages"
-msgstr ""
+msgstr "All characters"
 
 msgid "Personnages joueurs uniquement"
-msgstr ""
+msgstr "Player characters only"
 
 msgid "Personnages non joueurs uniquement"
-msgstr ""
+msgstr "Non-player characters only"
 
 msgid "groupe"
-msgstr ""
+msgstr "group"
 
 msgid "expérience"
-msgstr ""
+msgstr "experience"
 
 msgid "personnage"
-msgstr ""
+msgstr "character"
 
 msgid "cible"
-msgstr ""
+msgstr "target"
 
 msgid "distance"
-msgstr ""
+msgstr "distance"
 
 msgid "partie du corps ciblée"
-msgstr ""
+msgstr "targetted body part"
 
 msgid "cibles"
-msgstr ""
+msgstr "targets"
 
 msgid "attaquant"
-msgstr ""
+msgstr "attacker"
 
 msgid "défenseur"
-msgstr ""
+msgstr "defender"
 
 msgid "dégâts bruts"
-msgstr ""
+msgstr "raw damage"
 
 msgid "dégâts min."
-msgstr ""
+msgstr "min damage"
 
 msgid "dégâts max."
-msgstr ""
+msgstr "max damage"
 
 msgid "type de dégâts"
-msgstr ""
+msgstr "damage type"
 
 msgid "partie du corps"
-msgstr ""
+msgstr "body part"
 
 msgid "modificateur de seuil"
-msgstr ""
+msgstr "threshold modifier"
 
-msgid "modificateur de resistance"
-msgstr ""
+msgid "modificateur de résistance"
+msgstr "resistance modifier"
 
 msgid "personnages"
-msgstr ""
+msgstr "characters"
 
 msgid "action ?"
-msgstr ""
+msgstr "action?"
 
 msgid "quantité"
-msgstr ""
+msgstr "quantity"
 
 msgid "nombre"
-msgstr ""
+msgstr "number"
 
 msgid "campagne"
-msgstr ""
+msgstr "campaign"
 
 msgid "Fallout RPG"
-msgstr ""
+msgstr "Fallout RPG"
 
 msgid "santé"
-msgstr ""
+msgstr "health"
 
 msgid "points d'action"
-msgstr ""
+msgstr "action points"
 
 msgid "points de compétence"
-msgstr ""
+msgstr "skill points"
 
 msgid "points de talent"
-msgstr ""
+msgstr "talent points"
 
 msgid "karma"
-msgstr ""
+msgstr "karma"
 
 msgid "rads"
-msgstr ""
+msgstr "rads"
 
 msgid "soif"
-msgstr ""
+msgstr "thirst"
 
 msgid "faim"
-msgstr ""
+msgstr "hunger"
 
 msgid "sommeil"
-msgstr ""
+msgstr "sleep"
 
 msgid "force"
-msgstr ""
+msgstr "strength"
 
 msgid "perception"
-msgstr ""
+msgstr "perception"
 
 msgid "endurance"
-msgstr ""
+msgstr "endurance"
 
 msgid "charisme"
-msgstr ""
+msgstr "charisma"
 
 msgid "intelligence"
-msgstr ""
+msgstr "intelligence"
 
 msgid "agilité"
-msgstr ""
+msgstr "agility"
 
 msgid "chance"
-msgstr ""
+msgstr "luck"
 
 msgid "santé maximale"
-msgstr ""
+msgstr "max health"
 
 msgid "points d'action max."
-msgstr ""
+msgstr "max action points"
 
 msgid "charge maximale"
-msgstr ""
+msgstr "max weight"
 
 msgid "esquive"
-msgstr ""
+msgstr "dodge"
 
 msgid "attaque en mélée"
-msgstr ""
+msgstr "melee attack"
 
 msgid "initiative"
-msgstr ""
+msgstr "initiative"
 
 msgid "taux de regénération"
-msgstr ""
+msgstr "regeneration rate"
 
 msgid "chance de critique"
-msgstr ""
+msgstr "critical chance"
 
 msgid "seuil de dégâts"
-msgstr ""
+msgstr "damage threshold"
 
 msgid "résistance aux dégâts"
-msgstr ""
+msgstr "damage resistance"
 
 msgid "armes à feu légères"
-msgstr ""
+msgstr "small guns"
 
 msgid "armes à feu lourdes"
-msgstr ""
+msgstr "big guns"
 
 msgid "armes à énergie"
-msgstr ""
+msgstr "energy weapons"
 
 msgid "à mains nues"
-msgstr ""
+msgstr "unarmed"
 
 msgid "armes de mélée"
-msgstr ""
+msgstr "melee weapons"
 
 msgid "armes de lancer"
-msgstr ""
+msgstr "throwing weapons"
 
 msgid "premiers secours"
-msgstr ""
+msgstr "first aid"
 
 msgid "médecine"
-msgstr ""
+msgstr "medicine"
 
 msgid "chimie"
-msgstr ""
+msgstr "chimistry"
 
 msgid "discrétion"
-msgstr ""
+msgstr "sneak"
 
 msgid "crochetage"
-msgstr ""
+msgstr "lockpick"
 
 msgid "pickpocket"
-msgstr ""
+msgstr "pickpocket"
 
 msgid "pièges"
-msgstr ""
+msgstr "traps"
 
 msgid "science"
-msgstr ""
+msgstr "science"
 
 msgid "réparation"
-msgstr ""
+msgstr "repair"
 
 msgid "discours"
-msgstr ""
+msgstr "speech"
 
 msgid "marchandage"
-msgstr ""
+msgstr "barter"
 
 msgid "hasard"
-msgstr ""
+msgstr "gambling"
 
 msgid "survie"
-msgstr ""
+msgstr "survival"
 
 msgid "connaissance"
-msgstr ""
+msgstr "knowledge"
 
 msgid "résistance physique"
-msgstr ""
+msgstr "physical resistance"
 
 msgid "résistance au laser"
-msgstr ""
+msgstr "laser resistance"
 
 msgid "résistance au plasma"
-msgstr ""
+msgstr "plasma resistance"
 
 msgid "résistance aux explosions"
-msgstr ""
+msgstr "explosion resistance"
 
 msgid "résistance au feu"
-msgstr ""
+msgstr "fire resistance"
 
 msgid "résistance au gaz (contact)"
-msgstr ""
+msgstr "contact gaz resistance"
 
 msgid "résistance au gaz (inhalé)"
-msgstr ""
+msgstr "inhale gaz resistance"
 
 msgid "résistance à l'électricité"
-msgstr ""
+msgstr "electricity resistance"
 
 msgid "résistance aux poisons"
-msgstr ""
+msgstr "poison resistance"
 
 msgid "résistance aux radiations"
-msgstr ""
+msgstr "radiation resistance"
 
 msgid "dégâts normaux"
-msgstr ""
+msgstr "normal damage"
 
 msgid "dégâts de laser"
-msgstr ""
+msgstr "laser damage"
 
 msgid "dégâts de plasma"
-msgstr ""
+msgstr "plasma damage"
 
 msgid "dégâts explosifs"
-msgstr ""
+msgstr "explosive damage"
 
 msgid "dégâts de feu"
-msgstr ""
+msgstr "fire damage"
 
 msgid "dégâts de gaz (contact)"
-msgstr ""
+msgstr "contact gaz damage"
 
 msgid "dégâts de gaz (inhalé)"
-msgstr ""
+msgstr "inhale gaz damage"
 
 msgid "dégâts d'électricité"
-msgstr ""
+msgstr "electricity damage"
 
 msgid "dégâts de poison"
-msgstr ""
+msgstr "poison damage"
 
 msgid "dégâts de radiations"
-msgstr ""
+msgstr "radiation damage"
 
 msgid "soins"
-msgstr ""
+msgstr "heal"
 
 msgid "santé par niveau"
-msgstr ""
+msgstr "health by level"
 
 msgid "compétences par niveau"
-msgstr ""
+msgstr "skills by level"
 
 msgid "niveaux pour un talent"
-msgstr ""
+msgstr "levels for a talent"
 
 msgid "S.P.E.C.I.A.L."
-msgstr ""
+msgstr "S.P.E.C.I.A.L."
 
 msgid "Compétences"
-msgstr ""
+msgstr "Skills"
 
 msgid "Etat général"
-msgstr ""
+msgstr "General condition"
 
 msgid "Statistiques secondaires"
-msgstr ""
+msgstr "Secondary statistics"
 
 msgid "Résistances"
-msgstr ""
+msgstr "Resistances"
 
 msgid "Statistiques de niveau"
-msgstr ""
+msgstr "Level statistics"
 
 msgid "arme"
-msgstr ""
+msgstr "weapon"
 
 msgid "munition"
-msgstr ""
+msgstr "ammunition"
 
 msgid "armure"
-msgstr ""
+msgstr "armor"
 
 msgid "casque"
-msgstr ""
+msgstr "helmet"
 
 msgid "nourriture"
-msgstr ""
+msgstr "food"
 
 msgid "médicament"
-msgstr ""
+msgstr "chems"
 
 msgid "autre"
-msgstr ""
+msgstr "misc"
 
 msgid "humain"
-msgstr ""
+msgstr "human"
 
 msgid "ghoule"
-msgstr ""
+msgstr "ghoul"
 
 msgid "super-mutant"
-msgstr ""
+msgstr "super-mutant"
 
 msgid "écorcheur"
-msgstr ""
+msgstr "deathclaw"
 
 msgid "robot"
-msgstr ""
+msgstr "robot"
 
 msgid "animal"
-msgstr ""
+msgstr "animal"
 
 msgid "torse"
-msgstr ""
+msgstr "torso"
 
 msgid "jambes"
-msgstr ""
+msgstr "legs"
 
 msgid "bras"
-msgstr ""
+msgstr "arms"
 
 msgid "tête"
-msgstr ""
+msgstr "head"
 
 msgid "yeux"
-msgstr ""
+msgstr "eyes"
 
 msgid "cible touchée"
-msgstr ""
+msgstr "target hit"
 
 msgid "cible manquée"
-msgstr ""
+msgstr "target missed"
 
 msgid "points d'action insuffisants"
-msgstr ""
+msgstr "not enough action points"
 
 msgid "munitions insuffisantes"
-msgstr ""
+msgstr "not enough ammunitions"
 
 msgid "cible inconsciente"
-msgstr ""
+msgstr "target KO"
 
 msgid "cible défaite"
-msgstr ""
+msgstr "target dead"
 
 msgid "arme défectueuse"
-msgstr ""
+msgstr "rigged weapon"
 
 msgid "Etat normal"
-msgstr ""
+msgstr "Normal condition"
 
 msgid "Faiblement irradié"
-msgstr ""
+msgstr "Faintly irradiated"
 
 msgid "Modérément irradié"
-msgstr ""
+msgstr "Moderately irradiated"
 
 msgid "Fortement irradié"
-msgstr ""
+msgstr "Greatly irradiated"
 
 msgid "Dangereusement irradié"
-msgstr ""
+msgstr "Dangerously irradiated"
 
 msgid "Mortellement irradié"
-msgstr ""
+msgstr "Deadly irradiated"
 
 msgid "Rassasié"
-msgstr ""
+msgstr "Replete"
 
 msgid "Faiblement assoiffé"
-msgstr ""
+msgstr "Faintly thirsty"
 
 msgid "Modérément assoiffé"
-msgstr ""
+msgstr "Moderately thirsty"
 
 msgid "Fortement assoiffé"
-msgstr ""
+msgstr "Greatly thirsty"
 
 msgid "Dangereusement assoiffé"
-msgstr ""
+msgstr "Dangerously thirsty"
 
 msgid "Mortellement assoiffé"
-msgstr ""
+msgstr "Deadly thirsty"
 
 msgid "Faiblement affamé"
-msgstr ""
+msgstr "Faintly hungry"
 
 msgid "Modérément affamé"
-msgstr ""
+msgstr "Moderately hungry"
 
 msgid "Fortement affamé"
-msgstr ""
+msgstr "Greatly hungry"
 
 msgid "Dangereusement affamé"
-msgstr ""
+msgstr "Dangerously hungry"
 
 msgid "Mortellement affamé"
-msgstr ""
+msgstr "Deadly hungry"
 
 msgid "Reposé"
-msgstr ""
+msgstr "Well-rested"
 
 msgid "Faiblement fatigué"
-msgstr ""
+msgstr "Faintly tired"
 
 msgid "Modérément fatigué"
-msgstr ""
+msgstr "Moderately tired"
 
 msgid "Fortement fatigué"
-msgstr ""
+msgstr "Greatly tired"
 
 msgid "Dangereusement fatigué"
-msgstr ""
+msgstr "Dangerously tired"
 
 msgid "Mortellement fatigué"
-msgstr ""
+msgstr "Deadly tired"
 
 msgid "Niveau"
-msgstr ""
+msgstr "Level"
 
 msgid "Ratio"
-msgstr ""
+msgstr "Ratio"
 
 msgid "Statistique"
-msgstr ""
+msgstr "Statistic"
 
 msgid "Modificateur"
-msgstr ""
+msgstr "Modifier"
 
 msgid "Personnage"
-msgstr ""
+msgstr "Character"
 
 msgid "Distance"
-msgstr ""
+msgstr "Distance"
 
 msgid "Cible"
-msgstr ""
+msgstr "Target"
 
 msgid "surnom"
-msgstr ""
+msgstr "nickname"
 
 msgid "numéro de téléphone"
-msgstr ""
+msgstr "phone number"
 
 msgid "joueur"
-msgstr ""
+msgstr "player"
 
 msgid "joueurs"
-msgstr ""
+msgstr "players"
 
 msgid "nom"
-msgstr ""
+msgstr "name"
 
 msgid "titre"
-msgstr ""
+msgstr "title"
 
 msgid "description"
-msgstr ""
+msgstr "description"
 
 msgid "image"
-msgstr ""
+msgstr "image"
 
 msgid "miniature"
-msgstr ""
+msgstr "thumbnail"
 
 msgid "maître du jeu"
-msgstr ""
+msgstr "game master"
 
 msgid "date de début"
-msgstr ""
+msgstr "start date"
 
 msgid "date courante"
-msgstr ""
+msgstr "current date"
 
 msgid "personnage actif"
-msgstr ""
+msgstr "active character"
 
 msgid "rads par heure"
-msgstr ""
+msgstr "rads per hour"
 
 msgid "campagnes"
-msgstr ""
+msgstr "campaigns"
 
 msgid "chances de critiques"
-msgstr ""
+msgstr "critical chance"
 
 msgid "absorption de dégâts"
-msgstr ""
+msgstr "damage absorption"
 
 msgid "Cette fonction ne peut être utilisée que par les statistiques."
-msgstr ""
+msgstr "This functon can only be used by statistics."
 
 msgid "utilisateur"
-msgstr ""
+msgstr "user"
 
 msgid "race"
-msgstr ""
+msgstr "race"
 
 msgid "niveau"
-msgstr ""
+msgstr "level"
 
 msgid "joueur ?"
-msgstr ""
+msgstr "player?"
 
 msgid "actif ?"
-msgstr ""
+msgstr "active?"
 
 msgid "au repos ?"
-msgstr ""
+msgstr "resting?"
 
 msgid "regénération"
-msgstr ""
+msgstr "regeneration"
 
 msgid "spécialités"
-msgstr ""
+msgstr "speciality"
 
 msgid "charge"
-msgstr ""
+msgstr "weight"
 
 msgid "aucun malus"
-msgstr ""
+msgstr "no malus"
 
 msgid "L'attaquant ne possède pas d'arme ou celle-ci ne permet pas d'attaque en rafale."
-msgstr ""
+msgstr "The attacker don't have any weapon or it cannot burst attack."
 
 msgid "Les bornes de dégâts min. et max. ne sont pas correctes."
-msgstr ""
+msgstr "Min and max bounds are not correct."
 
 msgid "Ce personnage doit être préalablement enregistré avant d'être dupliqué."
-msgstr ""
+msgstr "This character must be saved before to be duplicated."
 
 msgid "Ce personnage n'a pas de points de compétences à distribuer."
-msgstr ""
+msgstr "This character don't have any skill point to spend."
 
 msgid "Ce personnage n'a pas assez de points de compétences."
-msgstr ""
+msgstr "This character don't have enough skill points."
 
 msgid "Cette compétence ne peut être améliorée."
-msgstr ""
+msgstr "This skill can not be improved."
 
 msgid "valeur"
-msgstr ""
-
-msgid "{self.label_damage} {self.get_damage_type_display()}"
-msgstr ""
+msgstr "value"
 
 msgid "type"
-msgstr ""
+msgstr "type"
 
 msgid "poids"
-msgstr ""
+msgstr "weight"
 
 msgid "quête ?"
-msgstr ""
+msgstr "quest?"
 
 msgid "arme de mêlée ?"
-msgstr ""
+msgstr "melee?"
 
 msgid "jetable ?"
-msgstr ""
+msgstr "throwable?"
 
 msgid "compétence"
-msgstr ""
+msgstr "skill"
 
 msgid "force minimum"
-msgstr ""
+msgstr "min strength"
 
 msgid "taille du chargeur"
-msgstr ""
+msgstr "clip size"
 
 msgid "munitions en rafale"
-msgstr ""
+msgstr "burst ammunitions"
 
 msgid "modif. de portée"
-msgstr ""
+msgstr "range modifier"
 
 msgid "modif. de précision"
-msgstr ""
+msgstr "precision modifier"
 
 msgid "modif. d'absorption"
-msgstr ""
+msgstr "absorption modifier"
 
-msgid "modif. de resistance"
-msgstr ""
+msgid "modif. de résistance"
+msgstr "resistance modifier"
 
 msgid "coût PA recharge"
-msgstr ""
+msgstr "reload AP cost"
 
 msgid "coût PA normal"
-msgstr ""
+msgstr "normal AP cost"
 
 msgid "coût PA ciblé"
-msgstr ""
+msgstr "targetted AP cost"
 
 msgid "coût PA rafale"
-msgstr ""
+msgstr "burst AP cost"
 
 msgid "dégâts mini."
-msgstr ""
+msgstr "min damage"
 
 msgid "modif. de dégâts"
-msgstr ""
+msgstr "damage modifier"
 
 msgid "dégâts critiques"
-msgstr ""
+msgstr "critical damage"
 
 msgid "modif. de condition"
-msgstr ""
+msgstr "condition modifier"
 
 msgid "absorption normal"
-msgstr ""
+msgstr "normal absorption"
 
 msgid "résistance normal"
-msgstr ""
+msgstr "normal resistance"
 
 msgid "absorption laser"
-msgstr ""
+msgstr "laser absorption"
 
 msgid "résistance laser"
-msgstr ""
+msgstr "laser resistance"
 
 msgid "absorption plasma"
-msgstr ""
+msgstr "plasma absorption"
 
 msgid "résistance plasma"
-msgstr ""
+msgstr "plasme resistance"
 
 msgid "absorption explosifs"
-msgstr ""
+msgstr "explosive absorption"
 
 msgid "résistance explosifs"
-msgstr ""
+msgstr "explosive resistance"
 
 msgid "absorption feu"
-msgstr ""
+msgstr "fire absorption"
 
 msgid "résistance feu"
-msgstr ""
+msgstr "fire resistance"
 
 msgid "effets"
-msgstr ""
+msgstr "effects"
 
 msgid "types de munitions"
-msgstr ""
+msgstr "ammunition types"
 
 msgid "Cet objet doit être préalablement enregistré avant d'être dupliqué."
-msgstr ""
+msgstr "This item must be saved before to be duplicated."
 
 msgid "objet"
-msgstr ""
+msgstr "item"
 
 msgid "objets"
-msgstr ""
-
-msgid "{self.get_stats_display()} = {self.value}"
-msgstr ""
+msgstr "items"
 
 msgid "modificateur d'objet"
-msgstr ""
+msgstr "item modifier"
 
 msgid "modificateurs d'objets"
-msgstr ""
+msgstr "item modifiers"
 
 msgid "emplacement"
-msgstr ""
+msgstr "slot"
 
 msgid "munitions"
-msgstr ""
+msgstr "ammunitions"
 
 msgid "état"
-msgstr ""
+msgstr "condition"
 
 msgid "Il n'est pas possible de s'équiper de ce type d'objet."
-msgstr ""
+msgstr "You can't equip this object."
 
 msgid "Le personnage ne possède plus assez de points d'actions pour s'équiper de cet objet."
-msgstr ""
+msgstr "This character doesn't have enough action points in order to equip this item."
 
 msgid "Il n'est pas possible d'utiliser ce type d'objet."
-msgstr ""
+msgstr "You can't use this object"
 
 msgid "Le personnage ne possède plus assez de points d'actions pour utiliser cet objet."
-msgstr ""
+msgstr "This character doesn't have enough action points in order to use this item."
 
 msgid "Le personnage doit posséder au moins un exemplaire de cet objet pour l'utiliser."
-msgstr ""
+msgstr "This personnage must have at least one copy of this item in order to use it."
 
 msgid "Le personnage doit posséder la quantité d'objets qu'il souhaite jeter."
-msgstr ""
+msgstr "This character must have the amount of item which he wants to throw."
 
 msgid "Le personnage ne possède plus assez de points d'actions pour jeter cet objet."
-msgstr ""
+msgstr "This character doesn't have enough action points in order to throw this item."
 
 msgid "Cet objet n'est pas une arme équipée ou ne peut être rechargé."
-msgstr ""
+msgstr "This item is not a equipped weapon or can't be reloaded."
 
 msgid "Il n'y a aucun type de munition équipé ou le nombre de munitions disponibles est insuffisant."
-msgstr ""
+msgstr "There is no equipped ammunition or there is not enough ammunitions left."
 
 msgid "Cette arme est incompatible avec le type de munition équipé."
-msgstr ""
+msgstr "This weapon is incompatible with the equipped ammunition."
 
 msgid "Cet objet n'est pas réparable."
-msgstr ""
+msgstr "This item isn't repearable."
 
 msgid "Le personnage ne possède plus assez de points d'actions pour réparer cet objet."
-msgstr ""
+msgstr "This character doesn't have enough action points in order to repair this item."
 
 msgid "Un autre objet est déjà présent à cet emplacement."
-msgstr ""
+msgstr "Another item is already equipped at this slot."
 
 msgid "L'emplacement doit correspondre au type d'objet."
-msgstr ""
+msgstr "The item slot must be the same as the object type."
 
 msgid "Ces munitions sont incompatibles avec l'arme équipée."
-msgstr ""
+msgstr "These ammunitions are not compatible with the equipped weapon."
 
 msgid "Cette arme est incompatible avec les munitions équipées."
-msgstr ""
-
-#, python-brace-format
-msgid "({self.character}) {self.item}"
-msgstr ""
+msgstr "This weapon is not compatible with equipped ammunitions."
 
 msgid "équipement"
-msgstr ""
+msgstr "equipment"
 
 msgid "équipements"
-msgstr ""
+msgstr "equipments"
 
 msgid "durée"
-msgstr ""
+msgstr "duration"
 
 msgid "intervalle"
-msgstr ""
+msgstr "interval"
 
 msgid "effet suivant"
-msgstr ""
+msgstr "next effect"
 
 msgid "Le personnage doit faire partie d'une campagne pour lui appliquer un effet sur la durée."
-msgstr ""
+msgstr "This character must be in a campaign in order to apply an effect on him."
 
 msgid "Cet effet doit être préalablement enregistré avant d'être dupliqué."
-msgstr ""
+msgstr "This effect must be saved before to be duplicated."
 
 msgid "effet"
-msgstr ""
+msgstr "effect"
 
 msgid "modificateur d'effet"
-msgstr ""
+msgstr "effect modifier"
 
 msgid "modificateurs d'effets"
-msgstr ""
+msgstr "effect modifiers"
 
 msgid "date d'effet"
-msgstr ""
+msgstr "start date"
 
 msgid "date d'arrêt"
-msgstr ""
+msgstr "end date"
 
 msgid "date suivante"
-msgstr ""
-
-#, python-brace-format
-msgid "({self.campaign}) {self.effect}"
-msgstr ""
+msgstr "next date"
 
 msgid "effet de campagne"
-msgstr ""
+msgstr "campaign effect"
 
 msgid "effets de campagne"
-msgstr ""
-
-#, python-brace-format
-msgid "({self.character}) {self.effect}"
-msgstr ""
+msgstr "campaign effects"
 
 msgid "effet de personnage"
-msgstr ""
+msgstr "character effect"
 
 msgid "effets de personnage"
-msgstr ""
+msgstr "character effects"
 
 msgid "Le personnage doit être dans la même campagne."
-msgstr ""
-
-#, python-brace-format
-msgid "({self.campaign}) {self.item}"
-msgstr ""
+msgstr "This character must be in the same campaign."
 
 msgid "butin"
-msgstr ""
+msgstr "loot"
 
 msgid "butins"
-msgstr ""
+msgstr "loots"
 
 msgid "Le personnage concerné doit être dans la même campagne que le butin a créer."
-msgstr ""
+msgstr "This character must be in the same campaign as tbe created loot."
 
 msgid "Ce modèle de butin doit être préalablement enregistré avant d'être dupliqué."
-msgstr ""
+msgstr "This loot template must be saved before to be duplicated."
 
 msgid "modèle de butin"
-msgstr ""
+msgstr "loot template"
 
 msgid "modèles des butins"
-msgstr ""
+msgstr "loot templates"
 
 msgid "modèle"
-msgstr ""
+msgstr "model"
 
 msgid "nombre min."
-msgstr ""
+msgstr "min amount"
 
 msgid "nombre max."
-msgstr ""
+msgstr "max amount"
 
 msgid "état min."
-msgstr ""
+msgstr "min condition"
 
 msgid "état max."
-msgstr ""
-
-#, python-brace-format
-msgid "({self.template}) {self.item}"
-msgstr ""
+msgstr "max condition"
 
 msgid "objet de butin"
-msgstr ""
+msgstr "loot item"
 
 msgid "objets des butins"
-msgstr ""
+msgstr "loot items"
 
 msgid "date"
-msgstr ""
+msgstr "date"
 
 msgid "date en jeu"
-msgstr ""
+msgstr "ingame date"
 
 msgid "jet"
-msgstr ""
+msgstr "roll"
 
 msgid "succès ?"
-msgstr ""
+msgstr "success?"
 
 msgid "critique ?"
-msgstr ""
+msgstr "critical?"
 
 msgid "échec"
-msgstr ""
+msgstr "fail"
 
 msgid "réussite"
-msgstr ""
+msgstr "success"
 
 msgid "critique"
-msgstr ""
+msgstr "critical"
 
 #, python-brace-format
 msgid "{label} du jet de {stats} : {roll} pour {value}"
-msgstr ""
+msgstr "{label} for {stats} roll: {roll} for {value}"
 
 #, python-brace-format
 msgid "{label} du jet de {stats} : {roll} pour {total} ({value}{modifier:+d})"
-msgstr ""
-
-#, python-brace-format
-msgid "({self.character}) - {self.label}"
-msgstr ""
+msgstr "{label} for {stats} roll: {roll} for {total} ({value}{modifier:+d})"
 
 msgid "historique de jet"
-msgstr ""
+msgstr "roll history"
 
 msgid "historiques des jets"
-msgstr ""
+msgstr "roll histories"
 
 msgid "dégâts de base"
-msgstr ""
+msgstr "base damage"
 
 msgid "protection"
-msgstr ""
+msgstr "protection"
 
 msgid "absorption armure"
-msgstr ""
+msgstr "armor absorption"
 
 msgid "résistance armure"
-msgstr ""
+msgstr "armor resistance"
 
 msgid "dégats armure"
-msgstr ""
+msgstr "armor damage"
 
 msgid "absorption dégâts"
-msgstr ""
+msgstr "damage absorption"
 
 msgid "résistance dégâts"
-msgstr ""
+msgstr "damage resistance"
 
 msgid "dégâts réels"
-msgstr ""
+msgstr "real damage"
 
-msgid "{self.get_damage_type_display()} de {self.real_damage}"
-msgstr ""
+msgid "{type} de {real_damage}"
+msgstr "{type} of {real_damage}"
 
 msgid "historique de dégâts"
-msgstr ""
+msgstr "damage history"
 
 msgid "historiques des dégâts"
-msgstr ""
+msgstr "damage histories"
 
 msgid "arme de l'attaquant"
-msgstr ""
+msgstr "attacker weapon"
 
 msgid "munitions de l'attaquant"
-msgstr ""
+msgstr "attacker ammunitions"
 
 msgid "protection du défenseur"
-msgstr ""
+msgstr "defender protection"
 
 msgid "tir en rafale ?"
-msgstr ""
+msgstr "burst shot?"
 
 msgid "compteur de coups"
-msgstr ""
+msgstr "hit count"
 
 msgid "précision"
-msgstr ""
+msgstr "precision"
 
 msgid "jet de précision"
-msgstr ""
+msgstr "precision roll"
 
 msgid "touché ?"
-msgstr ""
+msgstr "hit?"
 
 msgid "status"
-msgstr ""
+msgstr "status"
 
 msgid "historique des dégâts"
-msgstr ""
-
-msgid "{self.label} : {self.get_status_display()}"
-msgstr ""
+msgstr "damage history"
 
 #, python-brace-format
-msgid "{self.label} : {self.damage.real_damage} dégât(s) infligé(s)"
-msgstr ""
+msgid "{label} : {status}"
+msgstr "{label}: {status}"
 
 #, python-brace-format
-msgid "{self.attacker} vs. {self.defender} - {self.long_label}"
-msgstr ""
+msgid "{label} : {real_damage} dégât(s) infligé(s)"
+msgstr "{label}: {real_damage} inflicted damage"
+
+#, python-brace-format
+msgid "{attacker} vs. {defender} - {long_label}"
+msgstr "{attacker} vs. {defender} - {long_label}"
 
 msgid "historique de combat"
-msgstr ""
+msgstr "fight history"
 
 msgid "historiques des combats"
-msgstr ""
+msgstr "fight histories"
 
 msgid "Menu"
-msgstr ""
+msgstr "Menu"
 
 msgid "Actions"
-msgstr ""
+msgstr "Actions"
 
 msgid "Administration"
-msgstr ""
+msgstr "Administration"
 
-msgid "Lancer les dés (CTRL+B)"
-msgstr ""
+msgid "Lancer les dés (CTRL+ESPACE)"
+msgstr "Roll the dices (CTRL+SPACE)"
 
 msgid "Dés"
-msgstr ""
+msgstr "Dices"
 
 msgid "Fermer"
-msgstr ""
+msgstr "Close"
 
 msgid "Lancer les dés"
-msgstr ""
+msgstr "Roll the dices"
 
 msgid "Formule"
-msgstr ""
+msgstr "Formula"
 
 msgid "Notation standard des lancers de dé"
-msgstr ""
+msgstr "Standard notation of dice rolls"
 
 msgid "Résultat"
-msgstr ""
+msgstr "Result"
 
 msgid "Lancer"
-msgstr ""
+msgstr "Roll"
 
 msgid "Ajouter une campagne"
-msgstr ""
+msgstr "Add a campaign"
 
 msgid "Modifier la campagne"
-msgstr ""
+msgstr "Edit the campaign"
 
 msgid "Ajouter un personnage"
-msgstr ""
+msgstr "Add a character"
 
 msgid "Aucune campagne"
-msgstr ""
+msgstr "No campaign"
 
 msgid ""
 "\n"
@@ -1169,303 +1140,303 @@ msgid ""
 "                    particulière ainsi la plupart des actions liées à une campagne (comme la gestion du temps et les\n"
 "                    effets) sont désactivés.\n"
 "                "
-msgstr ""
+msgstr "You are currently on the character pool that is not associated with any particular campaign so most campaign-related actions (such as time and effects management) are disabled."
 
 msgid "Campagne"
-msgstr ""
+msgstr "Campaign"
 
 msgid "Butins"
-msgstr ""
+msgstr "Loots"
 
 msgid "Maintenant"
-msgstr ""
+msgstr "Now"
 
 msgid "Début de la campagne"
-msgstr ""
+msgstr "Campaign start"
 
 msgid "Supprimer"
-msgstr ""
+msgstr "Delete"
 
 msgid "Joueur"
-msgstr ""
+msgstr "Player"
 
 msgid "Points d'action"
-msgstr ""
+msgstr "Action points"
 
 msgid "PA"
-msgstr ""
+msgstr "AP"
 
 msgid "kg"
-msgstr ""
+msgstr "kg"
 
 msgid "$"
-msgstr ""
+msgstr "$"
 
 msgid "incassable"
-msgstr ""
+msgstr "unbreakable"
 
 msgid "Quantité"
-msgstr ""
+msgstr "Quantity"
 
 msgid "Prendre"
-msgstr ""
+msgstr "Take"
 
 msgid "Détruire"
-msgstr ""
+msgstr "Destroy"
 
 msgid "Niveau de radioactivité"
-msgstr ""
+msgstr "Rad-level"
 
 msgid "(en rad/h)"
-msgstr ""
+msgstr "(in rad/h)"
 
 msgid "rad/h"
-msgstr ""
+msgstr "rad/h"
 
 msgid "Modifier"
-msgstr ""
+msgstr "Edit"
 
 msgid "Effet"
-msgstr ""
+msgstr "Effect"
 
 msgid "Affecter"
-msgstr ""
+msgstr "Affect"
 
 msgid "Maître du jeu :"
-msgstr ""
+msgstr "Game master:"
 
 msgid "Personnage joueur :"
-msgstr ""
+msgstr "Player character:"
 
 msgid "Date de début :"
-msgstr ""
+msgstr "Start date:"
 
 msgid "Date courante :"
-msgstr ""
+msgstr "Current date:"
 
 msgid "h"
-msgstr ""
+msgstr "h"
 
 msgid "m"
-msgstr ""
+msgstr "m"
 
 msgid "Avancer"
-msgstr ""
+msgstr "Pass"
 
 msgid "Repos"
-msgstr ""
+msgstr "Resting"
 
 msgid "Type de personnage"
-msgstr ""
+msgstr "Character type"
 
 msgid "Tous"
-msgstr ""
+msgstr "All"
 
 msgid "PJ"
-msgstr ""
+msgstr "PC"
 
 msgid "PNJ"
-msgstr ""
+msgstr "PNC"
 
 msgid "Mod"
-msgstr ""
+msgstr "Mod"
 
 msgid "Expérience"
-msgstr ""
+msgstr "Experience"
 
 msgid "XP"
-msgstr ""
+msgstr "XP"
 
 msgid "Aucun"
-msgstr ""
+msgstr "None"
 
 msgid "Butin"
-msgstr ""
+msgstr "Loot"
 
 msgid "Ouvrir"
-msgstr ""
+msgstr "Open"
 
 msgid "Vider"
-msgstr ""
+msgstr "Empty"
 
 msgid "Qte"
-msgstr ""
+msgstr "Qty"
 
 msgid "Condition"
-msgstr ""
+msgstr "Condition"
 
 msgid "Cond"
-msgstr ""
+msgstr "Cond"
 
 msgid "Objet"
-msgstr ""
+msgstr "Item"
 
 msgid "Ajouter"
-msgstr ""
+msgstr "Add"
 
 msgid "Les personnages suivants vont attaquer :"
-msgstr ""
+msgstr "The following characters attack:"
 
 msgid "Valider"
-msgstr ""
+msgstr "Accept"
 
 msgid "Les personnages suivants seront affectés :"
-msgstr ""
+msgstr "The follwing characters will be affected:"
 
 msgid "Modifier le personnage"
-msgstr ""
+msgstr "Edit character"
 
 msgid "KO"
-msgstr ""
+msgstr "KO"
 
 msgid "Actif"
-msgstr ""
+msgstr "Active"
 
 msgid "Inventaire"
-msgstr ""
+msgstr "Inventory"
 
 msgid "Statistiques"
-msgstr ""
+msgstr "Statistics"
 
 msgid "points de vie"
-msgstr ""
+msgstr "Health points"
 
 msgid "OK"
-msgstr ""
+msgstr "OK"
 
 msgid "Attaque en rafale"
-msgstr ""
+msgstr "Burst attack"
 
 msgid "Attaque simple"
-msgstr ""
+msgstr "Simple attack"
 
 msgid "dst."
-msgstr ""
+msgstr "dst."
 
 msgid "non ciblé"
-msgstr ""
+msgstr "non targetted"
 
 msgid "valeur fixe"
-msgstr ""
+msgstr "fixed value"
 
 msgid "valeur min."
-msgstr ""
+msgstr "min value"
 
 msgid "valeur max."
-msgstr ""
+msgstr "max value"
 
 msgid "Retirer"
-msgstr ""
+msgstr "Unequip"
 
 msgid "Recharger"
-msgstr ""
+msgstr "Reload"
 
 msgid "Etat"
-msgstr ""
+msgstr "Condition"
 
 msgid "Réparer"
-msgstr ""
+msgstr "Repair"
 
 msgid "Lâcher"
-msgstr ""
+msgstr "Drop"
 
 msgid "Qualité"
-msgstr ""
+msgstr "Quality"
 
 msgid "Remplacer"
-msgstr ""
+msgstr "Replace"
 
 msgid "Equiper"
-msgstr ""
+msgstr "Equip"
 
 msgid "Utiliser"
-msgstr ""
+msgstr "Use"
 
 msgid "+"
-msgstr ""
+msgstr "+"
 
 msgid "Général"
-msgstr ""
+msgstr "General"
 
 #, python-format
 msgid ""
 "\n"
 "                                (%(count)s jets pour %(rate)s%% de succès)\n"
 "                            "
-msgstr ""
+msgstr "(%(count)s rolls for %(rate)s%% successful)"
 
 msgid "(aucun jet)"
-msgstr ""
+msgstr "(no roll)"
 
 msgid "Equipé"
-msgstr ""
+msgstr "Equiped"
 
 msgid "Autres"
-msgstr ""
+msgstr "Others"
 
 msgid "Connectez-vous !"
-msgstr ""
+msgstr "Log in!"
 
 msgid "Nom d'utilisateur"
-msgstr ""
+msgstr "Username"
 
 msgid "Mot de passe"
-msgstr ""
+msgstr "Password"
 
 msgid "Connexion"
-msgstr ""
+msgstr "Login"
 
 msgid "Personnages"
-msgstr ""
+msgstr "Characters"
 
 msgid "0 s"
-msgstr ""
+msgstr "0 s"
 
 msgid "30 s"
-msgstr ""
+msgstr "30 s"
 
 msgid "1 mn"
-msgstr ""
+msgstr "1 mn"
 
 msgid "2 mn"
-msgstr ""
+msgstr "2 mn"
 
 msgid "5 mn"
-msgstr ""
+msgstr "5 mn"
 
 msgid "10 mn"
-msgstr ""
+msgstr "10 mn"
 
 msgid "20 mn"
-msgstr ""
+msgstr "20 mn"
 
 msgid "30 mn"
-msgstr ""
+msgstr "30 mn"
 
 msgid "1 h"
-msgstr ""
+msgstr "1 h"
 
 msgid "Tour suivant"
-msgstr ""
+msgstr "Next turn"
 
 #, python-brace-format
 msgid "<strong>{result.character}</strong> {result.long_label}"
-msgstr ""
+msgstr "<strong>{result.character}</strong> {result.long_label}"
 
 #, python-brace-format
 msgid "<strong>Erreur</strong> {error}"
-msgstr ""
+msgstr "<strong>Error</strong> {error}"
 
 #, python-brace-format
 msgid "<strong>{result.attacker} vs {result.defender}</strong> {result.long_label}"
-msgstr ""
+msgstr "<strong>{result.attacker} vs {result.defender}</strong> {result.long_label}"
 
 #, python-brace-format
 msgid "<strong>{result.character}</strong> {result.label}"
-msgstr ""
+msgstr "<strong>{result.character}</strong> {result.label}"
 
 msgid "Français"
-msgstr ""
+msgstr "Français"
 
 msgid "English"
-msgstr ""
+msgstr "English"

@@ -183,7 +183,7 @@ class DamageInputSerializer(BaseCustomSerializer):
     damage_type = serializers.ChoiceField(choices=DAMAGES_TYPES, label=_("type de dégâts"))
     body_part = serializers.ChoiceField(choices=BODY_PARTS, label=_("partie du corps"))
     threshold_modifier = serializers.IntegerField(default=0, initial=0, label=_("modificateur de seuil"))
-    resistance_modifier = serializers.FloatField(default=0.0, initial=0.0, label=_("modificateur de resistance"))
+    resistance_modifier = serializers.FloatField(default=0.0, initial=0.0, label=_("modificateur de résistance"))
 
 
 class MultiDamageInputSerializer(DamageInputSerializer):
