@@ -30,7 +30,7 @@ def get_thumbnails(directory: str='') -> List[Tuple[str, str]]:
         return []
     images = []
     try:
-        dirname = os.path.join(settings.MEDIA_ROOT, 'thumbnail', directory)
+        dirname = os.path.join(settings.MEDIA_ROOT, 'thumbnails', directory)
         for filename in os.listdir(dirname):
             filepath = os.path.join(dirname, filename)
             title, ext = os.path.splitext(filename.replace('_', ' '))
@@ -90,8 +90,8 @@ class Campaign(CommonModel):
     name = models.CharField(max_length=200, verbose_name=_("nom"))
     title = models.CharField(max_length=200, blank=True, verbose_name=_("titre"))
     description = models.TextField(blank=True, verbose_name=_("description"))
-    image = models.ImageField(blank=True, upload_to='campaign', verbose_name=_("image"))
-    thumbnail = models.CharField(blank=True, max_length=100, choices=get_thumbnails('campaign'), verbose_name=_("miniature"))
+    image = models.ImageField(blank=True, upload_to='campaigns', verbose_name=_("image"))
+    thumbnail = models.CharField(blank=True, max_length=100, choices=get_thumbnails('campaigns'), verbose_name=_("miniature"))
     game_master = models.ForeignKey(
         'Player', blank=True, null=True, on_delete=models.SET_NULL,
         related_name='+', verbose_name=_("maître du jeu"))
@@ -361,8 +361,8 @@ class Character(Entity, Stats):
     name = models.CharField(max_length=200, verbose_name=_("nom"))
     title = models.CharField(max_length=200, blank=True, verbose_name=_("titre"))
     description = models.TextField(blank=True, verbose_name=_("description"))
-    image = models.ImageField(blank=True, upload_to='character', verbose_name=_("image"))
-    thumbnail = models.CharField(blank=True, max_length=100, choices=get_thumbnails('character'), verbose_name=_("miniature"))
+    image = models.ImageField(blank=True, upload_to='characters', verbose_name=_("image"))
+    thumbnail = models.CharField(blank=True, max_length=100, choices=get_thumbnails('characters'), verbose_name=_("miniature"))
     race = models.CharField(max_length=12, choices=RACES, default=RACE_HUMAN, db_index=True, verbose_name=_("race"))
     level = models.PositiveSmallIntegerField(default=1, verbose_name=_("niveau"))
     is_player = models.BooleanField(default=False, db_index=True, verbose_name=_("joueur ?"))
@@ -1158,8 +1158,8 @@ class Item(Entity, DamageMixin):
     name = models.CharField(max_length=200, verbose_name=_("nom"))
     title = models.CharField(max_length=200, blank=True, verbose_name=_("titre"))
     description = models.TextField(blank=True, verbose_name=_("description"))
-    image = models.ImageField(blank=True, upload_to='item', verbose_name=_("image"))
-    thumbnail = models.CharField(blank=True, max_length=100, choices=get_thumbnails('item'), verbose_name=_("miniature"))
+    image = models.ImageField(blank=True, upload_to='items', verbose_name=_("image"))
+    thumbnail = models.CharField(blank=True, max_length=100, choices=get_thumbnails('items'), verbose_name=_("miniature"))
     type = models.CharField(max_length=6, choices=ITEM_TYPES, verbose_name=_("type"))
     value = models.PositiveIntegerField(default=0, verbose_name=_("valeur"))
     weight = models.FloatField(default=0.0, verbose_name=_("poids"))
@@ -1536,10 +1536,10 @@ class Effect(Entity, DamageMixin):
     name = models.CharField(max_length=200, verbose_name=_("nom"))
     title = models.CharField(max_length=200, blank=True, verbose_name=_("titre"))
     description = models.TextField(blank=True, verbose_name=_("description"))
-    image = models.ImageField(blank=True, upload_to='effect', verbose_name=_("image"))
+    image = models.ImageField(blank=True, upload_to='effects', verbose_name=_("image"))
     thumbnail = models.CharField(
         blank=True, max_length=100, verbose_name=_("miniature"),
-        choices=get_thumbnails('effect') + get_thumbnails('item'))
+        choices=get_thumbnails('effects') + get_thumbnails('items'))
     chance = models.PositiveSmallIntegerField(default=100, verbose_name=_("chance"))
     duration = models.DurationField(blank=True, null=True, verbose_name=_("durée"))
     # Timed effects
@@ -1874,8 +1874,8 @@ class LootTemplate(CommonModel):
     name = models.CharField(max_length=200, verbose_name=_("nom"))
     title = models.CharField(max_length=200, blank=True, verbose_name=_("titre"))
     description = models.TextField(blank=True, verbose_name=_("description"))
-    image = models.ImageField(blank=True, upload_to='loot', verbose_name=_("image"))
-    thumbnail = models.CharField(blank=True, max_length=100, choices=get_thumbnails('item'), verbose_name=_("miniature"))
+    image = models.ImageField(blank=True, upload_to='loots', verbose_name=_("image"))
+    thumbnail = models.CharField(blank=True, max_length=100, choices=get_thumbnails('items'), verbose_name=_("miniature"))
 
     def create(self, campaign: Union['Campaign', int], character: Optional[Union['Character', int]]=None):
         """
