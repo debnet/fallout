@@ -19,9 +19,9 @@
         <div class="content">
             {% with image=character.image thumbnail=character.thumbnail %}
                 {% if thumbnail %}
-                    <img class="float-left mr-2" height="100" width="100" src="{{ thumbnail }}">
+                    <img class="float-left rounded mr-2" height="120" width="120" src="{{ thumbnail }}">
                 {% elif image %}
-                    <img class="float-left mr-2" height="100" width="100" src="{{ image.url }}">
+                    <img class="float-left rounded mr-2" height="120" width="120" src="{{ image.url }}">
                 {% endif %}
             {% endwith %}
             <h4 class="display-4">
@@ -44,7 +44,7 @@
             </p>
         </div>
         <div role="tabpanel" id="tabs">
-            <ul class="nav nav-tabs nav-justified tab" id="character-tabs" role="tablist">
+            <ul class="nav nav-pills nav-fill nav-justified pt-3 tab" id="character-tabs" role="tablist">
                 <li class="nav-item">
                     <a class="nav-link" data-toggle="tab" role="tab"
                        href="#character-stats" id="character-stats-tab">{% trans "Personnage" %}</a>

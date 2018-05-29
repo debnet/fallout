@@ -1076,8 +1076,8 @@ msgid "{label} : {status}"
 msgstr "{label}: {status}"
 
 #, python-brace-format
-msgid "{label} : {real_damage} dégât(s) infligé(s)"
-msgstr "{label}: {real_damage} inflicted damage"
+msgid "{label} : {real_damage} dégâts infligés ({body_part})"
+msgstr "{label}: {real_damage} inflicted damage ({body_part})"
 
 #, python-brace-format
 msgid "{attacker} vs. {defender} - {long_label}"

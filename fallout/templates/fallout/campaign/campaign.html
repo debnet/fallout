@@ -19,9 +19,9 @@
         <div class="container">
             {% with image=campaign.image thumbnail=campaign.thumbnail %}
                 {% if thumbnail %}
-                    <img class="float-left mr-2" height="100" width="100" src="{{ thumbnail }}">
+                    <img class="float-left rounded mr-2" height="120" width="120" src="{{ thumbnail }}">
                 {% elif image %}
-                    <img class="float-left mr-2" height="100" width="100" src="{{ image.url }}">
+                    <img class="float-left rounded mr-2" height="120" width="120" src="{{ image.url }}">
                 {% endif %}
             {% endwith %}
             <h4 class="display-4">
@@ -45,7 +45,7 @@
         </div>
     {% endif %}
     <div role="tabpanel" id="tabs">
-        <ul class="nav nav-tabs nav-justified tab" id="actions-tabs" role="tablist">
+        <ul class="nav nav-pills nav-fill nav-justified pt-3 tab" id="actions-tabs" role="tablist">
             <li class="nav-item">
                 <a class="nav-link" data-toggle="tab" role="tab"
                    id="campaign-infos-tab" href="#campaign-infos">{% trans "Campagne" %}</a>

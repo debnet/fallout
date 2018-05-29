@@ -832,12 +832,12 @@ class Character(Entity, Stats):
         attacker_hit_chance -= max(target_range - attacker_hit_range, 0) * FIGHT_RANGE_MALUS  # Range modifiers
         attacker_hit_chance += getattr(attacker_weapon, 'hit_chance_modifier', 0)  # Weapon hit chance modifier
         attacker_hit_chance += getattr(attacker_ammo, 'hit_chance_modifier', 0)  # Ammo hit chance modifier
+        attacker_hit_chance *= getattr(attacker_weapon_equipment, 'condition', 1.0)  # Weapon condition
         attacker_hit_chance -= getattr(defender_armor, 'armor_class', 0)  # Defender armor class modifier
         attacker_hit_chance -= target.stats.armor_class  # Armor class
+        attacker_hit_chance += hit_modifier  # Other modifiers
         if target_part:
             attacker_hit_chance += melee_hit_modifier if attacker_skill == SKILL_UNARMED else ranged_hit_modifier
-        attacker_hit_chance += hit_modifier  # Other modifiers
-        attacker_hit_chance *= getattr(attacker_weapon_equipment, 'condition', 1.0)  # Weapon condition
         # Hit chance is null if attacker is melee/unarmed and target is farther than weapon range
         if target_range - attacker_hit_range > 0 and is_melee:
             attacker_hit_chance = 0
@@ -941,9 +941,8 @@ class Character(Entity, Stats):
         armor = history.armor = getattr(armor_equipment, 'item', None)
         armor_damage = 0
         if armor and armor_equipment:
-            armor_threshold = armor.get_threshold(damage_type) + threshold_modifier
-            armor_resistance = armor.get_resistance(damage_type) * armor_equipment.condition
-            armor_resistance += resistance_modifier
+            armor_threshold = round(armor.get_threshold(damage_type) * armor_equipment.condition) + threshold_modifier
+            armor_resistance = (armor.get_resistance(damage_type) * armor_equipment.condition) + resistance_modifier
             total_damage -= max(armor_threshold, 0)
             total_damage *= (1.0 - min(armor_resistance, 1.0))
             armor_damage = max((base_damage - total_damage) * armor.condition_modifier, 0)
@@ -1995,13 +1994,15 @@ class RollHistory(CommonModel):
             """
             return [(
                 value,
-                round((value / self.count) * 100 if self.count else 0, 2),
+                round(((value / self.count) * 100) if self.count else 0, 2),
                 settings.CSS_CLASSES[key],
             ) for key, value in self.stats.items()]
 
         @property
         def success_rate(self) -> float:
-            return round((self.stats[1, 0] + self.stats[1, 1]) / self.count, 2) * 100
+            if not self.count:
+                return 0.0
+            return round((self.stats[1, 0] + self.stats[1, 1]) / self.count, 2) * 100.0
 
     @staticmethod
     def get_stats(character: Union['Character', int]):
@@ -2174,8 +2175,8 @@ class FightHistory(CommonModel):
         if not self.damage:
             return _("{label} : {status}").format(
                 label=self.label, status=self.get_status_display())
-        return _("{label} : {real_damage} dégât(s) infligé(s)").format(
-            label=self.label, real_damage=self.damage.real_damage)
+        return _("{label} : {real_damage} dégâts infligés ({body_part})").format(
+            label=self.label, real_damage=self.damage.real_damage, body_part=self.get_body_part_display())
 
     def __str__(self) -> str:
         return _("{attacker} vs. {defender} - {long_label}").format(

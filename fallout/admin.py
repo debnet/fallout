@@ -517,7 +517,7 @@ class DamageHistoryAdmin(CommonAdmin):
     list_filter = ('date', 'game_date', 'character', 'damage_type', )
     ordering = ('-date', )
     date_hierarchy = 'date'
-    autocomplete_fields = ('character', )
+    autocomplete_fields = ('character', 'armor', )
 
 
 class DamageHistoryInline(admin.StackedInline):
