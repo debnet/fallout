@@ -1,4 +1,4 @@
-{% load i18n static %}
+{% load i18n static compress %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -9,10 +9,12 @@
     <meta name="author" content="{{ author }}">
     <link rel="icon" href="{% static "favicon.ico" %}">
     <title>{% block title %}{{ title|default:_("Fallout RPG") }}{% endblock %}</title>
+    {% compress css %}
     <link href="{% static "css/bootstrap.min.css" %}" rel="stylesheet">
     <link href="{% static "css/jquery-ui.min.css" %}" rel="stylesheet">
     <link href="{% static "css/calendar.min.css" %}" rel="stylesheet">
     <link href="{% static "fallout/css/style.css" %}" rel="stylesheet">
+    {% endcompress %}
     {% block headers %}{% endblock %}
     {% block style %}{% endblock %}
 </head>
@@ -91,6 +93,7 @@
     </div>
 </div>
 
+{% compress js %}
 <script src="{% static "js/jquery.min.js" %}"></script>
 <script src="{% static "js/jquery-ui.min.js" %}"></script>
 <script src="{% static "js/popper.min.js" %}"></script>
@@ -100,6 +103,7 @@
 <script src="{% static "fallout/js/key.js" %}"></script>
 <script src="{% static "fallout/js/script.js" %}"></script>
 {% block scripts %}{% endblock %}
+{% endcompress %}
 
 </body>
 </html>
