@@ -25,7 +25,7 @@ class PlayerAdmin(UserAdmin):
     Administration des joueurs
     """
     fieldsets = UserAdmin.fieldsets + (
-        (_("Fallout"), {'fields': ('nickname', 'phone_number', )}), )
+        (_("Fallout"), {'fields': ('nickname', )}), )
     filter_horizontal = ('groups', 'user_permissions', )
 
 

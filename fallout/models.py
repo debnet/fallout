@@ -73,7 +73,6 @@ class Player(AbstractUser):
     Joueur
     """
     nickname = models.CharField(max_length=100, blank=True, verbose_name=_("surnom"))
-    phone_number = models.CharField(max_length=20, blank=True, verbose_name=_("numéro de téléphone"))
 
     def __str__(self):
         return self.nickname or self.first_name or self.username

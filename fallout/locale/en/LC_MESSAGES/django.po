@@ -604,9 +604,6 @@ msgstr "Target"
 msgid "surnom"
 msgstr "nickname"
 
-msgid "numéro de téléphone"
-msgstr "phone number"
-
 msgid "joueur"
 msgstr "player"
 
