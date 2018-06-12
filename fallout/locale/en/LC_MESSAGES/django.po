@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-05-28 21:10+0200\n"
+"POT-Creation-Date: 2018-06-12 22:25+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1029,8 +1029,12 @@ msgstr "damage resistance"
 msgid "dégâts réels"
 msgstr "real damage"
 
+#, python-brace-format
 msgid "{type} de {real_damage}"
 msgstr "{type} of {real_damage}"
+
+msgid "({self.character}) - {self.label}"
+msgstr "({self.character}) - {self.label}"
 
 msgid "historique de dégâts"
 msgstr "damage history"
@@ -1211,6 +1215,9 @@ msgstr "Start date:"
 msgid "Date courante :"
 msgstr "Current date:"
 
+msgid "Avancer dans le temps :"
+msgstr "Forward in time:"
+
 msgid "h"
 msgstr "h"
 
@@ -1222,6 +1229,9 @@ msgstr "Pass"
 
 msgid "Repos"
 msgstr "Resting"
+
+msgid "Faire un lancer :"
+msgstr "Make a roll:"
 
 msgid "Type de personnage"
 msgstr "Character type"
@@ -1243,6 +1253,12 @@ msgstr "Experience"
 
 msgid "XP"
 msgstr "XP"
+
+msgid "Gagner de l'expérience :"
+msgstr "Gain experience:"
+
+msgid "Gagner"
+msgstr "Gain"
 
 msgid "Aucun"
 msgstr "None"
@@ -1417,23 +1433,21 @@ msgid "Tour suivant"
 msgstr "Next turn"
 
 #, python-brace-format
-msgid "<strong>{result.character}</strong> {result.long_label}"
-msgstr "<strong>{result.character}</strong> {result.long_label}"
+msgid "<strong>{character}</strong> {label}"
+msgstr "<strong>{character}</strong> {label}"
+
+#, python-brace-format
+msgid "<strong>{character}</strong> vient de passer au niveau <strong>{level}</strong> et a besoin de <strong>{experience}</strong> points d'expérience pour passer au niveau suivant."
+msgstr "<strong>{character}</strong> goes to level <strong>{level}</strong> and needs <strong>{experience}</strong> experience points to pass the next level."
+
+#, python-brace-format
+msgid "<strong>{character}</strong> a encore besoin de <strong>{experience}</strong> points d'expérience pour passer au niveau suivant."
+msgstr "<strong>{character}</strong> still needs <strong>{experience}</strong> experience points to pass the next level."
 
 #, python-brace-format
 msgid "<strong>Erreur</strong> {error}"
 msgstr "<strong>Error</strong> {error}"
 
-#, python-brace-format
-msgid "<strong>{result.attacker} vs {result.defender}</strong> {result.long_label}"
-msgstr "<strong>{result.attacker} vs {result.defender}</strong> {result.long_label}"
-
-#, python-brace-format
-msgid "<strong>{result.character}</strong> {result.label}"
-msgstr "<strong>{result.character}</strong> {result.label}"
-
-msgid "Français"
-msgstr "Français"
-
-msgid "English"
-msgstr "English"
+#, fuzzy, python-brace-format
+msgid "<strong>{attacker} vs {defender}</strong> {label}"
+msgstr "<strong>{attacker} vs {defender}</strong> {label}"
