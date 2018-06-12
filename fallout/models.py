@@ -38,7 +38,7 @@ def get_thumbnails(directory: str='') -> List[Tuple[str, str]]:
             if os.path.isdir(filepath):
                 images.append((title, get_thumbnails(filename)))
             elif ext.lower() in ('.jpg', '.jpeg', '.gif', '.png'):
-                url = os.path.join(settings.MEDIA_URL, 'thumbnail', filename).replace('\\', '/')
+                url = os.path.join(settings.MEDIA_URL, 'thumbnails', filename).replace('\\', '/')
                 images.append((url, title))
     finally:
         return sorted(images)
@@ -624,7 +624,7 @@ class Character(Entity, Stats):
             self.experience += amount
             if save:
                 self.save()
-        return self.level, self.required_experience
+        return self.level, self.required_experience - self.experience
 
     def check_level(self) -> Tuple[int, int]:
         """
@@ -2057,7 +2057,7 @@ class RollHistory(CommonModel):
             total=self.value + self.modifier)
 
     def __str__(self) -> str:
-        return f"({self.character}) - {self.label}"
+        return f"({self.character}) - {self.long_label}"
 
     class Meta:
         verbose_name = _("historique de jet")
@@ -2089,14 +2089,14 @@ class DamageHistory(CommonModel):
     damage_resistance = models.FloatField(default=0.0, verbose_name=_("résistance dégâts"))
     real_damage = models.SmallIntegerField(default=0, verbose_name=_("dégâts réels"))
 
-    def __str__(self) -> str:
-        return _(f"({self.character}) - {self.label}")
-
     @property
     def label(self) -> str:
         return _("{type} de {real_damage}").format(
             type=self.get_damage_type_display(),
             real_damage=self.real_damage)
+
+    def __str__(self) -> str:
+        return _(f"({self.character}) - {self.label}")
 
     class Meta:
         verbose_name = _("historique de dégâts")

@@ -5,15 +5,15 @@ body {
 
 /* Inputs */
 .itiny {
-    width: 4em;
+    width: 4em !important;
     display: inline-block;
 }
 .ismall {
-    width: 5em;
+    width: 5em !important;
     display: inline-block;
 }
 .imedium {
-    width: 6em;
+    width: 6em !important;
     display: inline-block;
 }
 

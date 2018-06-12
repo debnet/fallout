@@ -32,18 +32,19 @@
                     {% if campaign %}
                         <div class="card-footer">
                             <form method="post" action="{{ request.path }}" class="form-inline justify-content-center">
+                                <div class="mr-3 font-weight-bold">{% trans "Avancer dans le temps :" %}</div>
                                 <div class="form-row align-items-center">
                                     <div class="col-auto input-group">
-                                        <input type="number" class="form-control" id="hours" name="hours"
-                                               placeholder="{% trans "h" %}" value="0" style="width: 60px"
-                                               aria-valuemin="0" min="0">
+                                        <input type="number" class="form-control ismall" id="hours" name="hours"
+                                               placeholder="{% trans "h" %}" value="0"
+                                               aria-valuemin="0" min="0" aria-valuemax="999" max="999">
                                         <div class="input-group-append">
                                             <label for="hours" class="input-group-text">{% trans "h" %}</label>
                                         </div>
                                     </div>
                                     <div class="col-auto input-group">
-                                        <input type="number" class="form-control" id="minutes" name="minutes"
-                                               placeholder="{% trans "m" %}" value="0" style="width: 60px"
+                                        <input type="number" class="form-control ismall" id="minutes" name="minutes"
+                                               placeholder="{% trans "m" %}" value="0"
                                                aria-valuemin="0" min="0" aria-valuemax="59" max="59">
                                         <div class="input-group-append">
                                             <label for="minutes" class="input-group-text">{% trans "m" %}</label>
@@ -67,10 +68,11 @@
                     {% endif %}
                     <div class="card-footer">
                         <form method="post" action="{{ request.path }}" class="form-inline justify-content-center">
+                            <div class="mr-3 font-weight-bold">{% trans "Faire un lancer :" %}</div>
                             <div class="form-row align-items-center">
                                 <div class="col-auto">
                                     <label class="sr-only" for="group-list">{% trans "Type de personnage" %}</label>
-                                    <select name="group" id="group-list" class="form-control custom-select">
+                                    <select name="group" id="roll-group-list" class="form-control custom-select">
                                         <option value="">{% trans "Tous" %}</option>
                                         <option value="pj">{% trans "PJ" %}</option>
                                         <option value="pnj">{% trans "PNJ" %}</option>
@@ -78,7 +80,7 @@
                                 </div>
                                 <div class="col-auto">
                                     <label class="sr-only" for="stats-list">{% trans "Statistique" %}</label>
-                                    <select name="stats" id="stats-list" class="form-control custom-select">
+                                    <select name="stats" id="roll-stats-list" class="form-control custom-select">
                                         {% for title, substats in stats %}
                                             <optgroup label="{{ title }}">
                                                 {% for value, label in substats %}
@@ -90,8 +92,8 @@
                                 </div>
                                 <div class="col-auto">
                                     <label class="sr-only" for="stats-modifier">{% trans "Modificateur" %}</label>
-                                    <input type="number" class="form-control" id="stats-modifier"
-                                           name="modifier" placeholder="{% trans "Mod" %}" value="0" style="width: 80px">
+                                    <input type="number" class="form-control ismall" id="stats-modifier"
+                                           name="modifier" placeholder="{% trans "Mod" %}" value="0">
                                 </div>
                                 <div class="col-auto">
                                     <button type="submit" class="btn btn-primary"
@@ -104,6 +106,32 @@
                                         <input class="form-check-input" type="checkbox" name="xp">
                                         {% trans "XP" %}
                                     </label>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="card-footer">
+                        <form method="post" action="{{ request.path }}" class="form-inline justify-content-center">
+                            <div class="mr-3 font-weight-bold">{% trans "Gagner de l'expérience :" %}</div>
+                            <div class="form-row align-items-center">
+                                <div class="col-auto">
+                                    <label class="sr-only" for="gain-group-list">{% trans "Type de personnage" %}</label>
+                                    <select name="group" id="group-list" class="form-control custom-select">
+                                        <option value="">{% trans "Tous" %}</option>
+                                        <option value="pj">{% trans "PJ" %}</option>
+                                        <option value="pnj">{% trans "PNJ" %}</option>
+                                    </select>
+                                </div>
+                                <div class="col-auto">
+                                    <label class="sr-only" for="stats-modifier">{% trans "Expérience" %}</label>
+                                    <input type="number" class="form-control ismall" id="experience"
+                                           name="experience" placeholder="{% trans "Expérience" %}" value="0">
+                                </div>
+                                <div class="col-auto">
+                                    <button type="submit" class="btn btn-primary"
+                                            name="method" value="gain">{% trans "Gagner" %}</button>
+                                    <input type="hidden" name="type" value="gain" />
+                                    {% csrf_token %}
                                 </div>
                             </div>
                         </form>

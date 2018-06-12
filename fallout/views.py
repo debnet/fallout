@@ -92,13 +92,31 @@ def view_campaign(request, campaign_id):
                 for character in Character.objects.filter(is_active=True, **filter):
                     result = character.roll(stats=stats, modifier=modifier, xp=xp)
                     messages.add_message(request, result.message_level, _(
-                        f"<strong>{result.character}</strong> {result.long_label}"))
+                        "<strong>{character}</strong> {label}").format(
+                            character=character, label=result.long_label))
+            elif type == 'gain':
+                group, experience = (data.get('group'), int(data.get('experience') or 0))
+                filter = dict(is_player=(group == 'pj')) if group else dict()
+                for character in Character.objects.filter(is_active=True, **filter):
+                    old_level = character.level
+                    level, required_experience = character.add_experience(experience)
+                    if level != old_level:
+                        messages.info(request, _(
+                            "<strong>{character}</strong> vient de passer au niveau "
+                            "<strong>{level}</strong> et a besoin de <strong>{experience}</strong> "
+                            "points d'expérience pour passer au niveau suivant.").format(
+                                character=character, level=level, experience=required_experience))
+                    else:
+                        messages.success(request, _(
+                            "<strong>{character}</strong> a encore besoin de <strong>{experience}</strong> "
+                            "points d'expérience pour passer au niveau suivant.").format(
+                                character=character, experience=required_experience))
         except ValidationError as error:
             for field, errors in error.message_dict.items():
                 for error in (errors if isinstance(errors, list) else [errors]):
-                    messages.error(request, _(f"<strong>Erreur</strong> {error}"))
+                    messages.error(request, _("<strong>Erreur</strong> {error}").format(error=error))
         except Exception as error:
-            messages.error(request, _(f"<strong>Erreur</strong> {error}"))
+            messages.error(request, _("<strong>Erreur</strong> {error}").format(error=error))
 
     return {
         'authorized': authorized,
@@ -137,7 +155,8 @@ def view_character(request, character_id):
                         stats=data.get('roll'),
                         modifier=int(data.get('modifier') or 0))
                     messages.add_message(request, result.message_level, _(
-                        f"<strong>{result.character}</strong> {result.long_label}"))
+                        "<strong>{character}</strong> {label}").format(
+                            character=character, label=result.long_label))
                 elif 'levelup' in data:
                     stats = data.get('levelup')
                     character.levelup(stats, 1)
@@ -149,7 +168,8 @@ def view_character(request, character_id):
                     hit_modifier=int(data.get('hit_modifier') or 0),
                     action=bool(data.get('action', False)))
                 messages.add_message(request, result.message_level, _(
-                    f"<strong>{result.attacker} vs {result.defender}</strong> {result.long_label}"))
+                    "<strong>{attacker} vs {defender}</strong> {label}").format(
+                        attacker=result.attacker, defender=result.defender, label=result.long_label))
             elif type == 'burst' and data.get('targets'):
                 results = character.burst(
                     targets=zip(data.get('targets') or [], data.get('ranges') or []),
@@ -157,7 +177,8 @@ def view_character(request, character_id):
                     action=bool(data.get('action', False)))
                 for result in results:
                     messages.add_message(request, result.message_level, _(
-                        f"<strong>{result.attacker} vs {result.defender}</strong> {result.long_label}"))
+                        "<strong>{attacker} vs {defender}</strong> {label}").format(
+                            attacker=result.attacker, defender=result.defender, label=result.long_label))
             elif type == 'damage':
                 result = character.damage(
                     raw_damage=int(data.get('raw_damage') or 0),
@@ -165,7 +186,9 @@ def view_character(request, character_id):
                     max_damage=int(data.get('max_damage') or 0),
                     damage_type=int(data.get('damage_type') or 0),
                     body_part=int(data.get('body_part') or 0))
-                messages.success(request, _(f"<strong>{result.character}</strong> {result.label}"))
+                messages.success(request, _(
+                    "<strong>{character}</strong> {label}").format(
+                        character=character, label=result.label))
             elif type == 'item':
                 item_id, item_name = data.get('item-id'), data.get('item-name')
                 if method == 'add':
@@ -209,9 +232,9 @@ def view_character(request, character_id):
         except ValidationError as error:
             for field, errors in error.message_dict.items():
                 for error in (errors if isinstance(errors, list) else [errors]):
-                    messages.error(request, _(f"<strong>Erreur</strong> {error}"))
+                    messages.error(request, _("<strong>Erreur</strong> {error}").format(error=error))
         except Exception as error:
-            messages.error(request, _(f"<strong>Erreur</strong> {error}"))
+            messages.error(request, _("<strong>Erreur</strong> {error}").format(error=error))
     # Données
     inventory, effects = character.inventory, character.effects
     rollstats = RollHistory.get_stats(character)
