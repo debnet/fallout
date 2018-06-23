@@ -371,7 +371,7 @@ class Prod(Base):
     ]
 
     # Celery configuration
-    CELERY_ENABLE = True
+    CELERY_ENABLE = values.BooleanValue(True)
     CELERY_BROKER_URL = BROKER_URL = values.Value('redis://localhost:6379/1', environ_name='CELERY_BROKER_URL')
     CELERY_BROKER_TRANSPORT_OPTIONS = BROKER_TRANSPORT_OPTIONS = {
         'visibility_timeout': 3600,
