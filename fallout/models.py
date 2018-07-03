@@ -89,7 +89,7 @@ class Campaign(CommonModel):
     name = models.CharField(max_length=200, verbose_name=_("nom"))
     title = models.CharField(max_length=200, blank=True, verbose_name=_("titre"))
     description = models.TextField(blank=True, verbose_name=_("description"))
-    image = models.ImageField(blank=True, upload_to='campaigns', verbose_name=_("image"))
+    image = models.ImageField(blank=True, null=True, upload_to='campaigns', verbose_name=_("image"))
     thumbnail = models.CharField(blank=True, max_length=100, choices=get_thumbnails('campaigns'), verbose_name=_("miniature"))
     game_master = models.ForeignKey(
         'Player', blank=True, null=True, on_delete=models.SET_NULL,
@@ -360,7 +360,7 @@ class Character(Entity, Stats):
     name = models.CharField(max_length=200, verbose_name=_("nom"))
     title = models.CharField(max_length=200, blank=True, verbose_name=_("titre"))
     description = models.TextField(blank=True, verbose_name=_("description"))
-    image = models.ImageField(blank=True, upload_to='characters', verbose_name=_("image"))
+    image = models.ImageField(blank=True, null=True, upload_to='characters', verbose_name=_("image"))
     thumbnail = models.CharField(blank=True, max_length=100, choices=get_thumbnails('characters'), verbose_name=_("miniature"))
     race = models.CharField(max_length=12, choices=RACES, default=RACE_HUMAN, db_index=True, verbose_name=_("race"))
     level = models.PositiveSmallIntegerField(default=1, verbose_name=_("niveau"))
@@ -1104,7 +1104,7 @@ class Modifier(CommonModel):
     """
     Modificateur de statistique
     """
-    stats = models.CharField(max_length=20, choices=ALL_STATS, verbose_name=_("statistique"))
+    stats = models.CharField(max_length=22, choices=ALL_STATS, verbose_name=_("statistique"))
     value = models.SmallIntegerField(default=0, verbose_name=_("valeur"))
 
     class Meta:
@@ -1157,7 +1157,7 @@ class Item(Entity, DamageMixin):
     name = models.CharField(max_length=200, verbose_name=_("nom"))
     title = models.CharField(max_length=200, blank=True, verbose_name=_("titre"))
     description = models.TextField(blank=True, verbose_name=_("description"))
-    image = models.ImageField(blank=True, upload_to='items', verbose_name=_("image"))
+    image = models.ImageField(blank=True, null=True, upload_to='items', verbose_name=_("image"))
     thumbnail = models.CharField(blank=True, max_length=100, choices=get_thumbnails('items'), verbose_name=_("miniature"))
     type = models.CharField(max_length=6, choices=ITEM_TYPES, verbose_name=_("type"))
     value = models.PositiveIntegerField(default=0, verbose_name=_("valeur"))
@@ -1535,7 +1535,7 @@ class Effect(Entity, DamageMixin):
     name = models.CharField(max_length=200, verbose_name=_("nom"))
     title = models.CharField(max_length=200, blank=True, verbose_name=_("titre"))
     description = models.TextField(blank=True, verbose_name=_("description"))
-    image = models.ImageField(blank=True, upload_to='effects', verbose_name=_("image"))
+    image = models.ImageField(blank=True, null=True, upload_to='effects', verbose_name=_("image"))
     thumbnail = models.CharField(
         blank=True, max_length=100, verbose_name=_("miniature"),
         choices=get_thumbnails('effects') + get_thumbnails('items'))
@@ -1873,7 +1873,7 @@ class LootTemplate(CommonModel):
     name = models.CharField(max_length=200, verbose_name=_("nom"))
     title = models.CharField(max_length=200, blank=True, verbose_name=_("titre"))
     description = models.TextField(blank=True, verbose_name=_("description"))
-    image = models.ImageField(blank=True, upload_to='loots', verbose_name=_("image"))
+    image = models.ImageField(blank=True, null=True, upload_to='loots', verbose_name=_("image"))
     thumbnail = models.CharField(blank=True, max_length=100, choices=get_thumbnails('items'), verbose_name=_("miniature"))
 
     def create(self, campaign: Union['Campaign', int], character: Optional[Union['Character', int]]=None):

@@ -5,8 +5,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="{{ description }}">
-    <meta name="author" content="{{ author }}">
+    {% if description %}<meta name="description" content="{{ description }}">{% endif %}
+    {% if author %}<meta name="author" content="{{ author }}">{% endif %}
     <link rel="icon" href="{% static "favicon.ico" %}">
     <title>{% block title %}{{ title|default:_("Fallout RPG") }}{% endblock %}</title>
     {% compress css %}
