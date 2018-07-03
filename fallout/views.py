@@ -269,5 +269,5 @@ def next_turn(request, campaign_id):
         campaign = Campaign.objects.filter(id=campaign_id).first()
         if campaign and (request.user.is_superuser or campaign.game_master == request.user):
             next_character = campaign.next_turn(seconds=int(data.get('seconds') or 0))
-            return redirect('fallout_character', next_character.id)
-    return redirect('fallout_campaign', campaign_id)
+            return redirect('fallout:character', next_character.id)
+    return redirect('fallout:campaign', campaign_id)

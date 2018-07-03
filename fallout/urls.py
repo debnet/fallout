@@ -5,10 +5,10 @@ from fallout import api, views
 
 
 urlpatterns = ([
-    path('', views.view_index, name='fallout_index'),
-    path('campaign/<int:campaign_id>/', views.view_campaign, name='fallout_campaign'),
-    path('character/<int:character_id>/', views.view_character, name='fallout_character'),
-    path('next_turn/<int:campaign_id>/', views.next_turn, name='fallout_next_turn'),
+    path('', views.view_index, name='index'),
+    path('campaign/<int:campaign_id>/', views.view_campaign, name='campaign'),
+    path('character/<int:character_id>/', views.view_character, name='character'),
+    path('next_turn/<int:campaign_id>/', views.next_turn, name='next_turn'),
 ], 'fallout')
 
 # API REST

@@ -186,7 +186,7 @@ class Campaign(CommonModel):
         Retourne l'URL vers la page de la campagne
         """
         from django.urls import reverse
-        return reverse('fallout_campaign', args=[str(self.pk)])
+        return reverse('fallout:campaign', args=[str(self.pk)])
 
     def __str__(self) -> str:
         return self.name
@@ -1081,7 +1081,7 @@ class Character(Entity, Stats):
         Retourne l'URL vers la page du personnage
         """
         from django.urls import reverse
-        return reverse('fallout_character', args=[str(self.pk)])
+        return reverse('fallout:character', args=[str(self.pk)])
 
     def __str__(self) -> str:
         return self.name
