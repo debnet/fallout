@@ -67,6 +67,7 @@ class Base(Configuration):
 
     # Database
     # https://docs.djangoproject.com/en/2.0/ref/settings/#databases
+    DATABASES = values.DatabaseURLValue('sqlite://./db.sqlite3')
     DATABASE_ROUTERS = values.ListValue(('common.router.DatabaseOverrideRouter',))
 
     # URL router
@@ -344,9 +345,6 @@ class Prod(Base):
     CACHE_MIDDLEWARE_SECONDS = 0
     CACHE_MIDDLEWARE_KEY_PREFIX = 'middleware'
 
-    # Database
-    DATABASES = values.DatabaseURLValue('postgres://user:password@localhost:5432/database?application_name=fallout')
-
     # Cache
     CACHES = {
         'default': {
@@ -371,7 +369,7 @@ class Prod(Base):
     ]
 
     # Celery configuration
-    CELERY_ENABLE = True
+    CELERY_ENABLE = values.BooleanValue(True)
     CELERY_BROKER_URL = BROKER_URL = values.Value('redis://localhost:6379/1', environ_name='CELERY_BROKER_URL')
     CELERY_BROKER_TRANSPORT_OPTIONS = BROKER_TRANSPORT_OPTIONS = {
         'visibility_timeout': 3600,
@@ -416,9 +414,6 @@ class Test(Base):
 
     # Disable password security
     AUTH_PASSWORD_VALIDATORS = []
-
-    # Database
-    DATABASES = values.DatabaseURLValue('sqlite://./db.sqlite3')
 
     # Cache
     CACHES = {
