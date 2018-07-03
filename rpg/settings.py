@@ -37,7 +37,6 @@ class Base(Configuration):
         'django.contrib.staticfiles',
         # Requirements
         'pytz',
-        'oauth2_provider',
         'corsheaders',
         'rest_framework',
         'rest_framework.authtoken',
@@ -111,14 +110,6 @@ class Base(Configuration):
     LDAP_STAFF_GROUPS = values.ListValue([])
     LDAP_GROUP_PREFIX = values.Value("[LDAP] ")
 
-    # OAuth configuration
-    OAUTH2_PROVIDER = {
-        'SCOPES': {
-            'read': 'Read scope',
-            'write': 'Write scope',
-        }
-    }
-
     # Password validation
     # https://docs.djangoproject.com/en/2.0/ref/settings/#auth-password-validators
     AUTH_PASSWORD_VALIDATORS = [
@@ -187,7 +178,6 @@ class Base(Configuration):
         'DEFAULT_AUTHENTICATION_CLASSES': (
             'rest_framework.authentication.TokenAuthentication',
             'rest_framework.authentication.SessionAuthentication',
-            'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
         ),
         'DEFAULT_RENDERER_CLASSES': (
             'rest_framework.renderers.JSONRenderer',
