@@ -223,7 +223,8 @@ class CharacterAdmin(EntityAdmin):
     burst.short_description = _("Attaquer en rafale plusieurs personnages")
 
     def loot(self, request, queryset):
-        pass  # TODO:
+        for character in queryset:
+            character.loot(empty=True)
     loot.short_description = _("Lâcher tous les équipements")
 
 
@@ -247,8 +248,8 @@ class ItemAdmin(EntityAdmin):
         )),
         (_("Armes uniquement"), dict(
             fields=(
-                'is_melee', 'is_throwable', 'skill', 'min_strength', 'range', 'clip_size', 'burst_count',
-                'hit_chance_modifier', 'threshold_modifier', 'resistance_modifier',
+                'is_melee', 'is_throwable', 'is_single_charge', 'skill', 'min_strength', 'range', 'clip_size',
+                'burst_count', 'hit_chance_modifier', 'threshold_modifier', 'resistance_modifier',
                 'ap_cost_reload', 'ap_cost_normal', 'ap_cost_target', 'ap_cost_burst', ),
             classes=('wide', 'collapse', ),
         )),

@@ -1166,6 +1166,7 @@ class Item(Entity, DamageMixin):
     # Weapon specific
     is_melee = models.BooleanField(default=False, verbose_name=_("arme de mêlée ?"))
     is_throwable = models.BooleanField(default=False, verbose_name=_("jetable ?"))
+    is_single_charge = models.BooleanField(default=False, verbose_name=_("recharge unitaire ?"))
     skill = models.CharField(max_length=15, blank=True, choices=SKILLS, verbose_name=_("compétence"))
     min_strength = models.PositiveSmallIntegerField(default=0, verbose_name=_("force minimum"))
     clip_size = models.PositiveSmallIntegerField(default=0, verbose_name=_("taille du chargeur"))
@@ -1369,10 +1370,11 @@ class Equipment(CommonModel):
             "Le personnage ne possède plus assez de points d'actions pour s'équiper de cet objet.")
 
         def get_equipment(equipment: 'Equipment', slot: str) -> Optional['Equipment']:
-            return Equipment.objects.filter(character_id=equipment.character_id, slot=slot).first()
+            return Equipment.objects.select_related('item').filter(
+                character_id=equipment.character_id, slot=slot).first()
 
         def handle_equipment(equipment: 'Equipment') -> None:
-            if equipment.clip_count:
+            if equipment.clip_count and not equipment.item.is_single_charge:
                 ammo = get_equipment(equipment, ITEM_AMMO)
                 if ammo:
                     ammo.quantity += equipment.clip_count
@@ -1380,7 +1382,7 @@ class Equipment(CommonModel):
                     equipment.clip_count = 0
             elif equipment.slot == ITEM_AMMO:
                 weapon = get_equipment(equipment, ITEM_WEAPON)
-                if weapon:
+                if weapon and not weapon.item.is_single_charge:
                     equipment.quantity += weapon.clip_count
                     weapon.clip_count = 0
                     weapon.save()
@@ -1461,10 +1463,14 @@ class Equipment(CommonModel):
             "Il n'y a aucun type de munition équipé ou le nombre de munitions disponibles est insuffisant.")
         assert ammo.item in self.item.ammunitions.all(), _(
             "Cette arme est incompatible avec le type de munition équipé.")
-        needed_ammo = min(self.item.clip_size - self.clip_count, ammo.quantity)
+        if self.item.is_single_charge:
+            needed_ammo = 1
+            self.clip_count = self.item.clip_size
+        else:
+            needed_ammo = min(self.item.clip_size - self.clip_count, ammo.quantity)
+            self.clip_count += needed_ammo
         ammo.quantity -= needed_ammo
         ammo.save()
-        self.clip_count += needed_ammo
         self.save()
         if action:
             self.character.action_points -= self.item.ap_cost_reload
