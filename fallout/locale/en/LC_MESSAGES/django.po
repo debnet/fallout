@@ -1568,7 +1568,7 @@ msgid ""
 "                    particulière ainsi la plupart des actions liées à une campagne (comme la gestion du temps et les\n"
 "                    effets) sont désactivés.\n"
 "                "
-msgstr "You are currently on the character pool that is not associated with any particular campaign so most campaign-related actions (such as time and effects management) are disabled."
+msgstr "\nYou are currently on the character pool that is not associated with any particular campaign so most campaign-related actions (such as time and effects management) are disabled."
 
 #: fallout/templates/fallout/campaign/campaign.html:51
 msgid "Campagne"
@@ -1906,7 +1906,7 @@ msgid ""
 "\n"
 "                                (%(count)s jets pour %(rate)s%% de succès)\n"
 "                            "
-msgstr "(%(count)s rolls for %(rate)s%% successful)"
+msgstr "\n(%(count)s rolls for %(rate)s%% successful)"
 
 #: fallout/templates/fallout/character/panels/infos.html:15
 msgid "(aucun jet)"
