@@ -5,25 +5,25 @@ from django.utils.translation import ugettext as _
 # General statistics
 STATS_HEALTH = 'health'
 STATS_ACTION_POINTS = 'action_points'
-STATS_SKILL_POINTS = 'skill_points'
-STATS_PERK_POINTS = 'perk_points'
-STATS_EXPERIENCE = 'experience'
-STATS_KARMA = 'karma'
-STATS_RADS = 'rads'
 STATS_THIRST = 'thirst'
 STATS_HUNGER = 'hunger'
 STATS_SLEEP = 'sleep'
+STATS_RADS = 'rads'
+STATS_EXPERIENCE = 'experience'
+STATS_SKILL_POINTS = 'skill_points'
+STATS_PERK_POINTS = 'perk_points'
+STATS_KARMA = 'karma'
 GENERAL_STATS = (
     (STATS_HEALTH, _("santé")),
     (STATS_ACTION_POINTS, _("points d'action")),
-    (STATS_SKILL_POINTS, _("points de compétence")),
-    (STATS_PERK_POINTS, _("points de talent")),
-    (STATS_EXPERIENCE, _("expérience")),
-    (STATS_KARMA, _("karma")),
-    (STATS_RADS, _("rads")),
     (STATS_THIRST, _("soif")),
     (STATS_HUNGER, _("faim")),
     (STATS_SLEEP, _("sommeil")),
+    (STATS_RADS, _("rads")),
+    (STATS_EXPERIENCE, _("expérience")),
+    (STATS_SKILL_POINTS, _("points de compétence")),
+    (STATS_PERK_POINTS, _("points de talent")),
+    (STATS_KARMA, _("karma")),
 )
 LIST_GENERAL_STATS = dict(GENERAL_STATS)
 LIST_NEEDS = [STATS_RADS, STATS_THIRST, STATS_HUNGER, STATS_SLEEP]
@@ -153,6 +153,7 @@ DAMAGE_GAZ_INHALED = 'gas_inhaled'
 DAMAGE_ELECTRICITY = 'electricity'
 DAMAGE_POISON = 'poison'
 DAMAGE_RADIATION = 'radiation'
+DAMAGE_RAW = 'raw'
 DAMAGE_HEAL = 'heal'
 DAMAGES_TYPES = (
     (DAMAGE_NORMAL, _("dégâts normaux")),
@@ -165,6 +166,7 @@ DAMAGES_TYPES = (
     (DAMAGE_ELECTRICITY, _("dégâts d'électricité")),
     (DAMAGE_POISON, _("dégâts de poison")),
     (DAMAGE_RADIATION, _("dégâts de radiations")),
+    (DAMAGE_RAW, _("dégâts directs")),
     (DAMAGE_HEAL, _("soins")),
 )
 LIST_DAMAGES_TYPES = dict(DAMAGES_TYPES)
@@ -182,6 +184,7 @@ DAMAGE_RESISTANCE = {
     DAMAGE_ELECTRICITY: RESISTANCE_ELECTRICITY,
     DAMAGE_POISON: RESISTANCE_POISON,
     DAMAGE_RADIATION: RESISTANCE_RADIATION,
+    DAMAGE_RAW: None,
     DAMAGE_HEAL: None,
 }
 

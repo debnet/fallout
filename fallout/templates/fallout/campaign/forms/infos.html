@@ -1,0 +1,43 @@
+{% load i18n l10n tools %}
+
+<div class="row">
+    {% for character in characters %}
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="card h-100">
+                <div class="card-header">
+                    <small class="badge badge-dark">{{ character.level }}</small>
+                    {% if character.is_player %}
+                        <small class="badge badge-success">{% trans "PJ" %}</small>
+                    {% else %}
+                        <small class="badge badge-warning">{% trans "PNJ" %}</small>
+                    {% endif %}
+                    {% if character.health == 0 %}
+                        <small class="badge badge-danger">{% trans "KO" %}</small>
+                    {% elif campaign.current_character == character %}
+                        <small class="badge badge-info">{% trans "Actif" %}</small>
+                    {% endif %}
+                    <span class="card-title"><a href="{% url 'fallout:character' character.id %}">{{ character.name }}</a></span>
+                    {% if character.title %}<small class="card-subtitle mb-2 text-muted">{{ character.title }}</small>{% endif %}
+                </div>
+                <div class="card-body">
+                    {% for code, label, lvalue, rvalue, class, rate in character.general_stats %}
+                        {% with title=character.labels|get:code|default:"" %}
+                            {% if rate is not None %}
+                                <strong>{{ label }}</strong>
+                                <small class="text-muted">{{ lvalue|floatformat:0 }} / {{ rvalue|floatformat:0 }}</small>
+                                <div class="progress">
+                                    {% localize off %}
+                                    <div class="progress-bar progress-bar-striped bg-{{ class }}" role="progressbar"
+                                         aria-valuenow="{{ lvalue }}" aria-valuemin="0" aria-valuemax="{{ rvalue }}"
+                                         style="width: {{ rate }}%" title="{{ title }}" data-toggle="tooltip" data-placement="top">
+                                    {% endlocalize %}
+                                    </div>
+                                </div>
+                            {% endif %}
+                        {% endwith %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>

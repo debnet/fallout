@@ -44,8 +44,8 @@ def get_thumbnails(directory: str='') -> List[Tuple[str, str]]:
         return sorted(images)
 
 
-def get_class(value: Union[int, float], maximum: Union[int, float], classes: Tuple[str]=None,
-              values: Tuple[float]=None, reverse: bool=False, default: str='muted') -> str:
+def get_class(value: Union[int, float], maximum: Union[int, float], classes: Tuple[str, ...]=None,
+              values: Tuple[float, ...]=None, reverse: bool=False, default: str='muted') -> str:
     """
     Affecte une classe CSS à une valeur donnée
     :param value: Valeur
@@ -456,11 +456,12 @@ class Character(Entity, Stats):
             yield code, label, value, None, get_class(value, maximum=100)
 
     @property
-    def general_stats(self) -> List[Tuple[str, str, Union[int, float], Optional[Union[int, float]], Optional[str]]]:
+    def general_stats(self) -> List[Tuple[str, str, Union[int, float], Optional[Union[int, float]], Optional[str], Optional[float]]]:
         """
         Retourne les statistiques générales
-        :return: code, label, valeur à gauche, valeur à droite, classe
+        :return: code, label, valeur à gauche, valeur à droite, classe, taux
         """
+
         for code, label in GENERAL_STATS:
             lvalue = getattr(self, code, 0)
             rvalue, rclass = None, None
@@ -476,15 +477,16 @@ class Character(Entity, Stats):
                 rvalue = lvalue
                 lvalue = self.used_skill_points
             elif code == STATS_EXPERIENCE:
+                charge, carry_weight = self.charge, self.stats.carry_weight
+                yield (STATS_CARRY_WEIGHT, _("charge"), charge, carry_weight,
+                       get_class(charge, carry_weight, reverse=True), (charge / carry_weight * 100.0))
                 rvalue = self.required_experience
             elif code in LIST_NEEDS:
                 rvalue = 1000
                 classes = ('primary', 'success', 'warning', 'danger', 'muted', 'muted')
                 values = (1.000, 0.800, 0.600, 0.400, 0.200, 0.000)
                 rclass = get_class(lvalue, rvalue, reverse=True, classes=classes, values=values)
-            yield code, label, lvalue, rvalue, rclass
-        yield (STATS_CARRY_WEIGHT, _("charge"), self.charge, self.stats.carry_weight,
-               get_class(self.charge, self.stats.carry_weight, reverse=True))
+            yield code, label, lvalue, rvalue, rclass, ((lvalue / rvalue) * 100.0) if rvalue else None
 
     @property
     def secondary_stats(self) -> List[Tuple[str, str, Union[int, float]]]:
@@ -717,7 +719,7 @@ class Character(Entity, Stats):
             self.add_experience(XP_GAIN_ROLL[history.success])
         return history
 
-    def loot(self, empty: bool=True) -> List['Loot']:
+    def loot(self, empty: bool=True) -> Optional[List['Loot']]:
         """
         Transforme l'équipement de ce personnage en butin
         :param empty: Vide l'inventaire du joueur ?
@@ -923,6 +925,7 @@ class Character(Entity, Stats):
         :param log: Historise les dégâts ?
         :return: Nombre de dégâts
         """
+        damage_type, body_part = damage_type or DAMAGE_NORMAL, body_part or PART_TORSO
         assert min_damage <= max_damage, _("Les bornes de dégâts min. et max. ne sont pas correctes.")
         history = DamageHistory(
             character=self, damage_type=damage_type, raw_damage=raw_damage,
@@ -934,30 +937,34 @@ class Character(Entity, Stats):
         # Character already KO
         if damage_type != DAMAGE_HEAL and self.health <= 0:
             return history
-        # Armor threshold and resistance
-        armor_slot = ITEM_HELMET if damage_type == DAMAGE_GAZ_INHALED or (body_part in (PART_EYES, PART_HEAD)) else ITEM_ARMOR
-        armor_equipment = self.inventory.filter(slot=armor_slot).first()
-        armor = history.armor = getattr(armor_equipment, 'item', None)
-        armor_damage = 0
-        if armor and armor_equipment:
-            armor_threshold = round(armor.get_threshold(damage_type) * armor_equipment.condition) + threshold_modifier
-            armor_resistance = (armor.get_resistance(damage_type) * armor_equipment.condition) + resistance_modifier
-            total_damage -= max(armor_threshold, 0)
-            total_damage *= (1.0 - min(armor_resistance, 1.0))
-            armor_damage = max((base_damage - total_damage) * armor.condition_modifier, 0)
-            # History
-            history.armor_threshold = armor_threshold
-            history.armor_resistance = armor_resistance
-            history.armor_damage = armor_damage
-        # Self threshold and resistance
-        type_resistance = DAMAGE_RESISTANCE.get(damage_type)
-        if type_resistance:
-            damage_threshold = self.stats.damage_threshold + threshold_modifier
-            damage_resistance = (self.stats.damage_resistance + getattr(self.stats, type_resistance, 0.0)) / 100.0
-            damage_resistance += resistance_modifier
-        else:
-            damage_threshold = 0
-            damage_resistance = 0.0
+        damage_threshold = 0
+        damage_resistance = 0.0
+        if damage_type not in (DAMAGE_RAW, DAMAGE_HEAL):
+            # Armor threshold and resistance
+            armor_slot = ITEM_HELMET if damage_type == DAMAGE_GAZ_INHALED or (body_part in (PART_EYES, PART_HEAD)) else ITEM_ARMOR
+            armor_equipment = self.inventory.filter(slot=armor_slot).first()
+            armor = history.armor = getattr(armor_equipment, 'item', None)
+            armor_damage = 0
+            if armor and armor_equipment:
+                armor_threshold = round(armor.get_threshold(damage_type) * armor_equipment.condition) + threshold_modifier
+                armor_resistance = (armor.get_resistance(damage_type) * armor_equipment.condition) + resistance_modifier
+                total_damage -= max(armor_threshold, 0)
+                total_damage *= (1.0 - min(armor_resistance, 1.0))
+                armor_damage = max((base_damage - total_damage) * armor.condition_modifier, 0)
+                # History
+                history.armor_threshold = armor_threshold
+                history.armor_resistance = armor_resistance
+                history.armor_damage = armor_damage
+            # Condition decrease on armor
+            if armor_damage > 0 and damage_type in PHYSICAL_DAMAGES:
+                armor_equipment.condition -= armor_damage
+                armor_equipment.save()
+            # Self threshold and resistance
+            type_resistance = DAMAGE_RESISTANCE.get(damage_type)
+            if type_resistance:
+                damage_threshold = self.stats.damage_threshold + threshold_modifier
+                damage_resistance = (self.stats.damage_resistance + getattr(self.stats, type_resistance, 0.0)) / 100.0
+                damage_resistance += resistance_modifier
         total_damage *= (-1.0 if damage_type == DAMAGE_HEAL else 1.0)
         total_damage -= max(damage_threshold, 0)
         total_damage *= (1.0 - min(damage_resistance, 1.0))
@@ -970,10 +977,6 @@ class Character(Entity, Stats):
                 self.health -= total_damage
             if save:
                 self.save()
-        # Condition decrease on armor
-        if armor_damage > 0 and damage_type in PHYSICAL_DAMAGES:
-            armor_equipment.condition -= armor_damage
-            armor_equipment.save()
         # History
         history.damage_threshold = damage_threshold
         history.damage_resistance = damage_resistance

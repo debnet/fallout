@@ -17,11 +17,10 @@
                     </small>
                 </h6>
                 <div class="progress">
-                    <div class="progress-bar"></div>
                     {% for value, width, class in roll.all %}
                         {% if value %}
                             {% localize off %}
-                            <div class="progress-bar bg-{{ class }}" role="progressbar"
+                            <div class="progress-bar progress-bar-striped bg-{{ class }}" role="progressbar"
                                  aria-valuenow="{{ value }}" aria-valuemin="0" aria-valuemax="{{ roll.count }}"
                                  style="width: {{ width }}%">
                             {% endlocalize %}

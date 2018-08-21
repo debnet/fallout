@@ -26,15 +26,15 @@
                 {% for character in characters %}
                     <a class="dropdown-item{% if character == current_character %} active{% endif %}"
                        href="{% url 'fallout:character' character.id %}">
-                        {% if not character.is_player %}
-                            <small class="badge badge-info">{% trans "PNJ" %}</small>
+                        {% if character.is_player %}
+                            <small class="badge badge-success">{% trans "PJ" %}</small>
                         {% else %}
-                            <span class="badge badge-warning">{% trans "PJ" %}</span>
+                            <small class="badge badge-warning">{% trans "PNJ" %}</small>
                         {% endif %}
                         {% if character.health == 0 %}
                             <small class="badge badge-danger">{% trans "KO" %}</small>
                         {% elif character.campaign.current_character == character %}
-                            <small class="badge badge-success">{% trans "Actif" %}</small>
+                            <small class="badge badge-info">{% trans "Actif" %}</small>
                         {% endif %}
                         {{ character.name }}
                         {% if character.title %}<small class="text-muted">{{ character.title }}</small>{% endif %}
@@ -43,10 +43,23 @@
             {% endwith %}
         </div>
     </li>
+    {% if campaign and character %}
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'fallout:campaign' campaign.id %}">{% trans "(Campagne courante)" %}</a>
+        </li>
+    {% endif %}
 </ul>
 {% if campaign and authorized %}
     <form class="form-inline" method="post" action="{% url 'fallout:next_turn' campaign.id %}">
-        <label class="text-white">{{ campaign.current_game_date }}</label>
+        <label class="text-white">
+            {{ campaign.current_game_date }}
+            {% with current=campaign.current_character %}
+                {% if current %}
+                    (<a class="{% if current.is_player %}text-success{% else %}text-warning{% endif %}"
+                        href="{% url 'fallout:character' current.id %}">{{ current }}</a>)
+                {% endif %}
+            {% endwith %}
+        </label>
         <select class="form-control form-control-sm custom-select ml-2 mr-2" name="seconds">
             <option value="0" selected="selected">{% trans "0 s" %}</option>
             <option value="30">{% trans "30 s" %}</option>

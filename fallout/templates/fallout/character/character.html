@@ -29,22 +29,22 @@
                 {% if character.title %}<small class="text-muted">{{ character.title }}</small>{% endif %}
             </h4>
             <p class="lead">
-                {% if not character.is_player %}
-                    <span class="badge badge-info">{% trans "PNJ" %}</span>
+                {% if character.is_player %}
+                    <span class="badge badge-success">{% trans "PJ" %}</span>
                 {% else %}
-                    <span class="badge badge-warning">{% trans "PJ" %}</span>
+                    <span class="badge badge-warning">{% trans "PNJ" %}</span>
                 {% endif %}
                 {% if character.health == 0 %}
                     <span class="badge badge-danger">{% trans "KO" %}</span>
                 {% elif character.campaign.current_character == character %}
-                    <span class="badge badge-success">{% trans "Actif" %}</span>
+                    <span class="badge badge-info">{% trans "Actif" %}</span>
                 {% endif %}
                 <span class="font-weight-bold">{% trans "Niveau" %} {{ character.level }}</span>
                 {% if character.description %} {{ character.description }}{% endif %}
             </p>
         </div>
         <div role="tabpanel" id="tabs">
-            <ul class="nav nav-pills nav-fill nav-justified pt-3 tab" id="character-tabs" role="tablist">
+            <ul class="nav nav-tabs nav-fill nav-justified pt-3 tab" id="character-tabs" role="tablist">
                 <li class="nav-item">
                     <a class="nav-link" data-toggle="tab" role="tab"
                        href="#character-stats" id="character-stats-tab">{% trans "Personnage" %}</a>

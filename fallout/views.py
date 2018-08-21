@@ -29,8 +29,8 @@ def view_campaign(request, campaign_id):
     """
     data = request.POST
     # Campagne
-    campaign = Campaign.objects.filter(id=campaign_id).first()
-    characters = Character.objects.filter(campaign=campaign, is_active=True)
+    campaign = Campaign.objects.select_related('current_character').filter(id=campaign_id).first()
+    characters = Character.objects.select_related('campaign__current_character').filter(campaign=campaign, is_active=True)
     if not request.user.is_superuser:
         characters = characters.filter(Q(user=request.user) | Q(campaign__game_master=request.user))
     loots = Loot.objects.select_related('item').filter(campaign=campaign).order_by('item__name')
@@ -89,7 +89,7 @@ def view_campaign(request, campaign_id):
                 group, stats, modifier, xp = (
                     data.get('group'), data.get('stats'), int(data.get('modifier') or 0), 'xp' in data)
                 filter = dict(is_player=(group == 'pj')) if group else dict()
-                for character in Character.objects.filter(is_active=True, **filter):
+                for character in characters.filter(is_active=True, **filter):
                     result = character.roll(stats=stats, modifier=modifier, xp=xp)
                     messages.add_message(request, result.message_level, _(
                         "<strong>{character}</strong> {label}").format(
@@ -97,7 +97,7 @@ def view_campaign(request, campaign_id):
             elif type == 'gain':
                 group, experience = (data.get('group'), int(data.get('experience') or 0))
                 filter = dict(is_player=(group == 'pj')) if group else dict()
-                for character in Character.objects.filter(is_active=True, **filter):
+                for character in characters.filter(is_active=True, **filter):
                     old_level = character.level
                     level, required_experience = character.add_experience(experience)
                     if level != old_level:
@@ -137,7 +137,7 @@ def view_character(request, character_id):
     """
     data = request.POST
     # Personnage
-    characters = Character.objects.select_related('user', 'campaign').filter(is_active=True)
+    characters = Character.objects.select_related('user', 'campaign__current_character').filter(is_active=True)
     if not request.user.is_superuser:
         characters = characters.filter(Q(user=request.user) | Q(campaign__game_master=request.user))
     character = characters.filter(id=character_id).first()
@@ -184,8 +184,8 @@ def view_character(request, character_id):
                     raw_damage=int(data.get('raw_damage') or 0),
                     min_damage=int(data.get('min_damage') or 0),
                     max_damage=int(data.get('max_damage') or 0),
-                    damage_type=int(data.get('damage_type') or 0),
-                    body_part=int(data.get('body_part') or 0))
+                    damage_type=str(data.get('damage_type') or None),
+                    body_part=str(data.get('body_part') or None))
                 messages.success(request, _(
                     "<strong>{character}</strong> {label}").format(
                         character=character, label=result.label))

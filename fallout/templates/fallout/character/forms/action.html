@@ -42,33 +42,6 @@
             </tr>
             <tr>
                 <td>
-                    <label for="{{ code }}-xp" class="d-inline">{% trans "expérience" %}</label>
-                </td>
-                <td class="text-right">
-                    <input type="number" class="form-control form-control-sm imedium" id="{{ code }}-ex" name="xp"
-                           value="{{ character.experience }}" min="0" aria-valuemin="0"/>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <label for="{{ code }}-karma" class="d-inline">{% trans "karma" %}</label>
-                </td>
-                <td class="text-right">
-                    <input type="number" class="form-control form-control-sm imedium" id="{{ code }}-karma" name="karma"
-                           value="{{ character.karma }}" min="-1000" aria-valuemin="-1000" max="1000" aria-valuemax="1000"/>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <label for="{{ code }}-rads" class="d-inline">{% trans "rads" %}</label>
-                </td>
-                <td class="text-right">
-                    <input type="number" class="form-control form-control-sm imedium" id="{{ code }}-rads" name="rads"
-                           value="{{ character.rads|floatformat:0 }}" min="0" aria-valuemin="0" max="1000" aria-valuemax="1000"/>
-                </td>
-            </tr>
-            <tr>
-                <td>
                     <label for="{{ code }}-thirst" class="d-inline">{% trans "soif" %}</label>
                 </td>
                 <td class="text-right">
@@ -92,6 +65,33 @@
                 <td class="text-right">
                     <input type="number" class="form-control form-control-sm imedium" id="{{ code }}-sleep" name="sleep"
                            value="{{ character.sleep|floatformat:0 }}" min="0" aria-valuemin="0" max="1000" aria-valuemax="1000"/>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for="{{ code }}-rads" class="d-inline">{% trans "rads" %}</label>
+                </td>
+                <td class="text-right">
+                    <input type="number" class="form-control form-control-sm imedium" id="{{ code }}-rads" name="rads"
+                           value="{{ character.rads|floatformat:0 }}" min="0" aria-valuemin="0" max="1000" aria-valuemax="1000"/>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for="{{ code }}-xp" class="d-inline">{% trans "expérience" %}</label>
+                </td>
+                <td class="text-right">
+                    <input type="number" class="form-control form-control-sm imedium" id="{{ code }}-ex" name="xp"
+                           value="{{ character.experience }}" min="0" aria-valuemin="0"/>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for="{{ code }}-karma" class="d-inline">{% trans "karma" %}</label>
+                </td>
+                <td class="text-right">
+                    <input type="number" class="form-control form-control-sm imedium" id="{{ code }}-karma" name="karma"
+                           value="{{ character.karma }}" min="-1000" aria-valuemin="-1000" max="1000" aria-valuemax="1000"/>
                 </td>
             </tr>
         </tbody>

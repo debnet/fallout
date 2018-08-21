@@ -98,14 +98,14 @@ class CharacterAdmin(EntityAdmin):
     Administration des personnages
     """
     fieldsets = tuple([
-        (_("Informations techniques"), dict(
-            fields=('user', 'campaign', ),
-            classes=('wide', 'collapse', ),
-        )),
         (_("Informations générales"), dict(
             fields=('name', 'title', 'description', 'image', 'thumbnail', 'race', 'level',
                     'is_player', 'is_active', 'is_resting', ),
             classes=('wide', ),
+        )),
+        (_("Informations techniques"), dict(
+            fields=('user', 'campaign',),
+            classes=('wide', 'collapse',),
         )),
         (_("Spécialités"), dict(
             fields=('tag_skills', ),

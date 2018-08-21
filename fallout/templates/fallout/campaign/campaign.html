@@ -45,7 +45,7 @@
         </div>
     {% endif %}
     <div role="tabpanel" id="tabs">
-        <ul class="nav nav-pills nav-fill nav-justified pt-3 tab" id="actions-tabs" role="tablist">
+        <ul class="nav nav-tabs nav-fill nav-justified pt-3 tab" id="actions-tabs" role="tablist">
             <li class="nav-item">
                 <a class="nav-link" data-toggle="tab" role="tab"
                    id="campaign-infos-tab" href="#campaign-infos">{% trans "Campagne" %}</a>
@@ -67,45 +67,4 @@
             {% include "fallout/campaign/panels/loots.html" %}
         </div>
     </div>
-{% endblock %}
-
-{% block scripts %}
-    {% if campaign %}
-        <script type="application/javascript">
-            $(document).ready(function () {
-                $("#campaign-calendar").calendar({
-                    language: "{{ LANGUAGE_CODE|default:'fr' }}",
-                    year: {{ campaign.current_game_date|date:'Y' }},
-                    month: {{ campaign.current_game_date|date:'m' }},
-                    cell_border: true,
-                    show_days: true,
-                    nav_icon: {
-                      prev: '&lt;',
-                      next: '&gt;'
-                    },
-                    legend: [
-                        {
-                            type: "text",
-                            label: "{% trans "Maintenant" %}",
-                            badge: "00"
-                        }
-                    ],
-                    data: [
-                        {
-                            date: "{{ campaign.start_game_date|date:'Y-m-d' }}",
-                            badge: false,
-                            title: "{% trans "Début de la campagne" %}",
-                            footer: "{{ campaign.start_game_date }}"
-                        },
-                        {
-                            date: "{{ campaign.current_game_date|date:'Y-m-d' }}",
-                            badge: true,
-                            title: "{% trans "Maintenant" %}",
-                            footer: "{{ campaign.current_game_date }}"
-                        }
-                    ]
-                });
-            });
-        </script>
-    {% endif %}
 {% endblock %}
