@@ -11,7 +11,7 @@ from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import F, Q, Sum, FloatField
-from django.utils.translation import ugettext as _
+from django.utils.translation import ugettext as __, ugettext_lazy as _
 from multiselectfield import MultiSelectField
 
 from fallout.constants import *  # noqa
@@ -328,12 +328,12 @@ class Stats(models.Model):
         return stats
 
     def _change_all_stats(self, **stats: Dict[str, Tuple[int, int, int]]) -> None:
-        assert isinstance(self, Stats), _("Cette fonction ne peut être utilisée que par les statistiques.")
+        assert isinstance(self, Stats), __("Cette fonction ne peut être utilisée que par les statistiques.")
         for name, values in stats.items():
             self._change_stats(name, *values)
 
     def _change_stats(self, name: str, value: int=0, mini: int=None, maxi: int=None) -> None:
-        assert isinstance(self, Stats), _("Cette fonction ne peut être utilisée que par les statistiques.")
+        assert isinstance(self, Stats), __("Cette fonction ne peut être utilisée que par les statistiques.")
         bonus, race_mini, race_maxi = RACES_STATS.get(self.character.race, {}).get(name, (None, None, None))
         target = self if name in LIST_EDITABLE_STATS else self.character
         mini = mini if mini is not None else race_mini or float('-inf')
@@ -557,7 +557,7 @@ class Character(Entity, Stats):
         label = next(iter(label for (mini, maxi), label in labels.items() if mini <= value <= (maxi or float('inf'))))
         effects = next(iter(modifiers for (mini, maxi), modifiers in effects.items() if mini <= value <= (maxi or float('inf'))))
         effects = ", ".join(f"{modifier} {LIST_ALL_STATS[stats]}" for stats, (modifier, mini, maxi) in effects.items())
-        effects = effects or _("aucun malus")
+        effects = effects or __("aucun malus")
         if label:
             return f"{label} ({effects})"
         return effects
@@ -748,7 +748,7 @@ class Character(Entity, Stats):
         histories = []
         attacker_weapon_equipment = self.inventory.filter(slot=ITEM_WEAPON).first()
         attacker_weapon = getattr(attacker_weapon_equipment, 'item', None)
-        assert attacker_weapon and attacker_weapon.burst_count != 0, _(
+        assert attacker_weapon and attacker_weapon.burst_count != 0, __(
             "L'attaquant ne possède pas d'arme ou celle-ci ne permet pas d'attaque en rafale.")
         for hit in range(attacker_weapon.burst_count):
             target, target_range = choice(targets)
@@ -926,7 +926,7 @@ class Character(Entity, Stats):
         :return: Nombre de dégâts
         """
         damage_type, body_part = damage_type or DAMAGE_NORMAL, body_part or PART_TORSO
-        assert min_damage <= max_damage, _("Les bornes de dégâts min. et max. ne sont pas correctes.")
+        assert min_damage <= max_damage, __("Les bornes de dégâts min. et max. ne sont pas correctes.")
         history = DamageHistory(
             character=self, damage_type=damage_type, raw_damage=raw_damage,
             min_damage=min_damage, max_damage=max_damage)
@@ -1011,7 +1011,7 @@ class Character(Entity, Stats):
         :param effects: Duplique également les effets
         :return: Personnage
         """
-        assert self.pk, _("Ce personnage doit être préalablement enregistré avant d'être dupliqué.")
+        assert self.pk, __("Ce personnage doit être préalablement enregistré avant d'être dupliqué.")
         character_id = self.pk
         self.save(force_insert=True)
         if equipments:
@@ -1032,9 +1032,9 @@ class Character(Entity, Stats):
         :param save: Sauvegarde le personne ?
         :return: Valeur courante
         """
-        assert self.skill_points, _("Ce personnage n'a pas de points de compétences à distribuer.")
-        assert value <= self.skill_points, _("Ce personnage n'a pas assez de points de compétences.")
-        assert stats in LIST_SKILLS, _("Cette compétence ne peut être améliorée.")
+        assert self.skill_points, __("Ce personnage n'a pas de points de compétences à distribuer.")
+        assert value <= self.skill_points, __("Ce personnage n'a pas assez de points de compétences.")
+        assert stats in LIST_SKILLS, __("Cette compétence ne peut être améliorée.")
         value = value * (2 if stats in self.tag_skills else 1)
         setattr(self, stats, getattr(self, stats) + value)
         if save:
@@ -1250,7 +1250,7 @@ class Item(Entity, DamageMixin):
         Duplique cet objet
         :return: Objet
         """
-        assert self.pk, _("Cet objet doit être préalablement enregistré avant d'être dupliqué.")
+        assert self.pk, __("Cet objet doit être préalablement enregistré avant d'être dupliqué.")
         item_id = self.pk
         self.save(force_insert=True)
         for modifier in ItemModifier.objects.filter(item_id=item_id):
@@ -1367,9 +1367,9 @@ class Equipment(CommonModel):
         :param action: Consommera des points d'action
         :return: Equipement
         """
-        assert self.item.is_equipable, _(
+        assert self.item.is_equipable, __(
             "Il n'est pas possible de s'équiper de ce type d'objet.")
-        assert not action or self.character.action_points >= AP_COST_EQUIP, _(
+        assert not action or self.character.action_points >= AP_COST_EQUIP, __(
             "Le personnage ne possède plus assez de points d'actions pour s'équiper de cet objet.")
 
         def get_equipment(equipment: 'Equipment', slot: str) -> Optional['Equipment']:
@@ -1412,11 +1412,11 @@ class Equipment(CommonModel):
         :param action: Consommera des points d'action
         :return: Liste des effets
         """
-        assert self.item.is_usable, _(
+        assert self.item.is_usable, __(
             "Il n'est pas possible d'utiliser ce type d'objet.")
-        assert not action or self.character.action_points >= AP_COST_USE, _(
+        assert not action or self.character.action_points >= AP_COST_USE, __(
             "Le personnage ne possède plus assez de points d'actions pour utiliser cet objet.")
-        assert self.quantity > 0, _(
+        assert self.quantity > 0, __(
             "Le personnage doit posséder au moins un exemplaire de cet objet pour l'utiliser.")
         effects = []
         for effect in self.item.effects.all():
@@ -1437,9 +1437,9 @@ class Equipment(CommonModel):
         :param action: Consommera des points d'action
         :return: Butin
         """
-        assert self.quantity >= quantity, _(
+        assert self.quantity >= quantity, __(
             "Le personnage doit posséder la quantité d'objets qu'il souhaite jeter.")
-        assert not action or self.character.action_points >= AP_COST_USE, _(
+        assert not action or self.character.action_points >= AP_COST_USE, __(
             "Le personnage ne possède plus assez de points d'actions pour jeter cet objet.")
         loot = Loot.create(
             campaign=self.character.campaign, item=self.item,
@@ -1457,14 +1457,14 @@ class Equipment(CommonModel):
         :param action: Consommera des points d'action
         :return: Equipement
         """
-        assert self.slot == ITEM_WEAPON and self.item.clip_size, _(
+        assert self.slot == ITEM_WEAPON and self.item.clip_size, __(
             "Cet objet n'est pas une arme équipée ou ne peut être rechargé.")
-        assert not action or self.character.action_points >= self.item.ap_cost_reload, _(
+        assert not action or self.character.action_points >= self.item.ap_cost_reload, __(
             "Le personnage ne possède plus assez de points d'actions pour jeter cet objet.")
         ammo = Equipment.objects.filter(character_id=self.character_id, slot=ITEM_AMMO).first()
-        assert ammo and ammo.quantity > 0, _(
+        assert ammo and ammo.quantity > 0, __(
             "Il n'y a aucun type de munition équipé ou le nombre de munitions disponibles est insuffisant.")
-        assert ammo.item in self.item.ammunitions.all(), _(
+        assert ammo.item in self.item.ammunitions.all(), __(
             "Cette arme est incompatible avec le type de munition équipé.")
         if self.item.is_single_charge:
             needed_ammo = 1
@@ -1487,8 +1487,8 @@ class Equipment(CommonModel):
         :param action: Consommera des points d'action
         :return: Equipement
         """
-        assert self.item.is_repairable, _("Cet objet n'est pas réparable.")
-        assert not action or self.character.action_points >= AP_COST_REPAIR, _(
+        assert self.item.is_repairable, __("Cet objet n'est pas réparable.")
+        assert not action or self.character.action_points >= AP_COST_REPAIR, __(
             "Le personnage ne possède plus assez de points d'actions pour réparer cet objet.")
         self.condition = (value / 100.0) if isinstance(value, int) else float(value)
         self.save()
@@ -1586,7 +1586,7 @@ class Effect(Entity, DamageMixin):
                 campaign=target, effect=self,
                 defaults=dict(start_date=target.current_game_date))
         elif isinstance(target, Character):
-            assert self.duration is None or target.campaign is not None, _(
+            assert self.duration is None or target.campaign is not None, __(
                 "Le personnage doit faire partie d'une campagne pour lui appliquer un effet sur la durée.")
             return CharacterEffect.objects.get_or_create(
                 character=target, effect=self,
@@ -1597,7 +1597,7 @@ class Effect(Entity, DamageMixin):
         Duplique cet effet
         :return: Effet
         """
-        assert self.pk, _("Cet effet doit être préalablement enregistré avant d'être dupliqué.")
+        assert self.pk, __("Cet effet doit être préalablement enregistré avant d'être dupliqué.")
         effect_id = self.pk
         self.save(force_insert=True)
         for modifier in EffectModifier.objects.filter(effect_id=effect_id):
@@ -1817,9 +1817,9 @@ class Loot(CommonModel):
         """
         if isinstance(character, (int, str)):
             character = Character.objects.get(pk=character)
-        assert self.campaign_id == character.campaign_id, _(
+        assert self.campaign_id == character.campaign_id, __(
             "Le personnage doit être dans la même campagne.")
-        assert not action or character.action_points >= AP_COST_TAKE, _(
+        assert not action or character.action_points >= AP_COST_TAKE, __(
             "Le personnage ne possède plus assez de points d'actions pour s'équiper de cet objet.")
         quantity = max(0, min(quantity, self.quantity))
         equipment = Equipment.objects.select_related('item').filter(character=character, item=self.item).first()
@@ -1900,7 +1900,7 @@ class LootTemplate(CommonModel):
             if isinstance(character, (int, str)):
                 character = Character.objects.get(pk=character)
             chance_modifier = character.stats.luck
-        assert not character or campaign.pk == character.campaign_id, _(
+        assert not character or campaign.pk == character.campaign_id, __(
             "Le personnage concerné doit être dans la même campagne que le butin a créer.")
         for template in self.items.select_related('item').all():
             chance = randint(1, 100 - randint(0, chance_modifier) * 2)
@@ -1917,7 +1917,7 @@ class LootTemplate(CommonModel):
         Duplique ce modèle de butin
         :return: Modèle de butin
         """
-        assert self.pk, _("Ce modèle de butin doit être préalablement enregistré avant d'être dupliqué.")
+        assert self.pk, __("Ce modèle de butin doit être préalablement enregistré avant d'être dupliqué.")
         template_id = self.pk
         self.save(force_insert=True)
         for item in LootTemplateItem.objects.filter(template_id=template_id):
@@ -2046,8 +2046,8 @@ class RollHistory(CommonModel):
         Libellé du jet
         """
         return ' '.join((
-            [_("échec"), _("réussite")][self.success],
-            ['', _("critique")][self.critical])).strip()
+            [__("échec"), __("réussite")][self.success],
+            ['', __("critique")][self.critical])).strip()
 
     @property
     def long_label(self) -> str:
@@ -2100,12 +2100,12 @@ class DamageHistory(CommonModel):
 
     @property
     def label(self) -> str:
-        return _("{type} de {real_damage}").format(
+        return __("{type} de {real_damage}").format(
             type=self.get_damage_type_display(),
             real_damage=self.real_damage)
 
     def __str__(self) -> str:
-        return _(f"({self.character}) - {self.label}")
+        return f"({self.character}) - {self.label}"
 
     class Meta:
         verbose_name = _("historique de dégâts")
@@ -2171,8 +2171,8 @@ class FightHistory(CommonModel):
         Libellé du combat
         """
         return ' '.join((
-            [_("échec"), _("réussite")][self.success],
-            ['', _("critique")][self.critical])).strip()
+            [__("échec"), _("réussite")][self.success],
+            ['', __("critique")][self.critical])).strip()
 
     @property
     def long_label(self) -> str:
@@ -2187,7 +2187,7 @@ class FightHistory(CommonModel):
             label=self.label, real_damage=self.damage.real_damage, body_part=self.get_body_part_display())
 
     def __str__(self) -> str:
-        return _("{attacker} vs. {defender} - {long_label}").format(
+        return __("{attacker} vs. {defender} - {long_label}").format(
             attacker=self.attacker, defender=self.defender, long_label=self.long_label)
 
     class Meta:

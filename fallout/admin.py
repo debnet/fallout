@@ -4,7 +4,7 @@ from django.contrib import admin, messages
 from django.contrib.auth.admin import UserAdmin
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
-from django.utils.translation import ugettext as _
+from django.utils.translation import ugettext as __, ugettext_lazy as _
 
 from fallout.forms import *  # noqa
 from fallout.models import *  # noqa
@@ -151,7 +151,7 @@ class CharacterAdmin(EntityAdmin):
         """
         for element in queryset:
             element.duplicate()
-        self.message_user(request, message=_("Les personnages sélectionnés ont été dupliqués."))
+        self.message_user(request, message=__("Les personnages sélectionnés ont été dupliqués."))
     duplicate.short_description = _("Dupliquer")
 
     def randomize(self, request, queryset):
@@ -165,7 +165,7 @@ class CharacterAdmin(EntityAdmin):
                     character.randomize(**form.cleaned_data)
                 self.message_user(
                     request,
-                    message=_("Les compétences des personnages sélectionnés ont été générées avec succès."),
+                    message=__("Les compétences des personnages sélectionnés ont été générées avec succès."),
                     level=messages.SUCCESS)
                 return HttpResponseRedirect(request.get_full_path())
         else:
@@ -209,7 +209,7 @@ class CharacterAdmin(EntityAdmin):
                     except Exception as error:
                         self.message_user(
                             request,
-                            _("{character} : {error}").format(character=character, error=str(error)),
+                            __("{character} : {error}").format(character=character, error=str(error)),
                             level=messages.ERROR)
                 return HttpResponseRedirect(request.get_full_path())
         else:
@@ -293,7 +293,7 @@ class ItemAdmin(EntityAdmin):
         """
         for element in queryset:
             element.duplicate()
-        self.message_user(request, message=_("Les objets sélectionnés ont été dupliqués."))
+        self.message_user(request, message=__("Les objets sélectionnés ont été dupliqués."))
     duplicate.short_description = _("Dupliquer")
 
 
@@ -363,7 +363,7 @@ class EffectAdmin(EntityAdmin):
         """
         for element in queryset:
             element.duplicate()
-        self.message_user(request, message=_("Les effets sélectionnés ont été dupliqués."))
+        self.message_user(request, message=__("Les effets sélectionnés ont été dupliqués."))
     duplicate.short_description = _("Dupliquer")
 
 
@@ -463,7 +463,7 @@ class LootTemplateAdmin(CommonAdmin):
         """
         for element in queryset:
             element.duplicate()
-        self.message_user(request, message=_("Les modèles de butins sélectionnés ont été dupliqués."))
+        self.message_user(request, message=__("Les modèles de butins sélectionnés ont été dupliqués."))
     duplicate.short_description = _("Dupliquer")
 
 
