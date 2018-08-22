@@ -362,7 +362,7 @@ class Character(Entity, Stats):
     description = models.TextField(blank=True, verbose_name=_("description"))
     image = models.ImageField(blank=True, null=True, upload_to='characters', verbose_name=_("image"))
     thumbnail = models.CharField(blank=True, max_length=100, choices=get_thumbnails('characters'), verbose_name=_("miniature"))
-    race = models.CharField(max_length=12, choices=RACES, default=RACE_HUMAN, db_index=True, verbose_name=_("race"))
+    race = models.CharField(max_length=20, choices=RACES, default=RACE_HUMAN, db_index=True, verbose_name=_("race"))
     level = models.PositiveSmallIntegerField(default=1, verbose_name=_("niveau"))
     is_player = models.BooleanField(default=False, db_index=True, verbose_name=_("joueur ?"))
     is_active = models.BooleanField(default=True, db_index=True, verbose_name=_("actif ?"))
@@ -1107,7 +1107,7 @@ class Modifier(CommonModel):
     """
     Modificateur de statistique
     """
-    stats = models.CharField(max_length=22, choices=ALL_STATS, verbose_name=_("statistique"))
+    stats = models.CharField(max_length=30, choices=ALL_STATS, verbose_name=_("statistique"))
     value = models.SmallIntegerField(default=0, verbose_name=_("valeur"))
 
     class Meta:
@@ -1162,7 +1162,7 @@ class Item(Entity, DamageMixin):
     description = models.TextField(blank=True, verbose_name=_("description"))
     image = models.ImageField(blank=True, null=True, upload_to='items', verbose_name=_("image"))
     thumbnail = models.CharField(blank=True, max_length=100, choices=get_thumbnails('items'), verbose_name=_("miniature"))
-    type = models.CharField(max_length=6, choices=ITEM_TYPES, verbose_name=_("type"))
+    type = models.CharField(max_length=10, choices=ITEM_TYPES, verbose_name=_("type"))
     value = models.PositiveIntegerField(default=0, verbose_name=_("valeur"))
     weight = models.FloatField(default=0.0, verbose_name=_("poids"))
     is_quest = models.BooleanField(default=False, verbose_name=_("quête ?"))
@@ -1170,7 +1170,7 @@ class Item(Entity, DamageMixin):
     is_melee = models.BooleanField(default=False, verbose_name=_("arme de mêlée ?"))
     is_throwable = models.BooleanField(default=False, verbose_name=_("jetable ?"))
     is_single_charge = models.BooleanField(default=False, verbose_name=_("recharge unitaire ?"))
-    skill = models.CharField(max_length=15, blank=True, choices=SKILLS, verbose_name=_("compétence"))
+    skill = models.CharField(max_length=20, blank=True, choices=SKILLS, verbose_name=_("compétence"))
     min_strength = models.PositiveSmallIntegerField(default=0, verbose_name=_("force minimum"))
     clip_size = models.PositiveSmallIntegerField(default=0, verbose_name=_("taille du chargeur"))
     burst_count = models.PositiveSmallIntegerField(default=0, verbose_name=_("munitions en rafale"))
@@ -1184,7 +1184,7 @@ class Item(Entity, DamageMixin):
     ap_cost_target = models.PositiveSmallIntegerField(default=0, verbose_name=_("coût PA ciblé"))
     ap_cost_burst = models.PositiveSmallIntegerField(default=0, verbose_name=_("coût PA rafale"))
     # Damage
-    damage_type = models.CharField(max_length=10, blank=True, choices=DAMAGES_TYPES, verbose_name=_("type de dégâts"))
+    damage_type = models.CharField(max_length=20, blank=True, choices=DAMAGES_TYPES, verbose_name=_("type de dégâts"))
     raw_damage = models.PositiveSmallIntegerField(default=0, verbose_name=_("dégâts bruts"))
     min_damage = models.PositiveSmallIntegerField(default=0, verbose_name=_("dégâts mini."))
     max_damage = models.PositiveSmallIntegerField(default=0, verbose_name=_("dégâts max."))
@@ -1315,7 +1315,7 @@ class Equipment(CommonModel):
     item = models.ForeignKey(
         'Item', on_delete=models.CASCADE,
         related_name='+', verbose_name=_("objet"))
-    slot = models.CharField(max_length=6, choices=SLOT_ITEM_TYPES, blank=True, verbose_name=_("emplacement"))
+    slot = models.CharField(max_length=10, choices=SLOT_ITEM_TYPES, blank=True, verbose_name=_("emplacement"))
     quantity = models.PositiveIntegerField(default=1, verbose_name=_("quantité"))
     clip_count = models.PositiveSmallIntegerField(blank=True, null=True, verbose_name=_("munitions"))
     condition = models.FloatField(blank=True, null=True, verbose_name=_("état"))
@@ -1553,7 +1553,7 @@ class Effect(Entity, DamageMixin):
     # Timed effects
     interval = models.DurationField(blank=True, null=True, verbose_name=_("intervalle"))
     damage_chance = models.PositiveSmallIntegerField(default=100, verbose_name=_("chance"))
-    damage_type = models.CharField(max_length=10, blank=True, choices=DAMAGES_TYPES, verbose_name=_("type de dégâts"))
+    damage_type = models.CharField(max_length=20, blank=True, choices=DAMAGES_TYPES, verbose_name=_("type de dégâts"))
     raw_damage = models.PositiveSmallIntegerField(default=0, verbose_name=_("dégâts bruts"))
     min_damage = models.PositiveSmallIntegerField(default=0, verbose_name=_("dégâts min."))
     max_damage = models.PositiveSmallIntegerField(default=0, verbose_name=_("dégâts max."))
@@ -1966,7 +1966,7 @@ class RollHistory(CommonModel):
     character = models.ForeignKey(
         'Character', on_delete=models.CASCADE,
         related_name='+', verbose_name=_("personnage"))
-    stats = models.CharField(max_length=10, blank=True, choices=ROLL_STATS, verbose_name=_("statistique"))
+    stats = models.CharField(max_length=20, blank=True, choices=ROLL_STATS, verbose_name=_("statistique"))
     value = models.PositiveSmallIntegerField(default=0, verbose_name=_("valeur"))
     modifier = models.SmallIntegerField(default=0, verbose_name=_("modificateur"))
     roll = models.PositiveIntegerField(default=0, verbose_name=_("jet"))
@@ -2082,7 +2082,7 @@ class DamageHistory(CommonModel):
     character = models.ForeignKey(
         'Character', on_delete=models.CASCADE,
         related_name='+', verbose_name=_("personnage"))
-    damage_type = models.CharField(max_length=10, blank=True, choices=DAMAGES_TYPES, verbose_name=_("type de dégâts"))
+    damage_type = models.CharField(max_length=20, blank=True, choices=DAMAGES_TYPES, verbose_name=_("type de dégâts"))
     raw_damage = models.PositiveSmallIntegerField(default=0, verbose_name=_("dégâts bruts"))
     min_damage = models.PositiveSmallIntegerField(default=0, verbose_name=_("dégâts min."))
     max_damage = models.PositiveSmallIntegerField(default=0, verbose_name=_("dégâts max."))
@@ -2137,7 +2137,7 @@ class FightHistory(CommonModel):
         limit_choices_to={'type__in': (ITEM_ARMOR, ITEM_HELMET)},
         related_name='+', verbose_name=_("protection du défenseur"))
     range = models.PositiveSmallIntegerField(default=0, verbose_name=_("distance"))
-    body_part = models.CharField(max_length=5, choices=BODY_PARTS, verbose_name=_("partie du corps"))
+    body_part = models.CharField(max_length=10, choices=BODY_PARTS, verbose_name=_("partie du corps"))
     burst = models.BooleanField(default=False, verbose_name=_("tir en rafale ?"))
     hit_count = models.PositiveSmallIntegerField(default=0, verbose_name=_("compteur de coups"))
     hit_modifier = models.SmallIntegerField(default=0, verbose_name=_("modif. de précision"))
@@ -2145,7 +2145,7 @@ class FightHistory(CommonModel):
     hit_roll = models.PositiveSmallIntegerField(default=0, verbose_name=_("jet de précision"))
     success = models.BooleanField(default=False, verbose_name=_("touché ?"))
     critical = models.BooleanField(default=False, verbose_name=_("critique ?"))
-    status = models.CharField(max_length=15, choices=FIGHT_STATUS, blank=True, verbose_name=_("status"))
+    status = models.CharField(max_length=20, choices=FIGHT_STATUS, blank=True, verbose_name=_("status"))
     damage = models.OneToOneField(
         'DamageHistory', blank=True, null=True, on_delete=models.CASCADE,
         limit_choices_to={'fight__isnull': False},
