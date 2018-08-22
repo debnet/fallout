@@ -2171,7 +2171,7 @@ class FightHistory(CommonModel):
         Libellé du combat
         """
         return ' '.join((
-            [__("échec"), _("réussite")][self.success],
+            [__("échec"), __("réussite")][self.success],
             ['', __("critique")][self.critical])).strip()
 
     @property
