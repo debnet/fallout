@@ -2054,9 +2054,9 @@ class RollHistory(CommonModel):
         """
         Libellé long du jet
         """
-        message = _("{label} du jet de {stats} : {roll} pour {value}")
+        message = __("{label} du jet de {stats} : {roll} pour {value}")
         if self.modifier:
-            message = _("{label} du jet de {stats} : {roll} pour {total} ({value}{modifier:+d})")
+            message = __("{label} du jet de {stats} : {roll} pour {total} ({value}{modifier:+d})")
         return message.format(
             stats=self.get_stats_display(),
             label=self.label,
@@ -2181,9 +2181,9 @@ class FightHistory(CommonModel):
         :return:
         """
         if not self.damage:
-            return _("{label} : {status}").format(
+            return __("{label} : {status}").format(
                 label=self.label, status=self.get_status_display())
-        return _("{label} : {real_damage} dégâts infligés ({body_part})").format(
+        return __("{label} : {real_damage} dégâts infligés ({body_part})").format(
             label=self.label, real_damage=self.damage.real_damage, body_part=self.get_body_part_display())
 
     def __str__(self) -> str:
