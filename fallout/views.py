@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.db.models import Q
 from django.shortcuts import redirect
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext as _
 
 from fallout.enums import BODY_PARTS, DAMAGES_TYPES, ROLL_STATS
 from fallout.models import (
@@ -229,6 +229,7 @@ def view_character(request, character_id):
                 character.thirst = int(data.get('thirst'))
                 character.hunger = int(data.get('hunger'))
                 character.sleep = int(data.get('sleep'))
+                character.save()
         except ValidationError as error:
             for field, errors in error.message_dict.items():
                 for error in (errors if isinstance(errors, list) else [errors]):
