@@ -667,7 +667,7 @@ class Character(Entity, Stats):
             self.modify_value(choice(self.tag_skills), 2)
             skill_points -= 1
         # Randomly distribute remaining skill points on other skills
-        other_skills = list(set(LIST_SKILLS) - set(self.tag_skills)) if rate else LIST_SKILLS
+        other_skills = list(set(LIST_SKILLS) - set(self.tag_skills)) if rate else list(LIST_SKILLS)
         while skill_points:
             skill = choice(other_skills)
             self.modify_value(skill, 2 if skill in self.tag_skills else 1)
@@ -783,9 +783,9 @@ class Character(Entity, Stats):
         attacker_weapon = history.attacker_weapon = getattr(attacker_weapon_equipment, 'item', None)
         attacker_ammo = history.attacker_ammo = getattr(attacker_ammo_equipment, 'item', None)
         # Fight conditions
-        if attacker_weapon and \
-                (attacker_weapon.clip_size and attacker_weapon_equipment.clip_count <= 0) or \
-                (attacker_weapon.is_throwable and attacker_weapon.quantity <= 0):
+        if attacker_weapon and (
+                (attacker_weapon.clip_size and attacker_weapon_equipment.clip_count <= 0) or
+                (attacker_weapon.is_throwable and attacker_weapon.quantity <= 0)):
             history.status = STATUS_NO_MORE_AMMO
         elif target.health <= 0:
             history.status = STATUS_TARGET_DEAD
@@ -1013,6 +1013,7 @@ class Character(Entity, Stats):
         """
         assert self.pk, __("Ce personnage doit être préalablement enregistré avant d'être dupliqué.")
         character_id = self.pk
+        self.name = f"*{self.name}"
         self.save(force_insert=True)
         if equipments:
             for equipment in Equipment.objects.filter(character_id=character_id):
@@ -1252,6 +1253,7 @@ class Item(Entity, DamageMixin):
         """
         assert self.pk, __("Cet objet doit être préalablement enregistré avant d'être dupliqué.")
         item_id = self.pk
+        self.name = f"*{self.name}"
         self.save(force_insert=True)
         for modifier in ItemModifier.objects.filter(item_id=item_id):
             modifier.item_id = self.pk
@@ -1599,6 +1601,7 @@ class Effect(Entity, DamageMixin):
         """
         assert self.pk, __("Cet effet doit être préalablement enregistré avant d'être dupliqué.")
         effect_id = self.pk
+        self.name = f"*{self.name}"
         self.save(force_insert=True)
         for modifier in EffectModifier.objects.filter(effect_id=effect_id):
             modifier.effect_id = self.pk
@@ -1919,6 +1922,7 @@ class LootTemplate(CommonModel):
         """
         assert self.pk, __("Ce modèle de butin doit être préalablement enregistré avant d'être dupliqué.")
         template_id = self.pk
+        self.name = f"*{self.name}"
         self.save(force_insert=True)
         for item in LootTemplateItem.objects.filter(template_id=template_id):
             item.template_id = self.pk
@@ -2066,7 +2070,7 @@ class RollHistory(CommonModel):
             total=self.value + self.modifier)
 
     def __str__(self) -> str:
-        return f"({self.character}) - {self.long_label}"
+        return f"{self.character} - {self.long_label}"
 
     class Meta:
         verbose_name = _("historique de jet")
@@ -2105,7 +2109,7 @@ class DamageHistory(CommonModel):
             real_damage=self.real_damage)
 
     def __str__(self) -> str:
-        return f"({self.character}) - {self.label}"
+        return f"{self.character} - {self.label}"
 
     class Meta:
         verbose_name = _("historique de dégâts")
