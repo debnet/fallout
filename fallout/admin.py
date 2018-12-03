@@ -35,6 +35,7 @@ class LootInline(admin.TabularInline):
     """
     model = Loot
     extra = 1
+    autocomplete_fields = ('item', )
 
 
 class CampaignEffectInlineAdmin(EntityTabularInline):
@@ -43,6 +44,7 @@ class CampaignEffectInlineAdmin(EntityTabularInline):
     """
     model = CampaignEffect
     extra = 1
+    autocomplete_fields = ('effect', )
 
 
 @admin.register(Campaign)
@@ -82,6 +84,7 @@ class EquipmentInlineAdmin(EntityTabularInline):
     """
     model = Equipment
     extra = 1
+    autocomplete_fields = ('item', )
 
 
 class CharacterEffectInlineAdmin(EntityTabularInline):
@@ -90,6 +93,7 @@ class CharacterEffectInlineAdmin(EntityTabularInline):
     """
     model = CharacterEffect
     extra = 1
+    autocomplete_fields = ('effect', )
 
 
 @admin.register(Character)
@@ -433,6 +437,7 @@ class LootTemplateItemInline(EntityTabularInline):
     """
     model = LootTemplateItem
     extra = 1
+    autocomplete_fields = ('item', )
 
 
 @admin.register(LootTemplate)
@@ -519,13 +524,6 @@ class DamageHistoryAdmin(CommonAdmin):
     ordering = ('-date', )
     date_hierarchy = 'date'
     autocomplete_fields = ('character', 'armor', )
-
-
-class DamageHistoryInline(admin.StackedInline):
-    """
-    Administration intégrée des historiques de dégâts
-    """
-    model = DamageHistory
 
 
 @admin.register(FightHistory)
