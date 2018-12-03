@@ -67,7 +67,6 @@ class CampaignAdmin(CommonAdmin):
         )),
     )
     inlines = [LootInline, CampaignEffectInlineAdmin]
-    filter_horizontal = ()
     list_display_links = ('name', )
     list_display = ('name', 'current_game_date', 'current_character', 'radiation', )
     list_editable = ('current_game_date', 'current_character', 'radiation', )
@@ -253,8 +252,8 @@ class ItemAdmin(EntityAdmin):
         (_("Armes uniquement"), dict(
             fields=(
                 'is_melee', 'is_throwable', 'is_single_charge', 'skill', 'min_strength', 'range', 'clip_size',
-                'burst_count', 'hit_chance_modifier', 'threshold_modifier', 'resistance_modifier',
-                'ap_cost_reload', 'ap_cost_normal', 'ap_cost_target', 'ap_cost_burst', ),
+                'burst_count', 'hit_chance_modifier', 'threshold_modifier', 'threshold_rate_modifier',
+                'resistance_modifier', 'ap_cost_reload', 'ap_cost_normal', 'ap_cost_target', 'ap_cost_burst', ),
             classes=('wide', 'collapse', ),
         )),
         (_("Dégâts"), dict(
@@ -279,7 +278,6 @@ class ItemAdmin(EntityAdmin):
             classes=('wide', 'collapse', ),
         )),
     )
-    filter_horizontal = ('effects', 'ammunitions', )
     inlines = [ItemModifierInline]
     list_display_links = ('name', )
     list_display = ('name', 'type', 'value', 'weight', 'is_quest', )
@@ -288,6 +286,7 @@ class ItemAdmin(EntityAdmin):
     search_fields = ('name', 'title', 'description', )
     ordering = ('name', )
     actions = ('duplicate', )
+    autocomplete_fields = ('effects', 'ammunitions', )
     save_on_top = True
     actions_on_bottom = True
 

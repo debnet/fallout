@@ -461,7 +461,6 @@ class Character(Entity, Stats):
         Retourne les statistiques générales
         :return: code, label, valeur à gauche, valeur à droite, classe, taux
         """
-
         for code, label in GENERAL_STATS:
             lvalue = getattr(self, code, 0)
             rvalue, rclass = None, None
@@ -544,7 +543,6 @@ class Character(Entity, Stats):
         """
         Retourne le libellé relatif au niveau d'un besoin
         :param need: Code du besoin
-        :param value: Valeur du besoin
         :return: Libellé
         """
         value = getattr(self, need, 0.0)
@@ -877,11 +875,14 @@ class Character(Entity, Stats):
                     ((self.stats.strength / 10.0) if is_melee else 0.0))
             threshold_modifier = getattr(attacker_weapon, 'threshold_modifier', 0)
             threshold_modifier += getattr(attacker_ammo, 'threshold_modifier', 0)
+            threshold_rate_modifier = getattr(attacker_weapon, 'threshold_rate_modifier', 0.0)
+            threshold_rate_modifier += getattr(attacker_ammo, 'threshold_rate_modifier', 0.0)
             resistance_modifier = getattr(attacker_weapon, 'resistance_modifier', 0.0)
             resistance_modifier += getattr(attacker_ammo, 'resistance_modifier', 0.0)
             history.damage = target.damage(
                 raw_damage=damage, damage_type=attacker_damage_type, body_part=body_part, save=True,
-                threshold_modifier=threshold_modifier, resistance_modifier=resistance_modifier)
+                threshold_modifier=threshold_modifier, threshold_rate_modifier=threshold_rate_modifier,
+                resistance_modifier=resistance_modifier)
             if not target.health:
                 history.status = STATUS_TARGET_KILLED
             # On hit effects
@@ -910,8 +911,8 @@ class Character(Entity, Stats):
         return history
 
     def damage(self, raw_damage: float=0.0, min_damage: int=0, max_damage: int=0, damage_type: str=DAMAGE_NORMAL,
-               body_part: str=PART_TORSO, threshold_modifier: int=0, resistance_modifier: float=0.0,
-               save: bool=True, log: bool=True) -> 'DamageHistory':
+               body_part: str=PART_TORSO, threshold_modifier: int=0, threshold_rate_modifier: float=0.0,
+               resistance_modifier: float=0.0, save: bool=True, log: bool=True) -> 'DamageHistory':
         """
         Inflige des dégâts au personnage
         :param raw_damage: Dégâts bruts
@@ -920,6 +921,7 @@ class Character(Entity, Stats):
         :param damage_type: Type des dégâts
         :param body_part: Partie du corps touchée
         :param threshold_modifier: Modificateur d'absorption de dégâts (appliqué à l'armure et au personnage)
+        :param threshold_rate_modifier: Modificateur de taux d'absorption de dégâts (appliqué à l'armure et au personnage)
         :param resistance_modifier: Modificateur de résistance aux dégâts (appliqué à l'armure et au personnage)
         :param save: Sauvegarder les modifications sur le personnage ?
         :param log: Historise les dégâts ?
@@ -947,6 +949,7 @@ class Character(Entity, Stats):
             armor_damage = 0
             if armor and armor_equipment:
                 armor_threshold = round(armor.get_threshold(damage_type) * armor_equipment.condition) + threshold_modifier
+                armor_threshold *= (1.0 + threshold_rate_modifier)
                 armor_resistance = (armor.get_resistance(damage_type) * armor_equipment.condition) + resistance_modifier
                 total_damage -= max(armor_threshold, 0)
                 total_damage *= (1.0 - min(armor_resistance, 1.0))
@@ -962,7 +965,7 @@ class Character(Entity, Stats):
             # Self threshold and resistance
             type_resistance = DAMAGE_RESISTANCE.get(damage_type)
             if type_resistance:
-                damage_threshold = self.stats.damage_threshold + threshold_modifier
+                damage_threshold = (self.stats.damage_threshold + threshold_modifier) * (1.0 + threshold_rate_modifier)
                 damage_resistance = (self.stats.damage_resistance + getattr(self.stats, type_resistance, 0.0)) / 100.0
                 damage_resistance += resistance_modifier
         total_damage *= (-1.0 if damage_type == DAMAGE_HEAL else 1.0)
@@ -1178,6 +1181,7 @@ class Item(Entity, DamageMixin):
     range = models.PositiveSmallIntegerField(default=0, verbose_name=_("modif. de portée"))
     hit_chance_modifier = models.SmallIntegerField(default=0, verbose_name=_("modif. de précision"))
     threshold_modifier = models.SmallIntegerField(default=0, verbose_name=_("modif. d'absorption"))
+    threshold_rate_modifier = models.FloatField(default=0.0, verbose_name=_("modif. taux d'absorption"))
     resistance_modifier = models.FloatField(default=0.0, verbose_name=_("modif. de résistance"))
     # Action points
     ap_cost_reload = models.PositiveSmallIntegerField(default=0, verbose_name=_("coût PA recharge"))
@@ -2095,10 +2099,10 @@ class DamageHistory(CommonModel):
         'Item', blank=True, null=True, on_delete=models.CASCADE,
         limit_choices_to={'type__in': (ITEM_ARMOR, ITEM_HELMET)},
         related_name='+', verbose_name=_("protection"))
-    armor_threshold = models.SmallIntegerField(default=0, verbose_name=_("absorption armure"))
+    armor_threshold = models.FloatField(default=0.0, verbose_name=_("absorption armure"))
     armor_resistance = models.FloatField(default=0.0, verbose_name=_("résistance armure"))
     armor_damage = models.FloatField(default=0.0, verbose_name=_("dégats armure"))
-    damage_threshold = models.SmallIntegerField(default=0, verbose_name=_("absorption dégâts"))
+    damage_threshold = models.FloatField(default=0.0, verbose_name=_("absorption dégâts"))
     damage_resistance = models.FloatField(default=0.0, verbose_name=_("résistance dégâts"))
     real_damage = models.SmallIntegerField(default=0, verbose_name=_("dégâts réels"))
 
