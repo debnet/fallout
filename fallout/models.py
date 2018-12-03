@@ -869,7 +869,7 @@ class Character(Entity, Stats):
             damage += self.stats.melee_damage if is_melee else 0
             damage *= 1.0 + (
                 getattr(attacker_weapon, 'damage_modifier', 0.0) +
-                getattr(attacker_weapon, 'damage_modifier', 0.0))
+                getattr(attacker_ammo, 'damage_modifier', 0.0))
             if critical:
                 damage *= 1.0 + (
                     getattr(attacker_weapon, 'critical_damage', 0.0) +
