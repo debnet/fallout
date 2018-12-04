@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-12-03 23:44+0100\n"
+"POT-Creation-Date: 2018-12-04 10:29+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -39,14 +39,24 @@ msgstr "Current value: {}"
 msgid " (Spécialité +{}) "
 msgstr "(Speciality +{}) "
 
+msgid "Les personnages sélectionnés ont été dupliqués."
+msgstr "Selected characters were duplicated."
+
 msgid "Dupliquer"
 msgstr "Duplicate"
+
+msgid "Les compétences des personnages sélectionnés ont été générées avec succès."
+msgstr "Skills of selected characters were generated successfully."
 
 msgid "Générer aléatoirement les compétences"
 msgstr "Randomly generate skills"
 
 msgid "Faire un jet de compétence"
 msgstr "Make a skill role"
+
+#, python-brace-format
+msgid "{character} : {error}"
+msgstr "{character}: {error}"
 
 msgid "Attaquer un autre personnage"
 msgstr "Attack another character"
@@ -69,11 +79,20 @@ msgstr "Protections only"
 msgid "Effets et munitions"
 msgstr "Effects and ammunitions"
 
+msgid "Les objets sélectionnés ont été dupliqués."
+msgstr "Selected items were duplicated."
+
 msgid "Etats"
 msgstr "Status"
 
 msgid "Dégâts temporels"
 msgstr "Temporal damages"
+
+msgid "Les effets sélectionnés ont été dupliqués."
+msgstr "Selected effects were duplicated."
+
+msgid "Les modèles de butins sélectionnés ont été dupliqués."
+msgstr "Selected loot templates were duplicated."
 
 msgid "Jet"
 msgstr "Roll"
@@ -588,6 +607,24 @@ msgstr "Distance"
 msgid "Cible"
 msgstr "Target"
 
+msgid "Exporte les données de l'application vers un document Excel"
+msgstr "Dumps application data to an Excel document"
+
+msgid "Tous les champs"
+msgstr "All fields"
+
+msgid "Chemin du fichier"
+msgstr "File path"
+
+msgid "Importe les données de l'application depuis un document Excel"
+msgstr "Loads application data from an Excel document"
+
+msgid "Validation"
+msgstr "Validation"
+
+msgid "Forcé"
+msgstr "Forced"
+
 msgid "surnom"
 msgstr "nickname"
 
@@ -636,6 +673,9 @@ msgstr "critical chance"
 msgid "absorption de dégâts"
 msgstr "damage absorption"
 
+msgid "Cette fonction ne peut être utilisée que par les statistiques."
+msgstr "This functon can only be used by statistics."
+
 msgid "utilisateur"
 msgstr "user"
 
@@ -662,6 +702,27 @@ msgstr "speciality"
 
 msgid "charge"
 msgstr "weight"
+
+msgid "aucun malus"
+msgstr "no malus"
+
+msgid "L'attaquant ne possède pas d'arme ou celle-ci ne permet pas d'attaque en rafale."
+msgstr "The attacker don't have any weapon or it cannot burst attack."
+
+msgid "Les bornes de dégâts min. et max. ne sont pas correctes."
+msgstr "Min and max bounds are not correct."
+
+msgid "Ce personnage doit être préalablement enregistré avant d'être dupliqué."
+msgstr "This character must be saved before to be duplicated."
+
+msgid "Ce personnage n'a pas de points de compétences à distribuer."
+msgstr "This character don't have any skill point to spend."
+
+msgid "Ce personnage n'a pas assez de points de compétences."
+msgstr "This character don't have enough skill points."
+
+msgid "Cette compétence ne peut être améliorée."
+msgstr "This skill can not be improved."
 
 msgid "valeur"
 msgstr "value"
@@ -771,6 +832,9 @@ msgstr "effects"
 msgid "types de munitions"
 msgstr "ammunition types"
 
+msgid "Cet objet doit être préalablement enregistré avant d'être dupliqué."
+msgstr "This item must be saved before to be duplicated."
+
 msgid "objet"
 msgstr "item"
 
@@ -791,6 +855,42 @@ msgstr "ammunitions"
 
 msgid "état"
 msgstr "condition"
+
+msgid "Il n'est pas possible de s'équiper de ce type d'objet."
+msgstr "You can't equip this object."
+
+msgid "Le personnage ne possède plus assez de points d'actions pour s'équiper de cet objet."
+msgstr "This character doesn't have enough action points in order to equip this item."
+
+msgid "Il n'est pas possible d'utiliser ce type d'objet."
+msgstr "You can't use this object"
+
+msgid "Le personnage ne possède plus assez de points d'actions pour utiliser cet objet."
+msgstr "This character doesn't have enough action points in order to use this item."
+
+msgid "Le personnage doit posséder au moins un exemplaire de cet objet pour l'utiliser."
+msgstr "This personnage must have at least one copy of this item in order to use it."
+
+msgid "Le personnage doit posséder la quantité d'objets qu'il souhaite jeter."
+msgstr "This character must have the amount of item which he wants to throw."
+
+msgid "Le personnage ne possède plus assez de points d'actions pour jeter cet objet."
+msgstr "This character doesn't have enough action points in order to throw this item."
+
+msgid "Cet objet n'est pas une arme équipée ou ne peut être rechargé."
+msgstr "This item is not a equipped weapon or can't be reloaded."
+
+msgid "Il n'y a aucun type de munition équipé ou le nombre de munitions disponibles est insuffisant."
+msgstr "There is no equipped ammunition or there is not enough ammunitions left."
+
+msgid "Cette arme est incompatible avec le type de munition équipé."
+msgstr "This weapon is incompatible with the equipped ammunition."
+
+msgid "Cet objet n'est pas réparable."
+msgstr "This item isn't repearable."
+
+msgid "Le personnage ne possède plus assez de points d'actions pour réparer cet objet."
+msgstr "This character doesn't have enough action points in order to repair this item."
 
 msgid "Un autre objet est déjà présent à cet emplacement."
 msgstr "Another item is already equipped at this slot."
@@ -818,6 +918,12 @@ msgstr "interval"
 
 msgid "effet suivant"
 msgstr "next effect"
+
+msgid "Le personnage doit faire partie d'une campagne pour lui appliquer un effet sur la durée."
+msgstr "This character must be in a campaign in order to apply an effect on him."
+
+msgid "Cet effet doit être préalablement enregistré avant d'être dupliqué."
+msgstr "This effect must be saved before to be duplicated."
 
 msgid "effet"
 msgstr "effect"
@@ -849,11 +955,20 @@ msgstr "character effect"
 msgid "effets de personnage"
 msgstr "character effects"
 
+msgid "Le personnage doit être dans la même campagne."
+msgstr "This character must be in the same campaign."
+
 msgid "butin"
 msgstr "loot"
 
 msgid "butins"
 msgstr "loots"
+
+msgid "Le personnage concerné doit être dans la même campagne que le butin a créer."
+msgstr "This character must be in the same campaign as tbe created loot."
+
+msgid "Ce modèle de butin doit être préalablement enregistré avant d'être dupliqué."
+msgstr "This loot template must be saved before to be duplicated."
 
 msgid "modèle de butin"
 msgstr "loot template"
@@ -897,6 +1012,23 @@ msgstr "success?"
 msgid "critique ?"
 msgstr "critical?"
 
+msgid "échec"
+msgstr "fail"
+
+msgid "réussite"
+msgstr "success"
+
+msgid "critique"
+msgstr "critical"
+
+#, python-brace-format
+msgid "{label} du jet de {stats} : {roll} pour {value}"
+msgstr "{label} for {stats} roll: {roll} for {value}"
+
+#, python-brace-format
+msgid "{label} du jet de {stats} : {roll} pour {total} ({value}{modifier:+d})"
+msgstr "{label} for {stats} roll: {roll} for {total} ({value}{modifier:+d})"
+
 msgid "historique de jet"
 msgstr "roll history"
 
@@ -926,6 +1058,10 @@ msgstr "damage resistance"
 
 msgid "dégâts réels"
 msgstr "real damage"
+
+#, python-brace-format
+msgid "{type} de {real_damage}"
+msgstr "{type} of {real_damage}"
 
 msgid "historique de dégâts"
 msgstr "damage history"
@@ -962,6 +1098,18 @@ msgstr "status"
 
 msgid "historique des dégâts"
 msgstr "damage history"
+
+#, python-brace-format
+msgid "{label} : {status}"
+msgstr "{label}: {status}"
+
+#, python-brace-format
+msgid "{label} : {real_damage} dégâts infligés ({body_part})"
+msgstr "{label}: {real_damage} inflicted damage ({body_part})"
+
+#, python-brace-format
+msgid "{attacker} vs. {defender} - {long_label}"
+msgstr "{attacker} vs. {defender} - {long_label}"
 
 msgid "historique de combat"
 msgstr "fight history"
@@ -1319,129 +1467,3 @@ msgstr "<strong>Error</strong> {error}"
 #, python-brace-format
 msgid "<strong>{attacker} vs {defender}</strong> {label}"
 msgstr "<strong>{attacker} vs {defender}</strong> {label}"
-
-#~ msgid "Les personnages sélectionnés ont été dupliqués."
-#~ msgstr "Selected characters were duplicated."
-
-#~ msgid "Les compétences des personnages sélectionnés ont été générées avec succès."
-#~ msgstr "Skills of selected characters were generated successfully."
-
-#~ msgid "{character} : {error}"
-#~ msgstr "{character}: {error}"
-
-#~ msgid "Les objets sélectionnés ont été dupliqués."
-#~ msgstr "Selected items were duplicated."
-
-#~ msgid "Les effets sélectionnés ont été dupliqués."
-#~ msgstr "Selected effects were duplicated."
-
-#~ msgid "Les modèles de butins sélectionnés ont été dupliqués."
-#~ msgstr "Selected loot templates were duplicated."
-
-#~ msgid "Cette fonction ne peut être utilisée que par les statistiques."
-#~ msgstr "This functon can only be used by statistics."
-
-#~ msgid "aucun malus"
-#~ msgstr "no malus"
-
-#~ msgid "L'attaquant ne possède pas d'arme ou celle-ci ne permet pas d'attaque en rafale."
-#~ msgstr "The attacker don't have any weapon or it cannot burst attack."
-
-#~ msgid "Les bornes de dégâts min. et max. ne sont pas correctes."
-#~ msgstr "Min and max bounds are not correct."
-
-#~ msgid "Ce personnage doit être préalablement enregistré avant d'être dupliqué."
-#~ msgstr "This character must be saved before to be duplicated."
-
-#~ msgid "Ce personnage n'a pas de points de compétences à distribuer."
-#~ msgstr "This character don't have any skill point to spend."
-
-#~ msgid "Ce personnage n'a pas assez de points de compétences."
-#~ msgstr "This character don't have enough skill points."
-
-#~ msgid "Cette compétence ne peut être améliorée."
-#~ msgstr "This skill can not be improved."
-
-#~ msgid "Cet objet doit être préalablement enregistré avant d'être dupliqué."
-#~ msgstr "This item must be saved before to be duplicated."
-
-#~ msgid "Il n'est pas possible de s'équiper de ce type d'objet."
-#~ msgstr "You can't equip this object."
-
-#~ msgid "Le personnage ne possède plus assez de points d'actions pour s'équiper de cet objet."
-#~ msgstr "This character doesn't have enough action points in order to equip this item."
-
-#~ msgid "Il n'est pas possible d'utiliser ce type d'objet."
-#~ msgstr "You can't use this object"
-
-#~ msgid "Le personnage ne possède plus assez de points d'actions pour utiliser cet objet."
-#~ msgstr "This character doesn't have enough action points in order to use this item."
-
-#~ msgid "Le personnage doit posséder au moins un exemplaire de cet objet pour l'utiliser."
-#~ msgstr "This personnage must have at least one copy of this item in order to use it."
-
-#~ msgid "Le personnage doit posséder la quantité d'objets qu'il souhaite jeter."
-#~ msgstr "This character must have the amount of item which he wants to throw."
-
-#~ msgid "Le personnage ne possède plus assez de points d'actions pour jeter cet objet."
-#~ msgstr "This character doesn't have enough action points in order to throw this item."
-
-#~ msgid "Cet objet n'est pas une arme équipée ou ne peut être rechargé."
-#~ msgstr "This item is not a equipped weapon or can't be reloaded."
-
-#~ msgid "Il n'y a aucun type de munition équipé ou le nombre de munitions disponibles est insuffisant."
-#~ msgstr "There is no equipped ammunition or there is not enough ammunitions left."
-
-#~ msgid "Cette arme est incompatible avec le type de munition équipé."
-#~ msgstr "This weapon is incompatible with the equipped ammunition."
-
-#~ msgid "Cet objet n'est pas réparable."
-#~ msgstr "This item isn't repearable."
-
-#~ msgid "Le personnage ne possède plus assez de points d'actions pour réparer cet objet."
-#~ msgstr "This character doesn't have enough action points in order to repair this item."
-
-#~ msgid "Le personnage doit faire partie d'une campagne pour lui appliquer un effet sur la durée."
-#~ msgstr "This character must be in a campaign in order to apply an effect on him."
-
-#~ msgid "Cet effet doit être préalablement enregistré avant d'être dupliqué."
-#~ msgstr "This effect must be saved before to be duplicated."
-
-#~ msgid "Le personnage doit être dans la même campagne."
-#~ msgstr "This character must be in the same campaign."
-
-#~ msgid "Le personnage concerné doit être dans la même campagne que le butin a créer."
-#~ msgstr "This character must be in the same campaign as tbe created loot."
-
-#~ msgid "Ce modèle de butin doit être préalablement enregistré avant d'être dupliqué."
-#~ msgstr "This loot template must be saved before to be duplicated."
-
-#~ msgid "échec"
-#~ msgstr "fail"
-
-#~ msgid "réussite"
-#~ msgstr "success"
-
-#~ msgid "critique"
-#~ msgstr "critical"
-
-#~ msgid "{label} du jet de {stats} : {roll} pour {value}"
-#~ msgstr "{label} for {stats} roll: {roll} for {value}"
-
-#~ msgid "{label} du jet de {stats} : {roll} pour {total} ({value}{modifier:+d})"
-#~ msgstr "{label} for {stats} roll: {roll} for {total} ({value}{modifier:+d})"
-
-#~ msgid "{type} de {real_damage}"
-#~ msgstr "{type} of {real_damage}"
-
-#~ msgid "({self.character}) - {self.label}"
-#~ msgstr "({self.character}) - {self.label}"
-
-#~ msgid "{label} : {status}"
-#~ msgstr "{label}: {status}"
-
-#~ msgid "{label} : {real_damage} dégâts infligés ({body_part})"
-#~ msgstr "{label}: {real_damage} inflicted damage ({body_part})"
-
-#~ msgid "{attacker} vs. {defender} - {long_label}"
-#~ msgstr "{attacker} vs. {defender} - {long_label}"

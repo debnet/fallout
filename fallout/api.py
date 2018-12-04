@@ -4,7 +4,7 @@ from common.api.serializers import BaseCustomSerializer, CommonModelSerializer
 from common.api.utils import (
     create_api, disable_relation_fields, api_view_with_serializer,
     create_model_serializer, to_model_serializer)
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
 
