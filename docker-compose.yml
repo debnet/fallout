@@ -1,10 +1,8 @@
 version: '3'
 
 services:
-  drop:
-    container_name: rpg
+  web:
     build: .
-    restart: always
     depends_on:
       - postgres
       - redis
@@ -13,7 +11,7 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - .:/rpg
+      - .:/fallout
     stdin_open: true
     tty: true
     environment:
@@ -22,7 +20,7 @@ services:
       DJANGO_SECRET_KEY: '1'
       DJANGO_REDIS_CACHE: 'redis:6379:1'
       DJANGO_CELERY_BROKER_URL: 'redis://redis:6379/1'
-      DATABASE_URL: 'postgres://rpg:rpg@postgres:5432/rpg'
+      DATABASE_URL: 'postgres://fallout:fallout@postgres:5432/fallout'
     command: >
       bash -c "python manage.py migrate --no-input &&
                python manage.py collectstatic --no-input &&
@@ -31,27 +29,25 @@ services:
                python manage.py runserver 0.0.0.0:8000"
 
   postgres:
-    container_name: postgres
     image: postgres:latest
     restart: always
     environment:
-      - POSTGRES_USER=rpg
-      - POSTGRES_PASSWORD=rpg
-      - POSTGRES_DB=rpg
-      - PGDATA=/db
+      - POSTGRES_USER=fallout
+      - POSTGRES_PASSWORD=fallout
+      - POSTGRES_DB=fallout
+      - PGDATA=/fallout
     ports:
       - 5432
     volumes:
-      - pgdata:/db
+      - pgdata:/fallout
 
   redis:
-    container_name: redis
     image: redis:latest
     restart: always
     ports:
       - 6379
     volumes:
-      - redisdata:/data
+      - redisdata:/fallout
 
 volumes:
   pgdata:
