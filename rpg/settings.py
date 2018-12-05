@@ -384,7 +384,7 @@ class Test(Base):
 
     SECRET_KEY = '1'
     DEBUG = True
-    INTERNAL_IPS = ('localhost', '127.0.0.1', 'testserver')
+    INTERNAL_IPS = ('localhost', '127.0.0.1', 'testserver', '*')
     ALLOWED_HOSTS = INTERNAL_IPS
 
     # Celery configuration: toujours eager, permet d'éviter à avoir les workers et le broker activés

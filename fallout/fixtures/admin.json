@@ -1,0 +1,21 @@
+[
+{
+    "model": "fallout.player",
+    "pk": 1,
+    "fields": {
+        "password": "pbkdf2_sha256$120000$aMLjTNyQBLx7$cOe5sDMbMac7e03wQBZ0mtCJ6s+GpUgq+7W0GsTlw+A=",
+        "last_login": null,
+        "is_superuser": true,
+        "username": "admin",
+        "first_name": "",
+        "last_name": "",
+        "email": "",
+        "is_staff": true,
+        "is_active": true,
+        "date_joined": "2018-12-05T12:21:35.915Z",
+        "nickname": "",
+        "groups": [],
+        "user_permissions": []
+    }
+}
+]
