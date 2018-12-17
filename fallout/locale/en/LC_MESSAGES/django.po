@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-12-04 10:29+0100\n"
+"POT-Creation-Date: 2018-12-17 01:43+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -160,6 +160,12 @@ msgstr "distance"
 msgid "partie du corps ciblée"
 msgstr "targetted body part"
 
+msgid "grenade ?"
+msgstr "grenade?"
+
+msgid "action ?"
+msgstr "action?"
+
 msgid "cibles"
 msgstr "targets"
 
@@ -195,9 +201,6 @@ msgstr "resistance modifier"
 
 msgid "personnages"
 msgstr "characters"
-
-msgid "action ?"
-msgstr "action?"
 
 msgid "quantité"
 msgstr "quantity"
@@ -454,6 +457,9 @@ msgstr "armor"
 msgid "casque"
 msgstr "helmet"
 
+msgid "grenade"
+msgstr "grenade"
+
 msgid "nourriture"
 msgstr "food"
 
@@ -586,6 +592,15 @@ msgstr "Dangerously tired"
 msgid "Mortellement fatigué"
 msgstr "Deadly tired"
 
+msgid "échec"
+msgstr "fail"
+
+msgid "réussite"
+msgstr "success"
+
+msgid "critique"
+msgstr "critical"
+
 msgid "Niveau"
 msgstr "Level"
 
@@ -606,6 +621,9 @@ msgstr "Distance"
 
 msgid "Cible"
 msgstr "Target"
+
+msgid "Action ?"
+msgstr "Action?"
 
 msgid "Exporte les données de l'application vers un document Excel"
 msgstr "Dumps application data to an Excel document"
@@ -664,6 +682,9 @@ msgstr "active character"
 msgid "rads par heure"
 msgstr "rads per hour"
 
+msgid "besoins activés ?"
+msgstr "needs enabled?"
+
 msgid "campagnes"
 msgstr "campaigns"
 
@@ -705,6 +726,9 @@ msgstr "weight"
 
 msgid "aucun malus"
 msgstr "no malus"
+
+msgid "L'attaquant ne possède pas ou plus de grenade."
+msgstr "The attacker don't have any grenade."
 
 msgid "L'attaquant ne possède pas d'arme ou celle-ci ne permet pas d'attaque en rafale."
 msgstr "The attacker don't have any weapon or it cannot burst attack."
@@ -1011,15 +1035,6 @@ msgstr "success?"
 
 msgid "critique ?"
 msgstr "critical?"
-
-msgid "échec"
-msgstr "fail"
-
-msgid "réussite"
-msgstr "success"
-
-msgid "critique"
-msgstr "critical"
 
 #, python-brace-format
 msgid "{label} du jet de {stats} : {roll} pour {value}"
@@ -1340,6 +1355,9 @@ msgstr "dst."
 msgid "non ciblé"
 msgstr "non targetted"
 
+msgid "Grenade"
+msgstr "Grenade"
+
 msgid "valeur fixe"
 msgstr "fixed value"
 
@@ -1447,6 +1465,9 @@ msgstr "1 h"
 
 msgid "Tour suivant"
 msgstr "Next turn"
+
+msgid "Base"
+msgstr "Root"
 
 #, python-brace-format
 msgid "<strong>{character}</strong> {label}"

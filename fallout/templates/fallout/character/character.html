@@ -19,7 +19,7 @@
         <div class="content">
             {% with image=character.image thumbnail=character.thumbnail %}
                 {% if thumbnail %}
-                    <img class="float-left rounded mr-2" height="120" width="120" src="{{ thumbnail }}">
+                    <img class="float-left rounded mr-2" height="120" width="120" src="{{ MEDIA_URL }}{{ thumbnail }}">
                 {% elif image %}
                     <img class="float-left rounded mr-2" height="120" width="120" src="{{ image.url }}">
                 {% endif %}

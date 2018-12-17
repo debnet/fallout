@@ -35,3 +35,6 @@ body {
     background-color: black;
     height: 200px;
 }
+.thumbnail > img {
+    height: 200px;
+}

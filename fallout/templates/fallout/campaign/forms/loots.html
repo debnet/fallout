@@ -17,7 +17,7 @@
         </div>
         <div class="col-auto form-check ml-1">
             <label class="form-check-label">
-                <input class="form-check-input" type="checkbox" name="action" checked="checked">
+                <input class="form-check-input" type="checkbox" name="is_action" checked="checked">
                 <span title="{% trans "Points d'action" %}">{% trans "PA" %}</span>
             </label>
         </div>
@@ -39,7 +39,7 @@
                             {% with image=item.image thumbnail=item.thumbnail %}
                                 {% if thumbnail %}
                                     <div class="thumbnail rounded mb-2">
-                                        <img class="img-fluid mx-auto d-block rounded" src="{{ thumbnail }}">
+                                        <img class="img-fluid mx-auto d-block rounded" src="{{ MEDIA_URL }}{{ thumbnail }}">
                                     </div>
                                 {% elif image %}
                                     <img class="img-fluid mx-auto d-block rounded mb-2" src="{{ image.url }}">

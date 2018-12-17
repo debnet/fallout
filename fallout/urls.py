@@ -9,6 +9,7 @@ urlpatterns = ([
     path('campaign/<int:campaign_id>/', views.view_campaign, name='campaign'),
     path('character/<int:character_id>/', views.view_character, name='character'),
     path('next_turn/<int:campaign_id>/', views.next_turn, name='next_turn'),
+    path('thumbnails/', views.thumbnails, name='thumbnails'),
 ], 'fallout')
 
 # API REST

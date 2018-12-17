@@ -13,27 +13,25 @@
             <tbody>
                 {% if burst %}
                     {% for c in characters %}
-                        {% if c != character %}
-                            <tr class="check-control">
-                                <td>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox"
-                                               name="targets" value="{{ c.id }}"
-                                               id="{{ code }}-target-{{ c.id }}"
-                                               data-target="{{ code }}-target-range-{{ c.id }}">
-                                        <label class="form-check-label" for="{{ code }}-target-{{ c.id }}">
-                                            {{ c.name }}
-                                        </label>
-                                    </div>
-                                </td>
-                                <td class="text-right">
-                                    <label for="{{ code }}-target-range-{{ c.id }}" class="d-inline">{% trans "dst." %}</label>
-                                    <input class="form-control form-control-sm ismall" type="number"
-                                           name="ranges" value="1" disabled
-                                           id="{{ code }}-target-range-{{ c.id }}" />
-                                </td>
-                            </tr>
-                        {% endif %}
+                        <tr class="check-control">
+                            <td>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox"
+                                           name="targets" value="{{ c.id }}"
+                                           id="{{ code }}-target-{{ c.id }}"
+                                           data-target="{{ code }}-target-range-{{ c.id }}">
+                                    <label class="form-check-label" for="{{ code }}-target-{{ c.id }}">
+                                        {{ c.name }}
+                                    </label>
+                                </div>
+                            </td>
+                            <td class="text-right">
+                                <label for="{{ code }}-target-range-{{ c.id }}" class="d-inline">{% trans "dst." %}</label>
+                                <input class="form-control form-control-sm ismall" type="number"
+                                       name="ranges" value="1" disabled
+                                       id="{{ code }}-target-range-{{ c.id }}" />
+                            </td>
+                        </tr>
                     {% endfor %}
                 {% else %}
                     <tr>
@@ -79,8 +77,12 @@
             <tfoot class="thead-dark">
                 <tr>
                     <th class="text-right align-middle" colspan="2">
+                        <label class="form-check-label mr-4" class="d-inline" title="{% trans "Grenade" %}">
+                            <input class="form-check-input" type="checkbox" name="is_grenade">
+                            {% trans "Grenade" %}
+                        </label>
                         <label class="form-check-label mr-1" class="d-inline" title="{% trans "Points d'action" %}">
-                            <input class="form-check-input" type="checkbox" name="action" checked="checked">
+                            <input class="form-check-input" type="checkbox" name="is_action" checked="checked">
                             {% trans "PA" %}
                         </label>
                         <button class="btn btn-sm btn-primary" type="submit">{% trans "OK" %}</button>

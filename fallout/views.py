@@ -166,15 +166,17 @@ def view_character(request, character_id):
                     target_part=data.get('target_part'),
                     target_range=int(data.get('target_range')),
                     hit_modifier=int(data.get('hit_modifier') or 0),
-                    action=bool(data.get('action', False)))
+                    is_grenade=bool(data.get('is_grenade', False)),
+                    is_action=bool(data.get('is_action', False)))
                 messages.add_message(request, result.message_level, _(
                     "<strong>{attacker} vs {defender}</strong> {label}").format(
                         attacker=result.attacker, defender=result.defender, label=result.long_label))
             elif type == 'burst' and data.get('targets'):
                 results = character.burst(
-                    targets=zip(data.get('targets') or [], data.get('ranges') or []),
+                    targets=zip(data.getlist('targets') or [], data.getlist('ranges') or []),
                     hit_modifier=int(data.get('hit_modifier') or 0),
-                    action=bool(data.get('action', False)))
+                    is_grenade=bool(data.get('is_grenade', False)),
+                    is_action=bool(data.get('is_action', False)))
                 for result in results:
                     messages.add_message(request, result.message_level, _(
                         "<strong>{attacker} vs {defender}</strong> {label}").format(
@@ -198,19 +200,19 @@ def view_character(request, character_id):
                     equip = Item.objects.filter(**filter).first()
                     equip.give(character=character, quantity=quantity, condition=condition)
                 else:
-                    action = bool(data.get('action', False))
+                    is_action = bool(data.get('is_action', False))
                     equip = Equipment.objects.select_related('character', 'item').filter(pk=item_id).first()
                     character = equip.character
                     if method == 'equip':
-                        equip.equip(action=action)
+                        equip.equip(is_action=is_action)
                     elif method == 'reload':
-                        equip.reload(action=action)
+                        equip.reload(is_action=is_action)
                     elif method == 'use':
-                        equip.use(action=action)
+                        equip.use(is_action=is_action)
                     elif method == 'repair':
-                        equip.repair(value=int(data.get('condition') or 100), action=action)
+                        equip.repair(value=int(data.get('condition') or 100), is_action=is_action)
                     elif method == 'drop':
-                        equip.drop(quantity=int(data.get('quantity') or 1), action=action)
+                        equip.drop(quantity=int(data.get('quantity') or 1), is_action=is_action)
             elif type == 'effect':
                 effect_id, effect_name = data.get('effect-id'), data.get('effect-name')
                 if method == 'add':
@@ -272,3 +274,30 @@ def next_turn(request, campaign_id):
             next_character = campaign.next_turn(seconds=int(data.get('seconds') or 0))
             return redirect('fallout:character', next_character.id)
     return redirect('fallout:campaign', campaign_id)
+
+
+@login_required
+@render_to('fallout/thumbnails.html')
+def thumbnails(request):
+    """
+    Affiche les thumbnails d'un répertoire
+    """
+    import os
+    from django.conf import settings
+    directory = request.GET.get('dir') or ''
+    directories = directory.split(os.sep)
+    dirname = os.path.join(settings.MEDIA_ROOT, 'thumbnails', directory)
+    images = []
+    for filename in os.listdir(dirname):
+        filepath = os.path.join(dirname, filename)
+        title, ext = os.path.splitext(filename.replace('_', ' '))
+        filename = os.path.join(directory, filename)
+        if os.path.isdir(filepath):
+            images.append((title, True, filename))
+        else:
+            url = os.path.join('thumbnails', filename).replace('\\', '/')
+            images.append((title, False, url))
+    return {
+        'directories': directories,
+        'images': sorted(images, key=lambda e: e[0]),
+    }

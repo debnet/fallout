@@ -1,0 +1,53 @@
+{% extends "fallout/base.html" %}
+{% load i18n %}
+
+{% block navbar %}
+    {% with campaign=character.campaign %}
+        {% include "fallout/navbar.html" %}
+    {% endwith %}
+{% endblock %}
+
+{% block content %}
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            {% if not directories.0 %}
+                <li class="breadcrumb-item active" aria-current="page">{% trans "Base" %}</li>
+            {% else %}
+                <li class="breadcrumb-item">
+                    <a href="{% url 'fallout:thumbnails' %}">{% trans "Base" %}</a>
+                </li>
+                {% for directory in directories %}
+                    {% if forloop.last %}
+                        <li class="breadcrumb-item text-capitalize active" aria-current="page">{{ directory }}</li>
+                    {% else %}
+                        <li class="breadcrumb-item">
+                            <a class="text-capitalize" href="?dir={{ directory }}">{{ directory }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        </ol>
+    </nav>
+    <div class="row">
+        {% for name, directory, url in images %}
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="card h-100">
+                    <div class="card-header">
+                        {% if directory %}
+                            <a href="?dir={{ url }}" class="card-title text-capitalize">{{ name }}</a>
+                        {% else %}
+                            <span class="card-title text-capitalize">{{ name }}</span>
+                        {% endif %}
+                    </div>
+                    {% if not directory %}
+                        <div class="card-body">
+                            <div class="thumbnail rounded">
+                                <img alt="{{ name }}" class="img-fluid mx-auto d-block" src="{{ MEDIA_URL }}{{ url }}">
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

@@ -223,11 +223,13 @@ ITEM_WEAPON = 'weapon'
 ITEM_AMMO = 'ammo'
 ITEM_ARMOR = 'armor'
 ITEM_HELMET = 'helmet'
+ITEM_GRENADE = 'grenade'
 SLOT_ITEM_TYPES = (
     (ITEM_WEAPON, _("arme")),
     (ITEM_AMMO, _("munition")),
     (ITEM_ARMOR, _("armure")),
     (ITEM_HELMET, _("casque")),
+    (ITEM_GRENADE, _("grenade")),
 )
 LIST_SLOT_ITEM_TYPES = dict(SLOT_ITEM_TYPES)
 
@@ -331,3 +333,8 @@ SLEEP_LABELS = {
     (800, 999): _("Dangereusement fatigué"),
     (1000, None): _("Mortellement fatigué"),
 }
+
+# Labels
+LABEL_FAIL = _("échec")
+LABEL_SUCCESS = _("réussite")
+LABEL_CRITICAL = _("critique")

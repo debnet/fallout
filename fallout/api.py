@@ -134,6 +134,8 @@ class FightInputSerializer(BaseFightInputSerializer):
     """
     target_part = serializers.ChoiceField(choices=BODY_PARTS, allow_blank=True, label=_("partie du corps ciblée"))
     hit_modifier = serializers.IntegerField(default=0, initial=0, label=_("modificateur"))
+    is_grenade = serializers.BooleanField(default=False, initial=False, label=_("grenade ?"))
+    is_action = serializers.BooleanField(default=True, initial=True, label=_("action ?"))
 
 
 class BurstInputSerializer(BaseCustomSerializer):
@@ -142,6 +144,8 @@ class BurstInputSerializer(BaseCustomSerializer):
     """
     targets = BaseFightInputSerializer(many=True, label=_("cibles"))
     hit_modifier = serializers.IntegerField(default=0, initial=0, label=_("modificateur"))
+    is_grenade = serializers.BooleanField(default=False, initial=False, label=_("grenade ?"))
+    is_action = serializers.BooleanField(default=True, initial=True, label=_("action ?"))
 
 
 @to_model_serializer(FightHistory)
@@ -169,8 +173,8 @@ def character_burst(request, character_id):
     API permettant d'effectuer une attaque en rafale sur un ou plusieurs personnages
     """
     attacker = get_object_or_404(Character, pk=character_id)
-    targets = [(t.get('target'), t.get('target_range')) for t in request.validated_data.get('targets', {})]
-    return attacker.burst(targets=targets, hit_modifier=request.validated_data.get('hit_modifier'))
+    targets = [(t.get('target'), t.get('target_range')) for t in request.validated_data.pop('targets', {})]
+    return attacker.burst(targets=targets, **request.validated_data)
 
 
 class DamageInputSerializer(BaseCustomSerializer):

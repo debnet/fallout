@@ -54,11 +54,11 @@ class CampaignAdmin(CommonAdmin):
     """
     fieldsets = (
         (_("Informations générales"), dict(
-            fields=('name', 'title', 'description', 'image', 'thumbnail', 'game_master', ),
+            fields=('name', 'title', 'description', 'image', 'game_master', ),
             classes=('wide', ),
         )),
         (_("Effets"), dict(
-            fields=('radiation', ),
+            fields=('needs', 'radiation', ),
             classes=('wide', ),
         )),
         (_("Informations techniques"), dict(
@@ -68,8 +68,9 @@ class CampaignAdmin(CommonAdmin):
     )
     inlines = [LootInline, CampaignEffectInlineAdmin]
     list_display_links = ('name', )
-    list_display = ('name', 'current_game_date', 'current_character', 'radiation', )
-    list_editable = ('current_game_date', 'current_character', 'radiation', )
+    list_display = ('name', 'current_game_date', 'current_character', 'needs', 'radiation', )
+    list_editable = ('current_game_date', 'current_character', 'needs', 'radiation', )
+    list_filter = ('needs', 'game_master', )
     search_fields = ('name', 'title', 'description', )
     ordering = ('name', )
     autocomplete_fields = ('game_master', 'current_character', )
@@ -251,8 +252,8 @@ class ItemAdmin(EntityAdmin):
         )),
         (_("Armes uniquement"), dict(
             fields=(
-                'is_melee', 'is_throwable', 'is_single_charge', 'skill', 'min_strength', 'range', 'clip_size',
-                'burst_count', 'hit_chance_modifier', 'threshold_modifier', 'threshold_rate_modifier',
+                'is_melee', 'is_throwable', 'is_single_charge', 'skill', 'min_strength', 'range',
+                'clip_size', 'burst_count', 'hit_chance_modifier', 'threshold_modifier', 'threshold_rate_modifier',
                 'resistance_modifier', 'ap_cost_reload', 'ap_cost_normal', 'ap_cost_target', 'ap_cost_burst', ),
             classes=('wide', 'collapse', ),
         )),

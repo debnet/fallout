@@ -13,7 +13,7 @@
                         {% with image=info.image thumbnail=info.thumbnail %}
                             {% if thumbnail %}
                                 <div class="thumbnail rounded mb-2">
-                                    <img class="img-fluid mx-auto d-block rounded" src="{{ thumbnail }}">
+                                    <img class="img-fluid mx-auto d-block rounded" src="{{ MEDIA_URL }}{{ thumbnail }}">
                                 </div>
                             {% elif image %}
                                 <img class="img-fluid mx-auto d-block rounded mb-2" src="{{ image.url }}">
