@@ -37,15 +37,15 @@
             </h4>
             <p class="lead">
                 {% blocktrans %}
-                    Vous êtes actuellement sur la réserve de personnages qui ne sont associés à aucune campagne
-                    particulière ainsi la plupart des actions liées à une campagne (comme la gestion du temps et les
-                    effets) sont désactivés.
+Vous êtes actuellement sur la réserve de personnages qui ne sont associés à aucune campagne
+particulière ainsi la plupart des actions liées à une campagne (comme la gestion du temps et les
+effets) sont désactivés.
                 {% endblocktrans %}
             </p>
         </div>
     {% endif %}
-    <div role="tabpanel" id="tabs">
-        <ul class="nav nav-tabs nav-fill nav-justified pt-3 tab" id="actions-tabs" role="tablist">
+    <div role="tabpanel" id="tabs" class="pt-2">
+        <ul class="nav nav-tabs nav-fill nav-justified tab" id="actions-tabs" role="tablist">
             <li class="nav-item">
                 <a class="nav-link" data-toggle="tab" role="tab"
                    id="campaign-infos-tab" href="#campaign-infos">{% trans "Campagne" %}</a>

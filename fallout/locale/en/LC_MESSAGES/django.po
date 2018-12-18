@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-12-17 01:43+0100\n"
+"POT-Creation-Date: 2018-12-18 00:59+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -29,6 +29,15 @@ msgstr "Effects"
 
 msgid "Informations techniques"
 msgstr "Technical informations"
+
+msgid "Autres"
+msgstr "Others"
+
+msgid "personnage"
+msgstr "character"
+
+msgid "campagne"
+msgstr "campaign"
 
 msgid "Spécialités"
 msgstr "Speciality"
@@ -128,7 +137,7 @@ msgid "réinitialiser ?"
 msgstr "reinit?"
 
 msgid "statistique"
-msgstr "stats"
+msgstr "statistic"
 
 msgid "modificateur"
 msgstr "modifier"
@@ -147,9 +156,6 @@ msgstr "group"
 
 msgid "expérience"
 msgstr "experience"
-
-msgid "personnage"
-msgstr "character"
 
 msgid "cible"
 msgstr "target"
@@ -207,9 +213,6 @@ msgstr "quantity"
 
 msgid "nombre"
 msgstr "number"
-
-msgid "campagne"
-msgstr "campaign"
 
 msgid "Fallout RPG"
 msgstr "Fallout RPG"
@@ -331,6 +334,9 @@ msgstr "pickpocket"
 msgid "pièges"
 msgstr "traps"
 
+msgid "explosifs"
+msgstr "explosives"
+
 msgid "science"
 msgstr "science"
 
@@ -342,9 +348,6 @@ msgstr "speech"
 
 msgid "marchandage"
 msgstr "barter"
-
-msgid "hasard"
-msgstr "gambling"
 
 msgid "survie"
 msgstr "survival"
@@ -433,9 +436,6 @@ msgstr "S.P.E.C.I.A.L."
 msgid "Compétences"
 msgstr "Skills"
 
-msgid "Etat général"
-msgstr "General condition"
-
 msgid "Statistiques secondaires"
 msgstr "Secondary statistics"
 
@@ -444,6 +444,9 @@ msgstr "Resistances"
 
 msgid "Statistiques de niveau"
 msgstr "Level statistics"
+
+msgid "Etat général"
+msgstr "General condition"
 
 msgid "arme"
 msgstr "weapon"
@@ -697,6 +700,21 @@ msgstr "damage absorption"
 msgid "Cette fonction ne peut être utilisée que par les statistiques."
 msgstr "This functon can only be used by statistics."
 
+msgid "charge"
+msgstr "weight"
+
+msgid "modificateurs"
+msgstr "modifiers"
+
+msgid "obsolète"
+msgstr "obsolete"
+
+msgid "date"
+msgstr "date"
+
+msgid "statistiques"
+msgstr "stats"
+
 msgid "utilisateur"
 msgstr "user"
 
@@ -720,9 +738,6 @@ msgstr "regeneration"
 
 msgid "spécialités"
 msgstr "speciality"
-
-msgid "charge"
-msgstr "weight"
 
 msgid "aucun malus"
 msgstr "no malus"
@@ -1021,9 +1036,6 @@ msgstr "loot item"
 msgid "objets des butins"
 msgstr "loot items"
 
-msgid "date"
-msgstr "date"
-
 msgid "date en jeu"
 msgstr "ingame date"
 
@@ -1179,9 +1191,9 @@ msgstr "No campaign"
 
 msgid ""
 "\n"
-"                    Vous êtes actuellement sur la réserve de personnages qui ne sont associés à aucune campagne\n"
-"                    particulière ainsi la plupart des actions liées à une campagne (comme la gestion du temps et les\n"
-"                    effets) sont désactivés.\n"
+"Vous êtes actuellement sur la réserve de personnages qui ne sont associés à aucune campagne\n"
+"particulière ainsi la plupart des actions liées à une campagne (comme la gestion du temps et les\n"
+"effets) sont désactivés.\n"
 "                "
 msgstr ""
 "\n"
@@ -1400,23 +1412,38 @@ msgstr "+"
 msgid "Général"
 msgstr "General"
 
+msgid "Attaques données"
+msgstr "Given attacks"
+
+msgid "Attaques reçues"
+msgstr "Taken attacks"
+
 #, python-format
 msgid ""
 "\n"
-"                                (%(count)s jets pour %(rate)s%% de succès)\n"
+"(%(count)s attaques pour %(rate)s%% de succès et %(damage)s dégâts infligés en moyenne)\n"
 "                            "
 msgstr ""
 "\n"
-"(%(count)s rolls for %(rate)s%% successful)"
+"(%(count)s attacks for %(rate)s%% success and %(damage)s inflicted average damages)"
+
+msgid "(aucune attaque)"
+msgstr "(no attack)"
+
+#, python-format
+msgid ""
+"\n"
+"(%(count)s jets pour %(rate)s%% de succès)\n"
+"                            "
+msgstr ""
+"\n"
+"(%(count)s rolls for %(rate)s%% success)"
 
 msgid "(aucun jet)"
 msgstr "(no roll)"
 
 msgid "Equipé"
 msgstr "Equiped"
-
-msgid "Autres"
-msgstr "Others"
 
 msgid "Connectez-vous !"
 msgstr "Log in!"

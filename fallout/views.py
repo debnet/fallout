@@ -10,7 +10,7 @@ from django.utils.translation import gettext as _
 from fallout.enums import BODY_PARTS, DAMAGES_TYPES, ROLL_STATS
 from fallout.models import (
     Campaign, Character, CampaignEffect, CharacterEffect, Effect,
-    Equipment, Item, Loot, LootTemplate, RollHistory)
+    Equipment, Item, Loot, LootTemplate, RollHistory, FightHistory)
 
 
 @login_required
@@ -30,7 +30,8 @@ def view_campaign(request, campaign_id):
     data = request.POST
     # Campagne
     campaign = Campaign.objects.select_related('current_character').filter(id=campaign_id).first()
-    characters = Character.objects.select_related('campaign__current_character').filter(campaign=campaign, is_active=True)
+    characters = Character.objects.select_related('statistics', 'campaign__current_character').filter(
+        campaign=campaign, is_active=True)
     if not request.user.is_superuser:
         characters = characters.filter(Q(user=request.user) | Q(campaign__game_master=request.user))
     loots = Loot.objects.select_related('item').filter(campaign=campaign).order_by('item__name')
@@ -137,7 +138,8 @@ def view_character(request, character_id):
     """
     data = request.POST
     # Personnage
-    characters = Character.objects.select_related('user', 'campaign__current_character').filter(is_active=True)
+    characters = Character.objects.select_related(
+        'user', 'statistics', 'campaign__current_character').filter(is_active=True)
     if not request.user.is_superuser:
         characters = characters.filter(Q(user=request.user) | Q(campaign__game_master=request.user))
     character = characters.filter(id=character_id).first()
@@ -241,6 +243,7 @@ def view_character(request, character_id):
     # Données
     inventory, effects = character.inventory, character.effects
     rollstats = RollHistory.get_stats(character)
+    fightstats = FightHistory.get_stats(character)
 
     return {
         'authorized': authorized,
@@ -255,6 +258,7 @@ def view_character(request, character_id):
         'campaign_effects': character.campaign.effects if character.campaign else None,
         # Statistics
         'rollstats': rollstats,
+        'fightstats': fightstats,
         # Enums
         'body_parts': BODY_PARTS,
         'damage_types': DAMAGES_TYPES,

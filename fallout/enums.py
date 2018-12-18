@@ -86,11 +86,11 @@ SKILL_SNEAK = 'sneak'
 SKILL_LOCKPICK = 'lockpick'
 SKILL_STEAL = 'steal'
 SKILL_TRAPS = 'traps'
+SKILL_EXPLOSIVES = 'explosives'
 SKILL_SCIENCE = 'science'
 SKILL_REPAIR = 'repair'
 SKILL_SPEECH = 'speech'
 SKILL_BARTER = 'barter'
-SKILL_GAMBLING = 'gambling'
 SKILL_SURVIVAL = 'survival'
 SKILL_KNOWLEDGE = 'knowledge'
 SKILLS = (
@@ -107,11 +107,11 @@ SKILLS = (
     (SKILL_LOCKPICK, _("crochetage")),
     (SKILL_STEAL, _("pickpocket")),
     (SKILL_TRAPS, _("pièges")),
+    (SKILL_EXPLOSIVES, _("explosifs")),
     (SKILL_SCIENCE, _("science")),
     (SKILL_REPAIR, _("réparation")),
     (SKILL_SPEECH, _("discours")),
     (SKILL_BARTER, _("marchandage")),
-    (SKILL_GAMBLING, _("hasard")),
     (SKILL_SURVIVAL, _("survie")),
     (SKILL_KNOWLEDGE, _("connaissance")),
 )
@@ -206,11 +206,14 @@ ROLL_STATS = (
 )
 
 # All statistics
-ALL_STATS = ROLL_STATS + (
-    (_("Etat général"), GENERAL_STATS),
+ALL_EDITABLE_STATS = ROLL_STATS + (
     (_("Statistiques secondaires"), SECONDARY_STATS),
     (_("Résistances"), RESISTANCES),
     (_("Statistiques de niveau"), LEVELED_STATS),
+)
+
+ALL_STATS = ALL_EDITABLE_STATS + (
+    (_("Etat général"), GENERAL_STATS),
 )
 
 # Lists of statistics
@@ -338,3 +341,10 @@ SLEEP_LABELS = {
 LABEL_FAIL = _("échec")
 LABEL_SUCCESS = _("réussite")
 LABEL_CRITICAL = _("critique")
+
+
+def get_label(success, critical):
+    return ' '.join((
+        str([LABEL_FAIL, LABEL_SUCCESS][success]),
+        str(['', LABEL_CRITICAL][critical]))).strip()
+

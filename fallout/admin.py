@@ -96,6 +96,46 @@ class CharacterEffectInlineAdmin(EntityTabularInline):
     autocomplete_fields = ('effect', )
 
 
+@admin.register(Statistics)
+class StatsAdmin(CommonAdmin):
+    """
+    Administration des statistiques
+    """
+    fieldsets = tuple([
+        (_("Informations générales"), dict(
+            fields=('character', ),
+            classes=('wide', ),
+        )),
+        (_("Autres"), dict(
+            fields=('charge', 'modifiers', ),
+            classes=('wide', 'collapse', ),
+        )),
+        *(
+            (title, dict(fields=tuple(a for a, b in fields), classes=('wide', 'collapse', )))
+            for title, fields in ALL_EDITABLE_STATS
+        )
+    ])
+    list_display_links = ('character_name', )
+    ordering = ('character__name', )
+    autocomplete_fields = ('character', )
+
+    def character_name(self, obj):
+        return obj.character.name
+    character_name.short_description = _("personnage")
+    character_name.admin_order_field = 'character__name'
+
+    def campaign_name(self, obj):
+        return obj.character.campaign.name if obj.character.campaign else None
+    campaign_name.short_description = _("campagne")
+    campaign_name.admin_order_field = 'character__campaign__name'
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('character__campaign')
+
+    def get_list_display(self, request):
+        return 'character_name', 'campaign_name',
+
+
 @admin.register(Character)
 class CharacterAdmin(EntityAdmin):
     """
@@ -124,7 +164,7 @@ class CharacterAdmin(EntityAdmin):
     list_display_links = ('name', )
     list_display = (
         'name', 'race', 'level', 'is_player', 'is_active',
-        'health', '_max_health', 'action_points', '_max_action_points', 'experience', 'karma')
+        'health', 'current_max_health', 'action_points', 'current_max_action_points', 'experience', 'karma')
     list_editable = ('health', 'action_points', 'experience', 'karma', 'is_active',)
     list_filter = ('campaign', 'user', 'race', 'is_player', 'is_active', )
     search_fields = ('name', 'title', 'description', )
@@ -230,6 +270,9 @@ class CharacterAdmin(EntityAdmin):
         for character in queryset:
             character.loot(empty=True)
     loot.short_description = _("Lâcher tous les équipements")
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('statistics')
 
 
 class ItemModifierInline(admin.TabularInline):
@@ -487,9 +530,9 @@ class RollHistoryAdmin(CommonAdmin):
             classes=('wide', ),
         )),
     )
-    list_display = ('date', 'game_date', 'character', 'stats', 'roll', 'value', 'success', 'critical', )
+    list_display = ('date', 'character', 'stats', 'roll', 'value', 'success', 'critical', )
     list_editable = ()
-    list_filter = ('date', 'game_date', 'character', 'stats', 'success', 'critical', )
+    list_filter = ('date', 'character', 'stats', 'success', 'critical', )
     ordering = ('-date', )
     date_hierarchy = 'date'
     autocomplete_fields = ('character', )
@@ -518,9 +561,10 @@ class DamageHistoryAdmin(CommonAdmin):
             classes=('wide', ),
         )),
     )
-    list_display = ('date', 'game_date', 'character', 'damage_type', 'base_damage', 'real_damage', )
+    search_fields = ('character', )
+    list_display = ('date', 'character', 'damage_type', 'base_damage', 'real_damage', )
     list_editable = ()
-    list_filter = ('date', 'game_date', 'character', 'damage_type', )
+    list_filter = ('date', 'character', 'damage_type', )
     ordering = ('-date', )
     date_hierarchy = 'date'
     autocomplete_fields = ('character', 'armor', )
@@ -551,16 +595,13 @@ class FightHistoryAdmin(CommonAdmin):
             classes=('wide', ),
         )),
     )
-    list_display = (
-        'date', 'game_date', 'attacker', 'defender',
-        'success', 'critical', 'status', 'real_damage', )
+    list_display = ('date', 'attacker', 'defender', 'success', 'critical', 'status',
+                    'hit_roll', 'hit_chance', 'real_damage', )
     list_editable = ()
-    list_filter = (
-        'date', 'game_date', 'attacker', 'defender',
-        'success', 'critical', 'status', )
+    list_filter = ('date', 'attacker', 'defender', 'success', 'critical', 'status', )
     ordering = ('-date', )
     date_hierarchy = 'date'
-    autocomplete_fields = ('attacker', 'attacker_weapon', 'attacker_ammo', 'defender', 'defender_armor', )
+    autocomplete_fields = ('attacker', 'attacker_weapon', 'attacker_ammo', 'defender', 'defender_armor', 'damage', )
 
     def real_damage(self, obj):
         """
@@ -568,3 +609,4 @@ class FightHistoryAdmin(CommonAdmin):
         """
         return getattr(obj.damage, 'real_damage', None)
     real_damage.short_description = _("dégâts")
+    real_damage.admin_order_field = 'damage__real_damage'

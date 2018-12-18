@@ -2,14 +2,52 @@
 
 <div class="tab-pane fade" role="tabpanel" id="character-infos">
     <div class="row">
-        {% for roll in rollstats %}
-            <div class="col-3 p-2">
+        {% for fight in fightstats %}
+            <div class="col-lg-6 col-md-12 p-2">
                 <h6>
-                    {{ roll.label|capfirst }}
+                    <span>
+                        {% if fight.is_attacker %}
+                            {% trans "Attaques données" %}
+                        {% else %}
+                            {% trans "Attaques reçues" %}
+                        {% endif %}
+                    </span>
                     <small class="text-muted">
-                        {% if roll.count %}
-                            {% blocktrans with count=roll.count rate=roll.success_rate %}
-                                ({{ count }} jets pour {{ rate }}% de succès)
+                        {% if fight.total_count %}
+                            {% blocktrans with count=fight.total_count rate=fight.success_rate damage=fight.damage_rate %}
+({{ count }} attaques pour {{ rate }}% de succès et {{ damage }} dégâts infligés en moyenne)
+                            {% endblocktrans %}
+                        {% else %}
+                            {% trans "(aucune attaque)" %}
+                        {% endif %}
+                    </small>
+                </h6>
+                <div class="progress">
+                    {% for value, width, class, label in fight.all %}
+                        {% if value %}
+                            {% localize off %}
+                            <div class="progress-bar progress-bar-striped bg-{{ class }}" role="progressbar"
+                                 aria-valuenow="{{ value }}" aria-valuemin="0" aria-valuemax="{{ roll.count }}"
+                                 style="width: {{ width }}%" title="{{ label }}" data-toggle="tooltip" data-placement="top">
+                            {% endlocalize %}
+                                {{ value }}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    <hr />
+    <div class="row">
+        {% for roll in rollstats %}
+            <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12 p-2">
+                <h6>
+                    <span>{{ roll.label|capfirst }}</span>
+                    <small class="text-muted">
+                        {% if roll.total_count %}
+                            {% blocktrans with count=roll.total_count rate=roll.success_rate %}
+({{ count }} jets pour {{ rate }}% de succès)
                             {% endblocktrans %}
                         {% else %}
                             {% trans "(aucun jet)" %}
@@ -17,12 +55,12 @@
                     </small>
                 </h6>
                 <div class="progress">
-                    {% for value, width, class in roll.all %}
+                    {% for value, width, class, label in roll.all %}
                         {% if value %}
                             {% localize off %}
                             <div class="progress-bar progress-bar-striped bg-{{ class }}" role="progressbar"
                                  aria-valuenow="{{ value }}" aria-valuemin="0" aria-valuemax="{{ roll.count }}"
-                                 style="width: {{ width }}%">
+                                 style="width: {{ width }}%" title="{{ label }}" data-toggle="tooltip" data-placement="top">
                             {% endlocalize %}
                                 {{ value }}
                             </div>
@@ -31,8 +69,9 @@
                 </div>
             </div>
             {% if forloop.counter == 7 %}
-            <div class="w-100"><hr /></div>
+                </div><hr /><div class="row">
             {% endif %}
         {% endfor %}
     </div>
+
 </div>

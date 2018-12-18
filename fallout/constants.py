@@ -294,11 +294,11 @@ COMPUTED_STATS = (
     ('lockpick', lambda s, c: 10 + s.perception + s.agility),
     ('steal', lambda s, c: 3 * s.agility),
     ('traps', lambda s, c: 10 + (2 * s.perception)),
+    ('explosives', lambda s, c: 2 * s.perception),
     ('science', lambda s, c: 4 * s.intelligence),
     ('repair', lambda s, c: 3 * s.intelligence),
     ('speech', lambda s, c: 5 * s.charisma),
     ('barter', lambda s, c: 4 * s.charisma),
-    ('gambling', lambda s, c: 5 * s.luck),
     ('survival', lambda s, c: 2 * (s.endurance + s.intelligence)),
     ('knowledge', lambda s, c: 5 * s.intelligence),
 )

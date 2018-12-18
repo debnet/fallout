@@ -132,4 +132,7 @@ $(document).ready(function($) {
 
     // Popups
     $('[data-toggle="tooltip"]').tooltip();
+
+    // Désactiver le re-POST
+    window.history.replaceState(null, document.title, location.href);
 });

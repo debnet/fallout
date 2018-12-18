@@ -4,13 +4,14 @@ from datetime import datetime, timedelta
 from random import randint, choice
 from typing import Dict, Iterable, List, Optional, Tuple, Union
 
+from common.fields import JsonField
 from common.models import CommonModel, Entity
 from common.utils import to_object
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models import F, Q, Sum, FloatField
+from django.db.models import F, Q, Case, Count, Sum, Value, When
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 from multiselectfield import MultiSelectField
@@ -199,18 +200,18 @@ class Campaign(CommonModel):
         verbose_name_plural = _("campagnes")
 
 
-class Stats(models.Model):
+class Stats(CommonModel):
     """
     Statistiques actuelles du personnage
     """
     # S.P.E.C.I.A.L.
-    strength = models.PositiveSmallIntegerField(default=1, verbose_name=_("force"))
-    perception = models.PositiveSmallIntegerField(default=1, verbose_name=_("perception"))
-    endurance = models.PositiveSmallIntegerField(default=1, verbose_name=_("endurance"))
-    charisma = models.PositiveSmallIntegerField(default=1, verbose_name=_("charisme"))
-    intelligence = models.PositiveSmallIntegerField(default=1, verbose_name=_("intelligence"))
-    agility = models.PositiveSmallIntegerField(default=1, verbose_name=_("agilité"))
-    luck = models.PositiveSmallIntegerField(default=1, verbose_name=_("chance"))
+    strength = models.PositiveSmallIntegerField(default=5, verbose_name=_("force"))
+    perception = models.PositiveSmallIntegerField(default=5, verbose_name=_("perception"))
+    endurance = models.PositiveSmallIntegerField(default=5, verbose_name=_("endurance"))
+    charisma = models.PositiveSmallIntegerField(default=5, verbose_name=_("charisme"))
+    intelligence = models.PositiveSmallIntegerField(default=5, verbose_name=_("intelligence"))
+    agility = models.PositiveSmallIntegerField(default=5, verbose_name=_("agilité"))
+    luck = models.PositiveSmallIntegerField(default=5, verbose_name=_("chance"))
     # Secondary statistics
     max_health = models.PositiveSmallIntegerField(default=0, verbose_name=_("santé maximale"))
     max_action_points = models.PositiveSmallIntegerField(default=0, verbose_name=_("points d'action max."))
@@ -247,11 +248,11 @@ class Stats(models.Model):
     lockpick = models.SmallIntegerField(default=0, verbose_name=_("crochetage"))
     steal = models.SmallIntegerField(default=0, verbose_name=_("pickpocket"))
     traps = models.SmallIntegerField(default=0, verbose_name=_("pièges"))
+    explosives = models.SmallIntegerField(default=0, verbose_name=_("explosifs"))
     science = models.SmallIntegerField(default=0, verbose_name=_("science"))
     repair = models.SmallIntegerField(default=0, verbose_name=_("réparation"))
     speech = models.SmallIntegerField(default=0, verbose_name=_("discours"))
     barter = models.SmallIntegerField(default=0, verbose_name=_("marchandage"))
-    gambling = models.SmallIntegerField(default=0, verbose_name=_("hasard"))
     survival = models.SmallIntegerField(default=0, verbose_name=_("survie"))
     knowledge = models.SmallIntegerField(default=0, verbose_name=_("connaissance"))
     # Leveled stats
@@ -261,6 +262,7 @@ class Stats(models.Model):
 
     # Added at init
     character = None
+    charge = 0
     base = {}
     modifiers = {}
 
@@ -319,7 +321,6 @@ class Stats(models.Model):
         # Derivated statistics
         for stats_name, formula in COMPUTED_STATS:
             stats._change_stats(stats_name, formula(stats, character))
-
         # Modifiers
         for stats_name in LIST_ALL_STATS:
             from_base = stats.base.get(stats_name, 0)
@@ -327,12 +328,18 @@ class Stats(models.Model):
             if from_base == from_stats:
                 continue
             stats.modifiers[stats_name] = from_stats - from_base
+        # Charge
+        stats.charge = character.equipments.aggregate(
+            charge=Sum(F('quantity') * F('item__weight'), output_field=models.FloatField())
+        ).get('charge') or 0.0
         return stats
 
     def _change_all_stats(self, **stats: Dict[str, Tuple[int, int, int]]) -> None:
         assert isinstance(self, Stats), _("Cette fonction ne peut être utilisée que par les statistiques.")
         for name, values in stats.items():
             self._change_stats(name, *values)
+        if isinstance(self, Statistics):
+            self.save()
 
     def _change_stats(self, name: str, value: int = 0, mini: int = None, maxi: int = None) -> None:
         assert isinstance(self, Stats), _("Cette fonction ne peut être utilisée que par les statistiques.")
@@ -342,9 +349,28 @@ class Stats(models.Model):
         maxi = maxi if maxi is not None else race_maxi or float('+inf')
         result = min(max(getattr(target, name, 0) + value, mini), maxi)
         setattr(target, name, result)
+        if isinstance(self, Statistics):
+            self.save()
 
     class Meta:
         abstract = True
+
+
+class Statistics(Stats):
+    """
+    Statistiques de personnage
+    """
+    character = models.OneToOneField(
+        'Character', primary_key=True, on_delete=models.CASCADE,
+        related_name='statistics', verbose_name=_('personnage'))
+    charge = models.FloatField(default=0.0, verbose_name=_("charge"))
+    modifiers = JsonField(blank=True, null=True, verbose_name=_("modificateurs"))
+    obsolete = models.BooleanField(default=False, editable=False, verbose_name=_("obsolète"))
+    date = models.DateTimeField(auto_now=True, editable=False, verbose_name=_("date"))
+
+    class Meta:
+        verbose_name = _("statistiques")
+        verbose_name_plural = _("statistiques")
 
 
 class Character(Entity, Stats):
@@ -397,17 +423,25 @@ class Character(Entity, Stats):
             character = character.pk
         if character:
             Character._stats.pop(int(character), None)
+            Statistics.objects.filter(character_id=int(character)).update(obsolete=True)
 
     @property
-    def stats(self) -> Stats:
+    def stats(self) -> Union[Statistics, Stats]:
         """
         Retourne les statistiques calculées du personnage
         :return: Statistiques
         """
-        stats = Character._stats.get(self.pk) or Stats.get(self)
-        if self.pk:
-            Character._stats[self.pk] = stats
-        return stats
+        try:
+            assert not self.statistics.obsolete
+        except:
+            stats = self._stats.get(self.pk) or Stats.get(self)
+            if self.pk:
+                self._stats[self.pk] = stats
+                self.statistics, created = Statistics.objects.update_or_create(character=self, defaults=dict(
+                    obsolete=False, charge=stats.charge, modifiers=stats.modifiers, **stats.to_dict()))
+            else:
+                return stats
+        return self.statistics
 
     @property
     def inventory(self) -> 'models.QuerySet[Equipment]':
@@ -478,7 +512,7 @@ class Character(Entity, Stats):
                 rvalue = lvalue
                 lvalue = self.used_skill_points
             elif code == STATS_EXPERIENCE:
-                charge, carry_weight = self.charge, self.stats.carry_weight
+                charge, carry_weight = self.stats.charge, self.stats.carry_weight
                 yield (STATS_CARRY_WEIGHT, _("charge"), charge, carry_weight,
                        get_class(charge, carry_weight, reverse=True), (charge / carry_weight * 100.0))
                 rvalue = self.required_experience
@@ -517,15 +551,6 @@ class Character(Entity, Stats):
             yield element
         for element in self.resistances:
             yield element
-
-    @property
-    def charge(self) -> float:
-        """
-        Retourne la charge totale de l'équipement
-        """
-        return self.equipments.aggregate(
-            charge=Sum(F('quantity') * F('item__weight'), output_field=FloatField())
-        ).get('charge') or 0
 
     @property
     def used_skill_points(self) -> float:
@@ -601,7 +626,7 @@ class Character(Entity, Stats):
 
     @property
     def modifiers(self):
-        for stats_name, value in self.stats.modifiers.items():
+        for stats_name, value in (self.stats.modifiers or {}).items():
             yield stats_name, LIST_ALL_STATS.get(stats_name), value
 
     def modify_value(self, name: str, value: Union[int, float]) -> Union[int, float]:
@@ -792,7 +817,7 @@ class Character(Entity, Stats):
         :return: Historique de combat
         """
         if isinstance(target, (int, str)):
-            target = Character.objects.get(pk=str(target))
+            target = Character.objects.select_related('statistics').get(pk=str(target))
         history = FightHistory(attacker=self, defender=target, burst=is_burst, hit_count=hit + 1, range=target_range)
         history.game_date = self.campaign and self.campaign.current_game_date
         # Equipment
@@ -800,6 +825,7 @@ class Character(Entity, Stats):
             attacker_weapon_equipment = self.inventory.select_related('item').filter(slot=ITEM_GRENADE).first()
             attacker_weapon = history.attacker_weapon = getattr(attacker_weapon_equipment, 'item', None)
             attacker_ammo = None
+            assert attacker_weapon_equipment, _("L'attaquant ne possède pas ou plus de grenade.")
         else:
             attacker_weapon_equipment = self.inventory.select_related('item').filter(slot=ITEM_WEAPON).first()
             attacker_ammo_equipment = self.inventory.select_related('item').filter(slot=ITEM_AMMO).first()
@@ -1135,7 +1161,7 @@ for stats, name in EDITABLE_STATS:
         return getattr(self.stats, stats, None)
 
     current_stats.short_description = name
-    setattr(Character, '_' + stats, property(current_stats))
+    setattr(Character, 'current_' + stats, property(current_stats))
 
 
 class Modifier(CommonModel):
@@ -1855,7 +1881,7 @@ class Loot(CommonModel):
         :return: Equipement
         """
         if isinstance(character, (int, str)):
-            character = Character.objects.get(pk=character)
+            character = Character.objects.select_related('statistics').get(pk=character)
         assert self.campaign_id == character.campaign_id, _(
             "Le personnage doit être dans la même campagne.")
         assert not is_action or character.action_points >= AP_COST_TAKE, _(
@@ -1937,7 +1963,7 @@ class LootTemplate(CommonModel):
         chance_modifier = 0
         if character:
             if isinstance(character, (int, str)):
-                character = Character.objects.get(pk=character)
+                character = Character.objects.select_related('statistics').get(pk=character)
             chance_modifier = character.stats.luck
         assert not character or campaign.pk == character.campaign_id, _(
             "Le personnage concerné doit être dans la même campagne que le butin a créer.")
@@ -2005,7 +2031,7 @@ class RollHistory(CommonModel):
     game_date = models.DateTimeField(blank=True, null=True, verbose_name=_("date en jeu"))
     character = models.ForeignKey(
         'Character', on_delete=models.CASCADE,
-        related_name='+', verbose_name=_("personnage"))
+        related_name='roll_history', verbose_name=_("personnage"))
     stats = models.CharField(max_length=20, blank=True, choices=ROLL_STATS, verbose_name=_("statistique"))
     value = models.PositiveSmallIntegerField(default=0, verbose_name=_("valeur"))
     modifier = models.SmallIntegerField(default=0, verbose_name=_("modificateur"))
@@ -2021,36 +2047,40 @@ class RollHistory(CommonModel):
             self.character = character
             self.code = code
             self.label = label
-            self.count = 0
+            self.total_count = 0
             self.stats = odict((((1, 1), 0), ((1, 0), 0), ((0, 0), 0), ((0, 1), 0)))
 
-        def add(self, success: bool, critical: bool):
+        def add(self, success: bool, critical: bool, count: int):
             """
             Ajoute un jet aux statistiques
             :param success: Succès ?
             :param critical: Critique ?
+            :param count: Nombre
             :return: Rien
             """
-            self.count += 1
-            self.stats[success, critical] += 1
+            self.total_count += count
+            self.stats[success, critical] += count
 
         @property
-        def all(self) -> List[Tuple[int, float, str]]:
+        def all(self) -> List[Tuple[int, float, str, str]]:
             """
             Ventilation des statistiques par succès/échec
-            :return: Liste ventilée par valeur, pourcentage et classe CSS
+            :return: Liste ventilée par valeur, pourcentage, classe CSS et libellé
             """
             return [(
-                value,
-                round(((value / self.count) * 100) if self.count else 0, 2),
-                settings.CSS_CLASSES[key],
-            ) for key, value in self.stats.items()]
+                value, round(((value / self.total_count) * 100) if self.total_count else 0, 2),
+                settings.CSS_CLASSES[success, critical], get_label(success, critical),
+            ) for (success, critical), value in self.stats.items()]
+
+        @property
+        def total_success(self) -> int:
+            return sum(self.stats[1, x] for x in range(2))
 
         @property
         def success_rate(self) -> float:
-            if not self.count:
+            if not self.total_count:
                 return 0.0
-            return round((self.stats[1, 0] + self.stats[1, 1]) / self.count, 2) * 100.0
+            return round(self.total_success * 100.0 / self.total_count, 1)
 
     @staticmethod
     def get_stats(character: Union['Character', int]):
@@ -2059,12 +2089,16 @@ class RollHistory(CommonModel):
         :param character: Personnage
         :return: Liste des statistiques de jets
         """
-        stats = odict()
+        all_stats = odict()
         for code, label in SPECIALS + SKILLS:
-            stats[code] = RollHistory.RollStats(character, code, label)
-        for roll in RollHistory.objects.only('stats', 'success', 'critical').filter(character=character).iterator():
-            stats[roll.stats].add(roll.success, roll.critical)
-        return list(stats.values())
+            all_stats[code] = RollHistory.RollStats(character, code, label)
+        rolls = RollHistory.objects.filter(character=character).values(
+            'stats', 'success', 'critical'
+        ).annotate(count=Count('*')).values_list(
+            'stats', 'success', 'critical', 'count')
+        for stats, success, critical, count in rolls:
+            all_stats[stats].add(success, critical, count or 0)
+        return list(all_stats.values())
 
     @property
     def css_class(self) -> str:
@@ -2085,9 +2119,7 @@ class RollHistory(CommonModel):
         """
         Libellé du jet
         """
-        return ' '.join((
-            str([LABEL_FAIL, LABEL_SUCCESS][self.success]),
-            str(['', LABEL_CRITICAL][self.critical]))).strip()
+        return get_label(self.success, self.critical)
 
     @property
     def long_label(self) -> str:
@@ -2121,7 +2153,7 @@ class DamageHistory(CommonModel):
     game_date = models.DateTimeField(blank=True, null=True, verbose_name=_("date en jeu"))
     character = models.ForeignKey(
         'Character', on_delete=models.CASCADE,
-        related_name='+', verbose_name=_("personnage"))
+        related_name='damage_history', verbose_name=_("personnage"))
     damage_type = models.CharField(max_length=20, blank=True, choices=DAMAGES_TYPES, verbose_name=_("type de dégâts"))
     raw_damage = models.PositiveSmallIntegerField(default=0, verbose_name=_("dégâts bruts"))
     min_damage = models.PositiveSmallIntegerField(default=0, verbose_name=_("dégâts min."))
@@ -2191,6 +2223,78 @@ class FightHistory(CommonModel):
         limit_choices_to={'fight__isnull': False},
         related_name='fight', verbose_name=_("historique des dégâts"))
 
+    class FightStats:
+        """
+        Statistiques des combats
+        """
+        def __init__(self, character: Union['Character', int], is_attacker: bool = True):
+            self.character = character
+            self.is_attacker = is_attacker
+            self.total_count = self.total_damage = 0
+            self.stats = odict((((1, 1), [0, 0]), ((1, 0), [0, 0]), ((0, 0), [0, 0]), ((0, 1), [0, 0])))
+
+        def add(self, success: bool, critical: bool, count: int, damage: int) -> None:
+            """
+            Ajoute un combat aux statistiques
+            :param success: Succès ?
+            :param critical: Critique ?
+            :param count: Nombre
+            :param damage: Dégâts
+            :return: Rien
+            """
+            self.total_count += count
+            self.total_damage += damage
+            value = self.stats[success, critical]
+            value[0] += count
+            value[1] += damage
+
+        @property
+        def all(self) -> List[Tuple[int, float, str, str]]:
+            """
+            Ventilation des statistiques par succès/échec
+            :return: Liste ventilée par valeur, pourcentage, classe CSS et libellé
+            """
+            return [(
+                count, round(((count / self.total_count) * 100) if self.total_count else 0, 2),
+                settings.CSS_CLASSES[success, critical], get_label(success, critical),
+            ) for (success, critical), (count, damage) in self.stats.items()]
+
+        @property
+        def total_success(self) -> int:
+            return sum(self.stats[1, x][0] for x in range(2))
+
+        @property
+        def success_rate(self) -> float:
+            if not self.total_count:
+                return 0.0
+            return round(self.total_success * 100.0 / self.total_count, 1)
+
+        @property
+        def damage_rate(self) -> float:
+            if not self.total_success:
+                return 0.0
+            return round(self.total_damage / self.total_success, 1)
+
+    @staticmethod
+    def get_stats(character: Union['Character', int]):
+        """
+        Récupère les statistiques de combats
+        :param character: Personnage
+        :return: Liste des statistiques de combats
+        """
+        boolean = models.BooleanField()
+        fights = FightHistory.objects.filter(
+            Q(attacker=character) | Q(defender=character), status__in=(STATUS_HIT_SUCCEED, STATUS_HIT_FAILED)
+        ).annotate(
+            is_attacker=Case(When(attacker=character, then=Value(True, boolean)), default=Value(False, boolean))
+        ).values('success', 'critical', 'is_attacker').annotate(
+            count=Count('*'), damage=Sum('damage__real_damage')
+        ).values_list('is_attacker', 'success', 'critical', 'count', 'damage')
+        attacker, defender = FightHistory.FightStats(character, True), FightHistory.FightStats(character, False)
+        for is_attacker, success, critical, count, damage in fights:
+            (defender, attacker)[is_attacker].add(success, critical, count or 0, damage or 0)
+        return attacker, defender
+
     @property
     def css_class(self) -> str:
         """
@@ -2210,9 +2314,7 @@ class FightHistory(CommonModel):
         """
         Libellé du combat
         """
-        return ' '.join((
-            str([LABEL_FAIL, LABEL_SUCCESS][self.success]),
-            str(['', LABEL_CRITICAL][self.critical]))).strip()
+        return get_label(self.success, self.critical)
 
     @property
     def long_label(self) -> str:
@@ -2240,6 +2342,7 @@ MODELS = (
     Player,
     Campaign,
     Character,
+    Statistics,
     Item,
     ItemModifier,
     Equipment,

@@ -98,19 +98,6 @@ class Base(Configuration):
         'common.auth.LdapAuthenticationBackend',
     )
 
-    # LDAP
-    LDAP_ENABLE = values.BooleanValue(False)
-    LDAP_LOGIN = values.Value(r'DOMAIN\{username}')
-    LDAP_HOST = values.Value('')
-    LDAP_BASE = values.Value('DC=domain,DC=local')
-    LDAP_FILTER = '(&(objectCategory=person)(objectClass=user)(sAMAccountName={username}))'
-    LDAP_ATTRIBUTES = ['mail', 'title', 'displayName', 'company', 'sn', 'givenName', 'memberOf']
-    LDAP_ADMIN_USERS = values.ListValue([])
-    LDAP_ADMIN_GROUPS = values.ListValue([])
-    LDAP_STAFF_USERS = values.ListValue([])
-    LDAP_STAFF_GROUPS = values.ListValue([])
-    LDAP_GROUP_PREFIX = values.Value("[LDAP] ")
-
     # Password validation
     # https://docs.djangoproject.com/en/2.0/ref/settings/#auth-password-validators
     AUTH_PASSWORD_VALIDATORS = [
@@ -148,7 +135,7 @@ class Base(Configuration):
 
     # Static files (CSS, JavaScript, Images)
     # https://docs.djangoproject.com/en/2.0/howto/static-files/
-    STATIC_URL = '/static/'
+    STATIC_URL = values.Value('/static/')
     STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
     STATICFILES_DIRS = (
@@ -163,7 +150,7 @@ class Base(Configuration):
 
     # Media url and directory
     MEDIA_NAME = 'medias'
-    MEDIA_URL = '/medias/'
+    MEDIA_URL = values.Value('/medias/')
     MEDIA_ROOT = values.Value(os.path.join(BASE_DIR, MEDIA_NAME))
 
     # Custom settings
@@ -219,26 +206,26 @@ class Base(Configuration):
     }
 
     # Login URLs
-    LOGIN_URL = '/login/'
-    LOGIN_REDIRECT_URL = '/'
-    LOGOUT_URL = '/logout/'
+    LOGIN_URL = values.Value('/login/')
+    LOGIN_REDIRECT_URL = values.Value('/')
+    LOGOUT_URL = values.Value('/logout/')
 
     # User substitution
     AUTH_USER_MODEL = 'fallout.Player'
 
     # Messages
     MESSAGE_TAGS = {
-        messages.DEBUG: 'light',
-        messages.INFO: 'info',
-        messages.SUCCESS: 'success',
-        messages.WARNING: 'warning',
-        messages.ERROR: 'danger',
+        messages.DEBUG: values.Value('light', environ_name='CSS_DEBUG'),
+        messages.INFO: values.Value('info', environ_name='CSS_INFO'),
+        messages.SUCCESS: values.Value('success', environ_name='CSS_SUCCESS'),
+        messages.WARNING: values.Value('warning', environ_name='CSS_WARNING'),
+        messages.ERROR: values.Value('danger', environ_name='CSS_ERROR'),
     }
     CSS_CLASSES = {
-        (1, 1): 'info',
-        (1, 0): 'success',
-        (0, 0): 'warning',
-        (0, 1): 'danger',
+        (1, 1): values.Value('info', environ_name='CSS_11'),
+        (1, 0): values.Value('success', environ_name='CSS_10'),
+        (0, 0): values.Value('warning', environ_name='CSS_00'),
+        (0, 1): values.Value('danger', environ_name='CSS_01'),
     }
 
     # CSS and JS compression
@@ -253,7 +240,7 @@ class Base(Configuration):
     PASSWORD_RESET_TIMEOUT_DAYS = values.IntegerValue(1)
 
     # Gestionnaire utilisé pour l'import des fichiers
-    FILE_UPLOAD_HANDLERS = ('common.utils.TemporaryFileHandler',)
+    FILE_UPLOAD_HANDLERS = ('common.utils.TemporaryFileHandler', )
 
     # Taille du payload maximum autorisée et permissions à l'upload
     DATA_UPLOAD_MAX_MEMORY_SIZE = values.IntegerValue(10485760)
