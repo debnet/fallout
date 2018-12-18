@@ -874,14 +874,15 @@ class Character(Entity, Stats):
         is_melee = attacker_skill in (SKILL_UNARMED, SKILL_MELEE_WEAPONS)
         attacker_hit_chance = getattr(self.stats, attacker_skill, 0) or 0  # Base skill and min strength modifier
         attacker_hit_chance += min(20 * (self.stats.strength - getattr(attacker_weapon, 'min_strength', 0) or 0), 0)
+        attacker_range_type = 'burst_range' if is_burst else 'range'
+        attacker_hit_range = max(
+            (getattr(attacker_weapon, attacker_range_type, 0) or 0) +
+            (getattr(attacker_ammo, attacker_range_type, 0) or 0), 0)
         attacker_weapon_melee = getattr(attacker_weapon, 'is_melee', True)
-        attacker_weapon_throwable = is_grenade or getattr(attacker_weapon, 'is_throwable', False)
-        if attacker_weapon_melee:
-            attacker_hit_range = max(getattr(attacker_weapon, 'range', 0) or 0, 1)
-        else:
+        if not attacker_weapon_melee:
+            attacker_weapon_throwable = is_grenade or getattr(attacker_weapon, 'is_throwable', False)
             attacker_range_stats = SPECIAL_STRENGTH if attacker_weapon_throwable else SPECIAL_PERCEPTION
-            attacker_hit_range = max((getattr(attacker_weapon, 'range', 0) or 0) + (getattr(attacker_ammo, 'range', 0) or 0), 0)
-            attacker_hit_range += (2 * (getattr(self.stats, attacker_range_stats, 0) or 0)) + 1
+            attacker_hit_range += (2 * (getattr(self.stats, attacker_range_stats, 0) or 0))
         attacker_hit_chance -= max(target_range - attacker_hit_range, 0) * FIGHT_RANGE_MALUS  # Range modifiers
         attacker_hit_chance += getattr(attacker_weapon, 'hit_chance_modifier', 0) or 0  # Weapon hit chance modifier
         attacker_hit_chance += getattr(attacker_ammo, 'hit_chance_modifier', 0) or 0  # Ammo hit chance modifier
@@ -1236,7 +1237,8 @@ class Item(Entity, DamageMixin):
     min_strength = models.PositiveSmallIntegerField(default=0, verbose_name=_("force minimum"))
     clip_size = models.PositiveSmallIntegerField(default=0, verbose_name=_("taille du chargeur"))
     burst_count = models.PositiveSmallIntegerField(default=0, verbose_name=_("munitions en rafale"))
-    range = models.PositiveSmallIntegerField(default=0, verbose_name=_("modif. de portée"))
+    range = models.PositiveSmallIntegerField(default=0, verbose_name=_("portée"))
+    burst_range = models.PositiveIntegerField(default=0, verbose_name=_("portée en rafale"))
     hit_chance_modifier = models.SmallIntegerField(default=0, verbose_name=_("modif. de précision"))
     threshold_modifier = models.SmallIntegerField(default=0, verbose_name=_("modif. d'absorption"))
     threshold_rate_modifier = models.FloatField(default=0.0, verbose_name=_("modif. taux d'absorption"))
