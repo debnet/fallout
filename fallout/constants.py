@@ -264,6 +264,9 @@ XP_GAIN_FIGHT = (XP_GAIN_FIGHT_MISS, XP_GAIN_FIGHT_HIT)
 # Turn time
 TURN_TIME = 30
 
+# Base weapon condition decay
+WEAPON_CONDITION_DECAY = 0.01
+
 # Computed statistics from S.P.E.C.I.A.L.
 COMPUTED_STATS = (
     ('hit_points_per_level', lambda s, c: 3 + (s.endurance // 2)),

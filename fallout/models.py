@@ -955,9 +955,11 @@ class Character(Entity, Stats):
             elif not attacker_weapon.is_melee:
                 attacker_weapon_equipment.clip_count -= 1
             if not is_grenade and not attacker_weapon.is_throwable:
-                attacker_weapon_equipment.condition -= attacker_weapon_equipment.condition * (
+                attacker_weapon_damage = attacker_weapon_equipment.condition * (
                     (getattr(attacker_weapon, 'condition_modifier', 0.0) or 0.0) +
                     (getattr(attacker_ammo, 'condition_modifier', 0.0) or 0.0))
+                attacker_weapon_equipment.condition -= 0 if attacker_weapon_damage < 0.0 else \
+                    max(attacker_weapon_damage, WEAPON_CONDITION_DECAY)
             attacker_weapon_equipment.save()
         # Save character and return history
         self.action_points -= ap_cost
