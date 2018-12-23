@@ -1417,7 +1417,7 @@ class Equipment(CommonModel):
         """
         Valeur de l'objet en fonction de son état
         """
-        return self.item.value * self.quantity * (self.condition or 1)
+        return self.item.value * self.quantity * ((self.condition or 1.0) ** 1.5)
 
     @property
     def charge(self) -> float:
