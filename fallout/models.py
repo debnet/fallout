@@ -963,7 +963,7 @@ class Character(Entity, Stats):
             elif not attacker_weapon.is_melee:
                 attacker_weapon_equipment.clip_count -= 1
             if attacker_weapon.durability and not is_grenade and not attacker_weapon.is_throwable:
-                attacker_weapon_equipment = (1 / attacker_weapon.durability) * (1.0 - (
+                attacker_weapon_equipment = (1.0 / attacker_weapon.durability) * (1.0 - (
                     (getattr(attacker_weapon, 'condition_modifier', 0.0) or 0.0) +
                     (getattr(attacker_ammo, 'condition_modifier', 0.0) or 0.0)))
                 attacker_weapon_equipment -= attacker_weapon_equipment
