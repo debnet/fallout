@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-12-18 23:12+0100\n"
+"POT-Creation-Date: 2018-12-23 01:15+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -769,6 +769,9 @@ msgstr "value"
 msgid "type"
 msgstr "type"
 
+msgid "durabilité"
+msgstr "durability"
+
 msgid "poids"
 msgstr "weight"
 
@@ -834,6 +837,9 @@ msgstr "damage modifier"
 
 msgid "dégâts critiques"
 msgstr "critical damage"
+
+msgid "modif. dégâts critiques"
+msgstr "critical damage modifier"
 
 msgid "modif. de condition"
 msgstr "condition modifier"

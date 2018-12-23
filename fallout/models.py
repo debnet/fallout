@@ -926,9 +926,12 @@ class Character(Entity, Stats):
                 (getattr(attacker_ammo, 'damage_modifier', 0.0) or 0.0))
             if critical:
                 damage *= 1.0 + (
-                    (getattr(attacker_weapon, 'critical_damage', 0.0) or 0.0) +
-                    (getattr(attacker_ammo, 'critical_damage', 0.0) or 0.0) +
+                    (getattr(attacker_weapon, 'critical_damage_modifier', 0.0) or 0.0) +
+                    (getattr(attacker_ammo, 'critical_damage_modifier', 0.0) or 0.0) +
                     ((self.stats.strength / 10.0) if is_melee else 0.0))
+                damage += (
+                    (getattr(attacker_weapon, 'critical_damage', 0) or 0) +
+                    (getattr(attacker_ammo, 'critical_damage', 0) or 0))
             threshold_modifier = getattr(attacker_weapon, 'threshold_modifier', 0) or 0
             threshold_modifier += getattr(attacker_ammo, 'threshold_modifier', 0) or 0
             threshold_rate_modifier = getattr(attacker_weapon, 'threshold_rate_modifier', 0.0) or 0.0
@@ -954,12 +957,11 @@ class Character(Entity, Stats):
                 attacker_weapon_equipment.quantity -= 1
             elif not attacker_weapon.is_melee:
                 attacker_weapon_equipment.clip_count -= 1
-            if not is_grenade and not attacker_weapon.is_throwable:
-                attacker_weapon_damage = attacker_weapon_equipment.condition * (
+            if attacker_weapon.durability and not is_grenade and not attacker_weapon.is_throwable:
+                attacker_weapon_equipment = (1 / attacker_weapon.durability) * (1.0 - (
                     (getattr(attacker_weapon, 'condition_modifier', 0.0) or 0.0) +
-                    (getattr(attacker_ammo, 'condition_modifier', 0.0) or 0.0))
-                attacker_weapon_equipment.condition -= 0 if attacker_weapon_damage < 0.0 else \
-                    max(attacker_weapon_damage, WEAPON_CONDITION_DECAY)
+                    (getattr(attacker_ammo, 'condition_modifier', 0.0) or 0.0)))
+                attacker_weapon_equipment -= attacker_weapon_equipment
             attacker_weapon_equipment.save()
         # Save character and return history
         self.action_points -= ap_cost
@@ -1013,13 +1015,16 @@ class Character(Entity, Stats):
                 armor_resistance = (armor.get_resistance(damage_type) * armor_equipment.condition) + resistance_modifier
                 total_damage -= max(armor_threshold, 0)
                 total_damage *= (1.0 - min(armor_resistance, 1.0))
-                armor_damage = max((base_damage - total_damage) * armor.condition_modifier, 0)
+                armor_damage = 0
+                if armor.durability:
+                    armor_condition_modifier = 1.0 - armor.condition_modifier
+                    armor_damage = max(((base_damage - total_damage) / armor.durability) * armor_condition_modifier, 0)
                 # History
                 history.armor_threshold = armor_threshold
                 history.armor_resistance = armor_resistance
                 history.armor_damage = armor_damage
             # Condition decrease on armor
-            if armor_damage > 0 and damage_type in PHYSICAL_DAMAGES:
+            if history.armor_damage > 0 and damage_type in PHYSICAL_DAMAGES:
                 armor_equipment.condition -= armor_damage
                 armor_equipment.save()
             # Self threshold and resistance
@@ -1229,6 +1234,7 @@ class Item(Entity, DamageMixin):
     thumbnail = models.CharField(blank=True, max_length=100, choices=get_thumbnails('items'), verbose_name=_("miniature"))
     type = models.CharField(max_length=10, choices=ITEM_TYPES, verbose_name=_("type"))
     value = models.PositiveIntegerField(default=0, verbose_name=_("valeur"))
+    durability = models.PositiveIntegerField(default=0, verbose_name=_("durabilité"))
     weight = models.FloatField(default=0.0, verbose_name=_("poids"))
     is_quest = models.BooleanField(default=False, verbose_name=_("quête ?"))
     # Weapon specific
@@ -1257,7 +1263,8 @@ class Item(Entity, DamageMixin):
     max_damage = models.PositiveSmallIntegerField(default=0, verbose_name=_("dégâts max."))
     damage_modifier = models.FloatField(default=0.0, verbose_name=_("modif. de dégâts"))
     critical_modifier = models.FloatField(default=0.0, verbose_name=_("chances de critiques"))
-    critical_damage = models.FloatField(default=0.0, verbose_name=_("dégâts critiques"))
+    critical_damage = models.PositiveIntegerField(default=0, verbose_name=_("dégâts critiques"))
+    critical_damage_modifier = models.FloatField(default=0.0, verbose_name=_("modif. dégâts critiques"))
     # Resistances
     armor_class = models.SmallIntegerField(default=0, verbose_name=_("esquive"))
     condition_modifier = models.FloatField(default=0.0, verbose_name=_("modif. de condition"))
@@ -1298,7 +1305,7 @@ class Item(Entity, DamageMixin):
         """
         Objet réparable ?
         """
-        return self.type in (ITEM_ARMOR, ITEM_HELMET, ITEM_WEAPON)
+        return self.type in (ITEM_ARMOR, ITEM_HELMET, ITEM_WEAPON) and not self.is_throwable
 
     def get_threshold(self, damage_type: str = DAMAGE_NORMAL) -> int:
         """

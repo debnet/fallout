@@ -290,25 +290,31 @@ class ItemAdmin(EntityAdmin):
     """
     fieldsets = (
         (_("Informations générales"), dict(
-            fields=('name', 'title', 'description', 'image', 'thumbnail', 'type', 'value', 'weight', 'is_quest', ),
+            fields=(
+                'name', 'title', 'description', 'image', 'thumbnail', 'type',
+                'value', 'weight', 'durability', 'condition_modifier', 'is_quest',
+            ),
             classes=('wide', ),
         )),
         (_("Armes uniquement"), dict(
             fields=(
                 'is_melee', 'is_throwable', 'is_single_charge', 'skill', 'min_strength', 'range', 'burst_range',
                 'clip_size', 'burst_count', 'hit_chance_modifier', 'threshold_modifier', 'threshold_rate_modifier',
-                'resistance_modifier', 'ap_cost_reload', 'ap_cost_normal', 'ap_cost_target', 'ap_cost_burst', ),
+                'resistance_modifier', 'ap_cost_reload', 'ap_cost_normal', 'ap_cost_target', 'ap_cost_burst',
+            ),
             classes=('wide', 'collapse', ),
         )),
         (_("Dégâts"), dict(
             fields=(
                 'damage_type', 'raw_damage', 'min_damage', 'max_damage',
-                'damage_modifier', 'critical_modifier', 'critical_damage', ),
+                'damage_modifier', 'critical_modifier',
+                'critical_damage', 'critical_damage_modifier',
+            ),
             classes=('wide', 'collapse', ),
         )),
         (_("Protections uniquement"), dict(
             fields=(
-                'armor_class', 'condition_modifier',
+                'armor_class',
                 'normal_threshold', 'normal_resistance',
                 'laser_threshold', 'laser_resistance',
                 'plasma_threshold', 'plasma_resistance',
