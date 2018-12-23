@@ -1326,11 +1326,14 @@ class Item(Entity, DamageMixin):
         """
         assert self.pk, _("Cet objet doit être préalablement enregistré avant d'être dupliqué.")
         item_id = self.pk
+        effects, ammunitions = self.effects.values_list('id', flat=True), self.ammunitions.values_list('id', flat=True)
         self.name = f"*{self.name}"
         self.save(force_insert=True)
         for modifier in ItemModifier.objects.filter(item_id=item_id):
             modifier.item_id = self.pk
             modifier.save(force_insert=True)
+        self.effects.add(*effects)
+        self.ammunitions.add(*ammunitions)
         return self
 
     def give(self, character: Union['Character', int], quantity: int = 1,
