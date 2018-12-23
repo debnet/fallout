@@ -20,10 +20,12 @@
             {% for s in stats %}
                 {% with title=character.labels|get:s.0|default:"" modifier=character.stats.modifiers|get:s.0 %}
                 <tr>
-                    <td {% if modifier %}title="{% if modifier > 0 %}+{% endif %}{{ modifier|default:"" }}" data-toggle="tooltip" data-placement="left"{% endif %}
-                        class="{% if modifier > 0 %}text-success{% elif modifier < 0 %}text-danger{% endif %}">
-                        {% if modifier > 0 %}&blacktriangle;{% elif modifier < 0 %}&blacktriangledown;{% endif %}
-                        {% if s.0 in character.tag_skills %}<strong>{{ s.1 }}</strong>{% else %}{{ s.1 }}{% endif %}
+                    <td>
+                        <span {% if modifier %}title="{% if modifier > 0 %}+{% endif %}{{ modifier|default:"" }}" data-toggle="tooltip" data-placement="right"
+                              class="{% if modifier > 0 %}text-success{% elif modifier < 0 %}text-danger{% endif %} pr-1"{% endif %}>
+                            {% if modifier > 0 %}&blacktriangle;{% elif modifier < 0 %}&blacktriangledown;{% endif %}
+                            {% if s.0 in character.tag_skills %}<strong>{{ s.1 }}</strong>{% else %}{{ s.1 }}{% endif %}
+                        </span>
                     </td>
                     <td class="text-right">
                         {% if view or not authorized %}

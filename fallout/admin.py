@@ -298,9 +298,10 @@ class ItemAdmin(EntityAdmin):
         )),
         (_("Armes uniquement"), dict(
             fields=(
-                'is_melee', 'is_throwable', 'is_single_charge', 'skill', 'min_strength', 'range', 'burst_range',
-                'clip_size', 'burst_count', 'hit_chance_modifier', 'threshold_modifier', 'threshold_rate_modifier',
-                'resistance_modifier', 'ap_cost_reload', 'ap_cost_normal', 'ap_cost_target', 'ap_cost_burst',
+                'is_melee', 'is_throwable', 'is_single_charge', 'skill', 'min_strength',
+                'range', 'burst_range', 'clip_size', 'burst_count', 'hit_chance_modifier',
+                'threshold_modifier', 'threshold_rate_modifier', 'armor_class_modifier', 'resistance_modifier',
+                'ap_cost_reload', 'ap_cost_normal', 'ap_cost_target', 'ap_cost_burst',
             ),
             classes=('wide', 'collapse', ),
         )),

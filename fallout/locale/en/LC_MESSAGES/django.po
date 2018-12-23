@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-12-23 01:15+0100\n"
+"POT-Creation-Date: 2018-12-23 04:35+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -275,7 +275,7 @@ msgid "charge maximale"
 msgstr "max weight"
 
 msgid "esquive"
-msgstr "dodge"
+msgstr "evasion"
 
 msgid "attaque en mélée"
 msgstr "melee attack"
@@ -772,6 +772,9 @@ msgstr "type"
 msgid "durabilité"
 msgstr "durability"
 
+msgid "modif. de condition"
+msgstr "condition modifier"
+
 msgid "poids"
 msgstr "weight"
 
@@ -814,6 +817,9 @@ msgstr "absorption modifier"
 msgid "modif. taux d'absorption"
 msgstr "absorption rate modifier"
 
+msgid "modif. d'esquive"
+msgstr "evasion modifier"
+
 msgid "modif. de résistance"
 msgstr "resistance modifier"
 
@@ -840,9 +846,6 @@ msgstr "critical damage"
 
 msgid "modif. dégâts critiques"
 msgstr "critical damage modifier"
-
-msgid "modif. de condition"
-msgstr "condition modifier"
 
 msgid "absorption normal"
 msgstr "normal absorption"

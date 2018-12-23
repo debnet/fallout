@@ -887,7 +887,11 @@ class Character(Entity, Stats):
         attacker_hit_chance += getattr(attacker_weapon, 'hit_chance_modifier', 0) or 0  # Weapon hit chance modifier
         attacker_hit_chance += getattr(attacker_ammo, 'hit_chance_modifier', 0) or 0  # Ammo hit chance modifier
         attacker_hit_chance *= getattr(attacker_weapon_equipment, 'condition', 1.0) or 1.0  # Weapon condition
-        attacker_hit_chance -= getattr(defender_armor, 'armor_class', 0) or 0  # Defender armor class modifier
+        defender_armor_class = (getattr(defender_armor, 'armor_class', 0) or 0) + target.stats.armor_class
+        defender_armor_class *= max(1.0 + (
+            (getattr(attacker_weapon, 'armor_class_modifier', 0.0) or 0.0) +
+            (getattr(attacker_ammo, 'armor_class_modifier', 0.0) or 0.0)), 0.0)
+        attacker_hit_chance -= defender_armor_class   # Defender armor class modifier
         attacker_hit_chance -= target.stats.armor_class  # Armor class
         attacker_hit_chance += hit_modifier  # Other modifiers
         if target_part:
@@ -906,9 +910,9 @@ class Character(Entity, Stats):
             # Critical chance
             critical_chance = getattr(self.stats, 'critical_chance', 0)
             critical_chance += critical_modifier
-            critical_chance *= 1.0 + (
+            critical_chance *= max(1.0 + (
                 (getattr(attacker_weapon, 'critical_modifier', 0.0) or 0.0) +
-                (getattr(attacker_ammo, 'critical_modifier', 0.0) or 0.0))
+                (getattr(attacker_ammo, 'critical_modifier', 0.0) or 0.0)), 0.0)
             # Apply damage
             history.status = STATUS_HIT_SUCCEED
             history.critical = critical = attacker_hit_roll < critical_chance
@@ -921,17 +925,18 @@ class Character(Entity, Stats):
                     continue
                 damage += item.base_damage
             damage += self.stats.melee_damage if is_melee else 0
-            damage *= 1.0 + (
+            damage *= max(1.0 + (
                 (getattr(attacker_weapon, 'damage_modifier', 0.0) or 0.0) +
-                (getattr(attacker_ammo, 'damage_modifier', 0.0) or 0.0))
+                (getattr(attacker_ammo, 'damage_modifier', 0.0) or 0.0)), 0.0)
             if critical:
-                damage *= 1.0 + (
+                damage *= max(1.0 + (
                     (getattr(attacker_weapon, 'critical_damage_modifier', 0.0) or 0.0) +
                     (getattr(attacker_ammo, 'critical_damage_modifier', 0.0) or 0.0) +
-                    ((self.stats.strength / 10.0) if is_melee else 0.0))
+                    ((self.stats.strength / 10.0) if is_melee else 0.0)), 1.0)
                 damage += (
                     (getattr(attacker_weapon, 'critical_damage', 0) or 0) +
                     (getattr(attacker_ammo, 'critical_damage', 0) or 0))
+            damage = max(damage, 0.0)  # Avoid negative damage
             threshold_modifier = getattr(attacker_weapon, 'threshold_modifier', 0) or 0
             threshold_modifier += getattr(attacker_ammo, 'threshold_modifier', 0) or 0
             threshold_rate_modifier = getattr(attacker_weapon, 'threshold_rate_modifier', 0.0) or 0.0
@@ -1011,10 +1016,10 @@ class Character(Entity, Stats):
             armor_damage = 0
             if armor and armor_equipment:
                 armor_threshold = round(armor.get_threshold(damage_type) * armor_equipment.condition) + threshold_modifier
-                armor_threshold *= (1.0 + threshold_rate_modifier)
+                armor_threshold *= max(1.0 + threshold_rate_modifier, 0.0)
                 armor_resistance = (armor.get_resistance(damage_type) * armor_equipment.condition) + resistance_modifier
                 total_damage -= max(armor_threshold, 0)
-                total_damage *= (1.0 - min(armor_resistance, 1.0))
+                total_damage *= max(1.0 - min(armor_resistance, 1.0), 0.0)
                 armor_damage = 0
                 if armor.durability:
                     armor_condition_modifier = 1.0 - armor.condition_modifier
@@ -1035,7 +1040,7 @@ class Character(Entity, Stats):
                 damage_resistance += resistance_modifier
         total_damage *= (-1.0 if damage_type == DAMAGE_HEAL else 1.0)
         total_damage -= max(damage_threshold, 0)
-        total_damage *= (1.0 - min(damage_resistance, 1.0))
+        total_damage *= max(1.0 - min(damage_resistance, 1.0), 0.0)
         total_damage = round(total_damage)
         # Apply damage on self
         if total_damage:
@@ -1235,6 +1240,7 @@ class Item(Entity, DamageMixin):
     type = models.CharField(max_length=10, choices=ITEM_TYPES, verbose_name=_("type"))
     value = models.PositiveIntegerField(default=0, verbose_name=_("valeur"))
     durability = models.PositiveIntegerField(default=0, verbose_name=_("durabilité"))
+    condition_modifier = models.FloatField(default=0.0, verbose_name=_("modif. de condition"))
     weight = models.FloatField(default=0.0, verbose_name=_("poids"))
     is_quest = models.BooleanField(default=False, verbose_name=_("quête ?"))
     # Weapon specific
@@ -1250,6 +1256,7 @@ class Item(Entity, DamageMixin):
     hit_chance_modifier = models.SmallIntegerField(default=0, verbose_name=_("modif. de précision"))
     threshold_modifier = models.SmallIntegerField(default=0, verbose_name=_("modif. d'absorption"))
     threshold_rate_modifier = models.FloatField(default=0.0, verbose_name=_("modif. taux d'absorption"))
+    armor_class_modifier = models.FloatField(default=0.0, verbose_name=_("modif. d'esquive"))
     resistance_modifier = models.FloatField(default=0.0, verbose_name=_("modif. de résistance"))
     # Action points
     ap_cost_reload = models.PositiveSmallIntegerField(default=0, verbose_name=_("coût PA recharge"))
@@ -1267,7 +1274,6 @@ class Item(Entity, DamageMixin):
     critical_damage_modifier = models.FloatField(default=0.0, verbose_name=_("modif. dégâts critiques"))
     # Resistances
     armor_class = models.SmallIntegerField(default=0, verbose_name=_("esquive"))
-    condition_modifier = models.FloatField(default=0.0, verbose_name=_("modif. de condition"))
     normal_threshold = models.SmallIntegerField(default=0, verbose_name=_("absorption normal"))
     normal_resistance = models.FloatField(default=0.0, verbose_name=_("résistance normal"))
     laser_threshold = models.SmallIntegerField(default=0, verbose_name=_("absorption laser"))
