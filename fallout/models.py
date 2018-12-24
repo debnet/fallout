@@ -786,6 +786,8 @@ class Character(Entity, Stats):
                     target, is_burst=True, is_grenade=True, target_range=int(target_range),
                     hit_modifier=hit_modifier, is_action=is_action, hit=hit, log=log)
                 histories.append(history)
+                if history.stop_burst:
+                    break
         else:
             attacker_weapon_equipment = self.inventory.select_related('item').filter(slot=ITEM_WEAPON).first()
             attacker_weapon = getattr(attacker_weapon_equipment, 'item', None)
@@ -797,6 +799,8 @@ class Character(Entity, Stats):
                     target, is_burst=True, target_range=int(target_range),
                     hit_modifier=hit_modifier, is_action=is_action, hit=hit, log=log)
                 histories.append(history)
+                if history.stop_burst:
+                    break
         self.save()
         return histories
 
@@ -2314,6 +2318,13 @@ class FightHistory(CommonModel):
         for is_attacker, success, critical, count, damage in fights:
             (defender, attacker)[is_attacker].add(success, critical, count or 0, damage or 0)
         return attacker, defender
+
+    @property
+    def stop_burst(self):
+        """
+        Stoppe l'attaque en rafale ?
+        """
+        return self.status in (STATUS_NOT_ENOUGH_AP, STATUS_NO_MORE_AMMO, STATUS_WEAPON_BROKEN)
 
     @property
     def css_class(self) -> str:
