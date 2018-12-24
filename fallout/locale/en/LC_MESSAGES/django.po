@@ -898,7 +898,7 @@ msgstr "skill"
 msgid "compétence minimale"
 msgstr "minimum skill"
 
-msgid "force minimum"
+msgid "force minimale"
 msgstr "minimum strength"
 
 msgid "taille du chargeur"

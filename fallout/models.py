@@ -1294,7 +1294,7 @@ class Item(Entity, Resistance, Damage):
     hands = models.PositiveSmallIntegerField(default=0, choices=HANDS, verbose_name=_("mains nécessaires"))
     skill = models.CharField(max_length=20, blank=True, choices=SKILLS, verbose_name=_("compétence"))
     min_skill = models.PositiveSmallIntegerField(default=0, verbose_name=_("compétence minimale"))
-    min_strength = models.PositiveSmallIntegerField(default=0, verbose_name=_("force minimum"))
+    min_strength = models.PositiveSmallIntegerField(default=0, verbose_name=_("force minimale"))
     clip_size = models.PositiveSmallIntegerField(default=0, verbose_name=_("taille du chargeur"))
     burst_count = models.PositiveSmallIntegerField(default=0, verbose_name=_("munitions en rafale"))
     range = models.PositiveSmallIntegerField(default=0, verbose_name=_("portée"))

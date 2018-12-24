@@ -337,7 +337,7 @@ class Migration(migrations.Migration):
                 ('hands', models.PositiveSmallIntegerField(choices=[(0, 'aucune'), (1, 'une main'), (2, 'deux mains')], default=0, verbose_name='mains nécessaires')),
                 ('skill', models.CharField(blank=True, choices=[('small_guns', 'armes à feu légères'), ('big_guns', 'armes à feu lourdes'), ('energy_weapons', 'armes à énergie'), ('unarmed', 'à mains nues'), ('melee_weapons', 'armes de mélée'), ('throwing', 'armes de lancer'), ('first_aid', 'premiers secours'), ('doctor', 'médecine'), ('chems', 'chimie'), ('sneak', 'discrétion'), ('lockpick', 'crochetage'), ('steal', 'pickpocket'), ('traps', 'pièges'), ('explosives', 'explosifs'), ('science', 'science'), ('repair', 'réparation'), ('speech', 'discours'), ('barter', 'marchandage'), ('survival', 'survie'), ('knowledge', 'connaissance')], max_length=20, verbose_name='compétence')),
                 ('min_skill', models.PositiveSmallIntegerField(default=0, verbose_name='compétence minimale')),
-                ('min_strength', models.PositiveSmallIntegerField(default=0, verbose_name='force minimum')),
+                ('min_strength', models.PositiveSmallIntegerField(default=0, verbose_name='force minimale')),
                 ('clip_size', models.PositiveSmallIntegerField(default=0, verbose_name='taille du chargeur')),
                 ('burst_count', models.PositiveSmallIntegerField(default=0, verbose_name='munitions en rafale')),
                 ('range', models.PositiveSmallIntegerField(default=0, verbose_name='portée')),
