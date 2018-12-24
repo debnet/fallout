@@ -907,28 +907,28 @@ class Character(Entity, Stats):
         defender_armor = history.defender_armor = getattr(defender_armor_equipment, 'item', None)
         # Chance to hit
         attacker_skill = SKILL_THROWING if is_grenade else getattr(attacker_weapon, 'skill', SKILL_UNARMED)
-        attacker_hit_chance = getattr(self.stats, attacker_skill, 0)  # Base skill and min strength modifier
+        attacker_hit_chance = getattr(self.stats, attacker_skill, 0)  # Base skill
         attacker_hit_chance += [0, self.stats.one_hand_accuracy, self.stats.two_hands_accuracy][
-            getattr(attacker_weapon, 'hands', 0)]
-        attacker_hit_chance += min(MIN_STRENGTH_MALUS * (
+            getattr(attacker_weapon, 'hands', 0)]  # Accuracy modifier for one-hand or two-hands weapons
+        attacker_hit_chance += min(MIN_STRENGTH_MALUS * (  # Accuracy malus if below required strength
             self.stats.strength - getattr(attacker_weapon, 'min_strength', 0)), 0)
-        attacker_hit_chance += min(MIN_SKILL_MALUS * (
+        attacker_hit_chance += min(MIN_SKILL_MALUS * (  # Accuracy malus if below required skill
             getattr(self.stats, attacker_skill, 0) - getattr(attacker_weapon, 'min_skill', 0)), 0)
         attacker_range_type = 'burst_range' if is_burst else 'range'
         attacker_hit_range = 1 if attacker_skill == SKILL_UNARMED else max(
             getattr(attacker_weapon, attacker_range_type, 0) +
-            getattr(attacker_ammo, attacker_range_type, 0), 0)
+            getattr(attacker_ammo, attacker_range_type, 0), 0)  # Weapon/ammo range modifiers
         attacker_weapon_melee = getattr(attacker_weapon, 'is_melee', True)
         if not attacker_weapon_melee:
             attacker_weapon_throwable = is_grenade or getattr(attacker_weapon, 'is_throwable', False)
             attacker_range_stats = SPECIAL_STRENGTH if attacker_weapon_throwable else SPECIAL_PERCEPTION
-            attacker_hit_range += (2 * getattr(self.stats, attacker_range_stats, 0))
+            attacker_hit_range += (2 * getattr(self.stats, attacker_range_stats, 0))  # Range modifiers by PER
         attacker_hit_chance -= max(target_range - attacker_hit_range, 0) * FIGHT_RANGE_MALUS  # Range modifiers
         attacker_hit_chance += getattr(attacker_weapon, 'hit_chance_modifier', 0)  # Weapon hit chance modifier
         attacker_hit_chance += getattr(attacker_ammo, 'hit_chance_modifier', 0)  # Ammo hit chance modifier
         attacker_hit_chance *= getattr(attacker_weapon_equipment, 'condition', 1.0)  # Weapon condition
         defender_armor_class = getattr(defender_armor, 'armor_class', 0) + target.stats.armor_class
-        defender_armor_class *= max(1.0 + (
+        defender_armor_class *= max(1.0 + (  # Armor class modifiers by weapon/ammo
             getattr(attacker_weapon, 'armor_class_modifier', 0.0) +
             getattr(attacker_ammo, 'armor_class_modifier', 0.0)), 0.0)
         attacker_hit_chance -= defender_armor_class   # Defender armor class modifier
@@ -948,9 +948,9 @@ class Character(Entity, Stats):
         self.add_experience(max(target.level - target.level, 1) * XP_GAIN_FIGHT[history.success], save=False)
         if history.success:
             # Critical chance
-            critical_chance = getattr(self.stats, 'critical_chance', 0)
-            critical_chance += critical_modifier
-            critical_chance *= max(1.0 + (
+            critical_chance = getattr(self.stats, 'critical_chance', 0)  # Base critical chance
+            critical_chance += critical_modifier  # Critical chance modifiers by body part
+            critical_chance *= max(1.0 + (  # Critical chance modifiers by weapon/ammo
                 getattr(attacker_weapon, 'critical_modifier', 0.0) +
                 getattr(attacker_ammo, 'critical_modifier', 0.0)), 0.0)
             # Apply damage
@@ -962,15 +962,15 @@ class Character(Entity, Stats):
                     continue
                 damage += item.calculated_damage
             damage += self.stats.melee_damage if is_melee else 0
-            damage *= max(1.0 + (
+            damage *= max(1.0 + (  # Damage modifiers by weapon/ammo
                 getattr(attacker_weapon, 'damage_modifier', 0.0) +
                 getattr(attacker_ammo, 'damage_modifier', 0.0)), 0.0)
             if critical:
-                damage *= max(1.0 + (
+                damage *= max(1.0 + (  # Critical damage modifiers (in %) by weapon/ammo
                     getattr(attacker_weapon, 'critical_damage_modifier', 0.0) +
                     getattr(attacker_ammo, 'critical_damage_modifier', 0.0) +
                     ((self.stats.strength / 10.0) if is_melee else 0.0)), 1.0)
-                damage += (
+                damage += (  # Critical damage modifiers (in raw damage) by weapon/ammo
                     getattr(attacker_weapon, 'critical_damage', 0) +
                     getattr(attacker_ammo, 'critical_damage', 0))
             damage *= max(1.0 + self.stats.damage_modifier, 0.0)
@@ -1010,7 +1010,7 @@ class Character(Entity, Stats):
                 attacker_weapon_equipment.condition -= attacker_weapon_damage
             attacker_weapon_equipment.save()
         # Save character and return history
-        self.action_points -= ap_cost
+        self.action_points -= max(ap_cost, 0)
         if not is_burst:
             self.save()
         if log:

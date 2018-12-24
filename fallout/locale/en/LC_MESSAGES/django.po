@@ -926,7 +926,7 @@ msgid "portée en rafale"
 msgstr "burst range"
 
 msgid "modif. de précision"
-msgstr "precision modifier"
+msgstr "accuracy modifier"
 
 msgid "modif. d'absorption"
 msgstr "absorption modifier"
@@ -1208,10 +1208,10 @@ msgid "compteur de coups"
 msgstr "hit count"
 
 msgid "précision"
-msgstr "precision"
+msgstr "accuracy"
 
 msgid "jet de précision"
-msgstr "precision roll"
+msgstr "accuracy roll"
 
 msgid "touché ?"
 msgstr "hit?"
