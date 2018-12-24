@@ -67,7 +67,7 @@ SECONDARY_STATS = (
     (STATS_SEQUENCE, _("initiative")),
     (STATS_HEALING_RATE, _("taux de regénération")),
     (STATS_CRITICAL_CHANCE, _("chance de critique")),
-    (STATS_DAMAGE_THRESHOLD, _("seuil de dégâts")),
+    (STATS_DAMAGE_THRESHOLD, _("absorption de dégâts")),
     (STATS_DAMAGE_RESISTANCE, _("résistance aux dégâts")),
 )
 LIST_SECONDARY_STATS = dict(SECONDARY_STATS)
@@ -130,7 +130,7 @@ RESISTANCE_POISON = 'poison_resistance'
 RESISTANCE_RADIATION = 'radiation_resistance'
 RESISTANCES = (
     (RESISTANCE_NORMAL, _("résistance physique")),
-    (RESISTANCE_LASER, _("résistance au laser")),
+    (RESISTANCE_LASER, _("résistance aux lasers")),
     (RESISTANCE_PLASMA, _("résistance au plasma")),
     (RESISTANCE_EXPLOSIVE, _("résistance aux explosions")),
     (RESISTANCE_FIRE, _("résistance au feu")),
@@ -141,6 +141,38 @@ RESISTANCES = (
     (RESISTANCE_RADIATION, _("résistance aux radiations")),
 )
 LIST_RESISTANCES = dict(RESISTANCES)
+
+# Thresholds
+THRESHOLD_NORMAL = 'normal_threshold'
+THRESHOLD_LASER = 'laser_threshold'
+THRESHOLD_PLASMA = 'plasma_threshold'
+THRESHOLD_EXPLOSIVE = 'explosive_threshold'
+THRESHOLD_FIRE = 'fire_threshold'
+THRESHOLD_GAZ_CONTACT = 'gas_contact_threshold'
+THRESHOLD_GAZ_INHALED = 'gas_inhaled_threshold'
+THRESHOLD_ELECTRICITY = 'electricity_threshold'
+THRESHOLD_POISON = 'poison_threshold'
+THRESHOLD_RADIATION = 'radiation_threshold'
+THRESHOLDS = (
+    (THRESHOLD_NORMAL, _("absorption physique")),
+    (THRESHOLD_LASER, _("absorption des lasers")),
+    (THRESHOLD_PLASMA, _("absorption du plasma")),
+    (THRESHOLD_EXPLOSIVE, _("absorption des explosions")),
+    (THRESHOLD_FIRE, _("absorption du feu")),
+    (THRESHOLD_GAZ_CONTACT, _("absorption du gaz (contact)")),
+    (THRESHOLD_GAZ_INHALED, _("absorption du gaz (inhalé)")),
+    (THRESHOLD_ELECTRICITY, _("absorption de l'électricité")),
+    (THRESHOLD_POISON, _("absorption des poisons")),
+    (THRESHOLD_RADIATION, _("absorption des radiations")),
+)
+LIST_THRESHOLDS = dict(THRESHOLDS)
+
+ALL_RESISTANCES = []
+for resistance, threshold in zip(THRESHOLDS, RESISTANCES):
+    ALL_RESISTANCES.append(resistance)
+    ALL_RESISTANCES.append(threshold)
+ALL_RESISTANCES = tuple(ALL_RESISTANCES)
+LIST_ALL_RESISTANCES = dict(ALL_RESISTANCES)
 
 # Damage
 DAMAGE_NORMAL = 'normal'
@@ -188,6 +220,22 @@ DAMAGE_RESISTANCE = {
     DAMAGE_HEAL: None,
 }
 
+# Damage / threshold
+DAMAGE_THRESHOLD = {
+    DAMAGE_NORMAL: THRESHOLD_NORMAL,
+    DAMAGE_LASER: THRESHOLD_LASER,
+    DAMAGE_PLASMA: THRESHOLD_PLASMA,
+    DAMAGE_EXPLOSIVE: THRESHOLD_EXPLOSIVE,
+    DAMAGE_FIRE: THRESHOLD_FIRE,
+    DAMAGE_GAZ_CONTACT: THRESHOLD_GAZ_CONTACT,
+    DAMAGE_GAZ_INHALED: THRESHOLD_GAZ_INHALED,
+    DAMAGE_ELECTRICITY: THRESHOLD_ELECTRICITY,
+    DAMAGE_POISON: THRESHOLD_POISON,
+    DAMAGE_RADIATION: THRESHOLD_RADIATION,
+    DAMAGE_RAW: None,
+    DAMAGE_HEAL: None,
+}
+
 # Leveled stats
 HIT_POINTS_PER_LEVEL = 'hit_points_per_level'
 SKILL_POINTS_PER_LEVEL = 'skill_points_per_level'
@@ -208,18 +256,24 @@ ROLL_STATS = (
 # All statistics
 ALL_EDITABLE_STATS = ROLL_STATS + (
     (_("Statistiques secondaires"), SECONDARY_STATS),
-    (_("Résistances"), RESISTANCES),
     (_("Statistiques de niveau"), LEVELED_STATS),
+    (_("Résistances"), ALL_RESISTANCES),
 )
-
 ALL_STATS = ALL_EDITABLE_STATS + (
     (_("Etat général"), GENERAL_STATS),
 )
 
 # Lists of statistics
-EDITABLE_STATS = SPECIALS + SKILLS + SECONDARY_STATS + RESISTANCES + LEVELED_STATS
+EDITABLE_STATS = SPECIALS + SKILLS + SECONDARY_STATS + RESISTANCES + THRESHOLDS + LEVELED_STATS
 LIST_EDITABLE_STATS = dict(EDITABLE_STATS)
 LIST_ALL_STATS = dict(sum((stats for label, stats in ALL_STATS), ()))
+
+# Hands required for weapon
+HANDS = (
+    (0, _("aucune")),
+    (1, _("une main")),
+    (2, _("deux mains")),
+)
 
 # Item type
 ITEM_WEAPON = 'weapon'

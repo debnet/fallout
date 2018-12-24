@@ -5,19 +5,21 @@
         <div class="col-md-3 col-sm-6 mb-3">
             <div class="card h-100">
                 <div class="card-header">
-                    <small class="badge badge-dark">{{ character.level }}</small>
-                    {% if character.is_player %}
-                        <small class="badge badge-success">{% trans "PJ" %}</small>
-                    {% else %}
-                        <small class="badge badge-warning">{% trans "PNJ" %}</small>
-                    {% endif %}
-                    {% if character.health == 0 %}
-                        <small class="badge badge-danger">{% trans "KO" %}</small>
-                    {% elif campaign.current_character == character %}
-                        <small class="badge badge-info">{% trans "Actif" %}</small>
-                    {% endif %}
                     <span class="card-title"><a href="{% url 'fallout:character' character.id %}">{{ character.name }}</a></span>
                     {% if character.title %}<small class="card-subtitle mb-2 text-muted">{{ character.title }}</small>{% endif %}
+                    <div class="float-right">
+                        <small class="badge badge-dark align-middle">{{ character.level }}</small>
+                        {% if character.is_player %}
+                            <small class="badge badge-success align-middle">{% trans "PJ" %}</small>
+                        {% else %}
+                            <small class="badge badge-warning align-middle">{% trans "PNJ" %}</small>
+                        {% endif %}
+                        {% if character.health == 0 %}
+                            <small class="badge badge-danger align-middle">{% trans "KO" %}</small>
+                        {% elif campaign.current_character == character %}
+                            <small class="badge badge-info align-middle">{% trans "Actif" %}</small>
+                        {% endif %}
+                    </div>
                 </div>
                 <div class="card-body">
                     {% for code, label, lvalue, rvalue, class, rate in character.general_stats %}

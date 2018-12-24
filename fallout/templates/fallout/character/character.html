@@ -30,14 +30,14 @@
             </h4>
             <p class="lead">
                 {% if character.is_player %}
-                    <span class="badge badge-success">{% trans "PJ" %}</span>
+                    <span class="badge badge-success align-middle">{% trans "PJ" %}</span>
                 {% else %}
-                    <span class="badge badge-warning">{% trans "PNJ" %}</span>
+                    <span class="badge badge-warning align-middle">{% trans "PNJ" %}</span>
                 {% endif %}
                 {% if character.health == 0 %}
-                    <span class="badge badge-danger">{% trans "KO" %}</span>
+                    <span class="badge badge-danger align-middle">{% trans "KO" %}</span>
                 {% elif character.campaign.current_character == character %}
-                    <span class="badge badge-info">{% trans "Actif" %}</span>
+                    <span class="badge badge-info align-middle">{% trans "Actif" %}</span>
                 {% endif %}
                 <span class="font-weight-bold">{% trans "Niveau" %} {{ character.level }}</span>
                 {% if character.description %} {{ character.description }}{% endif %}

@@ -18,7 +18,7 @@
             {% endwith %}
         </div>
         <div class="col">
-            {% with code="other" label=_("Autres") stats=character.other_stats view=True %}
+            {% with code="other" label=_("Résistances") stats=character.resistances view=True %}
                 {% include "fallout/character/forms/stats.html" %}
             {% endwith %}
         </div>

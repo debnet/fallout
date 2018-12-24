@@ -30,7 +30,7 @@
                     <div class="card h-100">
                         <div class="card-header">
                             {% if loot.quantity > 1 %}
-                                <span class="badge badge-dark">{{ loot.quantity }}</span>
+                                <span class="badge badge-dark align-middle">{{ loot.quantity }}</span>
                             {% endif %}
                             <span class="card-title">{{ item.name }}</span>
                             {% if item.title %}<small class="card-subtitle mb-2 text-muted">{{ item.title }}</small>{% endif %}
@@ -46,10 +46,14 @@
                                 {% endif %}
                             {% endwith %}
                             <p class="card-text">
-                                <small class="badge badge-primary">{{ loot.charge|floatformat:2 }} {% trans "kg" %}</small>
-                                <small class="badge badge-warning">{{ loot.value|floatformat:2 }} {% trans "$" %}</small>
+                                <small class="badge badge-primary align-middle">
+                                    {{ loot.charge|floatformat:2 }} {% trans "kg" %}
+                                </small>
+                                <small class="badge badge-warning align-middle">
+                                    {{ loot.value|floatformat:2 }} {% trans "$" %}
+                                </small>
                                 {% for modifier in item.modifiers.all %}
-                                    <small class="badge {% if modifier.value > 0 %}badge-success{% else %}badge-danger{% endif %}">
+                                    <small class="badge {% if modifier.value > 0 %}badge-success{% else %}badge-danger{% endif %} align-middle">
                                         {% if modifier.value > 0 %}+{% endif %}{{ modifier.value }}
                                         {{ modifier.get_stats_display }}
                                     </small>

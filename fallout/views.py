@@ -240,6 +240,7 @@ def view_character(request, character_id):
                     messages.error(request, _("<strong>Erreur</strong> {error}").format(error=error))
         except Exception as error:
             messages.error(request, _("<strong>Erreur</strong> {error}").format(error=error))
+            raise
     # Données
     inventory, effects = character.inventory, character.effects
     rollstats = RollHistory.get_stats(character)

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-12-23 04:35+0100\n"
+"POT-Creation-Date: 2018-12-24 19:40+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -185,10 +185,10 @@ msgid "dégâts bruts"
 msgstr "raw damage"
 
 msgid "dégâts min."
-msgstr "min damage"
+msgstr "min. damage"
 
 msgid "dégâts max."
-msgstr "max damage"
+msgstr "max. damage"
 
 msgid "type de dégâts"
 msgstr "damage type"
@@ -266,13 +266,13 @@ msgid "chance"
 msgstr "luck"
 
 msgid "santé maximale"
-msgstr "max health"
+msgstr "max. health"
 
 msgid "points d'action max."
-msgstr "max action points"
+msgstr "max. action points"
 
 msgid "charge maximale"
-msgstr "max weight"
+msgstr "max. weight"
 
 msgid "esquive"
 msgstr "evasion"
@@ -289,7 +289,7 @@ msgstr "regeneration rate"
 msgid "chance de critique"
 msgstr "critical chance"
 
-msgid "seuil de dégâts"
+msgid "absorption de dégâts"
 msgstr "damage threshold"
 
 msgid "résistance aux dégâts"
@@ -358,7 +358,7 @@ msgstr "knowledge"
 msgid "résistance physique"
 msgstr "physical resistance"
 
-msgid "résistance au laser"
+msgid "résistance aux lasers"
 msgstr "laser resistance"
 
 msgid "résistance au plasma"
@@ -371,10 +371,10 @@ msgid "résistance au feu"
 msgstr "fire resistance"
 
 msgid "résistance au gaz (contact)"
-msgstr "contact gaz resistance"
+msgstr "contact gas resistance"
 
 msgid "résistance au gaz (inhalé)"
-msgstr "inhale gaz resistance"
+msgstr "inhaled gas resistance"
 
 msgid "résistance à l'électricité"
 msgstr "electricity resistance"
@@ -384,6 +384,36 @@ msgstr "poison resistance"
 
 msgid "résistance aux radiations"
 msgstr "radiation resistance"
+
+msgid "absorption physique"
+msgstr "physical threshold"
+
+msgid "absorption des lasers"
+msgstr "laser threshold"
+
+msgid "absorption du plasma"
+msgstr "plasma threshold"
+
+msgid "absorption des explosions"
+msgstr "explosive threshold"
+
+msgid "absorption du feu"
+msgstr "fire threshold"
+
+msgid "absorption du gaz (contact)"
+msgstr "contact gas threshold"
+
+msgid "absorption du gaz (inhalé)"
+msgstr "inhaled gas threshold"
+
+msgid "absorption de l'électricité"
+msgstr "electricity threshold"
+
+msgid "absorption des poisons"
+msgstr "explosive threshold"
+
+msgid "absorption des radiations"
+msgstr "radiation threshold"
 
 msgid "dégâts normaux"
 msgstr "normal damage"
@@ -401,10 +431,10 @@ msgid "dégâts de feu"
 msgstr "fire damage"
 
 msgid "dégâts de gaz (contact)"
-msgstr "contact gaz damage"
+msgstr "contact gas damage"
 
 msgid "dégâts de gaz (inhalé)"
-msgstr "inhale gaz damage"
+msgstr "inhaled gas damage"
 
 msgid "dégâts d'électricité"
 msgstr "electricity damage"
@@ -439,14 +469,23 @@ msgstr "Skills"
 msgid "Statistiques secondaires"
 msgstr "Secondary statistics"
 
-msgid "Résistances"
-msgstr "Resistances"
-
 msgid "Statistiques de niveau"
 msgstr "Level statistics"
 
+msgid "Résistances"
+msgstr "Resistances"
+
 msgid "Etat général"
 msgstr "General condition"
+
+msgid "aucune"
+msgstr "none"
+
+msgid "une main"
+msgstr "one hand"
+
+msgid "deux mains"
+msgstr "two hands"
 
 msgid "arme"
 msgstr "weapon"
@@ -691,11 +730,68 @@ msgstr "needs enabled?"
 msgid "campagnes"
 msgstr "campaigns"
 
+msgid "absorption normal"
+msgstr "normal absorption"
+
+msgid "résistance normal"
+msgstr "normal resistance"
+
+msgid "absorption laser"
+msgstr "laser absorption"
+
+msgid "résistance laser"
+msgstr "laser resistance"
+
+msgid "absorption plasma"
+msgstr "plasma absorption"
+
+msgid "résistance plasma"
+msgstr "plasme resistance"
+
+msgid "absorption explosifs"
+msgstr "explosive absorption"
+
+msgid "résistance explosifs"
+msgstr "explosive resistance"
+
+msgid "absorption feu"
+msgstr "fire absorption"
+
+msgid "résistance feu"
+msgstr "fire resistance"
+
+msgid "absorption gaz (contact)"
+msgstr "contact gas threshold"
+
+msgid "résistance gaz (contact)"
+msgstr "contact gas resistance"
+
+msgid "absorption gaz (inhalé)"
+msgstr "inhaled gas threshold"
+
+msgid "résistance gaz (inhalé)"
+msgstr "inhaled gas resistance"
+
+msgid "absorption électricité"
+msgstr "laser threshold"
+
+msgid "résistance électricité"
+msgstr "electricity resistance"
+
+msgid "absorption poison"
+msgstr "poison threshold"
+
+msgid "résistance poison"
+msgstr "poison resistance"
+
+msgid "rabsorption radiations"
+msgstr "laser threshold"
+
+msgid "résistance radiations"
+msgstr "radiation resistance"
+
 msgid "chances de critiques"
 msgstr "critical chance"
-
-msgid "absorption de dégâts"
-msgstr "damage absorption"
 
 msgid "Cette fonction ne peut être utilisée que par les statistiques."
 msgstr "This functon can only be used by statistics."
@@ -733,6 +829,9 @@ msgstr "active?"
 msgid "au repos ?"
 msgstr "resting?"
 
+msgid "stats calculées ?"
+msgstr "calculated stats?"
+
 msgid "regénération"
 msgstr "regeneration"
 
@@ -749,7 +848,7 @@ msgid "L'attaquant ne possède pas d'arme ou celle-ci ne permet pas d'attaque en
 msgstr "The attacker don't have any weapon or it cannot burst attack."
 
 msgid "Les bornes de dégâts min. et max. ne sont pas correctes."
-msgstr "Min and max bounds are not correct."
+msgstr "Min. and max. bounds are not correct."
 
 msgid "Ce personnage doit être préalablement enregistré avant d'être dupliqué."
 msgstr "This character must be saved before to be duplicated."
@@ -781,20 +880,26 @@ msgstr "weight"
 msgid "quête ?"
 msgstr "quest?"
 
-msgid "arme de mêlée ?"
-msgstr "melee?"
-
 msgid "jetable ?"
 msgstr "throwable?"
+
+msgid "arme de mêlée ?"
+msgstr "melee?"
 
 msgid "recharge unitaire ?"
 msgstr "single charge?"
 
+msgid "mains nécessaires"
+msgstr "required hands"
+
 msgid "compétence"
 msgstr "skill"
 
+msgid "compétence minimale"
+msgstr "minimum skill"
+
 msgid "force minimum"
-msgstr "min strength"
+msgstr "minimum strength"
 
 msgid "taille du chargeur"
 msgstr "clip size"
@@ -835,9 +940,6 @@ msgstr "targetted AP cost"
 msgid "coût PA rafale"
 msgstr "burst AP cost"
 
-msgid "dégâts mini."
-msgstr "min damage"
-
 msgid "modif. de dégâts"
 msgstr "damage modifier"
 
@@ -846,36 +948,6 @@ msgstr "critical damage"
 
 msgid "modif. dégâts critiques"
 msgstr "critical damage modifier"
-
-msgid "absorption normal"
-msgstr "normal absorption"
-
-msgid "résistance normal"
-msgstr "normal resistance"
-
-msgid "absorption laser"
-msgstr "laser absorption"
-
-msgid "résistance laser"
-msgstr "laser resistance"
-
-msgid "absorption plasma"
-msgstr "plasma absorption"
-
-msgid "résistance plasma"
-msgstr "plasme resistance"
-
-msgid "absorption explosifs"
-msgstr "explosive absorption"
-
-msgid "résistance explosifs"
-msgstr "explosive resistance"
-
-msgid "absorption feu"
-msgstr "fire absorption"
-
-msgid "résistance feu"
-msgstr "fire resistance"
 
 msgid "effets"
 msgstr "effects"
@@ -1031,16 +1103,16 @@ msgid "modèle"
 msgstr "model"
 
 msgid "nombre min."
-msgstr "min amount"
+msgstr "min. amount"
 
 msgid "nombre max."
-msgstr "max amount"
+msgstr "max. amount"
 
 msgid "état min."
-msgstr "min condition"
+msgstr "min. condition"
 
 msgid "état max."
-msgstr "max condition"
+msgstr "max. condition"
 
 msgid "objet de butin"
 msgstr "loot item"
@@ -1386,10 +1458,10 @@ msgid "valeur fixe"
 msgstr "fixed value"
 
 msgid "valeur min."
-msgstr "min value"
+msgstr "min. value"
 
 msgid "valeur max."
-msgstr "max value"
+msgstr "max. value"
 
 msgid "Retirer"
 msgstr "Unequip"

@@ -144,7 +144,7 @@ class CharacterAdmin(EntityAdmin):
     fieldsets = tuple([
         (_("Informations générales"), dict(
             fields=('name', 'title', 'description', 'image', 'thumbnail', 'race', 'level',
-                    'is_player', 'is_active', 'is_resting', ),
+                    'is_player', 'is_active', 'is_resting', 'has_stats', ),
             classes=('wide', ),
         )),
         (_("Informations techniques"), dict(
@@ -179,7 +179,7 @@ class CharacterAdmin(EntityAdmin):
         Surcharge du formulaire pour afficher les données réelles des statistiques pour chaque champ
         """
         form = super().get_form(request, obj, **kwargs)
-        if obj:
+        if obj and obj.has_stats:
             for field_name, field in form.base_fields.items():
                 value = getattr(obj.stats, field_name, None)
                 if value is None:
@@ -298,7 +298,7 @@ class ItemAdmin(EntityAdmin):
         )),
         (_("Armes uniquement"), dict(
             fields=(
-                'is_melee', 'is_throwable', 'is_single_charge', 'skill', 'min_strength',
+                'is_melee', 'is_throwable', 'is_single_charge', 'skill', 'min_skill', 'min_strength', 'hands',
                 'range', 'burst_range', 'clip_size', 'burst_count', 'hit_chance_modifier',
                 'threshold_modifier', 'threshold_rate_modifier', 'armor_class_modifier', 'resistance_modifier',
                 'ap_cost_reload', 'ap_cost_normal', 'ap_cost_target', 'ap_cost_burst',
@@ -307,21 +307,13 @@ class ItemAdmin(EntityAdmin):
         )),
         (_("Dégâts"), dict(
             fields=(
-                'damage_type', 'raw_damage', 'min_damage', 'max_damage',
-                'damage_modifier', 'critical_modifier',
-                'critical_damage', 'critical_damage_modifier',
+                'damage_type', 'raw_damage', 'min_damage', 'max_damage', 'damage_modifier',
+                'critical_modifier', 'critical_damage', 'critical_damage_modifier',
             ),
             classes=('wide', 'collapse', ),
         )),
         (_("Protections uniquement"), dict(
-            fields=(
-                'armor_class',
-                'normal_threshold', 'normal_resistance',
-                'laser_threshold', 'laser_resistance',
-                'plasma_threshold', 'plasma_resistance',
-                'explosive_threshold', 'explosive_resistance',
-                'fire_threshold', 'fire_resistance',
-            ),
+            fields=('armor_class', *LIST_ALL_RESISTANCES, ),
             classes=('wide', 'collapse', ),
         )),
         (_("Effets et munitions"), dict(
