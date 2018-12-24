@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-12-24 19:40+0100\n"
+"POT-Creation-Date: 2018-12-24 23:46+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -289,11 +289,23 @@ msgstr "regeneration rate"
 msgid "chance de critique"
 msgstr "critical chance"
 
+msgid "modificateur d'action"
+msgstr "action modifier"
+
+msgid "précision à une main"
+msgstr "one hand accuracy"
+
+msgid "précision à deux mains"
+msgstr "two hands accuracy"
+
 msgid "absorption de dégâts"
 msgstr "damage threshold"
 
 msgid "résistance aux dégâts"
 msgstr "damage resistance"
+
+msgid "modificateur de dégâts"
+msgstr "damage modifier"
 
 msgid "armes à feu légères"
 msgstr "small guns"

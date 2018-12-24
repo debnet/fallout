@@ -56,8 +56,12 @@ STATS_MELEE_DAMAGE = 'melee_damage'
 STATS_SEQUENCE = 'sequence'
 STATS_HEALING_RATE = 'healing_rate'
 STATS_CRITICAL_CHANCE = 'critical_chance'
+STATS_AP_COST_MODIFIER = 'ap_cost_modifier'
+STATS_ONE_HAND_ACCURACY = 'one_hand_accuracy'
+STATS_TWO_HANDS_ACCURACY = 'two_hands_accuracy'
 STATS_DAMAGE_THRESHOLD = 'damage_threshold'
 STATS_DAMAGE_RESISTANCE = 'damage_resistance'
+STATS_DAMAGE_MODIFIER = 'damage_modifier'
 SECONDARY_STATS = (
     (STATS_MAX_HEALTH, _("santé maximale")),
     (STATS_MAX_ACTION_POINTS, _("points d'action max.")),
@@ -67,8 +71,12 @@ SECONDARY_STATS = (
     (STATS_SEQUENCE, _("initiative")),
     (STATS_HEALING_RATE, _("taux de regénération")),
     (STATS_CRITICAL_CHANCE, _("chance de critique")),
+    (STATS_AP_COST_MODIFIER, _("modificateur d'action")),
+    (STATS_ONE_HAND_ACCURACY, _("précision à une main")),
+    (STATS_TWO_HANDS_ACCURACY, _("précision à deux mains")),
     (STATS_DAMAGE_THRESHOLD, _("absorption de dégâts")),
     (STATS_DAMAGE_RESISTANCE, _("résistance aux dégâts")),
+    (STATS_DAMAGE_MODIFIER, _("modificateur de dégâts")),
 )
 LIST_SECONDARY_STATS = dict(SECONDARY_STATS)
 

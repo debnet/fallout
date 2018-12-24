@@ -262,8 +262,12 @@ class Stats(Resistance):
     sequence = models.SmallIntegerField(default=0, verbose_name=_("initiative"))
     healing_rate = models.SmallIntegerField(default=0, verbose_name=_("taux de regénération"))
     critical_chance = models.SmallIntegerField(default=0, verbose_name=_("chances de critiques"))
+    ap_cost_modifier = models.SmallIntegerField(default=0, verbose_name=_("modificateur d'action"))
+    one_hand_accuracy = models.SmallIntegerField(default=0.0, verbose_name=_("précision à une main"))
+    two_hands_accuracy = models.SmallIntegerField(default=0.0, verbose_name=_("précision à deux mains"))
     damage_threshold = models.SmallIntegerField(default=0, verbose_name=_("absorption de dégâts"))
     damage_resistance = models.FloatField(default=0.0, verbose_name=_("résistance aux dégâts"))
+    damage_modifier = models.FloatField(default=0.0, verbose_name=_("modificateur de dégâts"))
     # Skills
     small_guns = models.SmallIntegerField(default=0, verbose_name=_("armes à feu légères"))
     big_guns = models.SmallIntegerField(default=0, verbose_name=_("armes à feu lourdes"))
@@ -882,6 +886,7 @@ class Character(Entity, Stats):
                 ap_cost_type = 'ap_cost_burst'
             ap_cost = getattr(attacker_weapon, ap_cost_type, None)
             ap_cost = ap_cost if ap_cost is not None else AP_COST_FIGHT
+            ap_cost += self.stats.ap_cost_modifier
             if ap_cost > self.action_points:
                 history.status = STATUS_NOT_ENOUGH_AP
         # Premature end of fight
@@ -903,6 +908,8 @@ class Character(Entity, Stats):
         # Chance to hit
         attacker_skill = SKILL_THROWING if is_grenade else getattr(attacker_weapon, 'skill', SKILL_UNARMED)
         attacker_hit_chance = getattr(self.stats, attacker_skill, 0)  # Base skill and min strength modifier
+        attacker_hit_chance += [0, self.stats.one_hand_accuracy, self.stats.two_hands_accuracy][
+            getattr(attacker_weapon, 'hands', 0)]
         attacker_hit_chance += min(MIN_STRENGTH_MALUS * (
             self.stats.strength - getattr(attacker_weapon, 'min_strength', 0)), 0)
         attacker_hit_chance += min(MIN_SKILL_MALUS * (
@@ -966,6 +973,7 @@ class Character(Entity, Stats):
                 damage += (
                     getattr(attacker_weapon, 'critical_damage', 0) +
                     getattr(attacker_ammo, 'critical_damage', 0))
+            damage *= max(1.0 + self.stats.damage_modifier, 0.0)
             damage = max(damage, 0.0)  # Avoid negative damage
             threshold_modifier = getattr(attacker_weapon, 'threshold_modifier', 0)
             threshold_modifier += getattr(attacker_ammo, 'threshold_modifier', 0)
