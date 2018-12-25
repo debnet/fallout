@@ -354,7 +354,7 @@ FIGHT_STATUS = (
     (STATUS_NOT_ENOUGH_AP, _("points d'action insuffisants")),
     (STATUS_NO_MORE_AMMO, _("munitions insuffisantes")),
     (STATUS_TARGET_DEAD, _("cible inconsciente")),
-    (STATUS_TARGET_KILLED, _("cible défaite")),
+    (STATUS_TARGET_KILLED, _("cible tuée")),
     (STATUS_WEAPON_BROKEN, _("arme défectueuse")),
 )
 LIST_FIGHT_STATUS = dict(FIGHT_STATUS)

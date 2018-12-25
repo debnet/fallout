@@ -571,7 +571,7 @@ msgstr "not enough ammunitions"
 msgid "cible inconsciente"
 msgstr "target KO"
 
-msgid "cible défaite"
+msgid "cible tuée"
 msgstr "target dead"
 
 msgid "arme défectueuse"
