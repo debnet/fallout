@@ -41,6 +41,8 @@ This project is Docker-ready if you already have Compose. Just type this command
 It provides a local instance listening in `http://127.0.0.1:8000` 
 with PostgreSQL and Redis as service.
 
+By default, the administrator account is `admin` with password `admin`.
+
 #### From Python
 
 Like any Django project, you can start a development webserver with this command line:
