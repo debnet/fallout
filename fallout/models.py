@@ -934,7 +934,7 @@ class Character(Entity, Stats):
         attacker_hit_chance += min(MIN_SKILL_MALUS * (  # Accuracy malus if below required skill
             getattr(self.stats, attacker_skill, 0) - getattr(attacker_weapon, 'min_skill', 0)), 0)
         attacker_range_type = 'burst_range' if is_burst else 'range'
-        attacker_hit_range = 1 if attacker_skill == SKILL_UNARMED else max(
+        attacker_hit_range = 1 if not attacker_weapon else max(
             getattr(attacker_weapon, attacker_range_type, 0) +
             getattr(attacker_ammo, attacker_range_type, 0), 0)  # Weapon/ammo range modifiers
         attacker_weapon_melee = getattr(attacker_weapon, 'is_melee', True)
@@ -952,10 +952,10 @@ class Character(Entity, Stats):
             getattr(attacker_ammo, 'armor_class_modifier', 0.0)), 0.0)
         attacker_hit_chance -= defender_armor_class   # Defender armor class modifier
         attacker_hit_chance += hit_modifier  # Other modifiers
-        if target_part:
-            attacker_hit_chance += melee_hit_modifier if attacker_skill == SKILL_UNARMED else ranged_hit_modifier
-        # Hit chance is null if attacker is melee/unarmed and target is farther than weapon range
         is_melee = attacker_skill in (SKILL_UNARMED, SKILL_MELEE_WEAPONS)
+        if target_part:
+            attacker_hit_chance += melee_hit_modifier if is_melee else ranged_hit_modifier
+        # Hit chance is null if attacker is melee/unarmed and target is farther than weapon range
         if target_range - attacker_hit_range > 0 and is_melee:
             attacker_hit_chance = 0
         history.hit_modifier = int(hit_modifier)
