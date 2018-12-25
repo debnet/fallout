@@ -807,6 +807,7 @@ class Character(Entity, Stats):
         :param log: Historise le combat ?
         :return: Liste d'historiques de combat
         """
+        assert targets, _("Une attaque en rafale doit cibler au moins un personnage.")
         histories = []
         if is_grenade:
             attacker_weapon_equipment = self.inventory.select_related('item').filter(slot=ITEM_GRENADE).first()
@@ -833,7 +834,22 @@ class Character(Entity, Stats):
                 histories.append(history)
                 if history.status in (STATUS_TARGET_DEAD, STATUS_TARGET_KILLED):
                     dead_targets.add(target)
+                # Premature end of burst: removing remaining ammo and degrading weapon condition
                 if history.stop_burst or len(targets) == len(dead_targets):
+                    attacker_remaining_ammo = (attacker_weapon.burst_count - hit + 1)
+                    if attacker_remaining_ammo > 0:
+                        attacker_ammo_equipment = self.inventory.select_related('item').filter(slot=ITEM_AMMO).first()
+                        attacker_ammo = getattr(attacker_weapon_equipment, 'item', None)
+                        attacker_remaining_ammo = min(attacker_ammo_equipment.quantity, attacker_remaining_ammo)
+                        attacker_ammo_equipment.quantity -= attacker_remaining_ammo
+                        attacker_ammo_equipment.save()
+                        if attacker_weapon.durability:
+                            attacker_weapon_damage = (
+                                attacker_remaining_ammo * (1.0 / attacker_weapon.durability) * (1.0 - (
+                                    getattr(attacker_weapon, 'condition_modifier', 0.0) +
+                                    getattr(attacker_ammo, 'condition_modifier', 0.0))))
+                            attacker_weapon_equipment.condition -= attacker_weapon_damage
+                            attacker_weapon_equipment.save()
                     break
                 target = None
         self.save()
