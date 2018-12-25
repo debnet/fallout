@@ -796,7 +796,7 @@ class Character(Entity, Stats):
             equipements.delete()
         return loots
 
-    def burst(self, targets: Iterable[Tuple['Character', int]], hit_modifier: int = 0,
+    def burst(self, targets: List[Tuple['Character', int]], hit_modifier: int = 0,
               is_grenade: bool = False, is_action: bool = True, log: bool = True) -> List['FightHistory']:
         """
         Permet de lancer une attaque en rafale sur un groupe d'ennemis
@@ -818,21 +818,24 @@ class Character(Entity, Stats):
                     target, is_burst=True, is_grenade=True, target_range=int(target_range),
                     hit_modifier=hit_modifier, is_action=is_action, hit=hit, log=log)
                 histories.append(history)
-                if history.stop_burst:
-                    break
         else:
             attacker_weapon_equipment = self.inventory.select_related('item').filter(slot=ITEM_WEAPON).first()
             attacker_weapon = getattr(attacker_weapon_equipment, 'item', None)
             assert attacker_weapon and attacker_weapon.burst_count != 0, _(
                 "L'attaquant ne possède pas d'arme ou celle-ci ne permet pas d'attaque en rafale.")
+            target, target_range, dead_targets = None, 0, set()
             for hit in range(attacker_weapon.burst_count):
-                target, target_range = choice(targets)
+                while not target or target in dead_targets:
+                    target, target_range = choice(targets)
                 history = self.fight(
                     target, is_burst=True, target_range=int(target_range),
                     hit_modifier=hit_modifier, is_action=is_action, hit=hit, log=log)
                 histories.append(history)
-                if history.stop_burst:
+                if history.status in (STATUS_TARGET_DEAD, STATUS_TARGET_KILLED):
+                    dead_targets.add(target)
+                if history.stop_burst or len(targets) == len(dead_targets):
                     break
+                target = None
         self.save()
         return histories
 
@@ -880,7 +883,7 @@ class Character(Entity, Stats):
         # Action points
         ap_cost = 0
         if is_action:
-            if not is_burst:
+            if not is_burst or is_grenade:
                 ap_cost_type = 'ap_cost_target' if target_part else 'ap_cost_normal'
             else:
                 ap_cost_type = 'ap_cost_burst'

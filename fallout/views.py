@@ -175,7 +175,7 @@ def view_character(request, character_id):
                         attacker=result.attacker, defender=result.defender, label=result.long_label))
             elif type == 'burst' and data.get('targets'):
                 results = character.burst(
-                    targets=zip(data.getlist('targets') or [], data.getlist('ranges') or []),
+                    targets=list(zip(data.getlist('targets') or [], data.getlist('ranges') or [])),
                     hit_modifier=int(data.get('hit_modifier') or 0),
                     is_grenade=bool(data.get('is_grenade', False)),
                     is_action=bool(data.get('is_action', False)))
