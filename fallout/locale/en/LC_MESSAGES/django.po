@@ -572,7 +572,7 @@ msgid "cible inconsciente"
 msgstr "target KO"
 
 msgid "cible tuée"
-msgstr "target dead"
+msgstr "target killed"
 
 msgid "arme défectueuse"
 msgstr "rigged weapon"
