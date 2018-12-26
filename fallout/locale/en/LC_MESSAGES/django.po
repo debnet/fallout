@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-12-25 02:01+0100\n"
+"POT-Creation-Date: 2018-12-26 11:04+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -382,12 +382,6 @@ msgstr "explosion resistance"
 msgid "résistance au feu"
 msgstr "fire resistance"
 
-msgid "résistance au gaz (contact)"
-msgstr "contact gas resistance"
-
-msgid "résistance au gaz (inhalé)"
-msgstr "inhaled gas resistance"
-
 msgid "résistance à l'électricité"
 msgstr "electricity resistance"
 
@@ -396,6 +390,12 @@ msgstr "poison resistance"
 
 msgid "résistance aux radiations"
 msgstr "radiation resistance"
+
+msgid "résistance au gaz (contact)"
+msgstr "contact gas resistance"
+
+msgid "résistance au gaz (inhalé)"
+msgstr "inhaled gas resistance"
 
 msgid "absorption physique"
 msgstr "physical threshold"
@@ -412,12 +412,6 @@ msgstr "explosive threshold"
 msgid "absorption du feu"
 msgstr "fire threshold"
 
-msgid "absorption du gaz (contact)"
-msgstr "contact gas threshold"
-
-msgid "absorption du gaz (inhalé)"
-msgstr "inhaled gas threshold"
-
 msgid "absorption de l'électricité"
 msgstr "electricity threshold"
 
@@ -426,6 +420,12 @@ msgstr "explosive threshold"
 
 msgid "absorption des radiations"
 msgstr "radiation threshold"
+
+msgid "absorption du gaz (contact)"
+msgstr "contact gas threshold"
+
+msgid "absorption du gaz (inhalé)"
+msgstr "inhaled gas threshold"
 
 msgid "dégâts normaux"
 msgstr "normal damage"
@@ -442,12 +442,6 @@ msgstr "explosive damage"
 msgid "dégâts de feu"
 msgstr "fire damage"
 
-msgid "dégâts de gaz (contact)"
-msgstr "contact gas damage"
-
-msgid "dégâts de gaz (inhalé)"
-msgstr "inhaled gas damage"
-
 msgid "dégâts d'électricité"
 msgstr "electricity damage"
 
@@ -456,6 +450,12 @@ msgstr "poison damage"
 
 msgid "dégâts de radiations"
 msgstr "radiation damage"
+
+msgid "dégâts de gaz (contact)"
+msgstr "contact gas damage"
+
+msgid "dégâts de gaz (inhalé)"
+msgstr "inhaled gas damage"
 
 msgid "dégâts directs"
 msgstr "direct damage"
@@ -772,18 +772,6 @@ msgstr "fire absorption"
 msgid "résistance feu"
 msgstr "fire resistance"
 
-msgid "absorption gaz (contact)"
-msgstr "contact gas threshold"
-
-msgid "résistance gaz (contact)"
-msgstr "contact gas resistance"
-
-msgid "absorption gaz (inhalé)"
-msgstr "inhaled gas threshold"
-
-msgid "résistance gaz (inhalé)"
-msgstr "inhaled gas resistance"
-
 msgid "absorption électricité"
 msgstr "laser threshold"
 
@@ -801,6 +789,18 @@ msgstr "laser threshold"
 
 msgid "résistance radiations"
 msgstr "radiation resistance"
+
+msgid "absorption gaz (contact)"
+msgstr "contact gas threshold"
+
+msgid "résistance gaz (contact)"
+msgstr "contact gas resistance"
+
+msgid "absorption gaz (inhalé)"
+msgstr "inhaled gas threshold"
+
+msgid "résistance gaz (inhalé)"
+msgstr "inhaled gas resistance"
 
 msgid "chances de critiques"
 msgstr "critical chance"

@@ -214,16 +214,16 @@ class Resistance(CommonModel):
     explosive_resistance = models.FloatField(default=0.0, verbose_name=_("résistance explosifs"))
     fire_threshold = models.SmallIntegerField(default=0, verbose_name=_("absorption feu"))
     fire_resistance = models.FloatField(default=0.0, verbose_name=_("résistance feu"))
-    gas_contact_threshold = models.SmallIntegerField(default=0, verbose_name=_("absorption gaz (contact)"))
-    gas_contact_resistance = models.FloatField(default=0.0, verbose_name=_("résistance gaz (contact)"))
-    gas_inhaled_threshold = models.SmallIntegerField(default=0, verbose_name=_("absorption gaz (inhalé)"))
-    gas_inhaled_resistance = models.FloatField(default=0.0, verbose_name=_("résistance gaz (inhalé)"))
     electricity_threshold = models.SmallIntegerField(default=0, verbose_name=_("absorption électricité"))
     electricity_resistance = models.FloatField(default=0.0, verbose_name=_("résistance électricité"))
     poison_threshold = models.SmallIntegerField(default=0, verbose_name=_("absorption poison"))
     poison_resistance = models.FloatField(default=0.0, verbose_name=_("résistance poison"))
     radiation_threshold = models.SmallIntegerField(default=0, verbose_name=_("rabsorption radiations"))
     radiation_resistance = models.FloatField(default=0.0, verbose_name=_("résistance radiations"))
+    gas_contact_threshold = models.SmallIntegerField(default=0, verbose_name=_("absorption gaz (contact)"))
+    gas_contact_resistance = models.FloatField(default=0.0, verbose_name=_("résistance gaz (contact)"))
+    gas_inhaled_threshold = models.SmallIntegerField(default=0, verbose_name=_("absorption gaz (inhalé)"))
+    gas_inhaled_resistance = models.FloatField(default=0.0, verbose_name=_("résistance gaz (inhalé)"))
 
     def get_threshold(self, damage_type: str = DAMAGE_NORMAL) -> int:
         """

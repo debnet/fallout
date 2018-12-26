@@ -131,22 +131,22 @@ RESISTANCE_LASER = 'laser_resistance'
 RESISTANCE_PLASMA = 'plasma_resistance'
 RESISTANCE_EXPLOSIVE = 'explosive_resistance'
 RESISTANCE_FIRE = 'fire_resistance'
-RESISTANCE_GAZ_CONTACT = 'gas_contact_resistance'
-RESISTANCE_GAZ_INHALED = 'gas_inhaled_resistance'
 RESISTANCE_ELECTRICITY = 'electricity_resistance'
 RESISTANCE_POISON = 'poison_resistance'
 RESISTANCE_RADIATION = 'radiation_resistance'
+RESISTANCE_GAZ_CONTACT = 'gas_contact_resistance'
+RESISTANCE_GAZ_INHALED = 'gas_inhaled_resistance'
 RESISTANCES = (
     (RESISTANCE_NORMAL, _("résistance physique")),
     (RESISTANCE_LASER, _("résistance aux lasers")),
     (RESISTANCE_PLASMA, _("résistance au plasma")),
     (RESISTANCE_EXPLOSIVE, _("résistance aux explosions")),
     (RESISTANCE_FIRE, _("résistance au feu")),
-    (RESISTANCE_GAZ_CONTACT, _("résistance au gaz (contact)")),
-    (RESISTANCE_GAZ_INHALED, _("résistance au gaz (inhalé)")),
     (RESISTANCE_ELECTRICITY, _("résistance à l'électricité")),
     (RESISTANCE_POISON, _("résistance aux poisons")),
     (RESISTANCE_RADIATION, _("résistance aux radiations")),
+    (RESISTANCE_GAZ_CONTACT, _("résistance au gaz (contact)")),
+    (RESISTANCE_GAZ_INHALED, _("résistance au gaz (inhalé)")),
 )
 LIST_RESISTANCES = dict(RESISTANCES)
 
@@ -156,22 +156,22 @@ THRESHOLD_LASER = 'laser_threshold'
 THRESHOLD_PLASMA = 'plasma_threshold'
 THRESHOLD_EXPLOSIVE = 'explosive_threshold'
 THRESHOLD_FIRE = 'fire_threshold'
-THRESHOLD_GAZ_CONTACT = 'gas_contact_threshold'
-THRESHOLD_GAZ_INHALED = 'gas_inhaled_threshold'
 THRESHOLD_ELECTRICITY = 'electricity_threshold'
 THRESHOLD_POISON = 'poison_threshold'
 THRESHOLD_RADIATION = 'radiation_threshold'
+THRESHOLD_GAZ_CONTACT = 'gas_contact_threshold'
+THRESHOLD_GAZ_INHALED = 'gas_inhaled_threshold'
 THRESHOLDS = (
     (THRESHOLD_NORMAL, _("absorption physique")),
     (THRESHOLD_LASER, _("absorption des lasers")),
     (THRESHOLD_PLASMA, _("absorption du plasma")),
     (THRESHOLD_EXPLOSIVE, _("absorption des explosions")),
     (THRESHOLD_FIRE, _("absorption du feu")),
-    (THRESHOLD_GAZ_CONTACT, _("absorption du gaz (contact)")),
-    (THRESHOLD_GAZ_INHALED, _("absorption du gaz (inhalé)")),
     (THRESHOLD_ELECTRICITY, _("absorption de l'électricité")),
     (THRESHOLD_POISON, _("absorption des poisons")),
     (THRESHOLD_RADIATION, _("absorption des radiations")),
+    (THRESHOLD_GAZ_CONTACT, _("absorption du gaz (contact)")),
+    (THRESHOLD_GAZ_INHALED, _("absorption du gaz (inhalé)")),
 )
 LIST_THRESHOLDS = dict(THRESHOLDS)
 
@@ -188,11 +188,11 @@ DAMAGE_LASER = 'laser'
 DAMAGE_PLASMA = 'plasma'
 DAMAGE_EXPLOSIVE = 'explosive'
 DAMAGE_FIRE = 'fire'
-DAMAGE_GAZ_CONTACT = 'gas_contact'
-DAMAGE_GAZ_INHALED = 'gas_inhaled'
 DAMAGE_ELECTRICITY = 'electricity'
 DAMAGE_POISON = 'poison'
 DAMAGE_RADIATION = 'radiation'
+DAMAGE_GAZ_CONTACT = 'gas_contact'
+DAMAGE_GAZ_INHALED = 'gas_inhaled'
 DAMAGE_RAW = 'raw'
 DAMAGE_HEAL = 'heal'
 DAMAGES_TYPES = (
@@ -201,11 +201,11 @@ DAMAGES_TYPES = (
     (DAMAGE_PLASMA, _("dégâts de plasma")),
     (DAMAGE_EXPLOSIVE, _("dégâts explosifs")),
     (DAMAGE_FIRE, _("dégâts de feu")),
-    (DAMAGE_GAZ_CONTACT, _("dégâts de gaz (contact)")),
-    (DAMAGE_GAZ_INHALED, _("dégâts de gaz (inhalé)")),
     (DAMAGE_ELECTRICITY, _("dégâts d'électricité")),
     (DAMAGE_POISON, _("dégâts de poison")),
     (DAMAGE_RADIATION, _("dégâts de radiations")),
+    (DAMAGE_GAZ_CONTACT, _("dégâts de gaz (contact)")),
+    (DAMAGE_GAZ_INHALED, _("dégâts de gaz (inhalé)")),
     (DAMAGE_RAW, _("dégâts directs")),
     (DAMAGE_HEAL, _("soins")),
 )
@@ -219,11 +219,11 @@ DAMAGE_RESISTANCE = {
     DAMAGE_PLASMA: RESISTANCE_PLASMA,
     DAMAGE_EXPLOSIVE: RESISTANCE_EXPLOSIVE,
     DAMAGE_FIRE: RESISTANCE_FIRE,
-    DAMAGE_GAZ_CONTACT: RESISTANCE_GAZ_CONTACT,
-    DAMAGE_GAZ_INHALED: RESISTANCE_GAZ_INHALED,
     DAMAGE_ELECTRICITY: RESISTANCE_ELECTRICITY,
     DAMAGE_POISON: RESISTANCE_POISON,
     DAMAGE_RADIATION: RESISTANCE_RADIATION,
+    DAMAGE_GAZ_CONTACT: RESISTANCE_GAZ_CONTACT,
+    DAMAGE_GAZ_INHALED: RESISTANCE_GAZ_INHALED,
     DAMAGE_RAW: None,
     DAMAGE_HEAL: None,
 }
@@ -235,11 +235,11 @@ DAMAGE_THRESHOLD = {
     DAMAGE_PLASMA: THRESHOLD_PLASMA,
     DAMAGE_EXPLOSIVE: THRESHOLD_EXPLOSIVE,
     DAMAGE_FIRE: THRESHOLD_FIRE,
-    DAMAGE_GAZ_CONTACT: THRESHOLD_GAZ_CONTACT,
-    DAMAGE_GAZ_INHALED: THRESHOLD_GAZ_INHALED,
     DAMAGE_ELECTRICITY: THRESHOLD_ELECTRICITY,
     DAMAGE_POISON: THRESHOLD_POISON,
     DAMAGE_RADIATION: THRESHOLD_RADIATION,
+    DAMAGE_GAZ_CONTACT: THRESHOLD_GAZ_CONTACT,
+    DAMAGE_GAZ_INHALED: THRESHOLD_GAZ_INHALED,
     DAMAGE_RAW: None,
     DAMAGE_HEAL: None,
 }
