@@ -1018,8 +1018,10 @@ class Character(Entity, Stats):
             target.apply_effects()  # Apply effects immediatly
         # Clip count & weapon condition
         if attacker_weapon_equipment and attacker_weapon:
-            if is_grenade or attacker_weapon.is_throwable and (not is_burst or not hit):
+            if is_grenade and (not is_burst or not hit):
                 attacker_weapon_equipment.quantity -= 1
+            elif not is_grenade and attacker_weapon.is_throwable:
+                attacker_weapon_equipment.drop(quantity=1, save=False)
             elif not attacker_weapon.is_melee:
                 attacker_weapon_equipment.clip_count -= 1
             if attacker_weapon.durability and not is_grenade and not attacker_weapon.is_throwable:
@@ -1537,10 +1539,11 @@ class Equipment(CommonModel):
             self.character.save()
         return self
 
-    def use(self, is_action: bool = False) -> List['CharacterEffect']:
+    def use(self, is_action: bool = False, save: bool = True) -> List['CharacterEffect']:
         """
         Permet d'utiliser un objet
         :param is_action: Consommera des points d'action
+        :param save: Sauvegardera la modification
         :return: Liste des effets
         """
         assert self.item.is_usable, _(
@@ -1555,17 +1558,19 @@ class Equipment(CommonModel):
                 character=self.character, effect=effect,
                 defaults=dict(start_date=None, end_date=None, next_date=None)))
         self.quantity -= 1
-        self.save()
+        if save:
+            self.save()
         if is_action:
             self.character.action_points -= AP_COST_USE
             self.character.save()
         return effects
 
-    def drop(self, quantity: int = 1, is_action: bool = False) -> 'Loot':
+    def drop(self, quantity: int = 1, is_action: bool = False, save: bool = True) -> 'Loot':
         """
         Permet de jeter un ou plusieurs objets
         :param quantity: Quantité
         :param is_action: Consommera des points d'action
+        :param save: Sauvegardera la modification
         :return: Butin
         """
         assert self.quantity >= quantity, _(
@@ -1576,16 +1581,18 @@ class Equipment(CommonModel):
             campaign=self.character.campaign, item=self.item,
             quantity=quantity, condition=self.condition)
         self.quantity -= quantity
-        self.save()
+        if save:
+            self.save()
         if is_action:
             self.character.action_points -= AP_COST_DROP
             self.character.save()
         return loot
 
-    def reload(self, is_action: bool = False) -> 'Equipment':
+    def reload(self, is_action: bool = False, save: bool = True) -> 'Equipment':
         """
         Permet de recharger une arme
         :param is_action: Consommera des points d'action
+        :param save: Sauvegardera la modification
         :return: Equipement
         """
         assert self.slot == ITEM_WEAPON and self.item.clip_size, _(
@@ -1604,25 +1611,28 @@ class Equipment(CommonModel):
             needed_ammo = min(self.item.clip_size - self.clip_count, ammo.quantity)
             self.clip_count += needed_ammo
         ammo.quantity -= needed_ammo
-        ammo.save()
+        if save:
+            ammo.save()
         self.save()
         if is_action:
             self.character.action_points -= self.item.ap_cost_reload
             self.character.save()
         return self
 
-    def repair(self, value: Union[int, float] = 100, is_action: bool = False) -> 'Equipment':
+    def repair(self, value: Union[int, float] = 100, is_action: bool = False, save: bool = True) -> 'Equipment':
         """
         Permet de réparer un équipement détérioré
         :param value: Valeur de réparation
         :param is_action: Consommera des points d'action
+        :param save: Sauvegardera la modification
         :return: Equipement
         """
         assert self.item.is_repairable, _("Cet objet n'est pas réparable.")
         assert not is_action or self.character.action_points >= AP_COST_REPAIR, _(
             "Le personnage ne possède plus assez de points d'actions pour réparer cet objet.")
         self.condition = (value / 100.0) if isinstance(value, int) else float(value)
-        self.save()
+        if save:
+            self.save()
         if is_action:
             self.character.action_points -= AP_COST_REPAIR
             self.character.save()
