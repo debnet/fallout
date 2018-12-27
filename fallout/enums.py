@@ -137,6 +137,7 @@ RESISTANCE_RADIATION = 'radiation_resistance'
 RESISTANCE_GAZ_CONTACT = 'gas_contact_resistance'
 RESISTANCE_GAZ_INHALED = 'gas_inhaled_resistance'
 RESISTANCES = (
+
     (RESISTANCE_NORMAL, _("résistance physique")),
     (RESISTANCE_LASER, _("résistance aux lasers")),
     (RESISTANCE_PLASMA, _("résistance au plasma")),
@@ -162,6 +163,7 @@ THRESHOLD_RADIATION = 'radiation_threshold'
 THRESHOLD_GAZ_CONTACT = 'gas_contact_threshold'
 THRESHOLD_GAZ_INHALED = 'gas_inhaled_threshold'
 THRESHOLDS = (
+
     (THRESHOLD_NORMAL, _("absorption physique")),
     (THRESHOLD_LASER, _("absorption des lasers")),
     (THRESHOLD_PLASMA, _("absorption du plasma")),
@@ -175,11 +177,16 @@ THRESHOLDS = (
 )
 LIST_THRESHOLDS = dict(THRESHOLDS)
 
-ALL_RESISTANCES = []
-for resistance, threshold in zip(THRESHOLDS, RESISTANCES):
-    ALL_RESISTANCES.append(resistance)
-    ALL_RESISTANCES.append(threshold)
-ALL_RESISTANCES = tuple(ALL_RESISTANCES)
+
+def mix_resistances():
+    resistances = []
+    for resistance, threshold in zip(THRESHOLDS, RESISTANCES):
+        resistances.append(resistance)
+        resistances.append(threshold)
+    return resistances
+
+
+ALL_RESISTANCES = tuple(mix_resistances())
 LIST_ALL_RESISTANCES = dict(ALL_RESISTANCES)
 
 # Damage
@@ -195,6 +202,10 @@ DAMAGE_GAZ_CONTACT = 'gas_contact'
 DAMAGE_GAZ_INHALED = 'gas_inhaled'
 DAMAGE_RAW = 'raw'
 DAMAGE_HEAL = 'heal'
+DAMAGE_HEAL_RAD = 'heal_rad'
+DAMAGE_THIRST = 'thirst'
+DAMAGE_HUNGER = 'hunger'
+DAMAGE_SLEEP = 'sleep'
 DAMAGES_TYPES = (
     (DAMAGE_NORMAL, _("dégâts normaux")),
     (DAMAGE_LASER, _("dégâts de laser")),
@@ -207,10 +218,15 @@ DAMAGES_TYPES = (
     (DAMAGE_GAZ_CONTACT, _("dégâts de gaz (contact)")),
     (DAMAGE_GAZ_INHALED, _("dégâts de gaz (inhalé)")),
     (DAMAGE_RAW, _("dégâts directs")),
-    (DAMAGE_HEAL, _("soins")),
+    (DAMAGE_HEAL, _("soins de santé")),
+    (DAMAGE_HEAL_RAD, _("soins de radiations")),
+    (DAMAGE_THIRST, _("altération de soif")),
+    (DAMAGE_HUNGER, _("altération de faim")),
+    (DAMAGE_SLEEP, _("altération de sommeil")),
 )
 LIST_DAMAGES_TYPES = dict(DAMAGES_TYPES)
 PHYSICAL_DAMAGES = (DAMAGE_NORMAL, DAMAGE_LASER, DAMAGE_PLASMA, DAMAGE_EXPLOSIVE, DAMAGE_FIRE)
+NO_DAMAGES = (DAMAGE_RAW, DAMAGE_HEAL, DAMAGE_HEAL_RAD, DAMAGE_THIRST, DAMAGE_HUNGER, DAMAGE_SLEEP)
 
 # Damage / resistance
 DAMAGE_RESISTANCE = {
@@ -226,6 +242,7 @@ DAMAGE_RESISTANCE = {
     DAMAGE_GAZ_INHALED: RESISTANCE_GAZ_INHALED,
     DAMAGE_RAW: None,
     DAMAGE_HEAL: None,
+    DAMAGE_HEAL_RAD: None,
 }
 
 # Damage / threshold
@@ -242,7 +259,22 @@ DAMAGE_THRESHOLD = {
     DAMAGE_GAZ_INHALED: THRESHOLD_GAZ_INHALED,
     DAMAGE_RAW: None,
     DAMAGE_HEAL: None,
+    DAMAGE_HEAL_RAD: None,
 }
+
+# Short labels for damage types
+DAMAGE_SHORTS = (
+    (DAMAGE_NORMAL, _("N")),
+    (DAMAGE_LASER, _("L")),
+    (DAMAGE_PLASMA, _("P")),
+    (DAMAGE_EXPLOSIVE, _("E")),
+    (DAMAGE_FIRE, _("F")),
+    (DAMAGE_ELECTRICITY, _("E")),
+    (DAMAGE_POISON, _("P")),
+    (DAMAGE_RADIATION, _("R")),
+    (DAMAGE_GAZ_CONTACT, _("GC")),
+    (DAMAGE_GAZ_INHALED, _("GI")),
+)
 
 # Leveled stats
 HIT_POINTS_PER_LEVEL = 'hit_points_per_level'

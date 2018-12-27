@@ -22,16 +22,16 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    {% for code, label, lvalue, rvalue, class, rate in character.general_stats %}
-                        {% with title=character.labels|get:code|default:"" %}
-                            {% if rate is not None %}
-                                <strong>{{ label }}</strong>
-                                <small class="text-muted">{{ lvalue|floatformat:0 }} / {{ rvalue|floatformat:0 }}</small>
+                    {% for s in character.general_stats %}
+                        {% with title=character.labels|get:s.code|default:"" %}
+                            {% if s.rate is not None %}
+                                <strong>{{ s.label }}</strong>
+                                <small class="text-muted">{{ s.lvalue|floatformat:0 }} / {{ s.rvalue|floatformat:0 }}</small>
                                 <div class="progress">
                                     {% localize off %}
-                                    <div class="progress-bar progress-bar-striped bg-{{ class }}" role="progressbar"
-                                         aria-valuenow="{{ lvalue }}" aria-valuemin="0" aria-valuemax="{{ rvalue }}"
-                                         style="width: {{ rate }}%" title="{{ title }}" data-toggle="tooltip" data-placement="top">
+                                    <div class="progress-bar progress-bar-striped bg-{{ s.css }}" role="progressbar"
+                                         aria-valuenow="{{ s.lvalue }}" aria-valuemin="0" aria-valuemax="{{ s.rvalue }}"
+                                         style="width: {{ s.rate }}%" title="{{ s.title }}" data-toggle="tooltip" data-placement="top">
                                     {% endlocalize %}
                                     </div>
                                 </div>

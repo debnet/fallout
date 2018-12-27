@@ -73,6 +73,42 @@
                                     <small class="font-weight-bold">{{ item.long_label_damage }}</small>
                                 </p>
                             {% endif %}
+                            {% comment %}
+                            {% with resistances=item.resistances %}
+                                {% if resistances %}
+                                    <div class="table-responsive">
+                                        <table class="table table-sm mb-0">
+                                            <thead class="thead-dark">
+                                                <tr>
+                                                    {% for resistance in resistances %}
+                                                        <th scope="col" class="text-center font-weight-bold"
+                                                            title="{{ resistance.long_label }}" data-toggle="tooltip" data-placement="bottom">
+                                                            {{ resistance.short_label }}
+                                                        </th>
+                                                    {% endfor %}
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    {% for resistance in resistances %}
+                                                        <td class="text-center">
+                                                            {{ resistance.threshold }}
+                                                        </td>
+                                                    {% endfor %}
+                                                </tr>
+                                                <tr>
+                                                    {% for resistance in resistances %}
+                                                        <td class="text-center">
+                                                            {{ resistance.resistance }}%
+                                                        </td>
+                                                    {% endfor %}
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                {% endif %}
+                            {% endwith %}
+                            {% endcomment %}
                         </div>
                         {% if authorized %}
                             <div class="card-footer">

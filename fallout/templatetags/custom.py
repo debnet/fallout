@@ -8,7 +8,7 @@ register = template.Library()
 @register.filter('range')
 def irange(stop, start=0):
     reverse = stop < start
-    return range(start, stop - 1 if reverse else stop + 1, -1 if reverse else 1)
+    return range(int(start), int(stop) - 1 if reverse else int(stop) + 1, -1 if reverse else 1)
 
 
 @register.filter('min')

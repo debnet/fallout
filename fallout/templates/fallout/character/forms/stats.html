@@ -18,28 +18,29 @@
                 </tr>
             {% endif %}
             {% for s in stats %}
-                {% with title=character.labels|get:s.0|default:"" modifier=character.stats.modifiers|get:s.0 %}
+                {% with title=character.labels|get:s.code|default:"" modifier=character.stats.modifiers|get:s.code %}
                 <tr>
                     <td>
                         <span {% if modifier %}title="{% if modifier > 0 %}+{% endif %}{{ modifier|default:"" }}" data-toggle="tooltip" data-placement="right"
                               class="{% if modifier > 0 %}text-success{% elif modifier < 0 %}text-danger{% endif %} pr-1"{% endif %}>
                             {% if modifier > 0 %}&blacktriangle;{% elif modifier < 0 %}&blacktriangledown;{% endif %}
-                            {% if s.0 in character.tag_skills %}<strong>{{ s.1 }}</strong>{% else %}{{ s.1 }}{% endif %}
+                            {% if s.code in character.tag_skills %}<strong>{{ s.label }}</strong>{% else %}{{ s.label }}{% endif %}
                         </span>
                     </td>
                     <td class="text-right">
                         {% if view or not authorized %}
-                            <strong class="text-{{ s.4|default:'dark' }}" title="{{ title }}" data-toggle="tooltip" data-placement="top">
-                                {{ s.2|floatformat:0 }}{% if s.3 is not None %}&nbsp;/&nbsp;{{ s.3|floatformat:0 }}{% endif %}
+                            <strong class="text-{{ s.css|default:'dark' }}" title="{{ title }}" data-toggle="tooltip" data-placement="top">
+                                {{ s.lvalue|floatformat:0 }}{% if s.rvalue is not None %}&nbsp;/&nbsp;{{ s.rvalue|floatformat:0 }}{% endif %}
+                                {% if s.end %}{{ s.end }}{% endif %}
                             </strong>
                         {% elif authorized %}
                             {% if levelup and character.skill_points > 0 %}
-                                <button class="btn btn-sm btn-dark" type="submit" name="levelup" value="{{ s.0 }}">
+                                <button class="btn btn-sm btn-dark" type="submit" name="levelup" value="{{ s.code }}">
                                     <strong>{% trans "+" %}</strong>
                                 </button>
                             {% endif %}
-                            <button class="btn btn-sm btn-{{ s.4 }} itiny" type="submit" name="roll" value="{{ s.0 }}">
-                                <strong>{{ s.2|floatformat:0 }}</strong>
+                            <button class="btn btn-sm btn-{{ s.css }} itiny" type="submit" name="roll" value="{{ s.code }}">
+                                <strong>{{ s.lvalue|floatformat:0 }}</strong>
                             </button>
                         {% endif %}
                     </td>

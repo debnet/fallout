@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-12-26 11:04+0100\n"
+"POT-Creation-Date: 2018-12-27 03:05+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -460,8 +460,44 @@ msgstr "inhaled gas damage"
 msgid "dégâts directs"
 msgstr "direct damage"
 
-msgid "soins"
-msgstr "heal"
+msgid "soins de santé"
+msgstr "health cure"
+
+msgid "soins de radiations"
+msgstr "radiation cure"
+
+msgid "altération de soif"
+msgstr "thirst alteration"
+
+msgid "altération de faim"
+msgstr "hunger alteration"
+
+msgid "altération de sommeil"
+msgstr "sleep alteration"
+
+msgid "N"
+msgstr "N"
+
+msgid "L"
+msgstr "L"
+
+msgid "P"
+msgstr "P"
+
+msgid "E"
+msgstr "E"
+
+msgid "F"
+msgstr "F"
+
+msgid "R"
+msgstr "R"
+
+msgid "GC"
+msgstr "GC"
+
+msgid "GI"
+msgstr "GI"
 
 msgid "santé par niveau"
 msgstr "health by level"
@@ -896,10 +932,13 @@ msgid "quête ?"
 msgstr "quest?"
 
 msgid "jetable ?"
-msgstr "throwable?"
+msgstr "droppable?"
 
 msgid "arme de mêlée ?"
-msgstr "melee?"
+msgstr "melee weapon?"
+
+msgid "arme de lancé ?"
+msgstr "throwable weapon?"
 
 msgid "recharge unitaire ?"
 msgstr "single charge?"
@@ -1051,11 +1090,17 @@ msgstr "equipments"
 msgid "durée"
 msgstr "duration"
 
+msgid "appliquer ?"
+msgstr "apply?"
+
 msgid "intervalle"
 msgstr "interval"
 
 msgid "effet suivant"
 msgstr "next effect"
+
+msgid "effet annulé"
+msgstr "canceled effect"
 
 msgid "Le personnage doit faire partie d'une campagne pour lui appliquer un effet sur la durée."
 msgstr "This character must be in a campaign in order to apply an effect on him."

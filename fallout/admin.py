@@ -133,7 +133,7 @@ class StatsAdmin(CommonAdmin):
         return super().get_queryset(request).select_related('character__campaign')
 
     def get_list_display(self, request):
-        return 'character_name', 'campaign_name',
+        return 'character_name', 'campaign_name', 'date', 'obsolete'
 
 
 @admin.register(Character)
@@ -291,8 +291,8 @@ class ItemAdmin(EntityAdmin):
     fieldsets = (
         (_("Informations générales"), dict(
             fields=(
-                'name', 'title', 'description', 'image', 'thumbnail', 'type',
-                'value', 'weight', 'durability', 'condition_modifier', 'is_quest',
+                'name', 'title', 'description', 'image', 'thumbnail', 'type', 'value', 'weight',
+                'durability', 'condition_modifier', 'is_quest', 'is_droppable',
             ),
             classes=('wide', ),
         )),
@@ -382,23 +382,24 @@ class EffectAdmin(EntityAdmin):
     """
     fieldsets = (
         (_("Informations générales"), dict(
-            fields=('name', 'title', 'description', 'image', 'thumbnail', 'chance', 'duration', ),
+            fields=(
+                'name', 'title', 'description', 'image', 'thumbnail',
+                'chance', 'duration', 'next_effect', 'cancel_effect', ),
             classes=('wide', ),
         )),
         (_("Dégâts temporels"), dict(
-            fields=(
-                'interval', 'damage_chance', 'damage_type', 'raw_damage',
-                'min_damage', 'max_damage', 'next_effect', ),
+            fields=('apply', 'interval', 'damage_chance', 'damage_type', 'raw_damage', 'min_damage', 'max_damage', ),
             classes=('wide', 'collapse', ),
         )),
     )
     inlines = [EffectModifierInline]
     list_display_links = ('name', )
-    list_display = ('name', )
+    list_display = ('name', 'chance', 'duration', 'next_effect', 'cancel_effect', )
     list_editable = ()
     list_filter = ()
     search_fields = ('name', 'title', 'description', )
     ordering = ('name', )
+    autocomplete_fields = ('next_effect', 'cancel_effect', )
     actions = ('duplicate', )
     save_on_top = True
     actions_on_bottom = True

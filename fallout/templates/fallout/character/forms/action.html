@@ -14,7 +14,7 @@
                 </td>
                 <td class="text-right">
                     <select class="form-control form-control-sm custom-select imedium" id="{{ code }}-hp" name="hp">
-                        {% for i in character.stats.max_health|range:0 %}
+                        {% for i in 0|range:character.stats.max_health %}
                             {% if i == character.health %}
                                 <option value="{{ i }}" selected>{{ i }} *</option>
                             {% else %}
@@ -30,7 +30,7 @@
                 </td>
                 <td class="text-right">
                     <select class="form-control form-control-sm custom-select imedium" id="{{ code }}-ap" name="ap">
-                        {% for i in character.stats.max_action_points|range:0 %}
+                        {% for i in 0|range:character.stats.max_action_points %}
                             {% if i == character.action_points %}
                                 <option value="{{ i }}" selected>{{ i }} *</option>
                             {% else %}

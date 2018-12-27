@@ -1,5 +1,5 @@
 # coding: utf-8
-from collections import OrderedDict as odict
+from collections import OrderedDict as odict, namedtuple
 from datetime import datetime, timedelta
 from random import randint, choice
 from typing import Dict, Iterable, List, Optional, Tuple, Union
@@ -205,25 +205,25 @@ class Resistance(CommonModel):
     Résistances
     """
     normal_threshold = models.SmallIntegerField(default=0, verbose_name=_("absorption normal"))
-    normal_resistance = models.FloatField(default=0.0, verbose_name=_("résistance normal"))
+    normal_resistance = models.SmallIntegerField(default=0.0, verbose_name=_("résistance normal"))
     laser_threshold = models.SmallIntegerField(default=0, verbose_name=_("absorption laser"))
-    laser_resistance = models.FloatField(default=0.0, verbose_name=_("résistance laser"))
+    laser_resistance = models.SmallIntegerField(default=0.0, verbose_name=_("résistance laser"))
     plasma_threshold = models.SmallIntegerField(default=0, verbose_name=_("absorption plasma"))
-    plasma_resistance = models.FloatField(default=0.0, verbose_name=_("résistance plasma"))
+    plasma_resistance = models.SmallIntegerField(default=0.0, verbose_name=_("résistance plasma"))
     explosive_threshold = models.SmallIntegerField(default=0, verbose_name=_("absorption explosifs"))
-    explosive_resistance = models.FloatField(default=0.0, verbose_name=_("résistance explosifs"))
+    explosive_resistance = models.SmallIntegerField(default=0.0, verbose_name=_("résistance explosifs"))
     fire_threshold = models.SmallIntegerField(default=0, verbose_name=_("absorption feu"))
-    fire_resistance = models.FloatField(default=0.0, verbose_name=_("résistance feu"))
+    fire_resistance = models.SmallIntegerField(default=0.0, verbose_name=_("résistance feu"))
     electricity_threshold = models.SmallIntegerField(default=0, verbose_name=_("absorption électricité"))
-    electricity_resistance = models.FloatField(default=0.0, verbose_name=_("résistance électricité"))
+    electricity_resistance = models.SmallIntegerField(default=0.0, verbose_name=_("résistance électricité"))
     poison_threshold = models.SmallIntegerField(default=0, verbose_name=_("absorption poison"))
-    poison_resistance = models.FloatField(default=0.0, verbose_name=_("résistance poison"))
+    poison_resistance = models.SmallIntegerField(default=0.0, verbose_name=_("résistance poison"))
     radiation_threshold = models.SmallIntegerField(default=0, verbose_name=_("rabsorption radiations"))
-    radiation_resistance = models.FloatField(default=0.0, verbose_name=_("résistance radiations"))
+    radiation_resistance = models.SmallIntegerField(default=0.0, verbose_name=_("résistance radiations"))
     gas_contact_threshold = models.SmallIntegerField(default=0, verbose_name=_("absorption gaz (contact)"))
-    gas_contact_resistance = models.FloatField(default=0.0, verbose_name=_("résistance gaz (contact)"))
+    gas_contact_resistance = models.SmallIntegerField(default=0.0, verbose_name=_("résistance gaz (contact)"))
     gas_inhaled_threshold = models.SmallIntegerField(default=0, verbose_name=_("absorption gaz (inhalé)"))
-    gas_inhaled_resistance = models.FloatField(default=0.0, verbose_name=_("résistance gaz (inhalé)"))
+    gas_inhaled_resistance = models.SmallIntegerField(default=0.0, verbose_name=_("résistance gaz (inhalé)"))
 
     def get_threshold(self, damage_type: str = DAMAGE_NORMAL) -> int:
         """
@@ -235,7 +235,7 @@ class Resistance(CommonModel):
         """
         Récupère la résistance aux dégâts d'un type
         """
-        return getattr(self, damage_type + '_resistance', 0.0)
+        return getattr(self, damage_type + '_resistance', 0) / 100.0
 
     class Meta:
         abstract = True
@@ -266,8 +266,8 @@ class Stats(Resistance):
     one_hand_accuracy = models.SmallIntegerField(default=0.0, verbose_name=_("précision à une main"))
     two_hands_accuracy = models.SmallIntegerField(default=0.0, verbose_name=_("précision à deux mains"))
     damage_threshold = models.SmallIntegerField(default=0, verbose_name=_("absorption de dégâts"))
-    damage_resistance = models.FloatField(default=0.0, verbose_name=_("résistance aux dégâts"))
-    damage_modifier = models.FloatField(default=0.0, verbose_name=_("modificateur de dégâts"))
+    damage_resistance = models.SmallIntegerField(default=0.0, verbose_name=_("résistance aux dégâts"))
+    damage_modifier = models.SmallIntegerField(default=0.0, verbose_name=_("modificateur de dégâts"))
     # Skills
     small_guns = models.SmallIntegerField(default=0, verbose_name=_("armes à feu légères"))
     big_guns = models.SmallIntegerField(default=0, verbose_name=_("armes à feu lourdes"))
@@ -407,6 +407,10 @@ class Statistics(Stats):
         verbose_name_plural = _("statistiques")
 
 
+# Tuple pour les données des statistiques
+StatInfo = namedtuple('StatInfo', ('code', 'label', 'lvalue', 'rvalue', 'css', 'rate', 'end'))
+
+
 class Character(Entity, Stats):
     """
     Personnage
@@ -502,7 +506,7 @@ class Character(Entity, Stats):
                 Q(end_date__isnull=True) | Q(end_date__gte=F('character__campaign__current_game_date')))
         return self._effects
 
-    def _get_stats(self, stats: List[Tuple[str, str]], from_stats: bool = True) -> List[Tuple[str, str, Union[int, float]]]:
+    def _get_stats(self, stats: List[Tuple[str, str]], from_stats: bool = True) -> Iterable[Tuple[str, str, Union[int, float]]]:
         """
         Fonction interne pour retourner les valeurs des statistiques ciblées
         :param stats: Tuple de statistiques (code, libellé)
@@ -513,23 +517,23 @@ class Character(Entity, Stats):
             yield code, label, getattr(self.stats if from_stats else self, code, 0)
 
     @property
-    def special(self) -> List[Tuple[str, str, Union[int, float]]]:
+    def special(self) -> Iterable[StatInfo]:
         """
         Retourne le S.P.E.C.I.A.L.
         """
         for code, label, value in self._get_stats(SPECIALS):
-            yield code, label, value, None, get_class(value, maximum=10)
+            yield StatInfo(code, label, value, None, get_class(value, maximum=10), None, None)
 
     @property
-    def skills(self) -> List[Tuple[str, str, Union[int, float]]]:
+    def skills(self) -> Iterable[StatInfo]:
         """
         Retourne les compétences
         """
         for code, label, value in self._get_stats(SKILLS):
-            yield code, label, value, None, get_class(value, maximum=100)
+            yield StatInfo(code, label, value, None, get_class(value, maximum=100), None, None)
 
     @property
-    def general_stats(self) -> List[Tuple[str, str, Union[int, float], Optional[Union[int, float]], Optional[str], Optional[float]]]:
+    def general_stats(self) -> Iterable[StatInfo]:
         """
         Retourne les statistiques générales
         :return: code, label, valeur à gauche, valeur à droite, classe, taux
@@ -550,37 +554,40 @@ class Character(Entity, Stats):
                 lvalue = self.used_skill_points
             elif code == STATS_EXPERIENCE:
                 charge, carry_weight = self.stats.charge, self.stats.carry_weight
-                yield (STATS_CARRY_WEIGHT, _("charge"), charge, carry_weight,
-                       get_class(charge, carry_weight, reverse=True), (charge / carry_weight * 100.0))
+                yield StatInfo(
+                    STATS_CARRY_WEIGHT, _("charge"), charge, carry_weight,
+                    get_class(charge, carry_weight, reverse=True), (charge / carry_weight * 100.0), None)
                 rvalue = self.required_experience
             elif code in LIST_NEEDS:
                 rvalue = 1000
                 classes = ('primary', 'success', 'warning', 'danger', 'muted', 'muted')
                 values = (1.000, 0.800, 0.600, 0.400, 0.200, 0.000)
                 rclass = get_class(lvalue, rvalue, reverse=True, classes=classes, values=values)
-            yield code, label, lvalue, rvalue, rclass, ((lvalue / rvalue) * 100.0) if rvalue else None
+            rate = ((lvalue / rvalue) * 100.0) if rvalue else None
+            yield StatInfo(code, label, lvalue, rvalue, rclass, rate, None)
         # Secondary stats
-        for code, label, value in self.secondary_stats:
-            if code in (STATS_MAX_HEALTH, STATS_MAX_ACTION_POINTS, STATS_CARRY_WEIGHT):
+        for statinfo in self.secondary_stats:
+            if statinfo.code in (STATS_MAX_HEALTH, STATS_MAX_ACTION_POINTS, STATS_CARRY_WEIGHT):
                 continue
-            yield code, label, value if isinstance(value, int) else value * 100, None, None, None
+            yield statinfo
 
     @property
-    def secondary_stats(self) -> List[Tuple[str, str, Union[int, float]]]:
+    def secondary_stats(self) -> Iterable[StatInfo]:
         """
         Retourne les statistiques secondaires
         """
         for code, label, value in self._get_stats(SECONDARY_STATS):
-            yield code, label, value
+            yield StatInfo(code, label, value, None, None, None, None)
 
     @property
-    def resistances(self) -> List[Tuple[str, str, Union[int, float]]]:
+    def resistances(self) -> Iterable[StatInfo]:
         """
         Retourne les résistances
         """
-        for code, label, value in self._get_stats(ALL_RESISTANCES):
-            value, maximum = (value, None) if isinstance(value, int) else (value * 100, 100)
-            yield code, label, value, None, get_class(value, maximum=maximum)
+        for threshold, resistance in zip(self._get_stats(THRESHOLDS), self._get_stats(RESISTANCES)):
+            (code_t, label_t, value_t), (code_r, label_r, value_r) = threshold, resistance
+            yield StatInfo(code_t, label_t, value_t, None, None, None, None)
+            yield StatInfo(code_r, label_r, value_r, None, None, None, '%')
 
     @property
     def used_skill_points(self) -> float:
@@ -992,7 +999,7 @@ class Character(Entity, Stats):
                 damage += (  # Critical damage modifiers (in raw damage) by weapon/ammo
                     getattr(attacker_weapon, 'critical_damage', 0) +
                     getattr(attacker_ammo, 'critical_damage', 0))
-            damage *= max(1.0 + self.stats.damage_modifier, 0.0)
+            damage *= max(1.0 + (self.stats.damage_modifier / 100.0), 0.0)
             damage = max(damage, 0.0)  # Avoid negative damage
             threshold_modifier = getattr(attacker_weapon, 'threshold_modifier', 0)
             threshold_modifier += getattr(attacker_ammo, 'threshold_modifier', 0)
@@ -1013,7 +1020,7 @@ class Character(Entity, Stats):
             for item in (attacker_weapon, attacker_ammo, defender_armor):
                 if not item:
                     continue
-                for effect in item.effects.all():
+                for effect in item.effects.select_related('next_effect', 'cancel_effect').all():
                     effect.affect(target)
             target.apply_effects()  # Apply effects immediatly
         # Clip count & weapon condition
@@ -1069,7 +1076,7 @@ class Character(Entity, Stats):
         if damage_type != DAMAGE_HEAL and self.health <= 0:
             return history
         damage_threshold, damage_resistance = 0, 0.0
-        if damage_type not in (DAMAGE_RAW, DAMAGE_HEAL):
+        if damage_type not in NO_DAMAGES:
             # Armor threshold and resistance
             armor_slot = ITEM_HELMET if damage_type == DAMAGE_GAZ_INHALED or (body_part in (PART_EYES, PART_HEAD)) else ITEM_ARMOR
             armor_equipment = self.inventory.select_related('item').filter(slot=armor_slot).first()
@@ -1100,18 +1107,24 @@ class Character(Entity, Stats):
             damage_resistance = self.stats.get_resistance(damage_type)
             if damage_type in PHYSICAL_DAMAGES:
                 damage_threshold += self.stats.damage_threshold
-                damage_resistance += self.stats.damage_resistance
+                damage_resistance += (self.stats.damage_resistance / 100.0)
             damage_threshold += threshold_modifier
             damage_threshold *= threshold_rate_modifier
             damage_resistance += resistance_modifier
-        total_damage *= (-1.0 if damage_type == DAMAGE_HEAL else 1.0)
+        total_damage *= (-1.0 if damage_type in (DAMAGE_HEAL, DAMAGE_HEAL_RAD) else 1.0)
         total_damage -= max(damage_threshold, 0)
         total_damage *= max(1.0 - min(damage_resistance, 1.0), 0.0)
         total_damage = round(total_damage)
         # Apply damage on self
         if total_damage:
-            if damage_type == DAMAGE_RADIATION:
+            if damage_type in (DAMAGE_RADIATION, DAMAGE_HEAL_RAD):
                 self.rads += total_damage
+            elif damage_type == DAMAGE_THIRST:
+                self.thirst += total_damage
+            elif damage_type == DAMAGE_HUNGER:
+                self.hunger += total_damage
+            elif damage_type == DAMAGE_SLEEP:
+                self.sleep += total_damage
             else:
                 self.health -= total_damage
             if save:
@@ -1156,11 +1169,11 @@ class Character(Entity, Stats):
         self.save(force_insert=True)
         if equipments:
             for equipment in Equipment.objects.filter(character_id=character_id):
-                equipment.character_id = self.pk
+                equipment.pk, equipment.id, equipment.character_id = None, None, self.pk
                 equipment.save(force_insert=True)
         if effects:
             for effect in CharacterEffect.objects.filter(character_id=character_id):
-                effect.character_id = self.pk
+                effect.pk, effect.id, effect.character_id = None, None, self.pk
                 effect.save(force_insert=True)
         return self
 
@@ -1299,6 +1312,11 @@ class Damage(CommonModel):
         abstract = True
 
 
+# Tuple pour les données des résistances/absorptions
+ResistanceInfo = namedtuple('ResistanceInfo', (
+    'code', 'short_label', 'long_label', 'threshold', 'resistance', 'css_threshold', 'css_resistance'))
+
+
 class Item(Entity, Resistance, Damage):
     """
     Objet
@@ -1318,7 +1336,7 @@ class Item(Entity, Resistance, Damage):
     is_droppable = models.BooleanField(default=True, verbose_name=_("jetable ?"))
     # Weapon specific
     is_melee = models.BooleanField(default=False, verbose_name=_("arme de mêlée ?"))
-    is_throwable = models.BooleanField(default=False, verbose_name=_("jetable ?"))
+    is_throwable = models.BooleanField(default=False, verbose_name=_("arme de lancé ?"))
     is_single_charge = models.BooleanField(default=False, verbose_name=_("recharge unitaire ?"))
     hands = models.PositiveSmallIntegerField(default=0, choices=HANDS, verbose_name=_("mains nécessaires"))
     skill = models.CharField(max_length=20, blank=True, choices=SKILLS, verbose_name=_("compétence"))
@@ -1374,6 +1392,21 @@ class Item(Entity, Resistance, Damage):
         """
         return self.type in (ITEM_ARMOR, ITEM_HELMET, ITEM_WEAPON) and not self.is_throwable
 
+    @property
+    def resistances(self) -> List[ResistanceInfo]:
+        """
+        Retourne les résistances de l'armure
+        :return: code, libellé court, libellé long, absorption, résistance, CSS absorption, CSS résistance
+        """
+        resistances = []
+        for code, label in DAMAGE_SHORTS:
+            threshold, resistance = self.get_threshold(code), int(round(self.get_resistance(code) * 100))
+            if threshold or resistance:
+                resistances.append(ResistanceInfo(
+                    code, label, LIST_DAMAGES_TYPES.get(code), threshold, resistance,
+                    get_class(threshold, 20), get_class(resistance, 100)))
+        return resistances
+
     def duplicate(self) -> 'Item':
         """
         Duplique cet objet
@@ -1385,7 +1418,7 @@ class Item(Entity, Resistance, Damage):
         self.name = f"*{self.name}"
         self.save(force_insert=True)
         for modifier in ItemModifier.objects.filter(item_id=item_id):
-            modifier.item_id = self.pk
+            modifier.pk, modifier.id, modifier.item_id = None, None, self.pk
             modifier.save(force_insert=True)
         self.effects.add(*effects)
         self.ammunitions.add(*ammunitions)
@@ -1554,9 +1587,7 @@ class Equipment(CommonModel):
             "Le personnage doit posséder au moins un exemplaire de cet objet pour l'utiliser.")
         effects = []
         for effect in self.item.effects.all():
-            effects.append(CharacterEffect.objects.update_or_create(
-                character=self.character, effect=effect,
-                defaults=dict(start_date=None, end_date=None, next_date=None)))
+            effect.affect(self.character)
         self.quantity -= 1
         if save:
             self.save()
@@ -1691,13 +1722,17 @@ class Effect(Entity, Damage):
         choices=get_thumbnails('effects') + get_thumbnails('items'))
     chance = models.PositiveSmallIntegerField(default=100, verbose_name=_("chance"))
     duration = models.DurationField(blank=True, null=True, verbose_name=_("durée"))
+    apply = models.BooleanField(default=False, verbose_name=_("appliquer ?"))
     # Timed effects
     interval = models.DurationField(blank=True, null=True, verbose_name=_("intervalle"))
     damage_chance = models.PositiveSmallIntegerField(default=100, verbose_name=_("chance"))
     # Next effect
     next_effect = models.ForeignKey(
-        'Effect', blank=True, null=True, on_delete=models.CASCADE,
+        'Effect', blank=True, null=True, on_delete=models.SET_NULL,
         related_name='+', verbose_name=_("effet suivant"))
+    cancel_effect = models.ForeignKey(
+        'Effect', blank=True, null=True, on_delete=models.SET_NULL,
+        related_name='+', verbose_name=_("effet annulé"))
 
     @property
     def damage_config(self) -> Dict[str, Union[str, int]]:
@@ -1718,16 +1753,24 @@ class Effect(Entity, Damage):
         """
         if randint(1, 100) >= self.chance:
             return None
+        effect = None
         if isinstance(target, Campaign):
-            return CampaignEffect.objects.get_or_create(
+            if self.cancel_effect:
+                CampaignEffect.objects.filter(campaign=target, effect=self.cancel_effect).delete()
+            effect, created = CampaignEffect.objects.update_or_create(
                 campaign=target, effect=self,
                 defaults=dict(start_date=target.current_game_date))
         elif isinstance(target, Character):
             assert self.duration is None or target.campaign is not None, _(
                 "Le personnage doit faire partie d'une campagne pour lui appliquer un effet sur la durée.")
-            return CharacterEffect.objects.get_or_create(
+            if self.cancel_effect:
+                CharacterEffect.objects.filter(character=target, effect=self.cancel_effect).delete()
+            effect, created = CharacterEffect.objects.update_or_create(
                 character=target, effect=self,
                 defaults=dict(start_date=getattr(target.campaign, 'current_game_date', None)))
+        if effect and self.apply:
+            effect.apply(force=True)
+        return effect
 
     def duplicate(self) -> 'Effect':
         """
@@ -1739,7 +1782,7 @@ class Effect(Entity, Damage):
         self.name = f"*{self.name}"
         self.save(force_insert=True)
         for modifier in EffectModifier.objects.filter(effect_id=effect_id):
-            modifier.effect_id = self.pk
+            modifier.pk, modifier.id, modifier.effect_id = None, None, self.pk
             modifier.save(force_insert=True)
         return self
 
@@ -1786,13 +1829,15 @@ class ActiveEffect(CommonModel):
         """
         if not self.next_date:
             return None
-        malus = self.effect.damage_type != DAMAGE_HEAL
-        total = (self.end_date - self.start_date) / self.effect.interval
-        elapsed = ((self.next_date - self.start_date) / self.effect.interval) / total
-        remaining = ((self.end_date - self.next_date) / self.effect.interval) / total
+        malus = self.effect.damage_type not in (DAMAGE_HEAL, DAMAGE_HEAL_RAD)
+        start_date, end_date, next_date, interval, apply = (
+            self.start_date, self.end_date, self.next_date, self.effect.interval, self.effect.apply)
+        total = ((end_date - start_date) / interval) + apply
+        elapsed = ((next_date - (start_date + interval * (not apply))) / interval) / total
+        remaining = (((end_date - (next_date - interval * (not apply))) / interval) + apply) / total
         return (
-            (round(elapsed * 100.0, 2), 'success' if malus else 'danger', self.next_date),
-            (round(remaining * 100.0, 2), 'danger' if malus else 'success', self.end_date),
+            (round(elapsed * 100.0, 2), 'success' if malus else 'danger', self.next_date if malus else self.end_date),
+            (round(remaining * 100.0, 2), 'danger' if malus else 'success', self.end_date if malus else self.next_date),
         )
 
     class Meta:
@@ -1864,12 +1909,15 @@ class CharacterEffect(ActiveEffect):
         'Character', on_delete=models.CASCADE,
         related_name='active_effects', verbose_name=_("personnage"))
 
-    def apply(self, save: bool = True) -> Optional['DamageHistory']:
+    def apply(self, force: bool = False, save: bool = True) -> Optional['DamageHistory']:
         """
         Applique l'effet au personnage
+        :param force: Force l'application de l'effet ?
         :param save: Sauvegarde les données relatives au personnage ?
         :return: Liste des dégâts éventuellement subis
         """
+        if force:
+            return self.character.damage(save=save, **self.effect.damage_config)
         damage = None
         if not self.next_date and self.effect.interval:
             self.next_date = self.start_date
@@ -2060,7 +2108,7 @@ class LootTemplate(CommonModel):
         self.name = f"*{self.name}"
         self.save(force_insert=True)
         for item in LootTemplateItem.objects.filter(template_id=template_id):
-            item.template_id = self.pk
+            item.pk, item.id, item.template_id = None, None, self.pk
             item.save(force_insert=True)
         return self
 
