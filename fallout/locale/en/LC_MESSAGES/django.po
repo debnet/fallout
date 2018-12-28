@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-12-28 02:28+0100\n"
+"POT-Creation-Date: 2018-12-29 00:29+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -280,8 +280,8 @@ msgstr "max. weight"
 msgid "esquive"
 msgstr "evasion"
 
-msgid "attaque en mélée"
-msgstr "melee attack"
+msgid "dégâts en mêlée"
+msgstr "melee damage"
 
 msgid "initiative"
 msgstr "initiative"
@@ -322,7 +322,7 @@ msgstr "energy weapons"
 msgid "à mains nues"
 msgstr "unarmed"
 
-msgid "armes de mélée"
+msgid "armes de mêlée"
 msgstr "melee weapons"
 
 msgid "armes de lancer"
@@ -535,15 +535,6 @@ msgstr "Resistances"
 msgid "Etat général"
 msgstr "General condition"
 
-msgid "aucune"
-msgstr "none"
-
-msgid "une main"
-msgstr "one hand"
-
-msgid "deux mains"
-msgstr "two hands"
-
 msgid "arme"
 msgstr "weapon"
 
@@ -570,6 +561,30 @@ msgstr "book"
 
 msgid "autre"
 msgstr "misc"
+
+msgid "attaque à distance"
+msgstr "ranged attack"
+
+msgid "attaque à longue distance"
+msgstr "long ranged attack"
+
+msgid "attaque avec lunette"
+msgstr "scope ranged attack"
+
+msgid "attaque en mêlée"
+msgstr "melee attack"
+
+msgid "attaque de lancer"
+msgstr "throwing attack"
+
+msgid "aucune"
+msgstr "none"
+
+msgid "une main"
+msgstr "one hand"
+
+msgid "deux mains"
+msgstr "two hands"
 
 msgid "humain"
 msgstr "human"
@@ -952,17 +967,11 @@ msgstr "quest?"
 msgid "jetable ?"
 msgstr "droppable?"
 
-msgid "arme de mêlée ?"
-msgstr "melee weapon?"
-
-msgid "arme de lancé ?"
-msgstr "throwable weapon?"
-
-msgid "recharge unitaire ?"
-msgstr "single charge?"
-
 msgid "mains nécessaires"
 msgstr "required hands"
+
+msgid "mode d'attaque"
+msgstr "attack mode"
 
 msgid "compétence"
 msgstr "skill"
@@ -979,17 +988,26 @@ msgstr "clip size"
 msgid "munitions en rafale"
 msgstr "burst ammunitions"
 
-msgid "portée"
-msgstr "range"
+msgid "portée minimale"
+msgstr "minimum range"
 
-msgid "portée en rafale"
-msgstr "burst range"
+msgid "portée maximale"
+msgstr "maximum range"
+
+msgid "portée min. en rafale"
+msgstr "burst minimum range"
+
+msgid "portée max. en rafale"
+msgstr "burst maximum range"
 
 msgid "modificateur de précision"
 msgstr "accuracy modifier"
 
 msgid "modificateur d'esquive"
 msgstr "evasion modifier"
+
+msgid "recharge unitaire ?"
+msgstr "single charge?"
 
 msgid "coût PA recharge"
 msgstr "reload AP cost"
@@ -1671,3 +1689,7 @@ msgstr "<strong>Error</strong> {error}"
 #, python-brace-format
 msgid "<strong>{attacker} vs {defender}</strong> {label}"
 msgstr "<strong>{attacker} vs {defender}</strong> {label}"
+
+#, python-brace-format
+msgid "<strong>{attacker} vs {defender}</strong> {fail} coups ratés et {success} coups au but pour {damage} dégâts"
+msgstr "<strong>{attacker} vs {defender}</strong> {fail} failed hits and {success} succeded hits for {damage} damages"

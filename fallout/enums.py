@@ -67,7 +67,7 @@ SECONDARY_STATS = (
     (STATS_MAX_ACTION_POINTS, _("points d'action max.")),
     (STATS_CARRY_WEIGHT, _("charge maximale")),
     (STATS_ARMOR_CLASS, _("esquive")),
-    (STATS_MELEE_DAMAGE, _("attaque en mélée")),
+    (STATS_MELEE_DAMAGE, _("dégâts en mêlée")),
     (STATS_SEQUENCE, _("initiative")),
     (STATS_HEALING_RATE, _("taux de regénération")),
     (STATS_AP_COST_MODIFIER, _("modificateur d'action")),
@@ -106,7 +106,7 @@ SKILLS = (
     (SKILL_BIG_GUNS, _("armes à feu lourdes")),
     (SKILL_ENERGY_WEAPONS, _("armes à énergie")),
     (SKILL_UNARMED, _("à mains nues")),
-    (SKILL_MELEE_WEAPONS, _("armes de mélée")),
+    (SKILL_MELEE_WEAPONS, _("armes de mêlée")),
     (SKILL_THROWING, _("armes de lancer")),
     (SKILL_FIRST_AID, _("premiers secours")),
     (SKILL_DOCTOR, _("médecine")),
@@ -242,9 +242,6 @@ DAMAGE_RESISTANCE = {
     DAMAGE_RADIATION: RESISTANCE_RADIATION,
     DAMAGE_GAZ_CONTACT: RESISTANCE_GAZ_CONTACT,
     DAMAGE_GAZ_INHALED: RESISTANCE_GAZ_INHALED,
-    DAMAGE_RAW: None,
-    DAMAGE_HEAL: None,
-    DAMAGE_HEAL_RAD: None,
 }
 
 # Damage / threshold
@@ -259,9 +256,6 @@ DAMAGE_THRESHOLD = {
     DAMAGE_RADIATION: THRESHOLD_RADIATION,
     DAMAGE_GAZ_CONTACT: THRESHOLD_GAZ_CONTACT,
     DAMAGE_GAZ_INHALED: THRESHOLD_GAZ_INHALED,
-    DAMAGE_RAW: None,
-    DAMAGE_HEAL: None,
-    DAMAGE_HEAL_RAD: None,
 }
 
 # Short labels for damage types
@@ -310,13 +304,6 @@ EDITABLE_STATS = SPECIALS + SKILLS + SECONDARY_STATS + RESISTANCES + THRESHOLDS 
 LIST_EDITABLE_STATS = dict(EDITABLE_STATS)
 LIST_ALL_STATS = dict(sum((stats for label, stats in ALL_STATS), ()))
 
-# Hands required for weapon
-HANDS = (
-    (0, _("aucune")),
-    (1, _("une main")),
-    (2, _("deux mains")),
-)
-
 # Item type
 ITEM_WEAPON = 'weapon'
 ITEM_AMMO = 'ammo'
@@ -343,6 +330,27 @@ ITEM_TYPES = SLOT_ITEM_TYPES + (
     (ITEM_MISC, _("autre")),
 )
 LIST_ITEM_TYPES = dict(ITEM_TYPES)
+
+# Weapon modes
+MODE_RANGED = 'ranged'
+MODE_LONG = 'long'
+MODE_SCOPED = 'scoped'
+MODE_MELEE = 'melee'
+MODE_THROW = 'throw'
+MODES = (
+    (MODE_RANGED, _("attaque à distance")),
+    (MODE_LONG, _("attaque à longue distance")),
+    (MODE_SCOPED, _("attaque avec lunette")),
+    (MODE_MELEE, _("attaque en mêlée")),
+    (MODE_THROW, _("attaque de lancer")),
+)
+
+# Hands required for weapon
+HANDS = (
+    (0, _("aucune")),
+    (1, _("une main")),
+    (2, _("deux mains")),
+)
 
 # Races
 RACE_HUMAN = 'human'

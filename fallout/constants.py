@@ -242,8 +242,29 @@ TAG_SKILL_BONUS = 20
 # Healing rate multiplier when resting
 HEALING_RATE_RESTING_MULT = 4.0
 
-# Range malus when fighting
-FIGHT_RANGE_MALUS = 3
+# Maximum hit chance
+MAX_HIT_CHANCE = 95
+
+# Maximum damage resistance
+MAX_DAMAGE_RESISTANCE = 95
+
+# Perception multiplier for ranged attacks
+RANGED_PERCEPTION_MULT = 8
+
+# Ranged bonus/malus multipliers
+RANGED_BONUS_MULT = 2
+RANGED_MALUS_MULT = 4
+
+# Ranged hit chance multipliers
+RANGE_NORMAL_MULT = 2
+RANGE_LONG_MULT = 4
+RANGE_SCOPED_MULT = 5
+
+RANGE_MODIFIERS = {
+    MODE_RANGED: RANGE_NORMAL_MULT,
+    MODE_LONG: RANGE_LONG_MULT,
+    MODE_SCOPED: RANGE_SCOPED_MULT,
+}
 
 # Hit chance malus
 MIN_STRENGTH_MALUS = 20
@@ -264,6 +285,7 @@ XP_GAIN_ROLL = (XP_GAIN_ROLL_FAIL, XP_GAIN_ROLL_SUCCESS)
 XP_GAIN_FIGHT_MISS = 3  # XP gain for fight failure (multiplier)
 XP_GAIN_FIGHT_HIT = 2  # XP gain for fight success (multiplier)
 XP_GAIN_FIGHT = (XP_GAIN_FIGHT_MISS, XP_GAIN_FIGHT_HIT)
+XP_GAIN_BURST = 3
 
 # Turn time
 TURN_TIME = 30
@@ -281,6 +303,7 @@ COMPUTED_STATS = (
     ('sequence', lambda s, c: 2 * s.perception),
     ('healing_rate', lambda s, c: (s.endurance // 3)),
     ('critical_chance', lambda s, c: s.luck),
+    ('critical_raw_chance', lambda s, c: max(1, s.luck - 5)),
     # Resistances
     ('radiation_resistance', lambda s, c: 2 * s.endurance),
     ('poison_resistance', lambda s, c: 5 * s.endurance),

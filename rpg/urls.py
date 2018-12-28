@@ -19,9 +19,8 @@ urlpatterns = [
     path('api/', include('rest_framework.urls', namespace='rest_framework')),
     path('api/auth/', drf_views.obtain_auth_token, name='token'),
     # Fallout RPG
-    path('', RedirectView.as_view(pattern_name='fallout:index', permanent=True)),
-    path('fallout/', include(fallout_urls)),
-    path('api/fallout/', include(fallout_api)),
+    path('', include(fallout_urls)),
+    path('api/', include(fallout_api)),
 ]
 
 # Common framework

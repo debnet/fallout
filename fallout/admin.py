@@ -298,10 +298,12 @@ class ItemAdmin(EntityAdmin):
         )),
         (_("Armes uniquement"), dict(
             fields=(
-                'is_melee', 'is_throwable', 'is_single_charge', 'skill', 'min_skill', 'min_strength', 'hands',
-                'range', 'burst_range', 'clip_size', 'burst_count', 'hit_chance_modifier',
-                'armor_class_modifier', 'threshold_modifier', 'threshold_rate_modifier', 'resistance_modifier',
+                'attack_mode', 'skill', 'min_skill', 'min_strength', 'hands',
+                'min_range', 'min_burst_range', 'max_range', 'max_burst_range',
+                'clip_size', 'burst_count', 'hit_chance_modifier', 'armor_class_modifier',
+                'threshold_modifier', 'threshold_rate_modifier', 'resistance_modifier',
                 'ap_cost_reload', 'ap_cost_normal', 'ap_cost_target', 'ap_cost_burst',
+                'is_single_charge',
             ),
             classes=('wide', 'collapse', ),
         )),
@@ -325,7 +327,7 @@ class ItemAdmin(EntityAdmin):
     list_display_links = ('name', )
     list_display = ('name', 'type', 'value', 'weight', 'is_quest', )
     list_editable = ()
-    list_filter = ('type', 'hands', 'skill', 'is_quest', 'is_melee', 'is_throwable', 'is_droppable', )
+    list_filter = ('type', 'hands', 'attack_mode', 'skill', 'is_quest', 'is_droppable', )
     search_fields = ('name', 'title', 'description', )
     ordering = ('name', )
     actions = ('duplicate', )
