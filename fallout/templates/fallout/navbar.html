@@ -59,8 +59,8 @@
             {{ campaign.current_game_date }}
             {% with current=campaign.current_character %}
                 {% if current %}
-                    (<a class="{% if current.is_player %}text-success{% else %}text-warning{% endif %}"
-                        href="{% url 'fallout:character' current.id %}">{{ current }}</a>)
+                    (&nbsp;<a class="{% if current.is_player %}text-success{% else %}text-warning{% endif %}"
+                        href="{% url 'fallout:character' current.id %}">{{ current }}</a>&nbsp;)
                 {% endif %}
             {% endwith %}
         </label>

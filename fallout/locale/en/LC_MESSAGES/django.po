@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-12-27 03:05+0100\n"
+"POT-Creation-Date: 2018-12-28 02:28+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -96,6 +96,9 @@ msgstr "Status"
 
 msgid "Dégâts temporels"
 msgstr "Temporal damages"
+
+msgid "Dégâts ?"
+msgstr "Damages?"
 
 msgid "Les effets sélectionnés ont été dupliqués."
 msgstr "Selected effects were duplicated."
@@ -199,7 +202,7 @@ msgstr "body part"
 msgid "modificateur d'absorption"
 msgstr "threshold modifier"
 
-msgid "modificateur de taux d'absorption"
+msgid "modificateur taux d'absorption"
 msgstr "threshold rate modifier"
 
 msgid "modificateur de résistance"
@@ -286,9 +289,6 @@ msgstr "initiative"
 msgid "taux de regénération"
 msgstr "regeneration rate"
 
-msgid "chance de critique"
-msgstr "critical chance"
-
 msgid "modificateur d'action"
 msgstr "action modifier"
 
@@ -298,14 +298,17 @@ msgstr "one hand accuracy"
 msgid "précision à deux mains"
 msgstr "two hands accuracy"
 
-msgid "absorption de dégâts"
-msgstr "damage threshold"
-
-msgid "résistance aux dégâts"
-msgstr "damage resistance"
-
 msgid "modificateur de dégâts"
 msgstr "damage modifier"
+
+msgid "chance de critique"
+msgstr "critical chance"
+
+msgid "chance de dégâts bruts"
+msgstr "raw damage chance"
+
+msgid "modificateur dégats critiques"
+msgstr "critical damage modifier"
 
 msgid "armes à feu légères"
 msgstr "small guns"
@@ -367,6 +370,9 @@ msgstr "survival"
 msgid "connaissance"
 msgstr "knowledge"
 
+msgid "résistance aux dégâts"
+msgstr "damage resistance"
+
 msgid "résistance physique"
 msgstr "physical resistance"
 
@@ -396,6 +402,9 @@ msgstr "contact gas resistance"
 
 msgid "résistance au gaz (inhalé)"
 msgstr "inhaled gas resistance"
+
+msgid "absorption de dégâts"
+msgstr "damage threshold"
 
 msgid "absorption physique"
 msgstr "physical threshold"
@@ -466,13 +475,13 @@ msgstr "health cure"
 msgid "soins de radiations"
 msgstr "radiation cure"
 
-msgid "altération de soif"
+msgid "altérations de soif"
 msgstr "thirst alteration"
 
-msgid "altération de faim"
+msgid "altérations de faim"
 msgstr "hunger alteration"
 
-msgid "altération de sommeil"
+msgid "altérations de sommeil"
 msgstr "sleep alteration"
 
 msgid "N"
@@ -553,8 +562,11 @@ msgstr "grenade"
 msgid "nourriture"
 msgstr "food"
 
-msgid "médicament"
+msgid "drogue"
 msgstr "chems"
+
+msgid "livre"
+msgstr "book"
 
 msgid "autre"
 msgstr "misc"
@@ -779,31 +791,31 @@ msgid "campagnes"
 msgstr "campaigns"
 
 msgid "absorption normal"
-msgstr "normal absorption"
+msgstr "normal threshold"
 
 msgid "résistance normal"
 msgstr "normal resistance"
 
 msgid "absorption laser"
-msgstr "laser absorption"
+msgstr "laser threshold"
 
 msgid "résistance laser"
 msgstr "laser resistance"
 
 msgid "absorption plasma"
-msgstr "plasma absorption"
+msgstr "plasma threshold"
 
 msgid "résistance plasma"
 msgstr "plasme resistance"
 
 msgid "absorption explosifs"
-msgstr "explosive absorption"
+msgstr "explosive threshold"
 
 msgid "résistance explosifs"
 msgstr "explosive resistance"
 
 msgid "absorption feu"
-msgstr "fire absorption"
+msgstr "fire threshold"
 
 msgid "résistance feu"
 msgstr "fire resistance"
@@ -820,7 +832,7 @@ msgstr "poison threshold"
 msgid "résistance poison"
 msgstr "poison resistance"
 
-msgid "rabsorption radiations"
+msgid "absorption radiations"
 msgstr "laser threshold"
 
 msgid "résistance radiations"
@@ -840,6 +852,12 @@ msgstr "inhaled gas resistance"
 
 msgid "chances de critiques"
 msgstr "critical chance"
+
+msgid "chances de dégâts bruts"
+msgstr "raw damage chance"
+
+msgid "modificateur dégâts critiques"
+msgstr "critical damage modifier"
 
 msgid "Cette fonction ne peut être utilisée que par les statistiques."
 msgstr "This functon can only be used by statistics."
@@ -922,7 +940,7 @@ msgstr "type"
 msgid "durabilité"
 msgstr "durability"
 
-msgid "modif. de condition"
+msgid "modificateur de condition"
 msgstr "condition modifier"
 
 msgid "poids"
@@ -967,20 +985,11 @@ msgstr "range"
 msgid "portée en rafale"
 msgstr "burst range"
 
-msgid "modif. de précision"
+msgid "modificateur de précision"
 msgstr "accuracy modifier"
 
-msgid "modif. d'absorption"
-msgstr "absorption modifier"
-
-msgid "modif. taux d'absorption"
-msgstr "absorption rate modifier"
-
-msgid "modif. d'esquive"
+msgid "modificateur d'esquive"
 msgstr "evasion modifier"
-
-msgid "modif. de résistance"
-msgstr "resistance modifier"
 
 msgid "coût PA recharge"
 msgstr "reload AP cost"
@@ -994,14 +1003,8 @@ msgstr "targetted AP cost"
 msgid "coût PA rafale"
 msgstr "burst AP cost"
 
-msgid "modif. de dégâts"
-msgstr "damage modifier"
-
 msgid "dégâts critiques"
 msgstr "critical damage"
-
-msgid "modif. dégâts critiques"
-msgstr "critical damage modifier"
 
 msgid "effets"
 msgstr "effects"
@@ -1213,7 +1216,7 @@ msgid "protection"
 msgstr "protection"
 
 msgid "absorption armure"
-msgstr "armor absorption"
+msgstr "armor threshold"
 
 msgid "résistance armure"
 msgstr "armor resistance"
@@ -1222,7 +1225,7 @@ msgid "dégats armure"
 msgstr "armor damage"
 
 msgid "absorption dégâts"
-msgstr "damage absorption"
+msgstr "damage threshold"
 
 msgid "résistance dégâts"
 msgstr "damage resistance"
@@ -1275,8 +1278,8 @@ msgid "{label} : {status}"
 msgstr "{label}: {status}"
 
 #, python-brace-format
-msgid "{label} : {real_damage} dégâts infligés ({body_part})"
-msgstr "{label}: {real_damage} inflicted damage ({body_part})"
+msgid "{label} : {real_damage} {damage_type} infligés ({body_part})"
+msgstr "{label}: {real_damage} {damage_type} inflicted ({body_part})"
 
 #, python-brace-format
 msgid "{attacker} vs. {defender} - {long_label}"
@@ -1348,6 +1351,15 @@ msgstr "Campaign"
 
 msgid "Butins"
 msgstr "Loots"
+
+msgid "Actif depuis"
+msgstr "Active since"
+
+msgid "Actif encore"
+msgstr "Active until"
+
+msgid "dans"
+msgstr "in"
 
 msgid "Supprimer"
 msgstr "Delete"

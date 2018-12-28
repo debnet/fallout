@@ -32,7 +32,7 @@ def create_admin_tests():
                     cls.instance = mommy.make(cls.model)
 
                 def get(self, url=url, pk_required=pk_required):
-                    url = reverse(f'{namespace}:{url.name}', args=(self.instance.id, ) if pk_required else ())
+                    url = reverse(f'{namespace}:{url.name}', args=(self.instance.pk, ) if pk_required else ())
                     response = self.client.get(url)
                     self.assertEqual(response.status_code, 302)
                     self.client.force_login(self.user)

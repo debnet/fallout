@@ -29,14 +29,14 @@ def view_campaign(request, campaign_id):
     Vue principale des campagnes
     """
     data = request.POST
-    # Campagne
+
     campaign = Campaign.objects.select_related('current_character').filter(id=campaign_id).first()
     characters = Character.objects.select_related('statistics', 'campaign__current_character').filter(
         campaign=campaign, is_active=True)
     if not request.user.is_superuser:
         characters = characters.filter(Q(user=request.user) | Q(campaign__game_master=request.user))
     loots = Loot.objects.select_related('item').filter(campaign=campaign).order_by('item__name')
-    # Actions
+
     authorized = request.user and (request.user.is_superuser or (
         campaign and campaign.game_master_id == request.user.id))
     if request.method == 'POST' and authorized:
@@ -138,7 +138,7 @@ def view_character(request, character_id):
     Vue principale des personnages
     """
     data = request.POST
-    # Personnage
+
     characters = Character.objects.select_related(
         'user', 'statistics', 'campaign__current_character').filter(is_active=True)
     if not request.user.is_superuser:
@@ -146,7 +146,7 @@ def view_character(request, character_id):
     character = characters.filter(id=character_id).first()
     if not character:
         raise Http404
-    # Actions
+
     authorized = request.user and (request.user.is_superuser or (
         character and character.campaign and character.campaign.game_master_id == request.user.id))
     characters = characters.filter(campaign_id=character.campaign_id if character else None)
@@ -227,8 +227,10 @@ def view_character(request, character_id):
                     scope = data.get('scope')
                     if scope == 'character':
                         CharacterEffect.objects.filter(pk=effect_id).delete()
+                        Character.reset_stats(character)
                     elif scope == 'campaign':
                         CampaignEffect.objects.filter(pk=effect_id).delete()
+                        Character.reset_stats(character)
             elif type == 'action':
                 character.health, character.action_points = int(data.get('hp')), int(data.get('ap'))
                 character.experience, character.karma = int(data.get('xp')), int(data.get('karma'))
@@ -243,8 +245,7 @@ def view_character(request, character_id):
                     messages.error(request, _("<strong>Erreur</strong> {error}").format(error=error))
         except Exception as error:
             messages.error(request, _("<strong>Erreur</strong> {error}").format(error=error))
-            raise
-    # Données
+
     inventory, effects = character.inventory, character.effects
     rollstats = RollHistory.get_stats(character)
     fightstats = FightHistory.get_stats(character)

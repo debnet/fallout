@@ -55,13 +55,13 @@ STATS_ARMOR_CLASS = 'armor_class'
 STATS_MELEE_DAMAGE = 'melee_damage'
 STATS_SEQUENCE = 'sequence'
 STATS_HEALING_RATE = 'healing_rate'
-STATS_CRITICAL_CHANCE = 'critical_chance'
 STATS_AP_COST_MODIFIER = 'ap_cost_modifier'
 STATS_ONE_HAND_ACCURACY = 'one_hand_accuracy'
 STATS_TWO_HANDS_ACCURACY = 'two_hands_accuracy'
-STATS_DAMAGE_THRESHOLD = 'damage_threshold'
-STATS_DAMAGE_RESISTANCE = 'damage_resistance'
 STATS_DAMAGE_MODIFIER = 'damage_modifier'
+STATS_CRITICAL_CHANCE = 'critical_chance'
+STATS_CRITICAL_RAW_CHANCE = 'critical_raw_chance'
+STATS_CRITICAL_DAMAGE = 'critical_damage'
 SECONDARY_STATS = (
     (STATS_MAX_HEALTH, _("santé maximale")),
     (STATS_MAX_ACTION_POINTS, _("points d'action max.")),
@@ -70,13 +70,13 @@ SECONDARY_STATS = (
     (STATS_MELEE_DAMAGE, _("attaque en mélée")),
     (STATS_SEQUENCE, _("initiative")),
     (STATS_HEALING_RATE, _("taux de regénération")),
-    (STATS_CRITICAL_CHANCE, _("chance de critique")),
     (STATS_AP_COST_MODIFIER, _("modificateur d'action")),
     (STATS_ONE_HAND_ACCURACY, _("précision à une main")),
     (STATS_TWO_HANDS_ACCURACY, _("précision à deux mains")),
-    (STATS_DAMAGE_THRESHOLD, _("absorption de dégâts")),
-    (STATS_DAMAGE_RESISTANCE, _("résistance aux dégâts")),
     (STATS_DAMAGE_MODIFIER, _("modificateur de dégâts")),
+    (STATS_CRITICAL_CHANCE, _("chance de critique")),
+    (STATS_CRITICAL_RAW_CHANCE, _("chance de dégâts bruts")),
+    (STATS_CRITICAL_DAMAGE, _("modificateur dégats critiques")),
 )
 LIST_SECONDARY_STATS = dict(SECONDARY_STATS)
 
@@ -126,6 +126,7 @@ SKILLS = (
 LIST_SKILLS = dict(SKILLS)
 
 # Resistances
+RESISTANCE_DAMAGE = 'damage_resistance'
 RESISTANCE_NORMAL = 'normal_resistance'
 RESISTANCE_LASER = 'laser_resistance'
 RESISTANCE_PLASMA = 'plasma_resistance'
@@ -137,7 +138,7 @@ RESISTANCE_RADIATION = 'radiation_resistance'
 RESISTANCE_GAZ_CONTACT = 'gas_contact_resistance'
 RESISTANCE_GAZ_INHALED = 'gas_inhaled_resistance'
 RESISTANCES = (
-
+    (RESISTANCE_DAMAGE, _("résistance aux dégâts")),
     (RESISTANCE_NORMAL, _("résistance physique")),
     (RESISTANCE_LASER, _("résistance aux lasers")),
     (RESISTANCE_PLASMA, _("résistance au plasma")),
@@ -152,6 +153,7 @@ RESISTANCES = (
 LIST_RESISTANCES = dict(RESISTANCES)
 
 # Thresholds
+THRESHOLD_DAMAGE = 'damage_threshold'
 THRESHOLD_NORMAL = 'normal_threshold'
 THRESHOLD_LASER = 'laser_threshold'
 THRESHOLD_PLASMA = 'plasma_threshold'
@@ -163,7 +165,7 @@ THRESHOLD_RADIATION = 'radiation_threshold'
 THRESHOLD_GAZ_CONTACT = 'gas_contact_threshold'
 THRESHOLD_GAZ_INHALED = 'gas_inhaled_threshold'
 THRESHOLDS = (
-
+    (THRESHOLD_DAMAGE, _("absorption de dégâts")),
     (THRESHOLD_NORMAL, _("absorption physique")),
     (THRESHOLD_LASER, _("absorption des lasers")),
     (THRESHOLD_PLASMA, _("absorption du plasma")),
@@ -220,9 +222,9 @@ DAMAGES_TYPES = (
     (DAMAGE_RAW, _("dégâts directs")),
     (DAMAGE_HEAL, _("soins de santé")),
     (DAMAGE_HEAL_RAD, _("soins de radiations")),
-    (DAMAGE_THIRST, _("altération de soif")),
-    (DAMAGE_HUNGER, _("altération de faim")),
-    (DAMAGE_SLEEP, _("altération de sommeil")),
+    (DAMAGE_THIRST, _("altérations de soif")),
+    (DAMAGE_HUNGER, _("altérations de faim")),
+    (DAMAGE_SLEEP, _("altérations de sommeil")),
 )
 LIST_DAMAGES_TYPES = dict(DAMAGES_TYPES)
 PHYSICAL_DAMAGES = (DAMAGE_NORMAL, DAMAGE_LASER, DAMAGE_PLASMA, DAMAGE_EXPLOSIVE, DAMAGE_FIRE)
@@ -332,10 +334,12 @@ LIST_SLOT_ITEM_TYPES = dict(SLOT_ITEM_TYPES)
 
 ITEM_FOOD = 'food'
 ITEM_CHEM = 'chem'
+ITEM_BOOK = 'book'
 ITEM_MISC = 'misc'
 ITEM_TYPES = SLOT_ITEM_TYPES + (
     (ITEM_FOOD, _("nourriture")),
-    (ITEM_CHEM, _("médicament")),
+    (ITEM_CHEM, _("drogue")),
+    (ITEM_BOOK, _("livre")),
     (ITEM_MISC, _("autre")),
 )
 LIST_ITEM_TYPES = dict(ITEM_TYPES)

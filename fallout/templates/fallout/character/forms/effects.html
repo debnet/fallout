@@ -1,4 +1,4 @@
-{% load i18n l10n %}
+{% load i18n l10n humanize %}
 
 <div class="row">
     {% for effect in effects %}
@@ -19,6 +19,25 @@
                                 <img class="img-fluid mx-auto d-block rounded mb-2" src="{{ image.url }}">
                             {% endif %}
                         {% endwith %}
+                        {% if effect.progress and character.campaign %}
+                            {% with current_date=character.campaign.current_game_date %}
+                                <p class="card-text">
+                                    <div class="progress">
+                                        {% for value, date, css in effect.progress %}
+                                            {% localize off %}
+                                            <div role="progressbar" style="width: {{ value }}%;" aria-valuenow="{{ value }}"
+                                                 aria-valuemin="0" aria-valuemax="100" class="progress-bar bg-{{ css }}"
+                                            {% endlocalize %}
+                                                 {% if date < current_date %}title="{% trans "Actif depuis" %} {{ date|timesince:current_date }}"
+                                                 {% elif date >= current_date %}title="{% trans "Actif encore" %} {{ date|timeuntil:current_date }}"{% endif %}
+                                                 data-toggle="tooltip" data-placement="bottom">
+                                                {{ value|floatformat:0 }}%
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </p>
+                            {% endwith %}
+                        {% endif %}
                         <p class="card-text">
                             {% for modifier in info.modifiers.all %}
                                 <small class="badge {% if modifier.value > 0 %}badge-success{% else %}badge-danger{% endif %} align-middle">
@@ -27,30 +46,22 @@
                                 </small>
                             {% endfor %}
                         </p>
-                        {% if effect.progress %}
-                            <p class="card-text">
-                                <div class="progress">
-                                    {% for value, css, date in effect.progress %}
-                                        {% localize off %}
-                                        <div role="progressbar" style="width: {{ value }}%;" aria-valuenow="{{ value }}"
-                                             aria-valuemin="0" aria-valuemax="100" class="progress-bar bg-{{ css }}"
-                                        {% endlocalize %}
-                                             title="{{ date }}">
-                                            {{ value|floatformat:0 }}%
-                                        </div>
-                                    {% endfor %}
-                                </div>
-                            </p>
-                        {% endif %}
                         {% if info.description %}
                             <p class="card-text">
                                 <small class="text-muted">{{ info.description }}</small>
                             </p>
                         {% endif %}
                         {% if info.label_damage %}
-                            <p class="card-text">
-                                <small class="font-weight-bold">{{ info.long_label_damage }}</small>
-                            </p>
+                            {% with current_date=character.campaign.current_game_date %}
+                                <p class="card-text">
+                                    <small class="font-weight-bold">
+                                        {{ info.long_label_damage }}
+                                        {% if current_date %}
+                                            {% trans "dans" %} {{ effect.next_date|timeuntil:current_date }}
+                                        {% endif %}
+                                    </small>
+                                </p>
+                            {% endwith %}
                         {% endif %}
                     </div>
                     {% if authorized %}

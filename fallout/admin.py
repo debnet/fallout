@@ -69,7 +69,7 @@ class CampaignAdmin(CommonAdmin):
     inlines = [LootInline, CampaignEffectInlineAdmin]
     list_display_links = ('name', )
     list_display = ('name', 'current_game_date', 'current_character', 'needs', 'radiation', )
-    list_editable = ('current_game_date', 'current_character', 'needs', 'radiation', )
+    list_editable = ('current_character', 'needs', 'radiation', )
     list_filter = ('needs', 'game_master', )
     search_fields = ('name', 'title', 'description', )
     ordering = ('name', )
@@ -148,8 +148,8 @@ class CharacterAdmin(EntityAdmin):
             classes=('wide', ),
         )),
         (_("Informations techniques"), dict(
-            fields=('user', 'campaign',),
-            classes=('wide', 'collapse',),
+            fields=('user', 'campaign', ),
+            classes=('wide', ),
         )),
         (_("Spécialités"), dict(
             fields=('tag_skills', ),
@@ -300,7 +300,7 @@ class ItemAdmin(EntityAdmin):
             fields=(
                 'is_melee', 'is_throwable', 'is_single_charge', 'skill', 'min_skill', 'min_strength', 'hands',
                 'range', 'burst_range', 'clip_size', 'burst_count', 'hit_chance_modifier',
-                'threshold_modifier', 'threshold_rate_modifier', 'armor_class_modifier', 'resistance_modifier',
+                'armor_class_modifier', 'threshold_modifier', 'threshold_rate_modifier', 'resistance_modifier',
                 'ap_cost_reload', 'ap_cost_normal', 'ap_cost_target', 'ap_cost_burst',
             ),
             classes=('wide', 'collapse', ),
@@ -308,7 +308,7 @@ class ItemAdmin(EntityAdmin):
         (_("Dégâts"), dict(
             fields=(
                 'damage_type', 'raw_damage', 'min_damage', 'max_damage', 'damage_modifier',
-                'critical_modifier', 'critical_damage', 'critical_damage_modifier',
+                'critical_modifier', 'critical_raw_modifier', 'critical_damage', 'critical_damage_modifier',
             ),
             classes=('wide', 'collapse', ),
         )),
@@ -325,7 +325,7 @@ class ItemAdmin(EntityAdmin):
     list_display_links = ('name', )
     list_display = ('name', 'type', 'value', 'weight', 'is_quest', )
     list_editable = ()
-    list_filter = ('type', 'is_quest', 'is_melee', 'is_throwable', )
+    list_filter = ('type', 'hands', 'skill', 'is_quest', 'is_melee', 'is_throwable', 'is_droppable', )
     search_fields = ('name', 'title', 'description', )
     ordering = ('name', )
     actions = ('duplicate', )
@@ -366,6 +366,9 @@ class EquipmentAdmin(CommonAdmin):
     save_on_top = True
     actions_on_bottom = True
 
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('character', 'item')
+
 
 class EffectModifierInline(admin.TabularInline):
     """
@@ -388,13 +391,13 @@ class EffectAdmin(EntityAdmin):
             classes=('wide', ),
         )),
         (_("Dégâts temporels"), dict(
-            fields=('apply', 'interval', 'damage_chance', 'damage_type', 'raw_damage', 'min_damage', 'max_damage', ),
+            fields=('apply', 'damage_type', 'interval', 'damage_chance', 'raw_damage', 'min_damage', 'max_damage', ),
             classes=('wide', 'collapse', ),
         )),
     )
     inlines = [EffectModifierInline]
     list_display_links = ('name', )
-    list_display = ('name', 'chance', 'duration', 'next_effect', 'cancel_effect', )
+    list_display = ('name', 'chance', 'duration', 'next_effect', 'cancel_effect', 'has_damage', )
     list_editable = ()
     list_filter = ()
     search_fields = ('name', 'title', 'description', )
@@ -404,6 +407,11 @@ class EffectAdmin(EntityAdmin):
     save_on_top = True
     actions_on_bottom = True
 
+    def has_damage(self, obj):
+        return bool(obj.damage_type and (obj.apply or obj.interval))
+    has_damage.boolean = True
+    has_damage.short_description = _("Dégâts ?")
+
     def duplicate(self, request, queryset):
         """
         Action de duplication
@@ -412,6 +420,9 @@ class EffectAdmin(EntityAdmin):
             element.duplicate()
         self.message_user(request, message=_("Les effets sélectionnés ont été dupliqués."))
     duplicate.short_description = _("Dupliquer les objets sélectionnés")
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('next_effect', 'cancel_effect')
 
 
 @admin.register(CampaignEffect)
@@ -427,11 +438,14 @@ class CampaignEffectAdmin(CommonAdmin):
     )
     list_display = ('campaign', 'effect', 'start_date', 'end_date', 'next_date', )
     list_editable = ()
-    list_filter = ()
+    list_filter = ('campaign', )
     ordering = ('campaign', 'effect', )
     autocomplete_fields = ('campaign', 'effect', )
     save_on_top = True
     actions_on_bottom = True
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('campaign', 'effect')
 
 
 @admin.register(CharacterEffect)
@@ -447,11 +461,14 @@ class CharacterEffectAdmin(CommonAdmin):
     )
     list_display = ('character', 'effect', 'start_date', 'end_date', 'next_date', )
     list_editable = ()
-    list_filter = ()
+    list_filter = ('character', )
     ordering = ('character', 'effect', )
     autocomplete_fields = ('character', 'effect', )
     save_on_top = True
     actions_on_bottom = True
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('character', 'effect')
 
 
 @admin.register(Loot)
@@ -472,6 +489,9 @@ class Loot(CommonAdmin):
     autocomplete_fields = ('campaign', 'item', )
     save_on_top = True
     actions_on_bottom = True
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('campaign', 'item')
 
 
 class LootTemplateItemInline(EntityTabularInline):
@@ -537,6 +557,9 @@ class RollHistoryAdmin(CommonAdmin):
     date_hierarchy = 'date'
     autocomplete_fields = ('character', )
 
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('character')
+
 
 @admin.register(DamageHistory)
 class DamageHistoryAdmin(CommonAdmin):
@@ -568,6 +591,9 @@ class DamageHistoryAdmin(CommonAdmin):
     ordering = ('-date', )
     date_hierarchy = 'date'
     autocomplete_fields = ('character', 'armor', )
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('character')
 
 
 @admin.register(FightHistory)
@@ -610,3 +636,6 @@ class FightHistoryAdmin(CommonAdmin):
         return getattr(obj.damage, 'real_damage', None)
     real_damage.short_description = _("dégâts")
     real_damage.admin_order_field = 'damage__real_damage'
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('attacker', 'defender')
