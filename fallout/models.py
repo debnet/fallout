@@ -1462,7 +1462,7 @@ class Item(Entity, Resistance, Damage):
     @property
     def is_ranged(self) -> bool:
         """
-        Arme de mêlée ?
+        Arme à distance ?
         """
         return self.type == ITEM_WEAPON and self.attack_mode not in (MODE_MELEE, MODE_THROW)
 
