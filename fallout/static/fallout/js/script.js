@@ -46,7 +46,7 @@ $(document).ready(function($) {
     $('#item-name').autocomplete({
         source: function (request, response) {
             $.ajax({
-                url: "/api/fallout/item/",
+                url: "/api/item/",
                 data: {
                     name__icontains: request.term,
                     fields: 'id,name,type',
@@ -70,7 +70,7 @@ $(document).ready(function($) {
     $('#effect-name').autocomplete({
         source: function (request, response) {
             $.ajax({
-                url: "/api/fallout/effect/",
+                url: "/api/effect/",
                 data: {
                     name__icontains: request.term,
                     fields: 'id,name',
@@ -93,7 +93,7 @@ $(document).ready(function($) {
     $('#loot-name').autocomplete({
         source: function (request, response) {
             $.ajax({
-                url: "/api/fallout/loottemplate/",
+                url: "/api/loottemplate/",
                 data: {
                     name__icontains: request.term,
                     fields: 'id,name',
