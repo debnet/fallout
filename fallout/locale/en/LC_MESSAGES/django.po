@@ -1386,7 +1386,7 @@ msgid "PJ"
 msgstr "PC"
 
 msgid "PNJ"
-msgstr "PNC"
+msgstr "NPC"
 
 msgid "KO"
 msgstr "KO"
