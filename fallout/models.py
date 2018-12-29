@@ -400,6 +400,7 @@ class Statistics(Stats):
     modifiers = JsonField(blank=True, null=True, verbose_name=_("modificateurs"))
     obsolete = models.BooleanField(default=False, editable=False, verbose_name=_("obsolète"))
     date = models.DateTimeField(auto_now=True, editable=False, verbose_name=_("date"))
+    _code_field = 'character'
 
     class Meta:
         verbose_name = _("statistiques")
@@ -725,7 +726,7 @@ class Character(Entity, Stats):
                 break
             self.level += 1
             self.skill_points += self.stats.skill_points_per_level
-            if not self.level % self.stats.perk_rate:
+            if self.stats.perk_rate and not self.level % self.stats.perk_rate:
                 self.perk_points += 1
             level += 1
         return level, needed_xp
