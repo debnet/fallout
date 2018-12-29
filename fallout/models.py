@@ -1107,8 +1107,8 @@ class Character(Entity, Stats):
 
     def damage(self, raw_damage: float = 0.0, min_damage: int = 0, max_damage: int = 0,
                damage_type: str = DAMAGE_NORMAL, body_part: str = PART_TORSO,
-               threshold_modifier: int = 0, threshold_rate_modifier: int = 0.0,
-               resistance_modifier: int = 0.0, save: bool = True, log: bool = True) -> 'DamageHistory':
+               threshold_modifier: int = 0, threshold_rate_modifier: int = 0,
+               resistance_modifier: int = 0, save: bool = True, log: bool = True) -> 'DamageHistory':
         """
         Inflige des dégâts au personnage
         :param raw_damage: Dégâts bruts
