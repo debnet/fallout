@@ -987,13 +987,13 @@ class Character(Entity, Stats):
             if target_range < attacker_min_range:
                 weapon_accuracy_modifier -= attacker_min_range  # Malus at close range
             else:
-                weapon_accuracy_modifier += (self.stats.perception - 2) * weapon_range_modifier
+                weapon_accuracy_modifier += self.stats.perception * weapon_range_modifier
             attacker_hit_chance += self.stats.perception * RANGED_PERCEPTION_MULT
             attacker_hit_chance -= max(target_range - weapon_accuracy_modifier, 0) * RANGED_MALUS_MULT
         # Increase hit chance of weapons
-        if not is_melee:
+        elif not is_melee:
             attacker_range_stats = SPECIAL_STRENGTH if attacker_weapon.is_throwable else SPECIAL_PERCEPTION
-            attacker_hit_chance += (RANGED_BONUS_MULT * getattr(self.stats, attacker_range_stats, 0))
+            attacker_hit_chance += RANGED_BONUS_MULT * getattr(self.stats, attacker_range_stats, 0)
         # Targetted hit chance modifier
         if target_part:  # Hit chance malus are only for targetted shot
             attacker_hit_chance += melee_hit_modifier if is_melee else ranged_hit_modifier
