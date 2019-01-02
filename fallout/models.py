@@ -1088,7 +1088,7 @@ class Character(Entity, Stats):
                 attacker_weapon_equipment.quantity -= 1
             elif attacker_weapon.is_throwable:
                 attacker_weapon_equipment.drop(quantity=1, save=False)
-            elif not attacker_weapon.is_melee:
+            elif attacker_weapon.clip_size:
                 attacker_weapon_equipment.clip_count -= 1
             if attacker_weapon.durability and attacker_weapon.is_repairable:
                 attacker_weapon_damage = (1.0 / attacker_weapon.durability) * (1.0 - (
@@ -1792,7 +1792,7 @@ class Equipment(CommonModel):
             return self.delete(**kwargs)
         self.quantity = max(0, self.quantity) if self.quantity else 0
         self.condition = max(0.0, min(1.0, self.condition or 1.0)) if self.item.is_repairable else None
-        self.clip_count = max(0, self.clip_count or 0) if self.item.is_ranged else None
+        self.clip_count = max(0, self.clip_count or 0) if self.item.clip_size else None
         return super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
