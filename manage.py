@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 import os
+import uuid
 import sys
 
 if __name__ == "__main__":
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "rpg.settings")
     os.environ.setdefault("DJANGO_CONFIGURATION", "Test")
+    os.environ.setdefault("DJANGO_SECRET_KEY", str(uuid.uuid4()))
     try:
         # from django.core.management import execute_from_command_line
         from configurations.management import execute_from_command_line

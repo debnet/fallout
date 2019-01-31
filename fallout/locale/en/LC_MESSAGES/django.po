@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-12-29 00:29+0100\n"
+"POT-Creation-Date: 2019-01-29 08:40+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -246,6 +246,9 @@ msgstr "talent points"
 
 msgid "karma"
 msgstr "karma"
+
+msgid "récompense"
+msgstr "reward"
 
 msgid "force"
 msgstr "strength"
@@ -604,6 +607,9 @@ msgstr "robot"
 msgid "animal"
 msgstr "animal"
 
+msgid "créature"
+msgstr "creature"
+
 msgid "torse"
 msgstr "torso"
 
@@ -741,6 +747,15 @@ msgstr "Target"
 
 msgid "Action ?"
 msgstr "Action?"
+
+msgid "Importe des créatures"
+msgstr "Import creatures"
+
+msgid "Nouvelle créature :"
+msgstr "New creature:"
+
+msgid "Nom : "
+msgstr "Name: "
 
 msgid "Exporte les données de l'application vers un document Excel"
 msgstr "Dumps application data to an Excel document"

@@ -441,6 +441,7 @@ class Character(Entity, Stats):
     perk_points = models.PositiveSmallIntegerField(default=0, verbose_name=_("points de talent"))
     experience = models.PositiveIntegerField(default=0, verbose_name=_("expérience"))
     karma = models.SmallIntegerField(default=0, verbose_name=_("karma"))
+    reward = models.PositiveSmallIntegerField(default=0, verbose_name=_("récompense"))
     # Needs
     rads = models.FloatField(default=0.0, verbose_name=_("rads"))
     thirst = models.FloatField(default=0.0, verbose_name=_("soif"))
@@ -887,7 +888,10 @@ class Character(Entity, Stats):
             # Saves characters
             for target, target_range in targets:
                 target.save()
-                self.add_experience(max(target.level - self.level, 1) * XP_GAIN_BURST, save=False)
+                if not target.health and target.reward:
+                    self.add_experience(target.reward, save=False)
+                else:
+                    self.add_experience(max(target.level - self.level, 1) * XP_GAIN_BURST, save=False)
         self.save()
         return histories
 
@@ -1019,7 +1023,10 @@ class Character(Entity, Stats):
         history.success = history.hit_roll <= history.hit_chance
         history.critical = history.hit_roll >= CRITICAL_FAIL_D100
         if not is_burst:  # Experience only on single shot
-            self.add_experience(max(target.level - self.level, 1) * XP_GAIN_FIGHT[history.success], save=False)
+            if not target.health and target.reward:
+                self.add_experience(target.reward, save=False)
+            else:
+                self.add_experience(max(target.level - self.level, 1) * XP_GAIN_FIGHT[history.success], save=False)
         if history.success:
             # Apply damage
             attacker_damage_type = (  # Damage type

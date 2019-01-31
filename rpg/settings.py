@@ -187,28 +187,29 @@ class Base(Configuration):
     }
 
     # JSON Web Token Authentication
-    JWT_AUTH = {
-        'JWT_ENCODE_HANDLER': 'common.api.config.jwt_encode_handler',
-        'JWT_DECODE_HANDLER': 'common.api.config.jwt_decode_handler',
-        'JWT_PAYLOAD_HANDLER': 'common.api.config.jwt_payload_handler',
-        'JWT_RESPONSE_PAYLOAD_HANDLER': 'common.api.config.jwt_response_payload_handler',
-        'JWT_SECRET_KEY': SECRET_KEY,
-        'JWT_ALGORITHM': 'HS256',
-        'JWT_VERIFY': True,
-        'JWT_VERIFY_EXPIRATION': True,
-        'JWT_LEEWAY': 0,
-        'JWT_EXPIRATION_DELTA': datetime.timedelta(seconds=3600),
-        'JWT_AUDIENCE': None,
-        'JWT_ISSUER': None,
-        'JWT_ALLOW_REFRESH': True,
-        'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(days=7),
-        'JWT_AUTH_HEADER_PREFIX': 'JWT',
+    SIMPLE_JWT = {
+        'ACCESS_TOKEN_LIFETIME': datetime.timedelta(minutes=5),
+        'REFRESH_TOKEN_LIFETIME': datetime.timedelta(days=1),
+        'ROTATE_REFRESH_TOKENS': False,
+        'BLACKLIST_AFTER_ROTATION': True,
+        'ALGORITHM': 'HS256',
+        'SIGNING_KEY': values.SecretValue(environ_name='SECRET_KEY'),
+        'VERIFYING_KEY': None,
+        'AUTH_HEADER_TYPES': ('Bearer', 'JWT',),
+        'USER_ID_FIELD': 'id',
+        'USER_ID_CLAIM': 'user_id',
+        'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
+        'TOKEN_TYPE_CLAIM': 'token_type',
+        'SLIDING_TOKEN_REFRESH_EXP_CLAIM': 'refresh_exp',
+        'SLIDING_TOKEN_LIFETIME': datetime.timedelta(minutes=5),
+        'SLIDING_TOKEN_REFRESH_LIFETIME': datetime.timedelta(days=1),
     }
 
     # Login URLs
-    LOGIN_URL = values.Value('/login/')
-    LOGIN_REDIRECT_URL = values.Value('/')
-    LOGOUT_URL = values.Value('/logout/')
+    LOGIN_URL = values.Value('login')
+    LOGOUT_URL = values.Value('logout')
+    LOGIN_REDIRECT_URL = values.Value('fallout:index')
+    LOGOUT_REDIRECT_URL = values.Value('fallout:index')
 
     # User substitution
     AUTH_USER_MODEL = 'fallout.Player'
@@ -307,7 +308,6 @@ class Prod(Base):
     """
 
     DEBUG = False
-    SECRET_KEY = values.SecretValue()
 
     # HTTPS/SSL
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
@@ -370,7 +370,6 @@ class Test(Base):
     Configuration de développement
     """
 
-    SECRET_KEY = '1'
     DEBUG = True
     INTERNAL_IPS = ('localhost', '127.0.0.1', '[::1]', 'testserver', '*')
     ALLOWED_HOSTS = INTERNAL_IPS

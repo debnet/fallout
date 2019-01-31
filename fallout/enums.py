@@ -13,6 +13,7 @@ STATS_EXPERIENCE = 'experience'
 STATS_SKILL_POINTS = 'skill_points'
 STATS_PERK_POINTS = 'perk_points'
 STATS_KARMA = 'karma'
+STATS_REWARD = 'reward'
 GENERAL_STATS = (
     (STATS_HEALTH, _("santé")),
     (STATS_ACTION_POINTS, _("points d'action")),
@@ -24,6 +25,7 @@ GENERAL_STATS = (
     (STATS_SKILL_POINTS, _("points de compétence")),
     (STATS_PERK_POINTS, _("points de talent")),
     (STATS_KARMA, _("karma")),
+    (STATS_REWARD, _("récompense")),
 )
 LIST_GENERAL_STATS = dict(GENERAL_STATS)
 LIST_NEEDS = [STATS_RADS, STATS_THIRST, STATS_HUNGER, STATS_SLEEP]
@@ -359,6 +361,7 @@ RACE_SUPER_MUTANT = 'super_mutant'
 RACE_DEATHCLAW = 'deathclaw'
 RACE_ROBOT = 'robot'
 RACE_ANIMAL = 'animal'
+RACE_CREATURE = 'creature'
 RACES = (
     (RACE_HUMAN, _("humain")),
     (RACE_GHOUL, _("ghoule")),
@@ -366,6 +369,7 @@ RACES = (
     (RACE_DEATHCLAW, _("écorcheur")),
     (RACE_ROBOT, _("robot")),
     (RACE_ANIMAL, _("animal")),
+    (RACE_CREATURE, _("créature")),
 )
 LIST_RACES = dict(RACES)
 
