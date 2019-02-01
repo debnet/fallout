@@ -196,7 +196,7 @@ class CharacterAdmin(EntityAdmin):
         for element in queryset:
             element.duplicate()
         self.message_user(request, message=_("Les personnages sélectionnés ont été dupliqués."))
-    duplicate.short_description = _("Dupliquer les objets sélectionnés")
+    duplicate.short_description = _("Dupliquer les personnages sélectionnés")
 
     def randomize(self, request, queryset):
         """
@@ -421,7 +421,7 @@ class EffectAdmin(EntityAdmin):
         for element in queryset:
             element.duplicate()
         self.message_user(request, message=_("Les effets sélectionnés ont été dupliqués."))
-    duplicate.short_description = _("Dupliquer les objets sélectionnés")
+    duplicate.short_description = _("Dupliquer les effets sélectionnés")
 
     def get_queryset(self, request):
         return super().get_queryset(request).select_related('next_effect', 'cancel_effect')
@@ -534,7 +534,7 @@ class LootTemplateAdmin(CommonAdmin):
         for element in queryset:
             element.duplicate()
         self.message_user(request, message=_("Les modèles de butins sélectionnés ont été dupliqués."))
-    duplicate.short_description = _("Dupliquer les objets sélectionnés")
+    duplicate.short_description = _("Dupliquer les butins sélectionnés")
 
 
 @admin.register(RollHistory)

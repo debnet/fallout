@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-01-29 08:40+0100\n"
+"POT-Creation-Date: 2019-02-01 00:08+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -51,7 +51,9 @@ msgstr "(Speciality +{}) "
 msgid "Les personnages sélectionnés ont été dupliqués."
 msgstr "Selected characters were duplicated."
 
-msgid "Dupliquer les objets sélectionnés"
+#, fuzzy
+#| msgid "Dupliquer les objets sélectionnés"
+msgid "Dupliquer les personnages sélectionnés"
 msgstr "Duplicate selected objects"
 
 msgid "Les compétences des personnages sélectionnés ont été générées avec succès."
@@ -91,6 +93,9 @@ msgstr "Effects and ammunitions"
 msgid "Les objets sélectionnés ont été dupliqués."
 msgstr "Selected items were duplicated."
 
+msgid "Dupliquer les objets sélectionnés"
+msgstr "Duplicate selected objects"
+
 msgid "Etats"
 msgstr "Status"
 
@@ -103,8 +108,18 @@ msgstr "Damages?"
 msgid "Les effets sélectionnés ont été dupliqués."
 msgstr "Selected effects were duplicated."
 
+#, fuzzy
+#| msgid "Dupliquer les objets sélectionnés"
+msgid "Dupliquer les effets sélectionnés"
+msgstr "Duplicate selected objects"
+
 msgid "Les modèles de butins sélectionnés ont été dupliqués."
 msgstr "Selected loot templates were duplicated."
+
+#, fuzzy
+#| msgid "Dupliquer les objets sélectionnés"
+msgid "Dupliquer les butins sélectionnés"
+msgstr "Duplicate selected objects"
 
 msgid "Jet"
 msgstr "Roll"

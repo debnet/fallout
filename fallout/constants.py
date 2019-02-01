@@ -5,18 +5,18 @@ from fallout.enums import *  # noqa
 # Body part modifiers (ranged, melee, critical)
 BODY_PARTS_MODIFIERS = {
     PART_TORSO: (0, 0, 0),
-    PART_LEGS: (-10, -5, 10),
-    PART_ARMS: (-20, -10, 20),
-    PART_HEAD: (-30, -15, 25),
-    PART_EYES: (-40, -20, 30),
+    PART_LEGS: (-20, -10, 5),
+    PART_ARMS: (-30, -15, 10),
+    PART_HEAD: (-40, -20, 15),
+    PART_EYES: (-60, -30, 20),
 }
 
 # Body part randomly hit if not targetted (body part, chance)
 BODY_PARTS_RANDOM_CHANCES = (
     (PART_EYES, 1),
-    (PART_HEAD, 5),
-    (PART_ARMS, 10),
-    (PART_LEGS, 15),
+    (PART_HEAD, 2),
+    (PART_ARMS, 5),
+    (PART_LEGS, 10),
     (PART_TORSO, 100),
 )
 

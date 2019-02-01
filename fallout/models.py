@@ -1022,11 +1022,6 @@ class Character(Entity, Stats):
         history.hit_roll = randint(1, 100)
         history.success = history.hit_roll <= history.hit_chance
         history.critical = history.hit_roll >= CRITICAL_FAIL_D100
-        if not is_burst:  # Experience only on single shot
-            if not target.health and target.reward:
-                self.add_experience(target.reward, save=False)
-            else:
-                self.add_experience(max(target.level - self.level, 1) * XP_GAIN_FIGHT[history.success], save=False)
         if history.success:
             # Apply damage
             attacker_damage_type = (  # Damage type
@@ -1107,6 +1102,11 @@ class Character(Entity, Stats):
         # Save character and return history
         self.action_points -= max(ap_cost, 0)
         if not is_burst:
+            # Experience only on single shot
+            if not target.health and target.reward:
+                self.add_experience(target.reward, save=False)
+            else:
+                self.add_experience(max(target.level - self.level, 1) * XP_GAIN_FIGHT[history.success], save=False)
             self.save()
         if log:
             history.save()
@@ -1256,7 +1256,7 @@ class Character(Entity, Stats):
         assert value <= self.skill_points, _("Ce personnage n'a pas assez de points de compétences.")
         assert stats in LIST_SKILLS, _("Cette compétence ne peut être améliorée.")
         value = value * (2 if stats in self.tag_skills else 1)
-        setattr(self, stats, getattr(self, stats) + value)
+        self.modify_value(stats, value)
         if save:
             self.save()
         return getattr(self, stats)
@@ -1681,13 +1681,18 @@ class Equipment(CommonModel):
         assert self.quantity > 0, _(
             "Le personnage doit posséder au moins un exemplaire de cet objet pour l'utiliser.")
         effects = []
+        change_character = False
         for effect in self.item.effects.all():
             effect.affect(self.character)
+        for modifier in self.item.modifiers.all():
+            self.character.modify_value(modifier.stats, modifier.value)
+            change_character = True
         self.quantity -= 1
         if save:
             self.save()
         if is_action:
             self.character.action_points -= AP_COST_USE
+        if change_character or is_action:
             self.character.save()
         return effects
 
@@ -2614,8 +2619,8 @@ class FightHistory(CommonModel):
         if not self.damage:
             return _("{label} : {status}").format(
                 label=self.label, status=self.get_status_display())
-        return _("{label} : {real_damage} {damage_type} infligés ({body_part})").format(
-            label=self.label, real_damage=self.damage.real_damage,
+        return _("{label} : {status} - {real_damage} {damage_type} infligés ({body_part})").format(
+            label=self.label, status=self.get_status_display(), real_damage=self.damage.real_damage,
             damage_type=self.damage.get_damage_type_display(), body_part=self.get_body_part_display())
 
     def __str__(self) -> str:
