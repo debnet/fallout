@@ -51,10 +51,8 @@ msgstr "(Speciality +{}) "
 msgid "Les personnages sélectionnés ont été dupliqués."
 msgstr "Selected characters were duplicated."
 
-#, fuzzy
-#| msgid "Dupliquer les objets sélectionnés"
 msgid "Dupliquer les personnages sélectionnés"
-msgstr "Duplicate selected objects"
+msgstr "Duplicate selected characters"
 
 msgid "Les compétences des personnages sélectionnés ont été générées avec succès."
 msgstr "Skills of selected characters were generated successfully."
@@ -108,18 +106,14 @@ msgstr "Damages?"
 msgid "Les effets sélectionnés ont été dupliqués."
 msgstr "Selected effects were duplicated."
 
-#, fuzzy
-#| msgid "Dupliquer les objets sélectionnés"
 msgid "Dupliquer les effets sélectionnés"
-msgstr "Duplicate selected objects"
+msgstr "Duplicate selected effects"
 
 msgid "Les modèles de butins sélectionnés ont été dupliqués."
 msgstr "Selected loot templates were duplicated."
 
-#, fuzzy
-#| msgid "Dupliquer les objets sélectionnés"
 msgid "Dupliquer les butins sélectionnés"
-msgstr "Duplicate selected objects"
+msgstr "Duplicate selected loots"
 
 msgid "Jet"
 msgstr "Roll"
