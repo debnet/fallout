@@ -26,7 +26,8 @@ services:
                python manage.py collectstatic --no-input &&
                python manage.py compilemessages &&
                python manage.py loaddata admin &&
-               python manage.py loaddata fallout2 &&
+               python manage.py loaddata items &&
+               python manage.py loaddata creatures &&
                python manage.py runserver 0.0.0.0:8000"
 
   postgres:
