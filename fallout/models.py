@@ -761,6 +761,19 @@ class Character(Entity, Stats):
         # Save the changes
         self.save()
 
+    def generate_stats(self, save=True) -> None:
+        """
+        Génère définitivement les statistiques secondaires et les affecte au personnage
+        :param replace: Remplacer les valeurs déjà enregistrées ou les additionne dans le cas contraire
+        :param save: Sauvegarder les modifications sur le personnage ?
+        :return: Rien
+        """
+        stats = Stats.get(self)
+        for field in Stats._meta.fields:
+            setattr(self, field.name, getattr(stats, field.name, 0))
+        if save:
+            self.save()
+
     def update_needs(self, hours: float = 0.0, radiation: int = 0, resting: bool = True,
                      needs: bool = True, save: bool = True) -> None:
         """

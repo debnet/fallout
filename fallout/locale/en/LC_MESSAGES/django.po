@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-02-01 00:08+0100\n"
+"POT-Creation-Date: 2019-02-06 09:03+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -75,6 +75,9 @@ msgstr "Burst attack many characters"
 
 msgid "Lâcher tous les équipements"
 msgstr "Drop all equipments"
+
+msgid "Générer les statistiques"
+msgstr "Generate stats"
 
 msgid "Armes uniquement"
 msgstr "Weapons only"
@@ -1319,8 +1322,9 @@ msgstr "damage history"
 msgid "{label} : {status}"
 msgstr "{label}: {status}"
 
-#, python-brace-format
-msgid "{label} : {real_damage} {damage_type} infligés ({body_part})"
+#, fuzzy, python-brace-format
+#| msgid "{label} : {real_damage} {damage_type} infligés ({body_part})"
+msgid "{label} : {status} - {real_damage} {damage_type} infligés ({body_part})"
 msgstr "{label}: {real_damage} {damage_type} inflicted ({body_part})"
 
 #, python-brace-format

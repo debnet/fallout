@@ -169,7 +169,7 @@ class CharacterAdmin(EntityAdmin):
     list_filter = ('campaign', 'user', 'race', 'is_player', 'is_active', )
     search_fields = ('name', 'title', 'description', )
     ordering = ('name', )
-    actions = ('duplicate', 'randomize', 'roll', 'fight', 'burst', )
+    actions = ('duplicate', 'randomize', 'roll', 'fight', 'burst', 'generate_stats', 'add_stats', )
     autocomplete_fields = ('campaign', 'user', )
     save_on_top = True
     actions_on_bottom = True
@@ -252,8 +252,7 @@ class CharacterAdmin(EntityAdmin):
                             level=ROLL_LEVELS[(result.success, result.critical)])
                     except Exception as error:
                         self.message_user(
-                            request,
-                            _("{character} : {error}").format(character=character, error=str(error)),
+                            request, _("{character} : {error}").format(character=character, error=str(error)),
                             level=messages.ERROR)
                 return HttpResponseRedirect(request.get_full_path())
         else:
@@ -270,6 +269,11 @@ class CharacterAdmin(EntityAdmin):
         for character in queryset:
             character.loot(empty=True)
     loot.short_description = _("Lâcher tous les équipements")
+
+    def generate_stats(self, request, queryset):
+        for character in queryset:
+            character.generate_stats()
+    generate_stats.short_description = _("Générer les statistiques")
 
     def get_queryset(self, request):
         return super().get_queryset(request).select_related('statistics')
