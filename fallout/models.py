@@ -756,23 +756,37 @@ class Character(Entity, Stats):
             self.modify_value(skill, 2 if skill in self.tag_skills else 1)
             skill_points -= 1
         # Reset health and action points to their maximum
-        self.health = self.stats.max_health
-        self.action_points = self.stats.max_action_points
-        # Save the changes
-        self.save()
+        self.heal()
 
     def generate_stats(self, save=True) -> None:
         """
         Génère définitivement les statistiques secondaires et les affecte au personnage
-        :param replace: Remplacer les valeurs déjà enregistrées ou les additionne dans le cas contraire
         :param save: Sauvegarder les modifications sur le personnage ?
         :return: Rien
         """
         stats = Stats.get(self)
         for field in Stats._meta.fields:
             setattr(self, field.name, getattr(stats, field.name, 0))
+        self.heal(save=save)
+
+    def heal(self, health=True, action_points=True, needs=True, save=True):
+        """
+        Soigne la santé, réinitialise les points d'action et réduit les besoins
+        :param health: Soigner la santé ?
+        :param action_points: Réinitialiser les points d'action ?
+        :param needs: Réduire les besoins ?
+        :param save: Sauvegarder les modifications sur le personnage ?
+        :return: Rien
+        """
+        if health:
+            self.health = self.stats.max_health
+        if action_points:
+            self.action_points = self.stats.max_action_points
+        if needs:
+            for stats_name, formula in COMPUTED_NEEDS:
+                setattr(self, stats_name, 0)
         if save:
-            self.save()
+            self.save(reset=False)
 
     def update_needs(self, hours: float = 0.0, radiation: int = 0, resting: bool = True,
                      needs: bool = True, save: bool = True) -> None:
