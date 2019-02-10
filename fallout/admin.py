@@ -144,7 +144,7 @@ class CharacterAdmin(EntityAdmin):
     fieldsets = tuple([
         (_("Informations générales"), dict(
             fields=('name', 'title', 'description', 'image', 'thumbnail', 'race', 'level',
-                    'is_player', 'is_active', 'is_resting', 'has_stats', ),
+                    'is_player', 'is_active', 'is_resting', 'has_stats', 'has_needs', ),
             classes=('wide', ),
         )),
         (_("Informations techniques"), dict(
@@ -166,7 +166,7 @@ class CharacterAdmin(EntityAdmin):
         'name', 'race', 'level', 'is_player', 'is_active',
         'health', 'current_max_health', 'action_points', 'current_max_action_points', 'experience', 'karma')
     list_editable = ('health', 'action_points', 'experience', 'karma', 'is_active',)
-    list_filter = ('campaign', 'user', 'race', 'is_player', 'is_active', )
+    list_filter = ('campaign', 'user', 'race', 'is_player', 'is_active', 'has_stats', 'has_needs', )
     search_fields = ('name', 'title', 'description', )
     ordering = ('name', )
     actions = ('duplicate', 'randomize', 'roll', 'fight', 'burst', 'generate_stats', 'add_stats', )

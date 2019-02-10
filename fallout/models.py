@@ -434,6 +434,7 @@ class Character(Entity, Stats):
     is_active = models.BooleanField(default=True, db_index=True, verbose_name=_("actif ?"))
     is_resting = models.BooleanField(default=False, verbose_name=_("au repos ?"))
     has_stats = models.BooleanField(default=True, verbose_name=_("stats calculées ?"))
+    has_needs = models.BooleanField(default=True, verbose_name=_("besoins activés ?"))
     # Primary statistics
     health = models.PositiveSmallIntegerField(default=0, verbose_name=_("santé"))
     action_points = models.PositiveSmallIntegerField(default=0, verbose_name=_("points d'action"))
@@ -799,6 +800,8 @@ class Character(Entity, Stats):
         :param save: Sauvegarder les modifications sur le personnage ?
         :return: Rien
         """
+        if not self.has_needs:
+            return
         if needs:
             for stats_name, formula in COMPUTED_NEEDS:
                 self.modify_value(stats_name, formula(self.stats, self) * hours)
