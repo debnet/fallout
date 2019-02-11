@@ -12,6 +12,6 @@ os.environ.setdefault("DJANGO_CONFIGURATION", 'Prod')
 importer.install()
 
 # Initialize Celery application
-app = celery.Celery('nouvelleoffre')
+app = celery.Celery('fallout')
 app.config_from_object('django.conf:settings', namespace='CELERY')
 app.autodiscover_tasks()
