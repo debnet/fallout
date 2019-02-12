@@ -169,7 +169,7 @@ class CharacterAdmin(EntityAdmin):
     list_filter = ('campaign', 'user', 'race', 'is_player', 'is_active', 'has_stats', 'has_needs', )
     search_fields = ('name', 'title', 'description', )
     ordering = ('name', )
-    actions = ('duplicate', 'randomize', 'roll', 'fight', 'burst', 'generate_stats', 'add_stats', )
+    actions = ('duplicate', 'randomize', 'generate_stats', 'roll', 'fight', 'burst', 'heal', )
     autocomplete_fields = ('campaign', 'user', )
     save_on_top = True
     actions_on_bottom = True
@@ -191,11 +191,25 @@ class CharacterAdmin(EntityAdmin):
 
     def duplicate(self, request, queryset):
         """
-        Action de duplication
+        Action spécifique pour dupliquer un ou plusieurs personnages
         """
-        for element in queryset:
-            element.duplicate()
-        self.message_user(request, message=_("Les personnages sélectionnés ont été dupliqués."))
+        if 'duplicate' in request.POST:
+            form = DuplicateCharacterForm(request.POST)
+            if form.is_valid():
+                for character in queryset.order_by('name'):
+                    character_name = character.name
+                    for nb in range(form.cleaned_data['count']):
+                        character.name = character_name
+                        character.duplicate(campaign=form.cleaned_data['campaign'])
+                self.message_user(
+                    request,
+                    message=_("Les personnages sélectionnés ont été dupliqués."),
+                    level=messages.SUCCESS)
+                return HttpResponseRedirect(request.get_full_path())
+        else:
+            form = DuplicateCharacterForm()
+        return render(request, 'fallout/character/admin/duplicate.html', {
+            'form': form, 'characters': queryset, 'targets': request.POST.getlist(admin.ACTION_CHECKBOX_NAME)})
     duplicate.short_description = _("Dupliquer les personnages sélectionnés")
 
     def randomize(self, request, queryset):
@@ -274,6 +288,11 @@ class CharacterAdmin(EntityAdmin):
         for character in queryset:
             character.generate_stats()
     generate_stats.short_description = _("Générer les statistiques")
+
+    def heal(self, request, queryset):
+        for character in queryset:
+            character.heal()
+    heal.short_description = _("Soigner")
 
     def get_queryset(self, request):
         return super().get_queryset(request).select_related('statistics')

@@ -229,6 +229,10 @@ SURVIVAL_EFFECTS = (
     (STATS_SLEEP, SLEEP_EFFECTS),
 )
 
+# Survival modifiers when resting
+NEEDS_RESTING_RATE = 0.75
+NEEDS_NORMAL_RATE = 1.00
+
 # Critical rolls
 CRITICAL_FAIL_D10 = 10
 CRITICAL_FAIL_D100 = 96
@@ -331,8 +335,8 @@ COMPUTED_STATS = (
 )
 
 # Computed needs per hour
-COMPUTED_NEEDS = {
-    ('thirst', lambda s, c: max(1, (20 - s.endurance) * 2)),
-    ('hunger', lambda s, c: max(1, (16 - s.endurance) * 2)),
-    ('sleep', lambda s, c: max(1, (14 - s.endurance) * 2)),
-}
+COMPUTED_NEEDS = (
+    ('thirst', lambda s, c: max(1, 20 - s.endurance)),
+    ('hunger', lambda s, c: max(1, 15 - s.endurance)),
+    ('sleep', lambda s, c: max(1, 10 - s.endurance)),
+)

@@ -6,6 +6,14 @@ from fallout.models import *  # noqa
 from fallout.enums import ROLL_STATS, BODY_PARTS
 
 
+class DuplicateCharacterForm(forms.Form):
+    """
+    Formulaire pour dupliquer un ou plusieurs personnages
+    """
+    count = forms.IntegerField(min_value=0, initial=1, label=_("Nombre"))
+    campaign = forms.ModelChoiceField(required=False, queryset=Campaign.objects.order_by('name'), label=_("Campagne"))
+
+
 class RandomizeCharacterForm(forms.Form):
     """
     Formulaire pour randomiser les compétences d'un personnage

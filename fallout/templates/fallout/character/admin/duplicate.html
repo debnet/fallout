@@ -1,0 +1,21 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block content %}
+    <h1>{% trans "Dupliquer des personnages" %}</h1>
+    <p>{% trans "Les personnages suivants vont être dupliqués :" %}</p>
+    <ul>
+        {% for character in characters %}
+            <li>{{ character }}</li>
+        {% endfor %}
+    </ul>
+    <form action="" method="post">
+        {{ form.as_p }}
+        {% csrf_token %}
+        {% for target in targets %}
+            <input type="hidden" name="_selected_action" value="{{ target }}" />
+        {% endfor %}
+        <input type="hidden" name="action" value="duplicate" />
+        <button type="submit" name="duplicate">{% trans "Valider" %}</button>
+    </form>
+{% endblock %}

@@ -800,11 +800,11 @@ class Character(Entity, Stats):
         :param save: Sauvegarder les modifications sur le personnage ?
         :return: Rien
         """
-        if not self.has_needs:
-            return
-        if needs:
+        if needs and self.has_needs:
             for stats_name, formula in COMPUTED_NEEDS:
-                self.modify_value(stats_name, formula(self.stats, self) * hours)
+                rate = -1 if stats_name == STATS_SLEEP and (resting or self.is_resting) else 1
+                rate *= NEEDS_RESTING_RATE if resting or self.is_resting else NEEDS_NORMAL_RATE
+                self.modify_value(stats_name, formula(self.stats, self) * hours * rate)
         if radiation:
             self.damage(raw_damage=radiation * hours, damage_type=DAMAGE_RADIATION, save=False, log=False)
         healing_rate_modifier = HEALING_RATE_RESTING_MULT if (resting or self.is_resting) else 1.0
@@ -1253,16 +1253,19 @@ class Character(Entity, Stats):
                     damages.append(damage)
         return damages
 
-    def duplicate(self, equipments: bool = True, effects: bool = True) -> 'Character':
+    def duplicate(self, equipments: bool = True, effects: bool = True,
+                  campaign: Union[int, 'Campaign'] = None) -> 'Character':
         """
         Duplique ce personnage
         :param equipments: Duplique également les équipements
         :param effects: Duplique également les effets
+        :param campaign: Campagne de destination
         :return: Personnage
         """
         assert self.pk, _("Ce personnage doit être préalablement enregistré avant d'être dupliqué.")
         character_id = self.pk
-        self.name = f"*{self.name}"
+        self.name = f"* {self.name}"
+        self.campaign_id = getattr(campaign, 'pk', campaign) or self.campaign_id
         self.save(force_insert=True)
         if equipments:
             for equipment in Equipment.objects.filter(character_id=character_id):
@@ -1540,7 +1543,7 @@ class Item(Entity, Resistance, Damage):
         assert self.pk, _("Cet objet doit être préalablement enregistré avant d'être dupliqué.")
         item_id = self.pk
         effects, ammunitions = self.effects.values_list('id', flat=True), self.ammunitions.values_list('id', flat=True)
-        self.name = f"*{self.name}"
+        self.name = f"* {self.name}"
         self.save(force_insert=True)
         for modifier in ItemModifier.objects.filter(item_id=item_id):
             modifier.pk, modifier.id, modifier.item_id = None, None, self.pk
@@ -1926,7 +1929,7 @@ class Effect(Entity, Damage):
         """
         assert self.pk, _("Cet effet doit être préalablement enregistré avant d'être dupliqué.")
         effect_id = self.pk
-        self.name = f"*{self.name}"
+        self.name = f"* {self.name}"
         self.save(force_insert=True)
         for modifier in EffectModifier.objects.filter(effect_id=effect_id):
             modifier.pk, modifier.id, modifier.effect_id = None, None, self.pk
@@ -2305,7 +2308,7 @@ class LootTemplate(CommonModel):
         """
         assert self.pk, _("Ce modèle de butin doit être préalablement enregistré avant d'être dupliqué.")
         template_id = self.pk
-        self.name = f"*{self.name}"
+        self.name = f"* {self.name}"
         self.save(force_insert=True)
         for item in LootTemplateItem.objects.filter(template_id=template_id):
             item.pk, item.id, item.template_id = None, None, self.pk

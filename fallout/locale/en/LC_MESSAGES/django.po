@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-02-06 09:03+0100\n"
+"POT-Creation-Date: 2019-02-12 18:31+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -78,6 +78,9 @@ msgstr "Drop all equipments"
 
 msgid "Générer les statistiques"
 msgstr "Generate stats"
+
+msgid "Soigner"
+msgstr "Heal"
 
 msgid "Armes uniquement"
 msgstr "Weapons only"
@@ -736,6 +739,12 @@ msgstr "success"
 msgid "critique"
 msgstr "critical"
 
+msgid "Nombre"
+msgstr "Count"
+
+msgid "Campagne"
+msgstr "Campaign"
+
 msgid "Niveau"
 msgstr "Level"
 
@@ -1392,9 +1401,6 @@ msgstr ""
 "\n"
 "You are currently on the character pool that is not associated with any particular campaign so most campaign-related actions (such as time and effects management) are disabled."
 
-msgid "Campagne"
-msgstr "Campaign"
-
 msgid "Butins"
 msgstr "Loots"
 
@@ -1533,11 +1539,17 @@ msgstr "Item"
 msgid "Ajouter"
 msgstr "Add"
 
-msgid "Les personnages suivants vont attaquer :"
-msgstr "The following characters attack:"
+msgid "Dupliquer des personnages"
+msgstr "Duplicate characters"
+
+msgid "Les personnages suivants vont être dupliqués :"
+msgstr "The following characters will be duplicated:"
 
 msgid "Valider"
 msgstr "Accept"
+
+msgid "Les personnages suivants vont attaquer :"
+msgstr "The following characters attack:"
 
 msgid "Les personnages suivants seront affectés :"
 msgstr "The follwing characters will be affected:"
