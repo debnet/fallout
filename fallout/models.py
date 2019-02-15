@@ -2336,8 +2336,8 @@ class LootTemplateItem(CommonModel):
     chance = models.PositiveSmallIntegerField(default=100, verbose_name=_("chance"))
     min_quantity = models.PositiveIntegerField(default=1, verbose_name=_("nombre min."))
     max_quantity = models.PositiveIntegerField(default=1, null=True, verbose_name=_("nombre max."))
-    min_condition = models.PositiveSmallIntegerField(default=1.0, verbose_name=_("état min."))
-    max_condition = models.PositiveSmallIntegerField(default=1.0, verbose_name=_("état max."))
+    min_condition = models.PositiveSmallIntegerField(default=100, verbose_name=_("état min."))
+    max_condition = models.PositiveSmallIntegerField(default=100, verbose_name=_("état max."))
 
     def __str__(self) -> str:
         return f"({self.template}) {self.item}"
