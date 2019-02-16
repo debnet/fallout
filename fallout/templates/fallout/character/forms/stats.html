@@ -6,7 +6,7 @@
             <th class="text-center" colspan="2">{{ label }}</th>
         </thead>
         <tbody>
-            {% if not view or not authorized %}
+            {% if not view and authorized %}
                 <tr>
                     <td>
                         <label for="{{ code }}-modifier" class="d-inline">{% trans "modificateur" %}</label>
