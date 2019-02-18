@@ -426,6 +426,7 @@ class Character(Entity, Stats):
     name = models.CharField(max_length=200, verbose_name=_("nom"))
     title = models.CharField(max_length=200, blank=True, verbose_name=_("titre"))
     description = models.TextField(blank=True, verbose_name=_("description"))
+    background = models.TextField(blank=True, verbose_name=_("contexte"))
     image = models.ImageField(blank=True, null=True, upload_to='characters', verbose_name=_("image"))
     thumbnail = models.CharField(blank=True, max_length=100, choices=get_thumbnails('characters'), verbose_name=_("miniature"))
     race = models.CharField(max_length=20, choices=RACES, default=RACE_HUMAN, db_index=True, verbose_name=_("race"))
@@ -477,7 +478,7 @@ class Character(Entity, Stats):
             return self
         try:
             assert not self.statistics.obsolete
-        except:
+        except:  # noqa
             stats = self._stats.get(self.pk) or Stats.get(self)
             if self.pk:
                 self._stats[self.pk] = stats
@@ -841,16 +842,15 @@ class Character(Entity, Stats):
         :param empty: Vide l'inventaire du joueur ?
         :return: Liste des butins
         """
-        if not self.campaign:
-            return None
         loots = []
-        equipements = self.inventory
-        for equipement in equipements:
-            if not equipement.item.is_droppable:
-                continue
-            loots.append(Loot.create(campaign=self.campaign, item=equipement.item, condition=equipement.condition))
+        for equipement in self.inventory.exclude(slot=''):
+            equipement.equip(is_action=False)
+        for equipement in self.inventory.filter(item__is_droppable=True):
+            loots.append(Loot.create(
+                campaign=self.campaign, item=equipement.item,
+                condition=equipement.condition, quantity=equipement.quantity))
         if empty:
-            equipements.delete()
+            self.inventory.delete()
         return loots
 
     def burst(self, targets: List[Tuple[Union['Character', int], int]], hit_chance_modifier: int = 0,
@@ -1741,6 +1741,8 @@ class Equipment(CommonModel):
             "Le personnage doit posséder la quantité d'objets qu'il souhaite jeter.")
         assert not is_action or self.character.action_points >= AP_COST_USE, _(
             "Le personnage ne possède plus assez de points d'actions pour jeter cet objet.")
+        if self.slot:
+            self.equip(is_action=False)
         loot = Loot.create(
             campaign=self.character.campaign, item=self.item,
             quantity=quantity, condition=self.condition)

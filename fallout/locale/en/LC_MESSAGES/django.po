@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-02-12 18:31+0100\n"
+"POT-Creation-Date: 2019-02-18 14:43+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -79,8 +79,11 @@ msgstr "Drop all equipments"
 msgid "Générer les statistiques"
 msgstr "Generate stats"
 
-msgid "Soigner"
-msgstr "Heal"
+msgid "Soigner les personnages sélectionnés"
+msgstr "Heal selected characters"
+
+msgid "Equiper les personnages sélectionnés"
+msgstr "Equip selected characters"
 
 msgid "Armes uniquement"
 msgstr "Weapons only"
@@ -769,6 +772,42 @@ msgstr "Target"
 msgid "Action ?"
 msgstr "Action?"
 
+msgid "Armure"
+msgstr "Armor"
+
+msgid "Condition min. armure"
+msgstr "Armor min. condition"
+
+msgid "Condition max. armure"
+msgstr "Armor max. condition"
+
+msgid "Casque"
+msgstr "Helmet"
+
+msgid "Condition min. casque"
+msgstr "Helmet min. condition"
+
+msgid "Condition max. casque"
+msgstr "Helmet max. condition"
+
+msgid "Arme"
+msgstr "Weapon"
+
+msgid "Condition min. arme"
+msgstr "Weapon min. condition"
+
+msgid "Condition max. arme"
+msgstr "Weapon max. condition"
+
+msgid "Munition"
+msgstr "Ammunition"
+
+msgid "Nombre min. de munitions"
+msgstr "Min. ammo count"
+
+msgid "Nombre max. de munitions"
+msgstr "Max. ammo count"
+
 msgid "Importe des créatures"
 msgstr "Import creatures"
 
@@ -930,6 +969,9 @@ msgstr "stats"
 
 msgid "utilisateur"
 msgstr "user"
+
+msgid "contexte"
+msgstr "background"
 
 msgid "race"
 msgstr "race"
@@ -1547,6 +1589,12 @@ msgstr "The following characters will be duplicated:"
 
 msgid "Valider"
 msgstr "Accept"
+
+msgid "Equiper les personnages"
+msgstr "Equip characters"
+
+msgid "Les personnages suivants vont être équipés :"
+msgstr "The following characters will be equiped:"
 
 msgid "Les personnages suivants vont attaquer :"
 msgstr "The following characters attack:"

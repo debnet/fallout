@@ -1,70 +1,72 @@
 {% load i18n %}
 
 <div class="tab-pane fade" role="tabpanel" id="campaign-loots">
-    {% if authorized %}
-        <form method="post" action="{{ request.path }}" class="form-inline justify-content-center">
-            <div class="form-row align-items-center">
-                <div class="col-auto input-group">
-                    <div class="input-group-prepend">
-                        <label for="loot-character-list" class="input-group-text">{% trans "Personnage" %}</label>
+    <div id="campaign-loots-form" class="collapse-form collapse show">
+        {% if authorized %}
+            <form method="post" action="{{ request.path }}" class="form-inline justify-content-center">
+                <div class="form-row align-items-center">
+                    <div class="col-auto input-group">
+                        <div class="input-group-prepend">
+                            <label for="loot-character-list" class="input-group-text">{% trans "Personnage" %}</label>
+                        </div>
+                        <select name="character" id="loot-character-list" class="form-control custom-select">
+                            <option value="">{% trans "Aucun" %}</option>
+                            {% for character in characters %}
+                                <option value="{{ character.id }}">{{ character.name }}</option>
+                            {% endfor %}
+                        </select>
                     </div>
-                    <select name="character" id="loot-character-list" class="form-control custom-select">
-                        <option value="">{% trans "Aucun" %}</option>
-                        {% for character in characters %}
-                            <option value="{{ character.id }}">{{ character.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-auto">
-                    <label class="sr-only" for="loot-name">{% trans "Butin" %}</label>
-                    <input type="text" class="form-control" id="loot-name"
-                           name="loot" data-for="loot-id" placeholder="{% trans "Butin" %}">
-                    <input type="hidden" id="loot-id" name="loot-id" />
-                </div>
-                <div class="col-auto">
-                    <button type="submit" class="btn btn-primary"
-                            name="method" value="open">{% trans "Ouvrir" %}</button>
-                    <button type="submit" class="btn btn-danger"
-                            name="method" value="clear">{% trans "Vider" %}</button>
-                    <input type="hidden" name="type" value="loot" />
-                    {% csrf_token %}
-                </div>
-            </div>
-        </form>
-        <form method="post" action="{{ request.path }}" class="form-inline justify-content-center">
-            <div class="form-row align-items-center pt-3">
-                <div class="col-auto input-group">
-                    <div class="input-group-prepend">
-                        <label for="item-quantity" class="input-group-text">{% trans "Quantité" %}</label>
+                    <div class="col-auto">
+                        <label class="sr-only" for="loot-name">{% trans "Butin" %}</label>
+                        <input type="text" class="form-control" id="loot-name"
+                               name="loot" data-for="loot-id" placeholder="{% trans "Butin" %}">
+                        <input type="hidden" id="loot-id" name="loot-id" />
                     </div>
-                    <input type="number" class="form-control" id="item-quantity"
-                           name="quantity" placeholder="{% trans "Qte" %}" value="1" style="width: 80px"
-                           aria-valuemin="1" min="1">
-                </div>
-                <div class="col-auto input-group">
-                    <div class="input-group-prepend">
-                        <label for="item-condition" class="input-group-text">{% trans "Condition" %}</label>
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-primary"
+                                name="method" value="open">{% trans "Ouvrir" %}</button>
+                        <button type="submit" class="btn btn-danger"
+                                name="method" value="clear">{% trans "Vider" %}</button>
+                        <input type="hidden" name="type" value="loot" />
+                        {% csrf_token %}
                     </div>
-                    <input type="number" class="form-control" id="item-condition"
-                           name="condition" placeholder="{% trans "Cond" %}" value="100" style="width: 80px"
-                           aria-valuemin="1" min="1" aria-valuemax="100" max="100">
                 </div>
-                <div class="col-auto">
-                    <label class="sr-only" for="item-name">{% trans "Objet" %}</label>
-                    <input type="text" class="form-control mb-2 mb-sm-0" id="item-name"
-                           name="item-name" data-for="item-id" placeholder="{% trans "Objet" %}">
-                    <input type="hidden" id="item-id" name="item-id" />
+            </form>
+            <form method="post" action="{{ request.path }}" class="form-inline justify-content-center">
+                <div class="form-row align-items-center pt-3">
+                    <div class="col-auto input-group">
+                        <div class="input-group-prepend">
+                            <label for="item-quantity" class="input-group-text">{% trans "Quantité" %}</label>
+                        </div>
+                        <input type="number" class="form-control" id="item-quantity"
+                               name="quantity" placeholder="{% trans "Qte" %}" value="1" style="width: 80px"
+                               aria-valuemin="1" min="1">
+                    </div>
+                    <div class="col-auto input-group">
+                        <div class="input-group-prepend">
+                            <label for="item-condition" class="input-group-text">{% trans "Condition" %}</label>
+                        </div>
+                        <input type="number" class="form-control" id="item-condition"
+                               name="condition" placeholder="{% trans "Cond" %}" value="100" style="width: 80px"
+                               aria-valuemin="1" min="1" aria-valuemax="100" max="100">
+                    </div>
+                    <div class="col-auto">
+                        <label class="sr-only" for="item-name">{% trans "Objet" %}</label>
+                        <input type="text" class="form-control mb-2 mb-sm-0" id="item-name"
+                               name="item-name" data-for="item-id" placeholder="{% trans "Objet" %}">
+                        <input type="hidden" id="item-id" name="item-id" />
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-primary"
+                            name="method" value="add">{% trans "Ajouter" %}</button>
+                        <input type="hidden" name="type" value="loot" />
+                        {% csrf_token %}
+                    </div>
                 </div>
-                <div class="col-auto">
-                    <button type="submit" class="btn btn-primary"
-                        name="method" value="add">{% trans "Ajouter" %}</button>
-                    <input type="hidden" name="type" value="loot" />
-                    {% csrf_token %}
-                </div>
-            </div>
-        </form>
-        <hr />
-    {% endif %}
+            </form>
+            <hr />
+        {% endif %}
+    </div>
     {% with loots=loots %}
         {% include "fallout/campaign/forms/loots.html" %}
     {% endwith %}

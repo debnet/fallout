@@ -457,4 +457,3 @@ def get_label(success, critical):
     return ' '.join((
         str([LABEL_FAIL, LABEL_SUCCESS][success]),
         str(['', LABEL_CRITICAL][critical]))).strip()
-

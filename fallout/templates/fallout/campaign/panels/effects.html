@@ -1,63 +1,65 @@
 {% load i18n l10n custom %}
 
 <div class="tab-pane fade" role="tabpanel" id="campaign-effects">
-    <div class="col">
-        <h6>
-            {% trans "Niveau de radioactivité" %}
-            <small class="text-muted">{% trans "(en rad/h)" %}</small>
-        </h6>
+    <div id="campaign-effects-form" class="collapse-form collapse show">
+        <div class="col">
+            <h6>
+                {% trans "Niveau de radioactivité" %}
+                <small class="text-muted">{% trans "(en rad/h)" %}</small>
+            </h6>
+            {% if authorized %}
+                <form method="post" action="{{ request.path }}" class="form-inline justify-content-center float-right ml-3">
+                    <div class="form-row align-items-center">
+                        <div class="input-group input-group-sm">
+                            <input type="number" class="form-control" id="radiation" name="radiation"
+                                   placeholder="{% trans "rad/h" %}" value="{{ campaign.radiation }}" style="width: 80px"
+                                   aria-valuemin="0" min="0">
+                        </div>
+                        <div class="col-auto">
+                            <button type="submit" class="btn btn-sm btn-warning"
+                                    name="method" value="set" >{% trans "Modifier" %}</button>
+                            <input type="hidden" name="type" value="radiation" />
+                            {% csrf_token %}
+                        </div>
+                    </div>
+                </form>
+            {% endif %}
+            <div class="progress" style="height: 30px">
+                <div class="progress-bar"></div>
+                {% with rads=campaign.radiation %}
+                    {% if rads %}
+                        {% localize off %}
+                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-{% if rads > 50 %}danger{% elif rads > 20 %}warning{% else %}success{% endif %}"
+                             role="progressbar" aria-valuenow="{{ rads }}" aria-valuemin="0" aria-valuemax="{{ rads|max:100 }}"
+                             style="width: {{ rads }}%">
+                        {% endlocalize %}
+                            {{ rads }}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+            </div>
+        </div>
+        <hr />
         {% if authorized %}
-            <form method="post" action="{{ request.path }}" class="form-inline justify-content-center float-right ml-3">
+            <form method="post" action="{{ request.path }}" class="form-inline justify-content-center">
                 <div class="form-row align-items-center">
-                    <div class="input-group input-group-sm">
-                        <input type="number" class="form-control" id="radiation" name="radiation"
-                               placeholder="{% trans "rad/h" %}" value="{{ campaign.radiation }}" style="width: 80px"
-                               aria-valuemin="0" min="0">
+                    <div class="col-auto">
+                        <label class="sr-only" for="effect-name">{% trans "Effet" %}</label>
+                        <input type="text" class="form-control" id="effect-name"
+                               name="effect-name" data-for="effect-id" placeholder="{% trans "Effet" %}">
+                        <input type="hidden" id="effect-id" name="effect-id" />
                     </div>
                     <div class="col-auto">
-                        <button type="submit" class="btn btn-sm btn-warning"
-                                name="method" value="set" >{% trans "Modifier" %}</button>
-                        <input type="hidden" name="type" value="radiation" />
+                        <button type="submit" class="btn btn-primary"
+                                name="method" value="add" >{% trans "Affecter" %}</button>
+                        <input type="hidden" name="type" value="effect" />
                         {% csrf_token %}
                     </div>
                 </div>
             </form>
+            <hr />
         {% endif %}
-        <div class="progress" style="height: 30px">
-            <div class="progress-bar"></div>
-            {% with rads=campaign.radiation %}
-                {% if rads %}
-                    {% localize off %}
-                    <div class="progress-bar progress-bar-striped progress-bar-animated bg-{% if rads > 50 %}danger{% elif rads > 20 %}warning{% else %}success{% endif %}"
-                         role="progressbar" aria-valuenow="{{ rads }}" aria-valuemin="0" aria-valuemax="{{ rads|max:100 }}"
-                         style="width: {{ rads }}%">
-                    {% endlocalize %}
-                        {{ rads }}
-                    </div>
-                {% endif %}
-            {% endwith %}
-        </div>
     </div>
-    <hr />
-    {% if authorized %}
-        <form method="post" action="{{ request.path }}" class="form-inline justify-content-center">
-            <div class="form-row align-items-center">
-                <div class="col-auto">
-                    <label class="sr-only" for="effect-name">{% trans "Effet" %}</label>
-                    <input type="text" class="form-control" id="effect-name"
-                           name="effect-name" data-for="effect-id" placeholder="{% trans "Effet" %}">
-                    <input type="hidden" id="effect-id" name="effect-id" />
-                </div>
-                <div class="col-auto">
-                    <button type="submit" class="btn btn-primary"
-                            name="method" value="add" >{% trans "Affecter" %}</button>
-                    <input type="hidden" name="type" value="effect" />
-                    {% csrf_token %}
-                </div>
-            </div>
-        </form>
-        <hr />
-    {% endif %}
     {% with effects=campaign.effects %}
         {% include "fallout/campaign/forms/effects.html" %}
     {% endwith %}

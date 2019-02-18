@@ -15,6 +15,10 @@
 {% endblock %}
 
 {% block content %}
+    {% if authorized %}
+        <button class="btn btn-sm btn-primary float-right" data-toggle="collapse" type="button" aria-expanded="true"
+                data-target=".collapse-form" aria-controls="campaign-infos-form campaign-effects-form campaign-loots-form">&#x1F441;</button>
+    {% endif %}
     {% if campaign %}
         <div class="content">
             {% with image=campaign.image thumbnail=campaign.thumbnail %}
@@ -28,7 +32,7 @@
                 {{ campaign.name }}
                 {% if campaign.title %}<small class="text-muted">{{ campaign.title }}</small>{% endif %}
             </h4>
-            {% if campaign.description %}<p class="lead">{{ campaign.description }}</p>{% endif %}
+            {% if campaign.description %}<p class="lead">{{ campaign.description|safe }}</p>{% endif %}
         </div>
     {% else %}
         <div class="container">

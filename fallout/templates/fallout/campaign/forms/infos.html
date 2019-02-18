@@ -2,7 +2,7 @@
 
 <div class="row">
     {% for character in characters %}
-        <div class="col-md-3 col-sm-6 mb-3">
+        <div class="col-xl-3 col-lg-4 col-md-6 col-12 mb-3">
             <div class="card h-100">
                 <div class="card-header">
                     <span class="card-title"><a href="{% url 'fallout:character' character.id %}">{{ character.name }}</a></span>

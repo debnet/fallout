@@ -143,8 +143,8 @@ class CharacterAdmin(EntityAdmin):
     """
     fieldsets = tuple([
         (_("Informations générales"), dict(
-            fields=('name', 'title', 'description', 'image', 'thumbnail', 'race', 'level',
-                    'is_player', 'is_active', 'is_resting', 'has_stats', 'has_needs', ),
+            fields=('name', 'title', ('description', 'background'), 'image', 'thumbnail', 'race',
+                    'level', 'is_player', 'is_active', 'is_resting', 'has_stats', 'has_needs', ),
             classes=('wide', ),
         )),
         (_("Informations techniques"), dict(
@@ -167,9 +167,9 @@ class CharacterAdmin(EntityAdmin):
         'health', 'current_max_health', 'action_points', 'current_max_action_points', 'experience', 'karma')
     list_editable = ('health', 'action_points', 'experience', 'karma', 'is_active',)
     list_filter = ('campaign', 'user', 'race', 'is_player', 'is_active', 'has_stats', 'has_needs', )
-    search_fields = ('name', 'title', 'description', )
+    search_fields = ('name', 'title', 'description', 'background', )
     ordering = ('name', )
-    actions = ('duplicate', 'randomize', 'generate_stats', 'roll', 'fight', 'burst', 'heal', )
+    actions = ('duplicate', 'randomize', 'generate_stats', 'roll', 'fight', 'burst', 'heal', 'equip', )
     autocomplete_fields = ('campaign', 'user', )
     save_on_top = True
     actions_on_bottom = True
@@ -292,7 +292,46 @@ class CharacterAdmin(EntityAdmin):
     def heal(self, request, queryset):
         for character in queryset:
             character.heal()
-    heal.short_description = _("Soigner")
+    heal.short_description = _("Soigner les personnages sélectionnés")
+
+    def equip(self, request, queryset):
+        """
+        Action spécifique pour équiper les personnages sélectionnés
+        """
+        if 'equip' in request.POST:
+            form = EquipCharacterForm(request.POST)
+            if form.is_valid():
+                data = form.cleaned_data
+                Equipment.objects.filter(character__in=queryset).exclude(slot='').delete()
+                for character in queryset.order_by('name'):
+                    try:
+                        weapon = None
+                        for slot in (ITEM_ARMOR, ITEM_HELMET, ITEM_WEAPON):
+                            item, mini, maxi = data[slot], data[f'{slot}_min_condition'], data[f'{slot}_max_condition']
+                            if not item:
+                                continue
+                            equipment = Equipment.objects.create(
+                                character=character, item=item, slot=slot,
+                                quantity=1, condition=randint(mini, maxi) / 100.0)
+                            if slot == ITEM_WEAPON:
+                                weapon = equipment
+                        ammo, mini, maxi = data['ammo'], data[f'ammo_min_count'], data[f'ammo_max_count']
+                        if ammo:
+                            Equipment.objects.create(
+                                character=character, item=ammo, slot=ITEM_AMMO,
+                                quantity=randint(mini, maxi), condition=None)
+                        if weapon and ammo:
+                            weapon.reload(is_action=False)
+                    except Exception as error:
+                        self.message_user(
+                            request, _("{character} : {error}").format(character=character, error=str(error)),
+                            level=messages.ERROR)
+                return HttpResponseRedirect(request.get_full_path())
+        else:
+            form = EquipCharacterForm()
+        return render(request, 'fallout/character/admin/equip.html', {
+            'form': form, 'characters': queryset, 'targets': request.POST.getlist(admin.ACTION_CHECKBOX_NAME)})
+    equip.short_description = _("Equiper les personnages sélectionnés")
 
     def get_queryset(self, request):
         return super().get_queryset(request).select_related('statistics')

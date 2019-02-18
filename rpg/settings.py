@@ -222,7 +222,7 @@ class Base(Configuration):
         messages.INFO: values.Value('info', environ_name='CSS_INFO'),
         messages.SUCCESS: values.Value('success', environ_name='CSS_SUCCESS'),
         messages.WARNING: values.Value('warning', environ_name='CSS_WARNING'),
-        messages.ERROR: values.Value('danger', environ_name='CSS_ERROR'),
+        messages.ERROR: values.Value('danger error', environ_name='CSS_ERROR'),
     }
     CSS_CLASSES = {
         (1, 1): values.Value('info', environ_name='CSS_11'),

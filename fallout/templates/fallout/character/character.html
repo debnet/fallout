@@ -15,6 +15,10 @@
 {% endblock %}
 
 {% block content %}
+    {% if authorized %}
+        <button class="btn btn-sm btn-primary float-right" data-toggle="collapse" type="button" aria-expanded="true"
+                data-target=".collapse-form" aria-controls="character-items-form character-effects-form">&#x1F441;</button>
+    {% endif %}
     {% if character %}
         <div class="content">
             {% with image=character.image thumbnail=character.thumbnail %}
@@ -40,7 +44,12 @@
                     <span class="badge badge-info align-middle">{% trans "Actif" %}</span>
                 {% endif %}
                 <span class="font-weight-bold">{% trans "Niveau" %} {{ character.level }}</span>
-                {% if character.description %} {{ character.description }}{% endif %}
+                {% if character.description %} {{ character.description|safe }}{% endif %}
+                {% if character.background %}
+                    <a href="#character-background" data-toggle="collapse" type="button" aria-expanded="false"
+                       aria-controls="character-context">&#x1F441;</a>
+                    <span id="character-background" class="collapse">{{ character.background|safe }}</span>
+                {% endif %}
             </p>
         </div>
         <div role="tabpanel" id="tabs" class="pt-2">
