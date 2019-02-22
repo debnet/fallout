@@ -236,7 +236,7 @@
     "fields": {
         "uuid": "fa7efec9-190b-4817-921d-87aeb99348d0",
         "creation_date": "2018-12-23T17:14:55.240Z",
-        "modification_date": "2018-12-23T17:29:55.360Z",
+        "modification_date": "2019-02-22T22:02:12.115Z",
         "current_user": 1,
         "damage_threshold": 0,
         "damage_resistance": 0,
@@ -264,7 +264,7 @@
         "min_damage": 0,
         "max_damage": 0,
         "raw_damage": 0,
-        "name": "Calibre .45",
+        "name": ".45 Auto",
         "title": "",
         "description": "",
         "image": "",
@@ -9372,6 +9372,85 @@
     }
 },
 {
+    "model": "fallout.item",
+    "pk": 121,
+    "fields": {
+        "uuid": "40d0191d-f9a8-4e36-be36-232649697d22",
+        "creation_date": "2019-02-22T21:39:08.035Z",
+        "modification_date": "2019-02-22T21:40:11.550Z",
+        "current_user": 1,
+        "damage_threshold": 0,
+        "damage_resistance": 0,
+        "normal_threshold": 0,
+        "normal_resistance": 0,
+        "laser_threshold": 0,
+        "laser_resistance": 0,
+        "plasma_threshold": 0,
+        "plasma_resistance": 0,
+        "explosive_threshold": 0,
+        "explosive_resistance": 0,
+        "fire_threshold": 0,
+        "fire_resistance": 0,
+        "electricity_threshold": 0,
+        "electricity_resistance": 0,
+        "poison_threshold": 0,
+        "poison_resistance": 0,
+        "radiation_threshold": 0,
+        "radiation_resistance": 0,
+        "gas_contact_threshold": 0,
+        "gas_contact_resistance": 0,
+        "gas_inhaled_threshold": 0,
+        "gas_inhaled_resistance": 0,
+        "damage_type": "",
+        "min_damage": 0,
+        "max_damage": 0,
+        "raw_damage": 0,
+        "name": "Super Stimpak",
+        "title": "",
+        "description": "",
+        "image": "",
+        "thumbnail": "thumbnails/items/chems/chem_super_stimpack_2.png",
+        "type": "chem",
+        "value": 300,
+        "durability": 0,
+        "condition_modifier": 0.0,
+        "weight": 0.5,
+        "is_quest": false,
+        "is_droppable": true,
+        "hands": 0,
+        "attack_mode": "",
+        "skill": "",
+        "min_skill": 0,
+        "min_strength": 0,
+        "clip_size": 0,
+        "burst_count": 0,
+        "min_range": 0,
+        "max_range": 0,
+        "min_burst_range": 0,
+        "max_burst_range": 0,
+        "hit_chance_modifier": 0,
+        "armor_class_modifier": 0,
+        "threshold_modifier": 0,
+        "threshold_rate_modifier": 0,
+        "resistance_modifier": 0,
+        "is_single_charge": false,
+        "ap_cost_reload": 0,
+        "ap_cost_normal": 0,
+        "ap_cost_target": 0,
+        "ap_cost_burst": 0,
+        "damage_modifier": 0,
+        "critical_modifier": 0,
+        "critical_raw_modifier": 0,
+        "critical_damage": 0,
+        "critical_damage_modifier": 0,
+        "armor_class": 0,
+        "effects": [
+            24
+        ],
+        "ammunitions": []
+    }
+},
+{
     "model": "fallout.itemmodifier",
     "pk": 1,
     "fields": {
@@ -9890,7 +9969,7 @@
     "fields": {
         "uuid": "6739514e-f3c5-4549-befd-b12f712a0981",
         "creation_date": "2018-12-26T20:54:14.451Z",
-        "modification_date": "2018-12-26T20:54:14.451Z",
+        "modification_date": "2019-02-22T21:56:20.676Z",
         "current_user": 1,
         "damage_type": "heal_rad",
         "min_damage": 0,
@@ -9902,9 +9981,9 @@
         "image": "",
         "thumbnail": "thumbnails/items/chems/chem_radaway.png",
         "chance": 100,
-        "duration": "04:00:00",
+        "duration": "05:00:00",
         "apply": true,
-        "interval": "02:00:00",
+        "interval": "01:00:00",
         "damage_chance": 100,
         "next_effect": null,
         "cancel_effect": null
@@ -9986,6 +10065,58 @@
         "damage_chance": 100,
         "next_effect": null,
         "cancel_effect": null
+    }
+},
+{
+    "model": "fallout.effect",
+    "pk": 23,
+    "fields": {
+        "uuid": "122426b7-5976-4b98-9cc4-343a9c4ad3ef",
+        "creation_date": "2019-02-22T21:35:44.551Z",
+        "modification_date": "2019-02-22T21:35:44.551Z",
+        "current_user": 1,
+        "damage_type": "poison",
+        "min_damage": 3,
+        "max_damage": 6,
+        "raw_damage": 0,
+        "name": "Super Stimpak (malus)",
+        "title": "",
+        "description": "",
+        "image": "",
+        "thumbnail": "thumbnails/items/chems/chem_super_stimpack_2.png",
+        "chance": 100,
+        "duration": "00:02:00",
+        "apply": true,
+        "interval": "00:01:00",
+        "damage_chance": 100,
+        "next_effect": null,
+        "cancel_effect": null
+    }
+},
+{
+    "model": "fallout.effect",
+    "pk": 24,
+    "fields": {
+        "uuid": "659bdb21-e65a-4593-bf2c-0d29a801fa97",
+        "creation_date": "2019-02-22T21:38:00.151Z",
+        "modification_date": "2019-02-22T21:38:00.151Z",
+        "current_user": 1,
+        "damage_type": "heal",
+        "min_damage": 0,
+        "max_damage": 0,
+        "raw_damage": 75,
+        "name": "Super Stimpak (bonus)",
+        "title": "",
+        "description": "",
+        "image": "",
+        "thumbnail": "thumbnails/items/chems/chem_super_stimpack_2.png",
+        "chance": 100,
+        "duration": "00:01:00",
+        "apply": true,
+        "interval": null,
+        "damage_chance": 100,
+        "next_effect": 23,
+        "cancel_effect": 23
     }
 },
 {
@@ -10292,6 +10423,336 @@
         "stats": "radiation_resistance",
         "value": 50,
         "effect": 21
+    }
+},
+{
+    "model": "fallout.loottemplate",
+    "pk": 1,
+    "fields": {
+        "name": "Petite caisse de munitions",
+        "title": "",
+        "description": "",
+        "image": "",
+        "thumbnail": ""
+    }
+},
+{
+    "model": "fallout.loottemplate",
+    "pk": 2,
+    "fields": {
+        "name": "Grande caisse de munitions",
+        "title": "",
+        "description": "",
+        "image": "",
+        "thumbnail": ""
+    }
+},
+{
+    "model": "fallout.loottemplate",
+    "pk": 3,
+    "fields": {
+        "name": "Caisse de grenades",
+        "title": "",
+        "description": "",
+        "image": "",
+        "thumbnail": ""
+    }
+},
+{
+    "model": "fallout.loottemplate",
+    "pk": 4,
+    "fields": {
+        "name": "Armoire \u00e0 pharmacie",
+        "title": "",
+        "description": "",
+        "image": "",
+        "thumbnail": ""
+    }
+},
+{
+    "model": "fallout.loottemplateitem",
+    "pk": 1,
+    "fields": {
+        "template": 1,
+        "item": 2,
+        "chance": 90,
+        "min_quantity": 10,
+        "max_quantity": 20,
+        "min_condition": 100,
+        "max_condition": 100
+    }
+},
+{
+    "model": "fallout.loottemplateitem",
+    "pk": 2,
+    "fields": {
+        "template": 1,
+        "item": 3,
+        "chance": 90,
+        "min_quantity": 10,
+        "max_quantity": 20,
+        "min_condition": 100,
+        "max_condition": 100
+    }
+},
+{
+    "model": "fallout.loottemplateitem",
+    "pk": 3,
+    "fields": {
+        "template": 1,
+        "item": 4,
+        "chance": 80,
+        "min_quantity": 10,
+        "max_quantity": 20,
+        "min_condition": 100,
+        "max_condition": 100
+    }
+},
+{
+    "model": "fallout.loottemplateitem",
+    "pk": 4,
+    "fields": {
+        "template": 1,
+        "item": 11,
+        "chance": 70,
+        "min_quantity": 10,
+        "max_quantity": 20,
+        "min_condition": 100,
+        "max_condition": 100
+    }
+},
+{
+    "model": "fallout.loottemplateitem",
+    "pk": 5,
+    "fields": {
+        "template": 1,
+        "item": 12,
+        "chance": 70,
+        "min_quantity": 10,
+        "max_quantity": 20,
+        "min_condition": 100,
+        "max_condition": 100
+    }
+},
+{
+    "model": "fallout.loottemplateitem",
+    "pk": 6,
+    "fields": {
+        "template": 1,
+        "item": 10,
+        "chance": 60,
+        "min_quantity": 10,
+        "max_quantity": 20,
+        "min_condition": 100,
+        "max_condition": 100
+    }
+},
+{
+    "model": "fallout.loottemplateitem",
+    "pk": 7,
+    "fields": {
+        "template": 1,
+        "item": 13,
+        "chance": 50,
+        "min_quantity": 10,
+        "max_quantity": 20,
+        "min_condition": 100,
+        "max_condition": 100
+    }
+},
+{
+    "model": "fallout.loottemplateitem",
+    "pk": 8,
+    "fields": {
+        "template": 1,
+        "item": 14,
+        "chance": 50,
+        "min_quantity": 10,
+        "max_quantity": 20,
+        "min_condition": 100,
+        "max_condition": 100
+    }
+},
+{
+    "model": "fallout.loottemplateitem",
+    "pk": 9,
+    "fields": {
+        "template": 2,
+        "item": 7,
+        "chance": 90,
+        "min_quantity": 20,
+        "max_quantity": 50,
+        "min_condition": 100,
+        "max_condition": 100
+    }
+},
+{
+    "model": "fallout.loottemplateitem",
+    "pk": 10,
+    "fields": {
+        "template": 2,
+        "item": 8,
+        "chance": 90,
+        "min_quantity": 20,
+        "max_quantity": 50,
+        "min_condition": 100,
+        "max_condition": 100
+    }
+},
+{
+    "model": "fallout.loottemplateitem",
+    "pk": 11,
+    "fields": {
+        "template": 2,
+        "item": 9,
+        "chance": 80,
+        "min_quantity": 20,
+        "max_quantity": 50,
+        "min_condition": 100,
+        "max_condition": 100
+    }
+},
+{
+    "model": "fallout.loottemplateitem",
+    "pk": 12,
+    "fields": {
+        "template": 2,
+        "item": 1,
+        "chance": 70,
+        "min_quantity": 10,
+        "max_quantity": 20,
+        "min_condition": 100,
+        "max_condition": 100
+    }
+},
+{
+    "model": "fallout.loottemplateitem",
+    "pk": 13,
+    "fields": {
+        "template": 2,
+        "item": 16,
+        "chance": 60,
+        "min_quantity": 10,
+        "max_quantity": 20,
+        "min_condition": 100,
+        "max_condition": 100
+    }
+},
+{
+    "model": "fallout.loottemplateitem",
+    "pk": 14,
+    "fields": {
+        "template": 2,
+        "item": 5,
+        "chance": 50,
+        "min_quantity": 10,
+        "max_quantity": 20,
+        "min_condition": 100,
+        "max_condition": 100
+    }
+},
+{
+    "model": "fallout.loottemplateitem",
+    "pk": 15,
+    "fields": {
+        "template": 3,
+        "item": 88,
+        "chance": 90,
+        "min_quantity": 1,
+        "max_quantity": 3,
+        "min_condition": 100,
+        "max_condition": 100
+    }
+},
+{
+    "model": "fallout.loottemplateitem",
+    "pk": 16,
+    "fields": {
+        "template": 3,
+        "item": 91,
+        "chance": 60,
+        "min_quantity": 1,
+        "max_quantity": 3,
+        "min_condition": 100,
+        "max_condition": 100
+    }
+},
+{
+    "model": "fallout.loottemplateitem",
+    "pk": 17,
+    "fields": {
+        "template": 3,
+        "item": 89,
+        "chance": 30,
+        "min_quantity": 1,
+        "max_quantity": 3,
+        "min_condition": 100,
+        "max_condition": 100
+    }
+},
+{
+    "model": "fallout.loottemplateitem",
+    "pk": 18,
+    "fields": {
+        "template": 4,
+        "item": 120,
+        "chance": 80,
+        "min_quantity": 1,
+        "max_quantity": 5,
+        "min_condition": 100,
+        "max_condition": 100
+    }
+},
+{
+    "model": "fallout.loottemplateitem",
+    "pk": 19,
+    "fields": {
+        "template": 4,
+        "item": 114,
+        "chance": 60,
+        "min_quantity": 1,
+        "max_quantity": 3,
+        "min_condition": 100,
+        "max_condition": 100
+    }
+},
+{
+    "model": "fallout.loottemplateitem",
+    "pk": 20,
+    "fields": {
+        "template": 4,
+        "item": 116,
+        "chance": 60,
+        "min_quantity": 1,
+        "max_quantity": 3,
+        "min_condition": 100,
+        "max_condition": 100
+    }
+},
+{
+    "model": "fallout.loottemplateitem",
+    "pk": 21,
+    "fields": {
+        "template": 4,
+        "item": 119,
+        "chance": 40,
+        "min_quantity": 1,
+        "max_quantity": 3,
+        "min_condition": 100,
+        "max_condition": 100
+    }
+},
+{
+    "model": "fallout.loottemplateitem",
+    "pk": 22,
+    "fields": {
+        "template": 4,
+        "item": 118,
+        "chance": 40,
+        "min_quantity": 1,
+        "max_quantity": 3,
+        "min_condition": 100,
+        "max_condition": 100
     }
 }
 ]
