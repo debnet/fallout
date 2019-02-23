@@ -53,7 +53,7 @@
         </li>
     {% endif %}
 </ul>
-{% if campaign and authorized %}
+{% if campaign %}
     <form class="form-inline" method="post" action="{% url 'fallout:next_turn' campaign.id %}">
         <label class="text-white">
             {{ campaign.current_game_date }}
@@ -64,18 +64,20 @@
                 {% endif %}
             {% endwith %}
         </label>
-        <select class="form-control form-control-sm custom-select ml-2 mr-2" name="seconds">
-            <option value="0" selected="selected">{% trans "0 s" %}</option>
-            <option value="30">{% trans "30 s" %}</option>
-            <option value="60">{% trans "1 mn" %}</option>
-            <option value="120">{% trans "2 mn" %}</option>
-            <option value="300">{% trans "5 mn" %}</option>
-            <option value="600">{% trans "10 mn" %}</option>
-            <option value="1200">{% trans "20 mn" %}</option>
-            <option value="1800">{% trans "30 mn" %}</option>
-            <option value="3600">{% trans "1 h" %}</option>
-        </select>
-        <button class="btn btn-success btn-sm" name="next">{% trans "Tour suivant" %}</button>
-        {% csrf_token %}
+        {% if authorized %}
+            <select class="form-control form-control-sm custom-select ml-2 mr-2" name="seconds">
+                <option value="0" selected="selected">{% trans "0 s" %}</option>
+                <option value="30">{% trans "30 s" %}</option>
+                <option value="60">{% trans "1 mn" %}</option>
+                <option value="120">{% trans "2 mn" %}</option>
+                <option value="300">{% trans "5 mn" %}</option>
+                <option value="600">{% trans "10 mn" %}</option>
+                <option value="1200">{% trans "20 mn" %}</option>
+                <option value="1800">{% trans "30 mn" %}</option>
+                <option value="3600">{% trans "1 h" %}</option>
+            </select>
+            <button class="btn btn-success btn-sm" name="next">{% trans "Tour suivant" %}</button>
+            {% csrf_token %}
+        {% endif %}
     </form>
 {% endif %}
