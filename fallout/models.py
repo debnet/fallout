@@ -2111,6 +2111,8 @@ class CharacterEffect(ActiveEffect):
         game_date = character.campaign.current_game_date
         while self.next_date and self.next_date <= game_date:
             damages.append(character.damage(save=save, **self.effect.damage_config))
+            if not self.effect.interval:
+                break
             self.next_date += self.effect.interval
         if damages or (self.end_date and self.end_date <= game_date):
             self.save()

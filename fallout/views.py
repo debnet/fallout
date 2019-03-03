@@ -30,7 +30,10 @@ def view_campaign(request, campaign_id):
     """
     data = request.POST
 
-    campaign = Campaign.objects.select_related('current_character').filter(id=campaign_id).first()
+    campaigns = Campaign.objects.select_related('current_character')
+    if not request.user.is_superuser:
+        campaigns = campaigns.filter(Q(characters__player=request.user) | Q(game_master=request.user))
+    campaign = campaigns.filter(id=campaign_id).first()
     characters = Character.objects.select_related('statistics', 'campaign__current_character').filter(
         campaign=campaign, is_active=True)
     if not request.user.is_superuser:
@@ -122,7 +125,7 @@ def view_campaign(request, campaign_id):
 
     return {
         'authorized': authorized,
-        'campaigns': Campaign.objects.order_by('name'),
+        'campaigns': campaigns.order_by('name'),
         'characters': characters.order_by('-is_player', 'name'),
         'campaign': campaign,
         'loots': loots,
@@ -139,6 +142,9 @@ def view_character(request, character_id):
     """
     data = request.POST
 
+    campaigns = Campaign.objects.select_related('current_character')
+    if not request.user.is_superuser:
+        campaigns = campaigns.filter(Q(characters__player=request.user) | Q(game_master=request.user))
     characters = Character.objects.select_related(
         'user', 'statistics', 'campaign__current_character').filter(is_active=True)
     if not request.user.is_superuser:
@@ -260,7 +266,7 @@ def view_character(request, character_id):
     return {
         'authorized': authorized,
         # Lists
-        'campaigns': Campaign.objects.order_by('name'),
+        'campaigns': campaigns.order_by('name'),
         'characters': characters.order_by('-is_player', 'name'),
         # Character
         'character': character,
