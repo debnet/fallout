@@ -32,7 +32,7 @@ def view_campaign(request, campaign_id):
 
     campaigns = Campaign.objects.select_related('current_character')
     if not request.user.is_superuser:
-        campaigns = campaigns.filter(Q(characters__player=request.user) | Q(game_master=request.user))
+        campaigns = campaigns.filter(Q(characters__user=request.user) | Q(game_master=request.user))
     campaign = campaigns.filter(id=campaign_id).first()
     characters = Character.objects.select_related('statistics', 'campaign__current_character').filter(
         campaign=campaign, is_active=True)
@@ -144,7 +144,7 @@ def view_character(request, character_id):
 
     campaigns = Campaign.objects.select_related('current_character')
     if not request.user.is_superuser:
-        campaigns = campaigns.filter(Q(characters__player=request.user) | Q(game_master=request.user))
+        campaigns = campaigns.filter(Q(characters__user=request.user) | Q(game_master=request.user))
     characters = Character.objects.select_related(
         'user', 'statistics', 'campaign__current_character').filter(is_active=True)
     if not request.user.is_superuser:
