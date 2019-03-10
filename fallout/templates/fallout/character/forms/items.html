@@ -144,8 +144,8 @@
                                         <button class="btn btn-sm btn-warning mr-1" type="submit"
                                                 name="method" value="drop">{% trans "Lâcher" %}</button>
                                         {% if equip.current_condition < 100 %}
-                                            <label class="sr-only" for="quality-{{ loot.id }}">{% trans "Qualité" %}</label>
-                                            <select name="quantity" id="quality-{{ loot.id }}"
+                                            <label class="sr-only" for="condition-{{ loot.id }}">{% trans "Condition" %}</label>
+                                            <select name="condition" id="condition-{{ loot.id }}"
                                                     class="form-control form-control-sm custom-select ismall mr-1">
                                                 {% for i in 100|range:equip.current_condition %}
                                                     <option value="{{ i }}">{{ i }}</option>
@@ -167,7 +167,7 @@
                                     {% endif %}
                                     <div class="form-check ml-1">
                                         <label class="form-check-label">
-                                            <input class="form-check-input" type="checkbox" name="is_action" checked="checked">
+                                            <input class="form-check-input" type="checkbox" name="is_action">
                                             <small title="{% trans "Points d'action" %}">{% trans "PA" %}</small>
                                         </label>
                                     </div>

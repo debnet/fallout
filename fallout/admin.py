@@ -166,7 +166,7 @@ class CharacterAdmin(EntityAdmin):
         'name', 'race', 'level', 'is_player', 'is_active',
         'health', 'current_max_health', 'action_points', 'current_max_action_points', 'experience', 'karma')
     list_editable = ('health', 'action_points', 'experience', 'karma', 'is_active',)
-    list_filter = ('campaign', 'user', 'race', 'is_player', 'is_active', 'has_stats', 'has_needs', )
+    list_filter = ('campaign', 'is_player', 'is_active', 'has_stats', 'has_needs', 'race', 'user', )
     search_fields = ('name', 'title', 'description', 'background', )
     ordering = ('name', )
     actions = ('duplicate', 'randomize', 'generate_stats', 'roll', 'fight', 'burst', 'heal', 'equip', )
@@ -424,7 +424,7 @@ class EquipmentAdmin(CommonAdmin):
     )
     list_display = ('character', 'item', 'slot', 'quantity', 'condition', 'clip_count', )
     list_editable = ('slot', 'quantity', 'condition', 'clip_count', )
-    list_filter = ('character', 'slot', )
+    list_filter = ('character__campaign', 'character__is_player', 'slot', )
     ordering = ('character', 'item', )
     autocomplete_fields = ('character', 'item', )
     save_on_top = True
@@ -525,7 +525,7 @@ class CharacterEffectAdmin(CommonAdmin):
     )
     list_display = ('character', 'effect', 'start_date', 'end_date', 'next_date', )
     list_editable = ()
-    list_filter = ('character', )
+    list_filter = ('character__campaign', 'character__is_player', )
     ordering = ('character', 'effect', )
     autocomplete_fields = ('character', 'effect', )
     save_on_top = True
@@ -616,7 +616,7 @@ class RollHistoryAdmin(CommonAdmin):
     )
     list_display = ('date', 'character', 'stats', 'roll', 'value', 'success', 'critical', )
     list_editable = ()
-    list_filter = ('date', 'character', 'stats', 'success', 'critical', )
+    list_filter = ('character__campaign', 'character__is_player', 'stats', 'success', 'critical', 'date', )
     ordering = ('-date', )
     date_hierarchy = 'date'
     autocomplete_fields = ('character', )
@@ -651,7 +651,7 @@ class DamageHistoryAdmin(CommonAdmin):
     search_fields = ('character', )
     list_display = ('date', 'character', 'damage_type', 'base_damage', 'real_damage', )
     list_editable = ()
-    list_filter = ('date', 'character', 'damage_type', )
+    list_filter = ('character__campaign', 'character__is_player', 'damage_type', 'date', )
     ordering = ('-date', )
     date_hierarchy = 'date'
     autocomplete_fields = ('character', 'armor', )
@@ -688,7 +688,8 @@ class FightHistoryAdmin(CommonAdmin):
     list_display = ('date', 'attacker', 'defender', 'success', 'critical', 'status',
                     'hit_roll', 'hit_chance', 'real_damage', )
     list_editable = ()
-    list_filter = ('date', 'attacker', 'defender', 'success', 'critical', 'status', )
+    list_filter = ('attacker__campaign', 'attacker__is_player', 'defender__is_player',
+                   'success', 'critical', 'status', 'date', )
     ordering = ('-date', )
     date_hierarchy = 'date'
     autocomplete_fields = ('attacker', 'attacker_weapon', 'attacker_ammo', 'defender', 'defender_armor', 'damage', )
