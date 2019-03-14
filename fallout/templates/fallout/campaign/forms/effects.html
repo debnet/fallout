@@ -65,7 +65,7 @@
                         {% endif %}
                     </div>
                     {% if authorized %}
-                        <div class="card-footer">
+                        <div class="card-footer collapse-form collapse show">
                             <form class="form-inline" method="post" action="{{ request.path }}">
                                 <button class="btn btn-sm btn-danger mr-1" type="submit"
                                         name="method" value="remove">{% trans "Supprimer" %}</button>

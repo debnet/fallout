@@ -2,26 +2,26 @@
 
 <form method="post" action="{{ request.path }}">
     {% if authorized and loots %}
-    <div class="form-row align-items-center form-inline justify-content-center mb-3">
-        <div class="col-auto">
-            <div class="input-group mb-2 mb-sm-0">
-                <div class="input-group-prepend">
-                    <label for="pick-character-list" class="input-group-text">{% trans "Joueur" %}</label>
+        <div class="form-row align-items-center form-inline justify-content-center mb-3 collapse-form collapse show">
+            <div class="col-auto">
+                <div class="input-group mb-2 mb-sm-0">
+                    <div class="input-group-prepend">
+                        <label for="pick-character-list" class="input-group-text">{% trans "Joueur" %}</label>
+                    </div>
+                    <select name="character" id="pick-character-list" class="form-control custom-select">
+                        {% for character in characters %}
+                            <option value="{{ character.id }}">{{ character.name }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
-                <select name="character" id="pick-character-list" class="form-control custom-select">
-                    {% for character in characters %}
-                        <option value="{{ character.id }}">{{ character.name }}</option>
-                    {% endfor %}
-                </select>
+            </div>
+            <div class="col-auto form-check ml-1">
+                <label class="form-check-label">
+                    <input class="form-check-input" type="checkbox" name="is_action">
+                    <span title="{% trans "Points d'action" %}">{% trans "PA" %}</span>
+                </label>
             </div>
         </div>
-        <div class="col-auto form-check ml-1">
-            <label class="form-check-label">
-                <input class="form-check-input" type="checkbox" name="is_action">
-                <span title="{% trans "Points d'action" %}">{% trans "PA" %}</span>
-            </label>
-        </div>
-    </div>
     {% endif %}
     <div class="row">
         {% for loot in loots %}
@@ -86,13 +86,13 @@
                                 </p>
                             {% endif %}
                             {% if authorized and item.label_damage %}
-                                <p class="card-text">
+                                <p class="card-text collapse-form collapse show">
                                     <small class="font-weight-bold">{{ item.long_label_damage }}</small>
                                 </p>
                             {% endif %}
                             {% with resistances=item.resistances %}
                                 {% if authorized and resistances %}
-                                    <div class="table-responsive">
+                                    <div class="table-responsive collapse-form collapse show">
                                         <table class="table table-sm mb-0 small">
                                             <thead class="thead-dark">
                                                 <tr>
@@ -126,7 +126,7 @@
                             {% endwith %}
                         </div>
                         {% if authorized %}
-                            <div class="card-footer">
+                            <div class="card-footer collapse-form collapse show">
                                 {% if loot.quantity > 1 %}
                                     <label class="sr-only" for="quantity-{{ loot.id }}">{% trans "Quantité" %}</label>
                                     <select name="quantity-{{ loot.id }}" id="quantity-{{ loot.id }}"

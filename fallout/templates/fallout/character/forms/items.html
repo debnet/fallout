@@ -69,13 +69,13 @@
                                 </p>
                             {% endif %}
                             {% if authorized and item.label_damage %}
-                                <p class="card-text">
+                                <p class="card-text collapse-form collapse show">
                                     <small class="font-weight-bold">{{ item.long_label_damage }}</small>
                                 </p>
                             {% endif %}
                             {% with resistances=item.resistances %}
                                 {% if authorized and resistances %}
-                                    <div class="table-responsive">
+                                    <div class="table-responsive collapse-form collapse show">
                                         <table class="table table-sm mb-0 small">
                                             <thead class="thead-dark">
                                                 <tr>
@@ -109,7 +109,7 @@
                             {% endwith %}
                         </div>
                         {% if authorized %}
-                            <div class="card-footer">
+                            <div class="card-footer collapse-form collapse show">
                                 <form class="form-inline" method="post" action="{{ request.path }}">
                                     {% if equip.equiped %}
                                         <button class="btn btn-sm btn-danger mr-1" type="submit"

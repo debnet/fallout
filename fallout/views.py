@@ -125,8 +125,10 @@ def view_campaign(request, campaign_id):
 
     return {
         'authorized': authorized,
-        'campaigns': campaigns.order_by('name'),
+        # Lists
+        'campaigns': campaigns.distinct().order_by('name'),
         'characters': characters.order_by('-is_player', 'name'),
+        # Campaign
         'campaign': campaign,
         'loots': loots,
         # Enums
@@ -266,7 +268,7 @@ def view_character(request, character_id):
     return {
         'authorized': authorized,
         # Lists
-        'campaigns': campaigns.order_by('name'),
+        'campaigns': campaigns.distinct().order_by('name'),
         'characters': characters.order_by('-is_player', 'name'),
         # Character
         'character': character,
