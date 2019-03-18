@@ -76,6 +76,10 @@
                     <a class="nav-link" data-toggle="tab" role="tab"
                        href="#character-infos" id="character-infos-tab">{% trans "Statistiques" %}</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-toggle="tab" role="tab"
+                       href="#character-journal" id="character-journal-tab">{% trans "Journal" %}</a>
+                </li>
             </ul>
             <div class="tab-content">
                 {% include "fallout/character/panels/stats.html" %}
@@ -83,6 +87,7 @@
                 {% include "fallout/character/panels/effects.html" %}
                 {% include "fallout/character/panels/actions.html" %}
                 {% include "fallout/character/panels/infos.html" %}
+                {% include "fallout/character/panels/journal.html" %}
             </div>
         </div>
     {% endif %}

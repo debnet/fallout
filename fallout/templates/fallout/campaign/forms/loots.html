@@ -53,10 +53,17 @@
                                     {{ loot.value|floatformat:2 }} {% trans "$" %}
                                 </small>
                                 {% for modifier in item.modifiers.all %}
-                                    <small class="badge {% if modifier.value > 0 %}badge-success{% else %}badge-danger{% endif %} align-middle">
-                                        {% if modifier.value > 0 %}+{% endif %}{{ modifier.value }}
-                                        {{ modifier.get_stats_display }}
-                                    </small>
+                                    {% if modifier.stats in 'rads hunger thirst sleep' %}
+                                        <small class="badge {% if modifier.value > 0 %}badge-danger{% else %}badge-success{% endif %} align-middle">
+                                            {% if modifier.value > 0 %}+{% endif %}{{ modifier.value }}
+                                            {{ modifier.get_stats_display }}
+                                        </small>
+                                    {% else %}
+                                        <small class="badge {% if modifier.value > 0 %}badge-success{% else %}badge-danger{% endif %} align-middle">
+                                            {% if modifier.value > 0 %}+{% endif %}{{ modifier.value }}
+                                            {{ modifier.get_stats_display }}
+                                        </small>
+                                    {% endif %}
                                 {% endfor %}
                                 {% with condition=loot.current_condition %}
                                     {% if condition %}

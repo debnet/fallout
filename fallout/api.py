@@ -138,9 +138,10 @@ class FightInputSerializer(BaseFightInputSerializer):
     Serializer d'entrée pour les attaques
     """
     target_part = serializers.ChoiceField(choices=BODY_PARTS, allow_blank=True, label=_("partie du corps ciblée"))
-    hit_modifier = serializers.IntegerField(initial=0, label=_("modificateur"))
+    hit_chance_modifier = serializers.IntegerField(initial=0, label=_("modificateur"))
     is_grenade = serializers.BooleanField(initial=False, label=_("grenade ?"))
-    is_action = serializers.BooleanField(initial=True, label=_("action ?"))
+    is_action = serializers.BooleanField(initial=False, label=_("action ?"))
+    no_weapon = serializers.BooleanField(initial=False, label=_("aucun arme ?"))
 
 
 class BurstInputSerializer(BaseCustomSerializer):
@@ -148,9 +149,9 @@ class BurstInputSerializer(BaseCustomSerializer):
     Serializer d'entrée pour les attaques en rafales
     """
     targets = BaseFightInputSerializer(many=True, label=_("cibles"))
-    hit_modifier = serializers.IntegerField(initial=0, label=_("modificateur"))
+    hit_chance_modifier = serializers.IntegerField(initial=0, label=_("modificateur"))
     is_grenade = serializers.BooleanField(initial=False, label=_("grenade ?"))
-    is_action = serializers.BooleanField(initial=True, label=_("action ?"))
+    is_action = serializers.BooleanField(initial=False, label=_("action ?"))
 
 
 @to_model_serializer(FightHistory)

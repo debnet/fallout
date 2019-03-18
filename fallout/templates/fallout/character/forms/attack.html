@@ -74,10 +74,14 @@
                                type="number" name="hit_modifier" value="0" />
                     </td>
                 </tr>
-            </tbody>
-            <tfoot class="thead-dark">
                 <tr>
-                    <th class="text-right align-middle" colspan="2">
+                    <td class="text-right align-middle" colspan="2">
+                        {% if not burst %}
+                            <label class="form-check-label mr-4" class="d-inline" title="{% trans "Sans arme" %}">
+                                <input class="form-check-input" type="checkbox" name="no_weapon">
+                                {% trans "Sans arme" %}
+                            </label>
+                        {% endif %}
                         <label class="form-check-label mr-4" class="d-inline" title="{% trans "Grenade" %}">
                             <input class="form-check-input" type="checkbox" name="is_grenade">
                             {% trans "Grenade" %}
@@ -86,6 +90,12 @@
                             <input class="form-check-input" type="checkbox" name="is_action">
                             {% trans "PA" %}
                         </label>
+                    </td>
+                </tr>
+            </tbody>
+            <tfoot class="thead-dark">
+                <tr>
+                    <th class="text-right align-middle" colspan="2">
                         <button class="btn btn-sm btn-primary" type="submit">{% trans "OK" %}</button>
                     </th>
                 </tr>

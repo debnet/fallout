@@ -11,7 +11,7 @@ from django.utils.translation import gettext as _
 from fallout.enums import BODY_PARTS, DAMAGES_TYPES, ROLL_STATS
 from fallout.models import (
     Campaign, Character, CampaignEffect, CharacterEffect, Effect,
-    Equipment, Item, Loot, LootTemplate, RollHistory, FightHistory)
+    Equipment, Item, Loot, LootTemplate, RollHistory, FightHistory, Log)
 
 
 @login_required
@@ -42,8 +42,9 @@ def view_campaign(request, campaign_id):
 
     authorized = request.user and (request.user.is_superuser or (
         campaign and campaign.game_master_id == request.user.id))
-    if request.method == 'POST' and authorized:
-        try:
+
+    try:
+        if request.method == 'POST' and authorized:
             type = data.get('type')
             method = data.get('method')
             if type == 'loot':
@@ -116,12 +117,12 @@ def view_campaign(request, campaign_id):
                             "<strong>{character}</strong> a encore besoin de <strong>{experience}</strong> "
                             "points d'expérience pour passer au niveau suivant.").format(
                                 character=character, experience=required_experience))
-        except ValidationError as error:
-            for field, errors in error.message_dict.items():
-                for error in (errors if isinstance(errors, list) else [errors]):
-                    messages.error(request, _("<strong>Erreur</strong> {error}").format(error=error))
-        except Exception as error:
-            messages.error(request, _("<strong>Erreur</strong> {error}").format(error=error))
+    except ValidationError as error:
+        for field, errors in error.message_dict.items():
+            for error in (errors if isinstance(errors, list) else [errors]):
+                messages.error(request, _("<strong>Erreur</strong> {error}").format(error=error))
+    except Exception as error:
+        messages.error(request, _("<strong>Erreur</strong> {error}").format(error=error))
 
     return {
         'authorized': authorized,
@@ -142,7 +143,7 @@ def view_character(request, character_id):
     """
     Vue principale des personnages
     """
-    data = request.POST
+    data, get_data = request.POST, request.GET
 
     campaigns = Campaign.objects.select_related('current_character')
     if not request.user.is_superuser:
@@ -158,10 +159,15 @@ def view_character(request, character_id):
     authorized = request.user and (request.user.is_superuser or (
         character and character.campaign and character.campaign.game_master_id == request.user.id))
     characters = characters.filter(campaign_id=character.campaign_id if character else None)
-    if request.method == 'POST' and character and authorized:
-        try:
-            type = data.get('type')
-            method = data.get('method')
+
+    logs = Log.objects.filter(character=character)
+    if not authorized:
+        logs = logs.exclude(private=True)
+
+    try:
+        type = data.get('type')
+        method = data.get('method')
+        if request.method == 'POST' and character and authorized:
             if type == 'stats':
                 if 'roll' in data:
                     result = character.roll(
@@ -180,7 +186,8 @@ def view_character(request, character_id):
                     target_range=int(data.get('target_range')),
                     hit_chance_modifier=int(data.get('hit_modifier') or 0),
                     is_grenade=bool(data.get('is_grenade', False)),
-                    is_action=bool(data.get('is_action', False)))
+                    is_action=bool(data.get('is_action', False)),
+                    no_weapon=bool(data.get('no_weapon', False)))
                 messages.add_message(request, result.message_level, _(
                     "<strong>{attacker} vs {defender}</strong> {label}").format(
                         attacker=result.attacker, defender=result.defender, label=result.long_label))
@@ -254,12 +261,32 @@ def view_character(request, character_id):
                 character.hunger = int(data.get('hunger'))
                 character.sleep = int(data.get('sleep'))
                 character.save()
-        except ValidationError as error:
-            for field, errors in error.message_dict.items():
-                for error in (errors if isinstance(errors, list) else [errors]):
-                    messages.error(request, _("<strong>Erreur</strong> {error}").format(error=error))
-        except Exception as error:
-            messages.error(request, _("<strong>Erreur</strong> {error}").format(error=error))
+        # All users
+        if request.method == 'POST' and character:
+            if type == 'log':
+                log_id, log_text, log_private = int(data.get('log') or 0), data.get('text'), bool(data.get('private'))
+                if log_id and method == 'edit':
+                    log_to_edit = logs.filter(id=log_id)
+                    if not authorized:
+                        log_to_edit = log_to_edit.filter(player=request.user)
+                    log_to_edit.update(text=log_text)
+                elif method == 'add':
+                    Log.objects.create(
+                        player=request.user, character=character, text=log_text, private=log_private,
+                        game_date=getattr(character.campaign, 'current_game_date', None))
+        if request.method == 'GET' and character:
+            if 'delete' in get_data:
+                log_id = int(get_data.get('delete') or 0)
+                log_to_delete = logs.filter(id=log_id)
+                if not authorized:
+                    log_to_delete = log_to_delete.filter(player=request.user)
+                log_to_delete.delete()
+    except ValidationError as error:
+        for field, errors in error.message_dict.items():
+            for error in (errors if isinstance(errors, list) else [errors]):
+                messages.error(request, _("<strong>Erreur</strong> {error}").format(error=error))
+    except Exception as error:
+        messages.error(request, _("<strong>Erreur</strong> {error}").format(error=error))
 
     inventory, effects = character.inventory, character.effects
     rollstats = RollHistory.get_stats(character)
@@ -270,6 +297,7 @@ def view_character(request, character_id):
         # Lists
         'campaigns': campaigns.distinct().order_by('name'),
         'characters': characters.order_by('-is_player', 'name'),
+        'logs': logs.order_by('-game_date', '-date'),
         # Character
         'character': character,
         'inventory': inventory,
@@ -309,6 +337,8 @@ def thumbnails(request):
     import os
     from django.conf import settings
     directory = request.GET.get('dir') or ''
+    if '..' in directory:
+        raise Http404()
     directories = directory.split(os.sep)
     dirname = os.path.join(settings.MEDIA_ROOT, 'thumbnails', directory)
     images = []

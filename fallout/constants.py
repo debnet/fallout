@@ -237,6 +237,9 @@ NEEDS_NORMAL_RATE = 1.00
 CRITICAL_FAIL_D10 = 10
 CRITICAL_FAIL_D100 = 96
 
+# Multiplier effect of luck on rolls
+LUCK_ROLL_MULT = 1
+
 # Base value for experience points
 BASE_XP = 1000
 

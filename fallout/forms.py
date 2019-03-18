@@ -38,7 +38,9 @@ class FightCharacterForm(forms.Form):
     target_range = forms.IntegerField(min_value=1, initial=1, label=_("Distance"))
     target_part = forms.ChoiceField(choices=BODY_PARTS, label=_("Cible"))
     hit_modifier = forms.IntegerField(min_value=0, initial=0, label=_("Modificateur"))
+    is_grenade = forms.BooleanField(initial=False, label=_("Grenade ?"))
     is_action = forms.BooleanField(initial=False, label=_("Action ?"))
+    no_weapon = forms.BooleanField(initial=False, label=_("Aucune arme ?"))
 
 
 class EquipCharacterForm(forms.Form):

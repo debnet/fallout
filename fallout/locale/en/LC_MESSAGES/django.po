@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-02-18 14:43+0100\n"
+"POT-Creation-Date: 2019-03-18 20:41+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -192,6 +192,9 @@ msgstr "grenade?"
 
 msgid "action ?"
 msgstr "action?"
+
+msgid "aucun arme ?"
+msgstr "no weapon?"
 
 msgid "cibles"
 msgstr "targets"
@@ -769,8 +772,14 @@ msgstr "Distance"
 msgid "Cible"
 msgstr "Target"
 
+msgid "Grenade ?"
+msgstr "Grenade?"
+
 msgid "Action ?"
 msgstr "Action?"
+
+msgid "Aucune arme ?"
+msgstr "No weapon?"
 
 msgid "Armure"
 msgstr "Armor"
@@ -1373,10 +1382,9 @@ msgstr "damage history"
 msgid "{label} : {status}"
 msgstr "{label}: {status}"
 
-#, fuzzy, python-brace-format
-#| msgid "{label} : {real_damage} {damage_type} infligés ({body_part})"
+#, python-brace-format
 msgid "{label} : {status} - {real_damage} {damage_type} infligés ({body_part})"
-msgstr "{label}: {real_damage} {damage_type} inflicted ({body_part})"
+msgstr "{label}: {status} - {real_damage} {damage_type} inflicted ({body_part})"
 
 #, python-brace-format
 msgid "{attacker} vs. {defender} - {long_label}"
@@ -1387,6 +1395,21 @@ msgstr "fight history"
 
 msgid "historiques des combats"
 msgstr "fight histories"
+
+msgid "texte"
+msgstr "background"
+
+msgid "privé ?"
+msgstr "private?"
+
+msgid "{character} ({date})"
+msgstr "{character} ({date})"
+
+msgid "journal"
+msgstr "log"
+
+msgid "journaux"
+msgstr "logs"
 
 msgid "Menu"
 msgstr "Menu"
@@ -1611,6 +1634,9 @@ msgstr "Inventory"
 msgid "Statistiques"
 msgstr "Statistics"
 
+msgid "Journal"
+msgstr "Logs"
+
 msgid "points de vie"
 msgstr "Health points"
 
@@ -1628,6 +1654,9 @@ msgstr "dst."
 
 msgid "non ciblé"
 msgstr "non targetted"
+
+msgid "Sans arme"
+msgstr "No weapon"
 
 msgid "Grenade"
 msgstr "Grenade"
@@ -1655,9 +1684,6 @@ msgstr "Repair"
 
 msgid "Lâcher"
 msgstr "Drop"
-
-msgid "Qualité"
-msgstr "Quality"
 
 msgid "Remplacer"
 msgstr "Replace"
@@ -1706,6 +1732,24 @@ msgstr "(no roll)"
 
 msgid "Equipé"
 msgstr "Equiped"
+
+msgid "Annuler"
+msgstr "Cancel"
+
+msgid "Privé"
+msgstr "Private"
+
+msgid "Il y a"
+msgstr "About"
+
+msgid "le"
+msgstr "the"
+
+msgid "Le"
+msgstr "The"
+
+msgid "par"
+msgstr "by"
 
 msgid "Connectez-vous !"
 msgstr "Log in!"

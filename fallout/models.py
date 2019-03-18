@@ -610,7 +610,7 @@ class Character(Entity, Stats):
         for threshold, resistance in zip(self._get_stats(THRESHOLDS), self._get_stats(RESISTANCES)):
             (code_t, label_t, value_t), (code_r, label_r, value_r) = threshold, resistance
             yield StatInfo(code_t, label_t, value_t, None, None, None, None)
-            yield StatInfo(code_r, label_r, value_r, None, None, None, '%')
+            yield StatInfo(code_r, label_r, min(value_r, 95), None, None, None, '%')
 
     @property
     def used_skill_points(self) -> float:
@@ -825,8 +825,9 @@ class Character(Entity, Stats):
         history = RollHistory(character=self, stats=stats, modifier=modifier)
         history.game_date = self.campaign and self.campaign.current_game_date
         is_special = stats in LIST_SPECIALS
+        luck_modifier = int((5 - self.stats.luck) * LUCK_ROLL_MULT)
         history.value = getattr(self.stats, stats, 0)
-        history.roll = randint(1, 10 if is_special else (100 - randint(0, self.stats.luck)))
+        history.roll = randint(1, 10 if is_special else (100 + luck_modifier))
         history.success = history.roll <= (history.value + history.modifier)
         history.critical = (history.roll <= (1 if is_special else self.stats.luck)) if history.success \
             else (history.roll >= (CRITICAL_FAIL_D10 if is_special else CRITICAL_FAIL_D100))
@@ -927,7 +928,8 @@ class Character(Entity, Stats):
 
     def fight(self, target: Union['Character', int], target_range: int = 1, target_part: BODY_PARTS = None,
               hit_chance_modifier: int = 0, is_burst: bool = False, is_grenade: bool = False, is_action: bool = True,
-              hit_count: int = 0, log: bool = True, weapon_equipment: Optional['Equipment'] = None) -> 'FightHistory':
+              hit_count: int = 0, log: bool = True, no_weapon: bool = False,
+              weapon_equipment: Optional['Equipment'] = None) -> 'FightHistory':
         """
         Calcul un round de combat entre deux personnages
         :param target: Personnage ciblé
@@ -939,6 +941,7 @@ class Character(Entity, Stats):
         :param is_action: Consomme les points d'action de l'attaquant ?
         :param hit_count: Compteur de coups lors d'une attaque en rafale
         :param log: Historise le combat ?
+        :param no_weapon: Exécute une attaque sans arme équipée ?
         :param weapon_equipment: Arme équipée pour l'attaque en rafale (optimisation)
         :return: Historique de combat
         """
@@ -953,6 +956,8 @@ class Character(Entity, Stats):
             attacker_weapon = history.attacker_weapon = getattr(attacker_weapon_equipment, 'item', None)
             attacker_ammo = None
             assert attacker_weapon_equipment, _("L'attaquant ne possède pas ou plus de grenade.")
+        elif no_weapon:
+            attacker_weapon_equipment = attacker_weapon = attacker_ammo = None
         else:
             attacker_weapon_equipment = weapon_equipment or self.get_from_inventory(slot=ITEM_WEAPON)
             attacker_ammo_equipment = self.get_from_inventory(slot=ITEM_AMMO)
@@ -986,10 +991,11 @@ class Character(Entity, Stats):
                 history.save()
             return history
         # Targetted body part modifiers and equipment
+        luck_modifier = int((5 - self.stats.luck) * LUCK_ROLL_MULT)
         body_part = target_part
         if not target_part:
             for body_part, chance in BODY_PARTS_RANDOM_CHANCES:
-                if randint(1, 100) < chance:
+                if randint(1, 100 + luck_modifier) < chance:
                     break
         history.body_part = body_part = body_part or PART_TORSO
         ranged_hit_modifier, melee_hit_modifier, critical_modifier = BODY_PARTS_MODIFIERS[history.body_part]
@@ -1036,6 +1042,7 @@ class Character(Entity, Stats):
         attacker_hit_chance += getattr(attacker_ammo, 'hit_chance_modifier', 0)  # Ammo hit_count chance modifier
         attacker_hit_chance *= getattr(attacker_weapon_equipment, 'condition', 1.0)  # Weapon condition
         defender_armor_class = getattr(defender_armor, 'armor_class', 0) + target.stats.armor_class
+        defender_armor_class -= int((5 - target.stats.luck) * LUCK_ROLL_MULT)
         defender_armor_class *= max(1.0 + (  # Armor class modifiers by weapon/ammo
             getattr(attacker_weapon, 'armor_class_modifier', 0) +
             getattr(attacker_ammo, 'armor_class_modifier', 0)) / 100.0, 0.0)
@@ -1049,7 +1056,7 @@ class Character(Entity, Stats):
         history.hit_modifier = hit_chance_modifier
         history.hit_chance = int(round(attacker_hit_chance))
         history.status = STATUS_HIT_FAILED
-        history.hit_roll = randint(1, 100)
+        history.hit_roll = randint(1, 100 + luck_modifier)
         history.success = history.hit_roll <= history.hit_chance
         history.critical = history.hit_roll >= CRITICAL_FAIL_D100
         if history.success:
@@ -1088,7 +1095,7 @@ class Character(Entity, Stats):
                 critical_raw_chance = self.stats.critical_raw_chance + (  # Raw damage type chance modifiers
                     getattr(attacker_weapon, 'critical_raw_modifier', 0) +
                     getattr(attacker_ammo, 'critical_raw_modifier', 0))
-                if attacker_damage_type not in NO_DAMAGES and randint(1, 100) <= critical_raw_chance:
+                if attacker_damage_type not in NO_DAMAGES and randint(1, 100 + luck_modifier) <= critical_raw_chance:
                     attacker_damage_type = DAMAGE_RAW
             damage = max(damage, 0.0)  # Avoid negative damage
             # Threshold/resistance modifiers from weapon/ammo
@@ -1331,10 +1338,10 @@ class Character(Entity, Stats):
             self.loot(empty=True)
             self.is_active = False
         # Fixing min value for needs
+        self.rads = max(self.rads, 0)
         self.thirst = max(self.thirst, 0)
         self.hunger = max(self.hunger, 0)
         self.sleep = max(self.sleep, 0)
-        self.rads = max(self.rads, 0)
         super().save(*args, **kwargs)
 
     def get_absolute_url(self):
@@ -1900,10 +1907,10 @@ class Effect(Entity, Damage):
         :param target: Personnage ou campagne
         :return: Effect actif ou rien si l'effet ne s'applique pas
         """
-        if randint(1, 100) >= self.chance:
-            return None
         effect = None
         if isinstance(target, Campaign):
+            if randint(1, 100) >= self.chance:
+                return None
             if self.cancel_effect_id:
                 CampaignEffect.objects.filter(campaign=target, effect_id=self.cancel_effect_id).delete()
             effect, created = CampaignEffect.objects.update_or_create(
@@ -1914,6 +1921,9 @@ class Effect(Entity, Damage):
         elif isinstance(target, Character):
             assert (self.duration is None and self.interval is None) or target.campaign is not None, _(
                 "Le personnage doit faire partie d'une campagne pour lui appliquer un effet sur la durée.")
+            luck_modifier = int((5 - target.stats.luck) * LUCK_ROLL_MULT)
+            if randint(1, 100 + luck_modifier) >= self.chance:
+                return None
             if self.cancel_effect_id:
                 CharacterEffect.objects.filter(character=target, effect_id=self.cancel_effect_id).delete()
             current_game_date = getattr(target.campaign, 'current_game_date', None)
@@ -2288,15 +2298,15 @@ class LootTemplate(CommonModel):
         loots = []
         if isinstance(campaign, (int, str)):
             campaign = Campaign.objects.get(pk=campaign)
-        chance_modifier = 0
+        luck_modifier = 0
         if character:
             if isinstance(character, (int, str)):
                 character = Character.objects.select_related('statistics').get(pk=character)
-            chance_modifier = character.stats.luck
+            luck_modifier = int((5 - character.stats.luck) * LUCK_ROLL_MULT)
         assert not character or campaign.pk == character.campaign_id, _(
             "Le personnage concerné doit être dans la même campagne que le butin a créer.")
         for template in self.items.select_related('item').all():
-            chance = randint(1, 100 - randint(0, chance_modifier) * 2)
+            chance = randint(1, 100 - luck_modifier)
             if chance > template.chance:
                 continue
             loots.append(Loot.create(
@@ -2669,6 +2679,33 @@ class FightHistory(CommonModel):
         verbose_name_plural = _("historiques des combats")
 
 
+class Log(CommonModel):
+    """
+    Journal
+    """
+    player = models.ForeignKey(
+        'Player', blank=True, null=True, on_delete=models.CASCADE,
+        related_name='+', verbose_name=_("joueur"))
+    character = models.ForeignKey(
+        'Character', on_delete=models.CASCADE,
+        related_name='+', verbose_name=_("personnage"))
+    date = models.DateTimeField(auto_now_add=True, verbose_name=_("date"))
+    game_date = models.DateTimeField(blank=True, null=True, verbose_name=_("date en jeu"))
+    text = models.TextField(blank=True, verbose_name=_("texte"))
+    private = models.BooleanField(default=False, verbose_name=_("privé ?"))
+
+    @property
+    def log_id(self):
+        return str(self.id or 0)
+
+    def __str__(self):
+        return _("{character} ({date})").format(character=self.character, date=self.game_date or self.date)
+
+    class Meta:
+        verbose_name = _("journal")
+        verbose_name_plural = _("journaux")
+
+
 # List of all models
 MODELS = (
     Player,
@@ -2688,4 +2725,5 @@ MODELS = (
     RollHistory,
     DamageHistory,
     FightHistory,
+    Log,
 )

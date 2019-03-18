@@ -1,0 +1,53 @@
+{% load i18n custom %}
+
+<div class="tab-pane fade" role="tabpanel" id="character-journal">
+    <form method="post" action="{{ request.path }}" class="collapse-form collapse show">
+        <div class="form-row align-items-center">
+            <div class="col-md-11 col-xs-12">
+                <textarea class="form-control" rows="2" name="text">{% for log in logs %}{% if log.log_id == request.GET.edit %}{{ log.text }}{% endif %}{% endfor %}</textarea>
+            </div>
+            <div class="col-md-1 col-xs-12 text-center">
+                {% if request.GET.edit %}
+                    <button type="submit" class="btn btn-success"
+                            name="method" value="edit" >{% trans "Modifier" %}</button>
+                    <br />
+                    <button type="submit" class="btn btn-warning"
+                            name="method" value="cancel" >{% trans "Annuler" %}</button>
+                {% else %}
+                    <button type="submit" class="btn btn-primary"
+                            name="method" value="add" >{% trans "Ajouter" %}</button>
+                    {% if authorized %}
+                        <br />
+                        <label class="form-check-label" title="{% trans "Privé" %}">
+                            <input class="form-check-input" type="checkbox" name="private">
+                            {% trans "Privé" %}
+                        </label>
+                    {% endif %}
+                {% endif %}
+                <input type="hidden" name="type" value="log" />
+                <input type="hidden" name="log" value="{{ request.GET.edit }}" />
+                {% csrf_token %}
+            </div>
+        </div>
+    </form>
+    <hr />
+    {% for log in logs %}
+        <div {% if log.private %}class="alert-warning text-dark collapse-form collapse show"{% endif %}>
+            <div class="font-weight-bold">
+                {% if character.campaign and log.game_date %}
+                    {% trans "Il y a" %} {{ log.game_date|timesince:character.campaign.current_game_date }},
+                    {% trans "le" %} {{ log.game_date }}
+                    <small class="text-muted">({% trans "Le" %} {{ log.date }} {% trans "par" %} {{ log.player }})</small>
+                {% else %}{% trans "Le" %} {{ log.game_date|default:log.date }}{% endif %}
+            </div>
+            {% if authorized or log.player == request.user %}
+                <div class="collapse-form collapse show">
+                    <a href="?edit={{ log.id }}">{% trans "Modifier" %}</a> &ndash;
+                    <a href="?delete={{ log.id }}">{% trans "Supprimer" %}</a>
+                </div>
+            {% endif %}
+            <div class="markdown">{% markdown %}{{ log.text }}{% endmarkdown %}</div>
+            <hr />
+        </div>
+    {% endfor %}
+</div>

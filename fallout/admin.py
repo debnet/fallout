@@ -704,3 +704,20 @@ class FightHistoryAdmin(CommonAdmin):
 
     def get_queryset(self, request):
         return super().get_queryset(request).select_related('attacker', 'defender')
+
+
+@admin.register(Log)
+class LogAdmin(CommonAdmin):
+    """
+    Administration des journaux
+    """
+    fields = ('game_date', 'player', 'character', 'text', 'private', )
+    list_display = ('date', 'game_date', 'character', 'player', 'private', )
+    list_editable = ()
+    list_filter = ('character__campaign', 'player', )
+    ordering = ('-date',)
+    date_hierarchy = 'date'
+    autocomplete_fields = ('player', 'character', )
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('player', 'character')
