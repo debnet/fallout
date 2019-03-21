@@ -1914,7 +1914,7 @@ class Effect(Entity, Damage):
         """
         effect = None
         if isinstance(target, Campaign):
-            if randint(1, 100) <= self.chance:
+            if randint(1, 100) > self.chance:
                 return None
             if self.cancel_effect_id:
                 CampaignEffect.objects.filter(campaign=target, effect_id=self.cancel_effect_id).delete()
@@ -1926,7 +1926,7 @@ class Effect(Entity, Damage):
         elif isinstance(target, Character):
             assert (self.duration is None and self.interval is None) or target.campaign is not None, _(
                 "Le personnage doit faire partie d'une campagne pour lui appliquer un effet sur la durée.")
-            if randint(1, 100) <= self.chance:
+            if randint(1, 100) > self.chance:
                 return None
             if self.cancel_effect_id:
                 CharacterEffect.objects.filter(character=target, effect_id=self.cancel_effect_id).delete()
@@ -2310,7 +2310,7 @@ class LootTemplate(CommonModel):
         assert not character or campaign.pk == character.campaign_id, _(
             "Le personnage concerné doit être dans la même campagne que le butin a créer.")
         for template in self.items.select_related('item').all():
-            if randint(1, 100 - roll_modifier) <= template.chance:
+            if randint(1, 100 - roll_modifier) > template.chance:
                 continue
             loots.append(Loot.create(
                 campaign=campaign, item=template.item,
