@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-03-18 20:41+0100\n"
+"POT-Creation-Date: 2019-03-23 03:58+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -748,6 +748,9 @@ msgstr "critical"
 msgid "Nombre"
 msgstr "Count"
 
+msgid "Nom"
+msgstr "Name"
+
 msgid "Campagne"
 msgstr "Campaign"
 
@@ -988,11 +991,11 @@ msgstr "race"
 msgid "niveau"
 msgstr "level"
 
-msgid "joueur ?"
-msgstr "player?"
-
 msgid "actif ?"
 msgstr "active?"
+
+msgid "joueur ?"
+msgstr "player?"
 
 msgid "au repos ?"
 msgstr "resting?"
@@ -1402,6 +1405,7 @@ msgstr "background"
 msgid "privé ?"
 msgstr "private?"
 
+#, python-brace-format
 msgid "{character} ({date})"
 msgstr "{character} ({date})"
 
@@ -1510,6 +1514,9 @@ msgstr "$"
 
 msgid "incassable"
 msgstr "unbreakable"
+
+msgid "AC"
+msgstr "CA"
 
 msgid "Quantité"
 msgstr "Quantity"

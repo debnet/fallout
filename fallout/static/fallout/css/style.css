@@ -27,7 +27,7 @@ body {
     height: 2.5em;
 }
 .table td {
-    vertical-align:bottom!important;
+    vertical-align:middle !important;
 }
 
 /* Thumbnail images */

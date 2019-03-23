@@ -144,7 +144,7 @@ class CharacterAdmin(EntityAdmin):
     fieldsets = tuple([
         (_("Informations générales"), dict(
             fields=('name', 'title', ('description', 'background'), 'image', 'thumbnail', 'race',
-                    'level', 'is_player', 'is_active', 'is_resting', 'has_stats', 'has_needs', ),
+                    'level', 'is_active', 'is_player', 'is_resting', 'has_stats', 'has_needs', ),
             classes=('wide', ),
         )),
         (_("Informations techniques"), dict(
@@ -200,7 +200,7 @@ class CharacterAdmin(EntityAdmin):
                     character_name = character.name
                     for nb in range(form.cleaned_data['count']):
                         character.name = character_name
-                        character.duplicate(campaign=form.cleaned_data['campaign'])
+                        character.duplicate(name=form.cleaned_data['name'], campaign=form.cleaned_data['campaign'])
                 self.message_user(
                     request,
                     message=_("Les personnages sélectionnés ont été dupliqués."),

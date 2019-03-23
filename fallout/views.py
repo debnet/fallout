@@ -73,9 +73,10 @@ def view_campaign(request, campaign_id):
                     method, loot_id = method.split('-')
                     character = int(data.get('character') or 0)
                     quantity = int(data.get(f'quantity-{loot_id}') or 0)
+                    is_action = bool(data.get('is_action'))
                     if quantity:
                         loot = Loot.objects.filter(pk=loot_id).first()
-                        loot.take(character, quantity)
+                        loot.take(character, quantity, is_action=is_action)
             elif type == 'effect':
                 effect_id, effect_name = data.get('effect-id'), data.get('effect-name')
                 if method == 'add':

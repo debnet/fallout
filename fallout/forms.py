@@ -11,6 +11,7 @@ class DuplicateCharacterForm(forms.Form):
     Formulaire pour dupliquer un ou plusieurs personnages
     """
     count = forms.IntegerField(min_value=0, initial=1, label=_("Nombre"))
+    name = forms.CharField(required=False, label=_("Nom"))
     campaign = forms.ModelChoiceField(required=False, queryset=Campaign.objects.order_by('name'), label=_("Campagne"))
 
 
@@ -19,7 +20,7 @@ class RandomizeCharacterForm(forms.Form):
     Formulaire pour randomiser les compétences d'un personnage
     """
     level = forms.IntegerField(min_value=0, initial=0, label=_("Niveau"))
-    rate = forms.FloatField(min_value=0.0, max_value=1.0, initial=0.0, label=_("Ratio"))
+    rate = forms.FloatField(min_value=0.0, max_value=1.0, initial=1.0, label=_("Ratio"))
 
 
 class RollCharacterForm(forms.Form):

@@ -431,11 +431,11 @@ class Character(Entity, Stats):
     thumbnail = models.CharField(blank=True, max_length=100, choices=get_thumbnails('characters'), verbose_name=_("miniature"))
     race = models.CharField(max_length=20, choices=RACES, default=RACE_HUMAN, db_index=True, verbose_name=_("race"))
     level = models.PositiveSmallIntegerField(default=1, verbose_name=_("niveau"))
-    is_player = models.BooleanField(default=False, db_index=True, verbose_name=_("joueur ?"))
     is_active = models.BooleanField(default=True, db_index=True, verbose_name=_("actif ?"))
+    is_player = models.BooleanField(default=False, db_index=True, verbose_name=_("joueur ?"))
     is_resting = models.BooleanField(default=False, verbose_name=_("au repos ?"))
-    has_stats = models.BooleanField(default=True, verbose_name=_("stats calculées ?"))
-    has_needs = models.BooleanField(default=True, verbose_name=_("besoins activés ?"))
+    has_stats = models.BooleanField(default=False, verbose_name=_("stats calculées ?"))
+    has_needs = models.BooleanField(default=False, verbose_name=_("besoins activés ?"))
     # Primary statistics
     health = models.PositiveSmallIntegerField(default=0, verbose_name=_("santé"))
     action_points = models.PositiveSmallIntegerField(default=0, verbose_name=_("points d'action"))
@@ -1266,17 +1266,18 @@ class Character(Entity, Stats):
         return damages
 
     def duplicate(self, equipments: bool = True, effects: bool = True,
-                  campaign: Union[int, 'Campaign'] = None) -> 'Character':
+                  campaign: Union[int, 'Campaign'] = None, name: str = None) -> 'Character':
         """
         Duplique ce personnage
         :param equipments: Duplique également les équipements
         :param effects: Duplique également les effets
         :param campaign: Campagne de destination
+        :param name: Nouveau nom
         :return: Personnage
         """
         assert self.pk, _("Ce personnage doit être préalablement enregistré avant d'être dupliqué.")
         character_id = self.pk
-        self.name = f"* {self.name}"
+        self.name = name or f"* {self.name.replace('* ', '')}"
         self.campaign_id = getattr(campaign, 'pk', campaign) or self.campaign_id
         self.save(force_insert=True)
         if equipments:
@@ -1547,15 +1548,16 @@ class Item(Entity, Resistance, Damage):
                     get_class(threshold, 20), get_class(resistance, 100)))
         return resistances
 
-    def duplicate(self) -> 'Item':
+    def duplicate(self, name: str = None) -> 'Item':
         """
         Duplique cet objet
+        :param name: Nouveau nom
         :return: Objet
         """
         assert self.pk, _("Cet objet doit être préalablement enregistré avant d'être dupliqué.")
         item_id = self.pk
         effects, ammunitions = self.effects.values_list('id', flat=True), self.ammunitions.values_list('id', flat=True)
-        self.name = f"* {self.name}"
+        self.name = name or f"* {self.name.replace('* ', '')}"
         self.save(force_insert=True)
         for modifier in ItemModifier.objects.filter(item_id=item_id):
             modifier.pk, modifier.id, modifier.item_id = None, None, self.pk
@@ -1938,14 +1940,15 @@ class Effect(Entity, Damage):
                 effect.apply(target)
         return effect
 
-    def duplicate(self) -> 'Effect':
+    def duplicate(self, name: str = None) -> 'Effect':
         """
         Duplique cet effet
+        :param name: Nouveau nom
         :return: Effet
         """
         assert self.pk, _("Cet effet doit être préalablement enregistré avant d'être dupliqué.")
         effect_id = self.pk
-        self.name = f"* {self.name}"
+        self.name = name or f"* {self.name.replace('* ', '')}"
         self.save(force_insert=True)
         for modifier in EffectModifier.objects.filter(effect_id=effect_id):
             modifier.pk, modifier.id, modifier.effect_id = None, None, self.pk
@@ -2318,14 +2321,15 @@ class LootTemplate(CommonModel):
                 condition=randint(template.min_condition, template.max_condition) / 100.0))
         return loots
 
-    def duplicate(self) -> 'LootTemplate':
+    def duplicate(self, name: str = None) -> 'LootTemplate':
         """
         Duplique ce modèle de butin
+        :param name: Nouveau nom
         :return: Modèle de butin
         """
         assert self.pk, _("Ce modèle de butin doit être préalablement enregistré avant d'être dupliqué.")
         template_id = self.pk
-        self.name = f"* {self.name}"
+        self.name = name or f"* {self.name.replace('* ', '')}"
         self.save(force_insert=True)
         for item in LootTemplateItem.objects.filter(template_id=template_id):
             item.pk, item.id, item.template_id = None, None, self.pk

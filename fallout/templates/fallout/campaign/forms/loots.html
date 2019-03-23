@@ -103,6 +103,10 @@
                                         <table class="table table-sm mb-0 small">
                                             <thead class="thead-dark">
                                                 <tr>
+                                                    <th scope="col" class="text-center font-weight-bold"
+                                                        title="{% trans "esquive" %}" data-toggle="tooltip" data-placement="bottom">
+                                                        {% trans "AC" %}
+                                                    </th>
                                                     {% for resistance in resistances %}
                                                         <th scope="col" class="text-center font-weight-bold"
                                                             title="{{ resistance.long_label }}" data-toggle="tooltip" data-placement="bottom">
@@ -113,6 +117,9 @@
                                             </thead>
                                             <tbody>
                                                 <tr>
+                                                    <td class="text-center" rowspan="2">
+                                                        <strong>{{ item.armor_class }}</strong>
+                                                    </td>
                                                     {% for resistance in resistances %}
                                                         <td class="text-center">
                                                             {{ resistance.threshold }}
