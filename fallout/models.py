@@ -1011,6 +1011,8 @@ class Character(Entity, Stats):
         is_melee = not attacker_weapon or attacker_weapon.is_melee
         attacker_skill = getattr(attacker_weapon, 'skill', SKILL_UNARMED)
         attacker_hit_chance = getattr(self.stats, attacker_skill, 0)  # Base skill
+        if not attacker_hit_chance and not self.has_stats:
+            attacker_hit_chance = self.level * LEVELED_STATS_MULT  # Base skill level for creatures
         attacker_hit_chance += [0, self.stats.one_hand_accuracy, self.stats.two_hands_accuracy][
             getattr(attacker_weapon, 'hands', 0)]  # Accuracy modifier for one-hand or two-hands weapons
         attacker_hit_chance += min(MIN_STRENGTH_MALUS * (  # Accuracy malus if below required strength

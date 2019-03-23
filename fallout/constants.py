@@ -299,6 +299,9 @@ XP_GAIN_BURST = 3
 # Turn time
 TURN_TIME = 30
 
+# Leveled stats multiplier for creatures
+LEVELED_STATS_MULT = 10
+
 # Computed statistics from S.P.E.C.I.A.L.
 COMPUTED_STATS = (
     ('hit_points_per_level', lambda s, c: 3 + (s.endurance // 2)),
