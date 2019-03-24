@@ -1900,10 +1900,12 @@ class Effect(Entity, Damage):
         related_name='+', verbose_name=_("effet annulé"))
 
     @property
-    def damage_config(self) -> Dict[str, Union[str, int]]:
+    def damage_config(self) -> Optional[Dict[str, Union[str, int]]]:
         """
         Dégâts de l'effet
         """
+        if not self.damage_type:
+            return None
         return dict(
             raw_damage=self.raw_damage,
             min_damage=self.min_damage,
@@ -2033,7 +2035,7 @@ class CampaignEffect(ActiveEffect):
         :return: Dégâts potentiels infligés
         """
         damages = []
-        if not self.campaign:
+        if not self.campaign or not self.effect.damage_config:
             return damages
         game_date = self.campaign.current_game_date
         while self.next_date and self.next_date <= game_date:
@@ -2050,7 +2052,7 @@ class CampaignEffect(ActiveEffect):
         :return: Dégâts potentiels infligés
         """
         damages = {}
-        if not self.campaign:
+        if not self.campaign or not self.effect.damage_config:
             return damages
         game_date = self.campaign.current_game_date
         while self.next_date and self.next_date <= game_date:
@@ -2125,7 +2127,7 @@ class CharacterEffect(ActiveEffect):
         """
         damages = []
         character = character or self.character
-        if not character.campaign:
+        if not character.campaign or not self.effect.damage_config:
             return damages
         game_date = character.campaign.current_game_date
         while self.next_date and self.next_date <= game_date:
