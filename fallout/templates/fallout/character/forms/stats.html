@@ -34,7 +34,7 @@
                                 {% if s.end %}{{ s.end }}{% endif %}
                             </strong>
                         {% elif authorized %}
-                            {% if levelup and character.skill_points > 0 %}
+                            {% if levelup and character.used_skill_points < character.skill_points %}
                                 <button class="btn btn-sm btn-dark" type="submit" name="levelup" value="{{ s.code }}">
                                     <strong>{% trans "+" %}</strong>
                                 </button>
