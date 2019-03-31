@@ -196,11 +196,15 @@ class CharacterAdmin(EntityAdmin):
         if 'duplicate' in request.POST:
             form = DuplicateCharacterForm(request.POST)
             if form.is_valid():
+                name = form.cleaned_data['name']
+                count = form.cleaned_data['count']
                 for character in queryset.order_by('name'):
                     character_name = character.name
-                    for nb in range(form.cleaned_data['count']):
+                    for nb in range(count):
                         character.name = character_name
-                        character.duplicate(name=form.cleaned_data['name'], campaign=form.cleaned_data['campaign'])
+                        character.duplicate(
+                            name=f"{name or character_name} {nb + 1}",
+                            campaign=form.cleaned_data['campaign'])
                 self.message_user(
                     request,
                     message=_("Les personnages sélectionnés ont été dupliqués."),
