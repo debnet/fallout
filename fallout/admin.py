@@ -115,7 +115,9 @@ class StatsAdmin(CommonAdmin):
             for title, fields in ALL_EDITABLE_STATS
         )
     ])
+    date_hierarchy = 'date'
     list_display_links = ('character_name', )
+    list_filter = ('character__campaign', 'obsolete', )
     ordering = ('character__name', )
     autocomplete_fields = ('character', )
 
@@ -133,7 +135,7 @@ class StatsAdmin(CommonAdmin):
         return super().get_queryset(request).select_related('character__campaign')
 
     def get_list_display(self, request):
-        return 'character_name', 'campaign_name', 'date', 'obsolete'
+        return 'character_name', 'campaign_name', 'charge', 'date', 'obsolete'
 
 
 @admin.register(Character)
