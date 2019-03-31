@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-03-23 03:58+0100\n"
+"POT-Creation-Date: 2019-03-31 19:23+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -186,6 +186,15 @@ msgstr "distance"
 
 msgid "partie du corps ciblée"
 msgstr "targetted body part"
+
+msgid "succès ?"
+msgstr "success?"
+
+msgid "critique ?"
+msgstr "critical?"
+
+msgid "dégâts bruts ?"
+msgstr "raw damage?"
 
 msgid "grenade ?"
 msgstr "grenade?"
@@ -1144,6 +1153,9 @@ msgstr "ammunitions"
 msgid "état"
 msgstr "condition"
 
+msgid "secondaire"
+msgstr "secondary"
+
 msgid "Il n'est pas possible de s'équiper de ce type d'objet."
 msgstr "You can't equip this object."
 
@@ -1180,17 +1192,26 @@ msgstr "This item isn't repearable."
 msgid "Le personnage ne possède plus assez de points d'actions pour réparer cet objet."
 msgstr "This character doesn't have enough action points in order to repair this item."
 
-msgid "Un autre objet est déjà présent à cet emplacement."
-msgstr "Another item is already equipped at this slot."
-
 msgid "L'emplacement doit correspondre au type d'objet."
 msgstr "The item slot must be the same as the object type."
+
+msgid "Un autre objet est déjà présent à cet emplacement."
+msgstr "Another item is already equipped at this slot."
 
 msgid "Ces munitions sont incompatibles avec l'arme équipée."
 msgstr "These ammunitions are not compatible with the equipped weapon."
 
 msgid "Cette arme est incompatible avec les munitions équipées."
 msgstr "This weapon is not compatible with equipped ammunitions."
+
+msgid "Cet objet ne peut être considéré comme une arme secondaire."
+msgstr "This item can be used as a secondary weapon."
+
+msgid "Seule une arme de corps-à-corps ne peut être utilisée comme arme secondaire."
+msgstr "Only an unarmed or melee weapon can be used as a secondary weapon."
+
+msgid "Un autre objet de l'inventaire est déjà défini comme arme secondaire."
+msgstr "Another item is already defined as a secondary weapon."
 
 msgid "équipement"
 msgstr "equipment"
@@ -1296,12 +1317,6 @@ msgstr "ingame date"
 
 msgid "jet"
 msgstr "roll"
-
-msgid "succès ?"
-msgstr "success?"
-
-msgid "critique ?"
-msgstr "critical?"
 
 #, python-brace-format
 msgid "{label} du jet de {stats} : {roll} pour {value}"
@@ -1662,11 +1677,23 @@ msgstr "dst."
 msgid "non ciblé"
 msgstr "non targetted"
 
+msgid "Succès"
+msgstr "Success"
+
+msgid "Critique"
+msgstr "Critical"
+
+msgid "Dégâts bruts"
+msgstr "Raw damage"
+
 msgid "Sans arme"
 msgstr "No weapon"
 
 msgid "Grenade"
 msgstr "Grenade"
+
+msgid "Action"
+msgstr "Action"
 
 msgid "valeur fixe"
 msgstr "fixed value"
