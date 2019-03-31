@@ -139,6 +139,9 @@ class FightInputSerializer(BaseFightInputSerializer):
     """
     target_part = serializers.ChoiceField(choices=BODY_PARTS, allow_blank=True, label=_("partie du corps ciblée"))
     hit_chance_modifier = serializers.IntegerField(initial=0, label=_("modificateur"))
+    force_success = serializers.BooleanField(initial=False, label=_("succès ?"))
+    force_critical = serializers.BooleanField(initial=False, label=_("critique ?"))
+    force_raw_damage = serializers.BooleanField(initial=False, label=_("dégâts bruts ?"))
     is_grenade = serializers.BooleanField(initial=False, label=_("grenade ?"))
     is_action = serializers.BooleanField(initial=False, label=_("action ?"))
     no_weapon = serializers.BooleanField(initial=False, label=_("aucun arme ?"))
@@ -150,6 +153,9 @@ class BurstInputSerializer(BaseCustomSerializer):
     """
     targets = BaseFightInputSerializer(many=True, label=_("cibles"))
     hit_chance_modifier = serializers.IntegerField(initial=0, label=_("modificateur"))
+    force_success = serializers.BooleanField(initial=False, label=_("succès ?"))
+    force_critical = serializers.BooleanField(initial=False, label=_("critique ?"))
+    force_raw_damage = serializers.BooleanField(initial=False, label=_("dégâts bruts ?"))
     is_grenade = serializers.BooleanField(initial=False, label=_("grenade ?"))
     is_action = serializers.BooleanField(initial=False, label=_("action ?"))
 

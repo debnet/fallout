@@ -803,7 +803,7 @@ class Character(Entity, Stats):
         """
         if needs and self.has_needs:
             for stats_name, formula in COMPUTED_NEEDS:
-                rate = -1 if stats_name == STATS_SLEEP and (resting or self.is_resting) else 1
+                rate = -2 if stats_name == STATS_SLEEP and (resting or self.is_resting) else 1
                 rate *= NEEDS_RESTING_RATE if resting or self.is_resting else NEEDS_NORMAL_RATE
                 self.modify_value(stats_name, formula(self.stats, self) * hours * rate)
         if radiation:
@@ -860,7 +860,7 @@ class Character(Entity, Stats):
         return loots
 
     def burst(self, targets: List[Tuple[Union['Character', int], int]], hit_chance_modifier: int = 0,
-              is_grenade: bool = False, is_action: bool = True, log: bool = True) -> List['FightHistory']:
+              is_grenade: bool = False, is_action: bool = True, log: bool = True, **kwargs) -> List['FightHistory']:
         """
         Permet de lancer une attaque en rafale sur un groupe d'ennemis
         :param targets: Liste de personnages ciblés avec leur distance relative (en cases) pour chacun dans un tuple
@@ -880,7 +880,7 @@ class Character(Entity, Stats):
             for hit_count, (target, target_range) in enumerate(targets):
                 history = self.fight(
                     target, is_burst=True, is_grenade=True, target_range=int(target_range),
-                    hit_chance_modifier=hit_chance_modifier, is_action=is_action, hit_count=hit_count, log=log)
+                    hit_chance_modifier=hit_chance_modifier, is_action=is_action, hit_count=hit_count, log=log, **kwargs)
                 histories.append(history)
         else:
             attacker_weapon_equipment = self.get_from_inventory(slot=ITEM_WEAPON)
@@ -899,7 +899,7 @@ class Character(Entity, Stats):
                     target, target_range = choice(targets)
                 history = self.fight(
                     target, is_burst=True, target_range=int(target_range), weapon_equipment=attacker_weapon_equipment,
-                    hit_chance_modifier=hit_chance_modifier, is_action=is_action, hit_count=hit_count, log=log)
+                    hit_chance_modifier=hit_chance_modifier, is_action=is_action, hit_count=hit_count, log=log, **kwargs)
                 histories.append(history)
                 if history.status in (STATUS_TARGET_DEAD, STATUS_TARGET_KILLED):
                     dead_targets.add(target)
@@ -934,6 +934,7 @@ class Character(Entity, Stats):
     def fight(self, target: Union['Character', int], target_range: int = 1, target_part: BODY_PARTS = None,
               hit_chance_modifier: int = 0, is_burst: bool = False, is_grenade: bool = False, is_action: bool = True,
               hit_count: int = 0, log: bool = True, no_weapon: bool = False,
+              force_success: bool = False, force_critical: bool = False, force_raw_damage: bool = False,
               weapon_equipment: Optional['Equipment'] = None) -> 'FightHistory':
         """
         Calcul un round de combat entre deux personnages
@@ -947,6 +948,9 @@ class Character(Entity, Stats):
         :param hit_count: Compteur de coups lors d'une attaque en rafale
         :param log: Historise le combat ?
         :param no_weapon: Exécute une attaque sans arme équipée ?
+        :param force_success: Force le succès du coup ?
+        :param force_critical: Force un coup critique ?
+        :param force_raw_damage: Force les dégâts bruts ?
         :param weapon_equipment: Arme équipée pour l'attaque en rafale (optimisation)
         :return: Historique de combat
         """
@@ -958,16 +962,16 @@ class Character(Entity, Stats):
         # Equipment
         if is_grenade:
             attacker_weapon_equipment = weapon_equipment or self.get_from_inventory(slot=ITEM_GRENADE)
-            attacker_weapon = history.attacker_weapon = getattr(attacker_weapon_equipment, 'item', None)
-            attacker_ammo = None
+            attacker_ammo_equipment = None
             assert attacker_weapon_equipment, _("L'attaquant ne possède pas ou plus de grenade.")
         elif no_weapon:
-            attacker_weapon_equipment = attacker_weapon = attacker_ammo = None
+            attacker_weapon_equipment = weapon_equipment or self.get_from_inventory(secondary=True)
+            attacker_ammo_equipment = None
         else:
             attacker_weapon_equipment = weapon_equipment or self.get_from_inventory(slot=ITEM_WEAPON)
             attacker_ammo_equipment = self.get_from_inventory(slot=ITEM_AMMO)
-            attacker_weapon = history.attacker_weapon = getattr(attacker_weapon_equipment, 'item', None)
-            attacker_ammo = history.attacker_ammo = getattr(attacker_ammo_equipment, 'item', None)
+        attacker_weapon = history.attacker_weapon = getattr(attacker_weapon_equipment, 'item', None)
+        attacker_ammo = history.attacker_ammo = getattr(attacker_ammo_equipment, 'item', None)
         # Fight conditions
         if attacker_weapon and (
                 (attacker_weapon.clip_size and attacker_weapon_equipment.clip_count <= 0) or
@@ -1064,8 +1068,8 @@ class Character(Entity, Stats):
         history.hit_chance = int(round(attacker_hit_chance))
         history.status = STATUS_HIT_FAILED
         history.hit_roll = randint(1, 100)
-        history.success = history.hit_roll <= history.hit_chance
-        history.critical = history.hit_roll >= min(100, CRITICAL_FAIL_D100 - roll_modifier)
+        history.success = force_success or history.hit_roll <= history.hit_chance
+        history.critical = force_critical or history.hit_roll >= min(100, CRITICAL_FAIL_D100 - roll_modifier)
         if history.success:
             # Apply damage
             attacker_damage_type = (  # Damage type
@@ -1088,7 +1092,7 @@ class Character(Entity, Stats):
                 getattr(attacker_weapon, 'critical_modifier', 0) +
                 getattr(attacker_ammo, 'critical_modifier', 0))
             history.status = STATUS_HIT_SUCCEED
-            history.critical = history.hit_roll <= critical_chance
+            history.critical = force_critical or history.hit_roll <= critical_chance
             # Critical damage
             if history.critical:
                 damage *= max(1.0 + (  # Critical damage modifiers (in %) by weapon/ammo
@@ -1102,7 +1106,8 @@ class Character(Entity, Stats):
                 critical_raw_chance = self.stats.critical_raw_chance + (  # Raw damage type chance modifiers
                     getattr(attacker_weapon, 'critical_raw_modifier', 0) +
                     getattr(attacker_ammo, 'critical_raw_modifier', 0))
-                if attacker_damage_type not in NO_DAMAGES and randint(1, 100) <= critical_raw_chance:
+                critical_raw_damage = force_raw_damage or randint(1, 100) <= critical_raw_chance
+                if attacker_damage_type not in NO_DAMAGES and critical_raw_damage:
                     attacker_damage_type = DAMAGE_RAW
             damage = max(damage, 0.0)  # Avoid negative damage
             # Threshold/resistance modifiers from weapon/ammo
@@ -1629,6 +1634,7 @@ class Equipment(CommonModel):
     quantity = models.PositiveIntegerField(default=1, verbose_name=_("quantité"))
     clip_count = models.PositiveSmallIntegerField(blank=True, null=True, verbose_name=_("munitions"))
     condition = models.FloatField(blank=True, null=True, verbose_name=_("état"))
+    secondary = models.BooleanField(default=False, verbose_name=_("secondaire"))
 
     @property
     def equiped(self) -> bool:
@@ -1653,12 +1659,12 @@ class Equipment(CommonModel):
         return self.item.weight * self.quantity
 
     @property
-    def compatible_ammunition(self) -> Optional[List['Item']]:
+    def compatible_ammunition(self) -> Optional[bool]:
         """
         Munitions compatibles
         """
         if self.slot or self.item.type != ITEM_AMMO:
-            return
+            return None
         weapon = self.character.get_from_inventory(slot=ITEM_WEAPON)
         return weapon and self.item in weapon.item.ammunitions.all()
 
@@ -1820,23 +1826,52 @@ class Equipment(CommonModel):
             self.character.save()
         return self
 
+    def set_secondary(self) -> 'Equipment':
+        """
+        Permet de définir une équipement libre de l'inventaire comme arme secondaire
+        :return: Equipement
+        """
+        old_equipment = self.character.equipments.filter(secondary=True)
+        old_equipment.update(secondary=False)
+        self.secondary = True
+        try:
+            self.save()
+        except ValidationError:
+            old_equipment.update(secondary=True)
+            raise
+        return self
+
     def clean(self):
         """
         Validation de l'objet
         """
         if self.slot:
-            if self.character.equipments.exclude(id=self.pk).filter(slot=self.slot).exists():
-                raise ValidationError(dict(slot=_("Un autre objet est déjà présent à cet emplacement.")))
             if self.slot != self.item.type:
-                raise ValidationError(dict(slot=_("L'emplacement doit correspondre au type d'objet.")))
+                raise ValidationError(dict(slot=_(
+                    "L'emplacement doit correspondre au type d'objet.")))
+            if self.character.equipments.exclude(id=self.pk).filter(slot=self.slot).exists():
+                raise ValidationError(dict(slot=_(
+                    "Un autre objet est déjà présent à cet emplacement.")))
         if self.slot == ITEM_AMMO:
             equipment = self.character.equipments.select_related('item').filter(slot=ITEM_WEAPON).first()
             if equipment and not equipment.item.ammunitions.filter(id=self.item.pk).exists():
-                raise ValidationError(dict(item=_("Ces munitions sont incompatibles avec l'arme équipée.")))
+                raise ValidationError(dict(item=_(
+                    "Ces munitions sont incompatibles avec l'arme équipée.")))
         elif self.slot == ITEM_WEAPON:
             equipment = self.character.equipments.select_related('item').filter(slot=ITEM_AMMO).first()
             if equipment and not self.item.ammunitions.filter(id=equipment.item.pk).exists():
-                raise ValidationError(dict(item=_("Cette arme est incompatible avec les munitions équipées.")))
+                raise ValidationError(dict(item=_(
+                    "Cette arme est incompatible avec les munitions équipées.")))
+        if self.secondary:
+            if self.item.type != ITEM_WEAPON:
+                raise ValidationError(dict(item=_(
+                    "Cet objet ne peut être considéré comme une arme secondaire.")))
+            if not self.item.is_melee:
+                raise ValidationError(dict(item=_(
+                    "Seule une arme de corps-à-corps ne peut être utilisée comme arme secondaire.")))
+            if self.character.equipments.exclude(id=self.pk).filter(secondary=True).exists():
+                raise ValidationError(dict(secondary=_(
+                    "Un autre objet de l'inventaire est déjà défini comme arme secondaire.")))
 
     def reset_character_stats(self):
         """
@@ -2629,7 +2664,8 @@ class FightHistory(CommonModel):
         """
         boolean = models.BooleanField()
         fights = FightHistory.objects.filter(
-            Q(attacker=character) | Q(defender=character), status__in=(STATUS_HIT_SUCCEED, STATUS_HIT_FAILED)
+            Q(attacker=character) | Q(defender=character),
+            status__in=(STATUS_HIT_SUCCEED, STATUS_TARGET_KILLED, STATUS_HIT_FAILED)
         ).annotate(
             is_attacker=Case(When(attacker=character, then=Value(True, boolean)), default=Value(False, boolean))
         ).values('success', 'critical', 'is_attacker').annotate(

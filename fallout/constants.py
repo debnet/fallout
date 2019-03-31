@@ -311,7 +311,7 @@ COMPUTED_STATS = (
     # Secondary statistics
     ('armor_class', lambda s, c: s.agility),
     ('carry_weight', lambda s, c: (15 + (15 * s.strength)) // 3),
-    ('melee_damage', lambda s, c: max(1, s.strength - 5)),
+    ('melee_damage', lambda s, c: max(1, s.strength - 5) * 2),
     ('sequence', lambda s, c: 2 * s.perception),
     ('healing_rate', lambda s, c: (s.endurance // 3)),
     ('critical_chance', lambda s, c: s.luck),

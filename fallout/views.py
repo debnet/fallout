@@ -60,7 +60,7 @@ def view_campaign(request, campaign_id):
                     filter = dict(pk=item_id) if item_id else dict(name__icontains=item_name)
                     item = Item.objects.filter(**filter).first()
                     Loot.create(campaign=campaign, item=item, quantity=quantity, condition=condition)
-                elif method == 'clear':
+                elif method == 'cear':
                     Loot.objects.filter(campaign=campaign).delete()
                 elif method.startswith('delete'):
                     method, loot_id = method.split('-')
@@ -186,6 +186,9 @@ def view_character(request, character_id):
                     target_part=data.get('target_part'),
                     target_range=int(data.get('target_range')),
                     hit_chance_modifier=int(data.get('hit_modifier') or 0),
+                    force_success=bool(data.get('force_success', False)),
+                    force_critical=bool(data.get('force_critical', False)),
+                    force_raw_damage=bool(data.get('force_raw_damage', False)),
                     is_grenade=bool(data.get('is_grenade', False)),
                     is_action=bool(data.get('is_action', False)),
                     no_weapon=bool(data.get('no_weapon', False)))
@@ -196,6 +199,9 @@ def view_character(request, character_id):
                 histories = character.burst(
                     targets=list(zip(data.getlist('targets') or [], data.getlist('ranges') or [])),
                     hit_chance_modifier=int(data.get('hit_modifier') or 0),
+                    force_success=bool(data.get('force_success', False)),
+                    force_critical=bool(data.get('force_critical', False)),
+                    force_raw_damage=bool(data.get('force_raw_damage', False)),
                     is_grenade=bool(data.get('is_grenade', False)),
                     is_action=bool(data.get('is_action', False)))
                 results = {}
@@ -241,6 +247,8 @@ def view_character(request, character_id):
                         equip.repair(value=int(data.get('condition') or 100), is_action=is_action)
                     elif method == 'drop':
                         equip.drop(quantity=int(data.get('quantity') or 1), is_action=is_action)
+                    elif method == 'secondary':
+                        equip.set_secondary()
             elif type == 'effect':
                 effect_id, effect_name = data.get('effect-id'), data.get('effect-name')
                 if method == 'add':

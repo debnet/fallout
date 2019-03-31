@@ -11,7 +11,12 @@
                                 <span class="badge badge-dark align-middle">{{ equip.quantity }}</span>
                             {% endif %}
                             <span class="card-title">{{ item.name }}</span>
-                            {% if item.title %}<small class="card-subtitle mb-2 text-muted">{{ item.title }}</small>{% endif %}
+                            {% if item.title %}
+                                <small class="card-subtitle mb-2 text-muted">{{ item.title }}</small>
+                            {% endif %}
+                            {% if equip.secondary %}
+                                <span class="badge badge-secondary align-middle float-right">{% trans "Arme" %}</span>
+                            {% endif %}
                         </div>
                         <div class="card-body">
                             {% with image=item.image thumbnail=item.thumbnail %}
@@ -177,6 +182,10 @@
                                         {% elif item.is_usable %}
                                             <button class="btn btn-sm btn-success mr-1" type="submit"
                                                     name="method" value="use">{% trans "Utiliser" %}</button>
+                                        {% endif %}
+                                        {% if item.is_melee and not equip.secondary %}
+                                            <button class="btn btn-sm btn-secondary mr-1" type="submit"
+                                                name="method" value="secondary">{% trans "Arme" %}</button>
                                         {% endif %}
                                     {% endif %}
                                     <div class="form-check ml-1">

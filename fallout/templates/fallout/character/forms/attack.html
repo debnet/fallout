@@ -76,6 +76,22 @@
                 </tr>
                 <tr>
                     <td class="text-right align-middle" colspan="2">
+                        <label class="form-check-label mr-4" class="d-inline" title="{% trans "Succès" %}">
+                            <input class="form-check-input" type="checkbox" name="force_success">
+                            {% trans "Succès" %}
+                            </label>
+                        <label class="form-check-label mr-4" class="d-inline" title="{% trans "Critique" %}">
+                            <input class="form-check-input" type="checkbox" name="force_critical">
+                            {% trans "Critique" %}
+                        </label>
+                        <label class="form-check-label mr-1" class="d-inline" title="{% trans "Dégâts bruts" %}">
+                            <input class="form-check-input" type="checkbox" name="force_raw_damage">
+                            {% trans "Dégâts bruts" %}
+                        </label>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="text-right align-middle" colspan="2">
                         {% if not burst %}
                             <label class="form-check-label mr-4" class="d-inline" title="{% trans "Sans arme" %}">
                                 <input class="form-check-input" type="checkbox" name="no_weapon">
@@ -88,7 +104,7 @@
                         </label>
                         <label class="form-check-label mr-1" class="d-inline" title="{% trans "Points d'action" %}">
                             <input class="form-check-input" type="checkbox" name="is_action">
-                            {% trans "PA" %}
+                            {% trans "Action" %}
                         </label>
                     </td>
                 </tr>
