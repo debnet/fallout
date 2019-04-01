@@ -164,8 +164,19 @@ class Campaign(CommonModel):
             if (self.current_character and
                     self.current_character.action_points != self.current_character.stats.max_action_points):
                 self.current_character.action_points = self.current_character.stats.max_action_points
-                self.current_character.save()
+                self.current_character.save(reset=False)
         return next_character
+
+    def clear_turn(self) -> None:
+        """
+        Désactive le système de tour par tour
+        :return: Rien
+        """
+        self.current_character = None
+        for character in self.characters.all():
+            character.action_points = character.stats.max_action_points
+            character.save(reset=False)
+        self.save()
 
     def save(self, resting=False, *args, **kwargs):
         """
@@ -416,9 +427,9 @@ class Character(Entity, Stats):
     Personnage
     """
     # Technical informations
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, blank=True, null=True, on_delete=models.SET_NULL,
-        related_name='characters', verbose_name=_("utilisateur"))
+    player = models.ForeignKey(
+        'Player', blank=True, null=True, on_delete=models.SET_NULL,
+        related_name='characters', verbose_name=_("joueur"))
     campaign = models.ForeignKey(
         'Campaign', blank=True, null=True, on_delete=models.SET_NULL,
         related_name='characters', verbose_name=_("campagne"))
@@ -1162,7 +1173,7 @@ class Character(Entity, Stats):
         return history
 
     def damage(self, raw_damage: float = 0.0, min_damage: int = 0, max_damage: int = 0,
-               damage_type: str = DAMAGE_NORMAL, body_part: str = PART_TORSO,
+               damage_type: str = '', body_part: str = '',
                threshold_modifier: int = 0, threshold_rate_modifier: int = 0,
                resistance_modifier: int = 0, save: bool = True, log: bool = True) -> 'DamageHistory':
         """
@@ -1180,11 +1191,11 @@ class Character(Entity, Stats):
         :return: Nombre de dégâts
         """
         threshold_rate_modifier = round(threshold_rate_modifier / 100.0, 2)
-        damage_type, body_part = damage_type or DAMAGE_NORMAL, body_part or PART_TORSO
+        damage_type, body_part = damage_type or DAMAGE_NORMAL, body_part or ''
         assert min_damage <= max_damage, _("Les bornes de dégâts min. et max. ne sont pas correctes.")
         history = DamageHistory(
             character=self, damage_type=damage_type, raw_damage=raw_damage,
-            min_damage=min_damage, max_damage=max_damage)
+            min_damage=min_damage, max_damage=max_damage, body_part=body_part)
         history.game_date = self.campaign and self.campaign.current_game_date
         # Base damage
         total_damage = raw_damage + randint(min_damage, max_damage)
@@ -1195,8 +1206,9 @@ class Character(Entity, Stats):
         damage_threshold, damage_resistance = 0, 0.0
         if damage_type not in NO_DAMAGES:
             # Armor threshold and resistance
-            armor_slot = ITEM_HELMET if damage_type == DAMAGE_GAZ_INHALED or (body_part in (PART_EYES, PART_HEAD)) else ITEM_ARMOR
-            armor_equipment = self.get_from_inventory(slot=armor_slot)
+            to_head = damage_type == DAMAGE_GAZ_INHALED or body_part in (PART_EYES, PART_HEAD)
+            armor_slot = None if not body_part else ITEM_HELMET if to_head else ITEM_ARMOR
+            armor_equipment = self.get_from_inventory(slot=armor_slot) if armor_slot else None
             armor = history.armor = getattr(armor_equipment, 'item', None)
             armor_damage = 0
             if armor and armor_equipment:
@@ -1400,6 +1412,7 @@ class Damage(CommonModel):
     min_damage = models.PositiveSmallIntegerField(default=0, verbose_name=_("dégâts min."))
     max_damage = models.PositiveSmallIntegerField(default=0, verbose_name=_("dégâts max."))
     raw_damage = models.PositiveSmallIntegerField(default=0, verbose_name=_("dégâts bruts"))
+    body_part = models.CharField(max_length=10, blank=True, choices=BODY_PARTS, verbose_name=_("partie du corps"))
 
     @property
     def calculated_damage(self) -> int:
@@ -1430,8 +1443,12 @@ class Damage(CommonModel):
         :return: Représentation des dégâts ou rien si l'objet n'est pas une arme ou une munition
         """
         if not self.label_damage:
-            return self.get_damage_type_display()
-        return f"{self.label_damage} {self.get_damage_type_display()}"
+            if not self.body_part:
+                return self.get_damage_type_display()
+            return f"{self.get_damage_type_display()} ({self.get_body_part_display()}"
+        if not self.body_part:
+            f"{self.label_damage} {self.get_damage_type_display()}"
+        return f"{self.label_damage} {self.get_damage_type_display()} ({self.get_body_part_display()})"
 
     class Meta:
         abstract = True
@@ -1945,7 +1962,8 @@ class Effect(Entity, Damage):
             raw_damage=self.raw_damage,
             min_damage=self.min_damage,
             max_damage=self.max_damage,
-            damage_type=self.damage_type)
+            damage_type=self.damage_type,
+            body_part=self.body_part)
 
     def affect(self, target: Union['Campaign', 'Character']) -> Optional[Union['CampaignEffect', 'CharacterEffect']]:
         """
@@ -2551,7 +2569,26 @@ class DamageHistory(Damage):
     real_damage = models.SmallIntegerField(default=0, verbose_name=_("dégâts réels"))
 
     @property
+    def css_class(self) -> str:
+        """
+        Classe CSS associée
+        """
+        return ('success', 'warning')[self.real_damage >= 0]
+
+    @property
+    def message_level(self) -> str:
+        """
+        Niveau de message
+        """
+        return {v: k for k, v in settings.MESSAGE_TAGS.items()}.get(self.css_class) or 10  # Debug
+
+    @property
     def label(self) -> str:
+        if self.body_part:
+            return _("{type} de {real_damage} ({body_part})").format(
+                type=self.get_damage_type_display(),
+                real_damage=self.real_damage,
+                body_part=self.get_body_part_display())
         return _("{type} de {real_damage}").format(
             type=self.get_damage_type_display(),
             real_damage=self.real_damage)

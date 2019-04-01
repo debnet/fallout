@@ -37,11 +37,25 @@ class FightCharacterForm(forms.Form):
     """
     target = forms.ModelChoiceField(queryset=Character.objects.order_by('name'), label=_("Personnage"))
     target_range = forms.IntegerField(min_value=1, initial=1, label=_("Distance"))
-    target_part = forms.ChoiceField(choices=BODY_PARTS, label=_("Cible"))
+    target_part = forms.ChoiceField(choices=BODY_PARTS, label=_("Partie du corps"))
     hit_modifier = forms.IntegerField(min_value=0, initial=0, label=_("Modificateur"))
     is_grenade = forms.BooleanField(initial=False, label=_("Grenade ?"))
     is_action = forms.BooleanField(initial=False, label=_("Action ?"))
     no_weapon = forms.BooleanField(initial=False, label=_("Aucune arme ?"))
+
+
+class DamageCharacterForm(forms.Form):
+    """
+    Formulaire pour infliger des dégâts à un personnage
+    """
+    raw_damage = forms.IntegerField(initial=0, label=_("dégâts bruts"))
+    min_damage = forms.IntegerField(initial=0, label=_("dégâts min."))
+    max_damage = forms.IntegerField(initial=0, label=_("dégâts max."))
+    damage_type = forms.ChoiceField(choices=DAMAGES_TYPES, label=_("type de dégâts"))
+    body_part = forms.ChoiceField(choices=BODY_PARTS, label=_("partie du corps"))
+    threshold_modifier = forms.IntegerField(initial=0, label=_("modificateur d'absorption"))
+    threshold_rate_modifier = forms.IntegerField(initial=0, label=_("modificateur taux d'absorption"))
+    resistance_modifier = forms.IntegerField(initial=0, label=_("modificateur de résistance"))
 
 
 class EquipCharacterForm(forms.Form):

@@ -16,6 +16,10 @@ body {
     width: 6em !important;
     display: inline-block;
 }
+.ilarge {
+    width: 7em !important;
+    display: inline-block;
+}
 
 /* Panels */
 .tab-pane {

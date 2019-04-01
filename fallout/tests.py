@@ -28,14 +28,14 @@ def create_admin_tests():
             if not test:
 
                 def setup(cls):
-                    cls.user = Player.objects.create_superuser('admin', '', '')
+                    cls.player = Player.objects.create_superuser('admin', '', '')
                     cls.instance = mommy.make(cls.model)
 
                 def get(self, url=url, pk_required=pk_required):
                     url = reverse(f'{namespace}:{url.name}', args=(self.instance.pk, ) if pk_required else ())
                     response = self.client.get(url)
                     self.assertEqual(response.status_code, 302)
-                    self.client.force_login(self.user)
+                    self.client.force_login(self.player)
                     response = self.client.get(url)
                     self.assertEqual(response.status_code, 200)
                     return url

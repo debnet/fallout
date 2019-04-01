@@ -150,7 +150,7 @@ class CharacterAdmin(EntityAdmin):
             classes=('wide', ),
         )),
         (_("Informations techniques"), dict(
-            fields=('user', 'campaign', ),
+            fields=('player', 'campaign', ),
             classes=('wide', ),
         )),
         (_("Spécialités"), dict(
@@ -168,11 +168,11 @@ class CharacterAdmin(EntityAdmin):
         'name', 'race', 'level', 'is_player', 'is_active',
         'health', 'current_max_health', 'action_points', 'current_max_action_points', 'experience', 'karma')
     list_editable = ('health', 'action_points', 'experience', 'karma', 'is_active',)
-    list_filter = ('campaign', 'is_player', 'is_active', 'has_stats', 'has_needs', 'race', 'user', )
+    list_filter = ('campaign', 'is_player', 'is_active', 'has_stats', 'has_needs', 'race', 'player', )
     search_fields = ('name', 'title', 'description', 'background', )
     ordering = ('name', )
-    actions = ('duplicate', 'randomize', 'generate_stats', 'roll', 'fight', 'burst', 'heal', 'equip', )
-    autocomplete_fields = ('campaign', 'user', )
+    actions = ('duplicate', 'heal', 'damage', 'equip', 'roll', 'fight', 'randomize', 'generate_stats', )
+    autocomplete_fields = ('campaign', 'player', )
     save_on_top = True
     actions_on_bottom = True
 
@@ -247,15 +247,30 @@ class CharacterAdmin(EntityAdmin):
             if form.is_valid():
                 for character in queryset.order_by('name'):
                     result = character.roll(**form.cleaned_data)
-                    self.message_user(
-                        request, str(result),
-                        level=ROLL_LEVELS[(result.success, result.critical)])
+                    self.message_user(request, str(result), level=result.message_level)
                 return HttpResponseRedirect(request.get_full_path())
         else:
             form = RollCharacterForm()
         return render(request, 'fallout/character/admin/roll.html', {
             'form': form, 'characters': queryset, 'targets': request.POST.getlist(admin.ACTION_CHECKBOX_NAME)})
     roll.short_description = _("Faire un jet de compétence")
+
+    def damage(self, request, queryset):
+        """
+        Action spécifique pour effectuer un lancer de compétence
+        """
+        if 'damage' in request.POST:
+            form = DamageCharacterForm(request.POST)
+            if form.is_valid():
+                for character in queryset.order_by('name'):
+                    result = character.damage(**form.cleaned_data)
+                    self.message_user(request, str(result), level=result.message_level)
+                return HttpResponseRedirect(request.get_full_path())
+        else:
+            form = DamageCharacterForm()
+        return render(request, 'fallout/character/admin/damage.html', {
+            'form': form, 'characters': queryset, 'targets': request.POST.getlist(admin.ACTION_CHECKBOX_NAME)})
+    damage.short_description = _("Infliger des dégâts aux personnages sélectionnés")
 
     def fight(self, request, queryset):
         """
@@ -267,9 +282,7 @@ class CharacterAdmin(EntityAdmin):
                 for character in queryset.order_by('name'):
                     try:
                         result = character.fight(**form.cleaned_data)
-                        self.message_user(
-                            request, str(result),
-                            level=ROLL_LEVELS[(result.success, result.critical)])
+                        self.message_user(request, str(result), level=result.message_level)
                     except Exception as error:
                         self.message_user(
                             request, _("{character} : {error}").format(character=character, error=str(error)),
@@ -281,10 +294,6 @@ class CharacterAdmin(EntityAdmin):
             'form': form, 'characters': queryset, 'targets': request.POST.getlist(admin.ACTION_CHECKBOX_NAME)})
     fight.short_description = _("Attaquer un autre personnage")
 
-    def burst(self, request, queryset):
-        pass  # TODO:
-    burst.short_description = _("Attaquer en rafale plusieurs personnages")
-
     def loot(self, request, queryset):
         for character in queryset:
             character.loot(empty=True)
@@ -293,7 +302,7 @@ class CharacterAdmin(EntityAdmin):
     def generate_stats(self, request, queryset):
         for character in queryset:
             character.generate_stats()
-    generate_stats.short_description = _("Générer les statistiques")
+    generate_stats.short_description = _("Générer les statistiques secondaires")
 
     def heal(self, request, queryset):
         for character in queryset:
@@ -377,7 +386,7 @@ class ItemAdmin(EntityAdmin):
         )),
         (_("Dégâts"), dict(
             fields=(
-                'damage_type', 'raw_damage', 'min_damage', 'max_damage', 'damage_modifier',
+                'body_part', 'damage_type', 'raw_damage', 'min_damage', 'max_damage', 'damage_modifier',
                 'critical_modifier', 'critical_raw_modifier', 'critical_damage', 'critical_damage_modifier',
             ),
             classes=('wide', 'collapse', ),
@@ -461,7 +470,9 @@ class EffectAdmin(EntityAdmin):
             classes=('wide', ),
         )),
         (_("Dégâts temporels"), dict(
-            fields=('apply', 'damage_type', 'interval', 'damage_chance', 'raw_damage', 'min_damage', 'max_damage', ),
+            fields=(
+                'apply', 'body_part', 'damage_type', 'interval', 'damage_chance',
+                'raw_damage', 'min_damage', 'max_damage', ),
             classes=('wide', 'collapse', ),
         )),
     )
@@ -642,7 +653,7 @@ class DamageHistoryAdmin(CommonAdmin):
             classes=('wide', ),
         )),
         (_("Dégâts de base"), dict(
-            fields=('damage_type', 'raw_damage', 'min_damage', 'max_damage', 'base_damage', ),
+            fields=('body_part', 'damage_type', 'raw_damage', 'min_damage', 'max_damage', 'base_damage', ),
             classes=('wide', ),
         )),
         (_("Etat de la protection"), dict(
@@ -655,9 +666,9 @@ class DamageHistoryAdmin(CommonAdmin):
         )),
     )
     search_fields = ('character', )
-    list_display = ('date', 'character', 'damage_type', 'base_damage', 'real_damage', )
+    list_display = ('date', 'character', 'body_part', 'damage_type', 'base_damage', 'real_damage', )
     list_editable = ()
-    list_filter = ('character__campaign', 'character__is_player', 'damage_type', 'date', )
+    list_filter = ('character__campaign', 'character__is_player', 'body_part', 'damage_type', 'date', )
     ordering = ('-date', )
     date_hierarchy = 'date'
     autocomplete_fields = ('character', 'armor', )
@@ -695,7 +706,7 @@ class FightHistoryAdmin(CommonAdmin):
                     'hit_roll', 'hit_chance', 'real_damage', )
     list_editable = ()
     list_filter = ('attacker__campaign', 'attacker__is_player', 'defender__is_player',
-                   'success', 'critical', 'status', 'date', )
+                   'success', 'critical', 'status', 'body_part', 'date', )
     ordering = ('-date', )
     date_hierarchy = 'date'
     autocomplete_fields = ('attacker', 'attacker_weapon', 'attacker_ammo', 'defender', 'defender_armor', 'damage', )

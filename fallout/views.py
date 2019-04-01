@@ -60,7 +60,7 @@ def view_campaign(request, campaign_id):
                     filter = dict(pk=item_id) if item_id else dict(name__icontains=item_name)
                     item = Item.objects.filter(**filter).first()
                     Loot.create(campaign=campaign, item=item, quantity=quantity, condition=condition)
-                elif method == 'cear':
+                elif method == 'clear':
                     Loot.objects.filter(campaign=campaign).delete()
                 elif method.startswith('delete'):
                     method, loot_id = method.split('-')
@@ -77,6 +77,16 @@ def view_campaign(request, campaign_id):
                     if quantity:
                         loot = Loot.objects.filter(pk=loot_id).first()
                         loot.take(character, quantity, is_action=is_action)
+            elif type == 'damage':
+                group, damage_type, body_part, min_damage, max_damage, raw_damage = (
+                    data.get('group'), data.get('damage_type'), data.get('body_part'),
+                    int(data.get('min_damage')), int(data.get('max_damage')), int(data.get('raw_damage')))
+                filter = dict(is_player=(group == 'pj')) if group else dict()
+                for character in characters.filter(is_active=True, **filter):
+                    result = character.damage(raw_damage, min_damage, max_damage, damage_type, body_part)
+                    messages.add_message(request, result.message_level, _(
+                        "<strong>{character}</strong> {label}").format(
+                            character=character, label=result.label))
             elif type == 'effect':
                 effect_id, effect_name = data.get('effect-id'), data.get('effect-name')
                 if method == 'add':
@@ -135,6 +145,8 @@ def view_campaign(request, campaign_id):
         'loots': loots,
         # Enums
         'stats': ROLL_STATS,
+        'body_parts': BODY_PARTS,
+        'damage_types': DAMAGES_TYPES,
     }
 
 
@@ -150,7 +162,7 @@ def view_character(request, character_id):
     if not request.user.is_superuser:
         campaigns = campaigns.filter(Q(characters__user=request.user) | Q(game_master=request.user))
     characters = Character.objects.select_related(
-        'user', 'statistics', 'campaign__current_character').filter(is_active=True)
+        'player', 'statistics', 'campaign__current_character').filter(is_active=True)
     if not request.user.is_superuser:
         characters = characters.filter(Q(user=request.user) | Q(campaign__game_master=request.user))
     character = characters.filter(id=character_id).first()
@@ -220,9 +232,9 @@ def view_character(request, character_id):
                     raw_damage=int(data.get('raw_damage') or 0),
                     min_damage=int(data.get('min_damage') or 0),
                     max_damage=int(data.get('max_damage') or 0),
-                    damage_type=str(data.get('damage_type') or None),
-                    body_part=str(data.get('body_part') or None))
-                messages.success(request, _(
+                    damage_type=str(data.get('damage_type') or ''),
+                    body_part=str(data.get('body_part') or ''))
+                messages.add_message(request, result.message_level, _(
                     "<strong>{character}</strong> {label}").format(
                         character=character, label=result.label))
             elif type == 'item':
@@ -328,12 +340,16 @@ def next_turn(request, campaign_id):
     """
     action = request.method == 'POST'
     data = request.POST
-    # Prochain tour
-    if action and 'next' in data:
-        campaign = Campaign.objects.filter(id=campaign_id).first()
-        if campaign and (request.user.is_superuser or campaign.game_master == request.user):
+    campaign = Campaign.objects.filter(id=campaign_id).first()
+    if action and campaign and (request.user.is_superuser or campaign.game_master == request.user):
+        # Prochain tour
+        if 'next' in data:
             next_character = campaign.next_turn(seconds=int(data.get('seconds') or 0))
             return redirect('fallout:character', next_character.id)
+        # Fin du tour
+        if 'cancel' in data:
+            campaign.clear_turn()
+            return redirect(data.get('page'))
     return redirect('fallout:campaign', campaign_id)
 
 

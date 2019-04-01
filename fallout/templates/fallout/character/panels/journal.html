@@ -32,7 +32,8 @@
     </form>
     <hr />
     {% for log in logs %}
-        <div {% if log.private %}class="alert-warning text-dark collapse-form collapse show"{% endif %}>
+        <div {% if log.private %}class="alert-danger text-dark collapse-form collapse show"
+             {% elif log.player != character.player %}class="alert-warning text-dark"{% endif %}>
             <div class="font-weight-bold">
                 {% if character.campaign and log.game_date %}
                     {% trans "Il y a" %} {{ log.game_date|timesince:character.campaign.current_game_date }},
@@ -40,7 +41,8 @@
                     <small class="text-muted">({% trans "Le" %} {{ log.date }} {% trans "par" %} {{ log.player }})</small>
                 {% else %}{% trans "Le" %} {{ log.game_date|default:log.date }}{% endif %}
             </div>
-            {% if authorized or log.player == request.user %}
+            {{ character.game_master }}
+            {% if authorized or log.player == character.player %}
                 <div class="collapse-form collapse show">
                     <a href="?edit={{ log.id }}">{% trans "Modifier" %}</a> &ndash;
                     <a href="?delete={{ log.id }}">{% trans "Supprimer" %}</a>

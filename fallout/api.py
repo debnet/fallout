@@ -137,7 +137,7 @@ class FightInputSerializer(BaseFightInputSerializer):
     """
     Serializer d'entrée pour les attaques
     """
-    target_part = serializers.ChoiceField(choices=BODY_PARTS, allow_blank=True, label=_("partie du corps ciblée"))
+    target_part = serializers.ChoiceField(choices=BODY_PARTS, allow_blank=True, label=_("partie du corps"))
     hit_chance_modifier = serializers.IntegerField(initial=0, label=_("modificateur"))
     force_success = serializers.BooleanField(initial=False, label=_("succès ?"))
     force_critical = serializers.BooleanField(initial=False, label=_("critique ?"))
@@ -203,7 +203,7 @@ class DamageInputSerializer(BaseCustomSerializer):
     min_damage = serializers.IntegerField(initial=0, label=_("dégâts min."))
     max_damage = serializers.IntegerField(initial=0, label=_("dégâts max."))
     damage_type = serializers.ChoiceField(choices=DAMAGES_TYPES, label=_("type de dégâts"))
-    body_part = serializers.ChoiceField(choices=BODY_PARTS, label=_("partie du corps"))
+    body_part = serializers.ChoiceField(choices=BODY_PARTS, allow_blank=True, label=_("partie du corps"))
     threshold_modifier = serializers.IntegerField(initial=0, label=_("modificateur d'absorption"))
     threshold_rate_modifier = serializers.IntegerField(initial=0, label=_("modificateur taux d'absorption"))
     resistance_modifier = serializers.IntegerField(initial=0, label=_("modificateur de résistance"))

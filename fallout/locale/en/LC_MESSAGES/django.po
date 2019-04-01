@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-03-31 19:23+0200\n"
+"POT-Creation-Date: 2019-04-01 14:51+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -63,6 +63,9 @@ msgstr "Randomly generate skills"
 msgid "Faire un jet de compétence"
 msgstr "Make a skill role"
 
+msgid "Infliger des dégâts aux personnages sélectionnés"
+msgstr "Damage selected characters"
+
 #, python-brace-format
 msgid "{character} : {error}"
 msgstr "{character}: {error}"
@@ -70,14 +73,11 @@ msgstr "{character}: {error}"
 msgid "Attaquer un autre personnage"
 msgstr "Attack another character"
 
-msgid "Attaquer en rafale plusieurs personnages"
-msgstr "Burst attack many characters"
-
 msgid "Lâcher tous les équipements"
 msgstr "Drop all equipments"
 
-msgid "Générer les statistiques"
-msgstr "Generate stats"
+msgid "Générer les statistiques secondaires"
+msgstr "Generate secondary stats"
 
 msgid "Soigner les personnages sélectionnés"
 msgstr "Heal selected characters"
@@ -184,8 +184,8 @@ msgstr "target"
 msgid "distance"
 msgstr "distance"
 
-msgid "partie du corps ciblée"
-msgstr "targetted body part"
+msgid "partie du corps"
+msgstr "body part"
 
 msgid "succès ?"
 msgstr "success?"
@@ -225,9 +225,6 @@ msgstr "max. damage"
 
 msgid "type de dégâts"
 msgstr "damage type"
-
-msgid "partie du corps"
-msgstr "body part"
 
 msgid "modificateur d'absorption"
 msgstr "threshold modifier"
@@ -781,8 +778,8 @@ msgstr "Character"
 msgid "Distance"
 msgstr "Distance"
 
-msgid "Cible"
-msgstr "Target"
+msgid "Partie du corps"
+msgstr "Body part"
 
 msgid "Grenade ?"
 msgstr "Grenade?"
@@ -987,9 +984,6 @@ msgstr "date"
 
 msgid "statistiques"
 msgstr "stats"
-
-msgid "utilisateur"
-msgstr "user"
 
 msgid "contexte"
 msgstr "background"
@@ -1357,6 +1351,10 @@ msgid "dégâts réels"
 msgstr "real damage"
 
 #, python-brace-format
+msgid "{type} de {real_damage} ({body_part})"
+msgstr "{type} of {real_damage} ({body_part})"
+
+#, python-brace-format
 msgid "{type} de {real_damage}"
 msgstr "{type} of {real_damage}"
 
@@ -1438,12 +1436,6 @@ msgstr "Actions"
 
 msgid "Administration"
 msgstr "Administration"
-
-msgid "Lancer les dés (CTRL+ESPACE)"
-msgstr "Roll the dices (CTRL+SPACE)"
-
-msgid "Dés"
-msgstr "Dices"
 
 msgid "Fermer"
 msgstr "Close"
@@ -1554,11 +1546,44 @@ msgstr "rad/h"
 msgid "Modifier"
 msgstr "Edit"
 
+msgid "Type de personnage"
+msgstr "Character type"
+
+msgid "Tous"
+msgstr "All"
+
+msgid "Type de dégâts"
+msgstr "Damage type"
+
+msgid "non ciblé"
+msgstr "non targetted"
+
+msgid "Infliger"
+msgstr "Damage"
+
 msgid "Effet"
 msgstr "Effect"
 
 msgid "Affecter"
 msgstr "Affect"
+
+msgid "Gagner de l'expérience :"
+msgstr "Gain experience:"
+
+msgid "Expérience"
+msgstr "Experience"
+
+msgid "Gagner"
+msgstr "Gain"
+
+msgid "Faire un lancer :"
+msgstr "Make a roll:"
+
+msgid "Mod"
+msgstr "Mod"
+
+msgid "XP"
+msgstr "XP"
 
 msgid "Avancer dans le temps :"
 msgstr "Forward in time:"
@@ -1574,30 +1599,6 @@ msgstr "Pass"
 
 msgid "Repos"
 msgstr "Resting"
-
-msgid "Faire un lancer :"
-msgstr "Make a roll:"
-
-msgid "Type de personnage"
-msgstr "Character type"
-
-msgid "Tous"
-msgstr "All"
-
-msgid "Mod"
-msgstr "Mod"
-
-msgid "Expérience"
-msgstr "Experience"
-
-msgid "XP"
-msgstr "XP"
-
-msgid "Gagner de l'expérience :"
-msgstr "Gain experience:"
-
-msgid "Gagner"
-msgstr "Gain"
 
 msgid "Aucun"
 msgstr "None"
@@ -1626,14 +1627,20 @@ msgstr "Item"
 msgid "Ajouter"
 msgstr "Add"
 
+msgid "Infliger des dégâts à des personnages"
+msgstr "Damage characters"
+
+msgid "Les personnages suivants vont subir des dégâts :"
+msgstr "The following characters will be damaged:"
+
+msgid "Valider"
+msgstr "Accept"
+
 msgid "Dupliquer des personnages"
 msgstr "Duplicate characters"
 
 msgid "Les personnages suivants vont être dupliqués :"
 msgstr "The following characters will be duplicated:"
-
-msgid "Valider"
-msgstr "Accept"
 
 msgid "Equiper les personnages"
 msgstr "Equip characters"
@@ -1673,9 +1680,6 @@ msgstr "Simple attack"
 
 msgid "dst."
 msgstr "dst."
-
-msgid "non ciblé"
-msgstr "non targetted"
 
 msgid "Succès"
 msgstr "Success"
@@ -1832,6 +1836,12 @@ msgstr "1 h"
 
 msgid "Tour suivant"
 msgstr "Next turn"
+
+msgid "Lancer les dés (CTRL+ESPACE)"
+msgstr "Roll the dices (CTRL+SPACE)"
+
+msgid "Dés"
+msgstr "Dices"
 
 msgid "Base"
 msgstr "Root"

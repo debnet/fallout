@@ -41,23 +41,72 @@
         </div>
         <hr />
         {% if authorized %}
-            <form method="post" action="{{ request.path }}" class="form-inline justify-content-center collapse-form collapse show">
-                <div class="form-row align-items-center">
-                    <div class="col-auto">
-                        <label class="sr-only" for="effect-name">{% trans "Effet" %}</label>
-                        <input type="text" class="form-control" id="effect-name"
-                               name="effect-name" data-for="effect-id" placeholder="{% trans "Effet" %}">
-                        <input type="hidden" id="effect-id" name="effect-id" />
+            <div class="collapse-form collapse show">
+                <form method="post" action="{{ request.path }}" class="form-inline justify-content-center">
+                    <div class="form-row align-items-center">
+                        <div class="col-auto">
+                            <label class="sr-only" for="damage-group-list">{% trans "Type de personnage" %}</label>
+                            <select name="group" id="damage-group-list" class="form-control custom-select">
+                                <option value="">{% trans "Tous" %}</option>
+                                <option value="pj">{% trans "PJ" %}</option>
+                                <option value="pnj">{% trans "PNJ" %}</option>
+                            </select>
+                        </div>
+                        <div class="col-auto">
+                            <label for="damage-type" class="sr-only">{% trans "Type de dégâts" %}</label>
+                            <select class="form-control custom-select" id="damage-type" name="damage_type">
+                                {% for code, label in damage_types %}
+                                    <option value="{{ code }}">{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-auto">
+                            <label for="body-part" class="sr-only">{% trans "Partie du corps" %}</label>
+                            <select class="form-control custom-select" id="body-part" name="body_part">
+                                <option value="">{% trans "non ciblé" %}</option>
+                                {% for code, label in body_parts %}
+                                    <option value="{{ code }}">{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-auto">
+                            <input id="min-damage" class="form-control ismall"
+                                   type="number" name="min_damage" value="0" />
+                            <span class="ml-1 mr-1 font-weight-bold">&minus;</span>
+                            <input id="min-damage" class="form-control ismall"
+                                   type="number" name="max_damage" value="0" />
+                            <span class="ml-1 mr-1 font-weight-bold">&plus;</span>
+                            <input id="min-damage" class="form-control ismall"
+                                   type="number" name="raw_damage" value="0" />
+                        </div>
+                        <div class="col-auto">
+                            <button type="submit" class="btn btn-primary"
+                                    name="method" value="add" >{% trans "Infliger" %}</button>
+                            <input type="hidden" name="type" value="damage" />
+                            {% csrf_token %}
+                        </div>
                     </div>
-                    <div class="col-auto">
-                        <button type="submit" class="btn btn-primary"
-                                name="method" value="add" >{% trans "Affecter" %}</button>
-                        <input type="hidden" name="type" value="effect" />
-                        {% csrf_token %}
+                </form>
+                <form method="post" action="{{ request.path }}" class="form-inline justify-content-center">
+                    <div class="form-row align-items-center pt-2">
+                        <div class="form-row align-items-center">
+                            <div class="col-auto">
+                                <label class="sr-only" for="effect-name">{% trans "Effet" %}</label>
+                                <input type="text" class="form-control" id="effect-name"
+                                       name="effect-name" data-for="effect-id" placeholder="{% trans "Effet" %}">
+                                <input type="hidden" id="effect-id" name="effect-id" />
+                            </div>
+                            <div class="col-auto">
+                                <button type="submit" class="btn btn-primary"
+                                        name="method" value="add" >{% trans "Affecter" %}</button>
+                                <input type="hidden" name="type" value="effect" />
+                                {% csrf_token %}
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </form>
-            <hr />
+                </form>
+                <hr />
+            </div>
         {% endif %}
     </div>
     {% with effects=campaign.effects %}

@@ -65,7 +65,7 @@
             {% endwith %}
         </label>
         {% if authorized %}
-            <select class="form-control form-control-sm custom-select ml-2 mr-2" name="seconds">
+            <select class="form-control form-control-sm custom-select ilarge ml-2 mr-2" name="seconds">
                 <option value="0" selected="selected">{% trans "0 s" %}</option>
                 <option value="30">{% trans "30 s" %}</option>
                 <option value="60">{% trans "1 mn" %}</option>
@@ -77,7 +77,13 @@
                 <option value="3600">{% trans "1 h" %}</option>
             </select>
             <button class="btn btn-success btn-sm" name="next">{% trans "Tour suivant" %}</button>
+            {% if campaign.current_character %}
+                <button class="btn btn-warning btn-sm ml-2" name="cancel">{% trans "Annuler" %}</button>
+            {% endif %}
+            <input type="hidden" name="page" value="{{ request.path }}" />
             {% csrf_token %}
         {% endif %}
+        <button type="button" class="btn btn-sm btn-secondary ml-2" data-toggle="modal" data-target="#diceroll"
+            title="{% trans "Lancer les dés (CTRL+ESPACE)" %}">{% trans "Dés" %}</button>
     </form>
 {% endif %}
