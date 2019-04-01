@@ -41,7 +41,6 @@
                     <small class="text-muted">({% trans "Le" %} {{ log.date }} {% trans "par" %} {{ log.player }})</small>
                 {% else %}{% trans "Le" %} {{ log.game_date|default:log.date }}{% endif %}
             </div>
-            {{ character.game_master }}
             {% if authorized or log.player == character.player %}
                 <div class="collapse-form collapse show">
                     <a href="?edit={{ log.id }}">{% trans "Modifier" %}</a> &ndash;
