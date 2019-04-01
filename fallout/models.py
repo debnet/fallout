@@ -1447,7 +1447,7 @@ class Damage(CommonModel):
                 return self.get_damage_type_display()
             return f"{self.get_damage_type_display()} ({self.get_body_part_display()}"
         if not self.body_part:
-            f"{self.label_damage} {self.get_damage_type_display()}"
+            return f"{self.label_damage} {self.get_damage_type_display()}"
         return f"{self.label_damage} {self.get_damage_type_display()} ({self.get_body_part_display()})"
 
     class Meta:
