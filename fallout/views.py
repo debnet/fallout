@@ -32,12 +32,12 @@ def view_campaign(request, campaign_id):
 
     campaigns = Campaign.objects.select_related('current_character')
     if not request.user.is_superuser:
-        campaigns = campaigns.filter(Q(characters__user=request.user) | Q(game_master=request.user))
+        campaigns = campaigns.filter(Q(characters__player=request.user) | Q(game_master=request.user))
     campaign = campaigns.filter(id=campaign_id).first()
     characters = Character.objects.select_related('statistics', 'campaign__current_character').filter(
         campaign=campaign, is_active=True)
     if not request.user.is_superuser:
-        characters = characters.filter(Q(user=request.user) | Q(campaign__game_master=request.user))
+        characters = characters.filter(Q(player=request.user) | Q(campaign__game_master=request.user))
     loots = Loot.objects.select_related('item').filter(campaign=campaign).order_by('item__name')
 
     authorized = request.user and (request.user.is_superuser or (
@@ -160,11 +160,11 @@ def view_character(request, character_id):
 
     campaigns = Campaign.objects.select_related('current_character')
     if not request.user.is_superuser:
-        campaigns = campaigns.filter(Q(characters__user=request.user) | Q(game_master=request.user))
+        campaigns = campaigns.filter(Q(characters__player=request.user) | Q(game_master=request.user))
     characters = Character.objects.select_related(
         'player', 'statistics', 'campaign__current_character').filter(is_active=True)
     if not request.user.is_superuser:
-        characters = characters.filter(Q(user=request.user) | Q(campaign__game_master=request.user))
+        characters = characters.filter(Q(player=request.user) | Q(campaign__game_master=request.user))
     character = characters.filter(id=character_id).first()
     if not character:
         raise Http404
