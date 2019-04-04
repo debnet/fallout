@@ -171,7 +171,8 @@ class CharacterAdmin(EntityAdmin):
     list_filter = ('campaign', 'is_player', 'is_active', 'has_stats', 'has_needs', 'race', 'player', )
     search_fields = ('name', 'title', 'description', 'background', )
     ordering = ('name', )
-    actions = ('duplicate', 'heal', 'damage', 'equip', 'roll', 'fight', 'randomize', 'generate_stats', )
+    actions = EntityAdmin.actions + [
+        'duplicate', 'heal', 'damage', 'equip', 'roll', 'fight', 'randomize', 'generate_stats']
     autocomplete_fields = ('campaign', 'player', )
     save_on_top = True
     actions_on_bottom = True
@@ -407,7 +408,7 @@ class ItemAdmin(EntityAdmin):
     list_filter = ('type', 'hands', 'attack_mode', 'skill', 'is_quest', 'is_droppable', )
     search_fields = ('name', 'title', 'description', )
     ordering = ('name', )
-    actions = ('duplicate', )
+    actions = EntityAdmin.actions + ['duplicate']
     autocomplete_fields = ('effects', 'ammunitions', )
     save_on_top = True
     actions_on_bottom = True
@@ -484,7 +485,7 @@ class EffectAdmin(EntityAdmin):
     search_fields = ('name', 'title', 'description', )
     ordering = ('name', )
     autocomplete_fields = ('next_effect', 'cancel_effect', )
-    actions = ('duplicate', )
+    actions = EntityAdmin.actions + ['duplicate']
     save_on_top = True
     actions_on_bottom = True
 
@@ -602,7 +603,7 @@ class LootTemplateAdmin(CommonAdmin):
     list_filter = ()
     ordering = ('name', )
     search_fields = ('name', 'title', 'description', )
-    actions = ('duplicate', )
+    actions = CommonAdmin.actions + ['duplicate']
     save_on_top = True
     actions_on_bottom = True
 
