@@ -191,7 +191,7 @@ def view_character(request, character_id):
                             character=character, label=result.long_label))
                 elif 'levelup' in data:
                     stats = data.get('levelup')
-                    character.levelup(stats, 1)
+                    character.levelup(stats, 1, _ignore_log=True)
             elif type == 'fight' and data.get('target'):
                 result = character.fight(
                     target=data.get('target'),

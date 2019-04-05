@@ -35,9 +35,11 @@
                             </strong>
                         {% elif authorized %}
                             {% if levelup and character.used_skill_points < character.skill_points %}
-                                <button class="btn btn-sm btn-dark" type="submit" name="levelup" value="{{ s.code }}">
-                                    <strong>{% trans "+" %}</strong>
-                                </button>
+                                {% if s.code in character.tag_skills or character.used_skill_points|add:2 < character.skill_points %}
+                                    <button class="btn btn-sm btn-dark" type="submit" name="levelup" value="{{ s.code }}">
+                                        <strong>{% trans "+" %}</strong>
+                                    </button>
+                                {% endif %}
                             {% endif %}
                             <button class="btn btn-sm btn-{{ s.css }} itiny" type="submit" name="roll" value="{{ s.code }}">
                                 <strong>{{ s.lvalue|floatformat:0 }}</strong>

@@ -172,7 +172,7 @@ class CharacterAdmin(EntityAdmin):
     search_fields = ('name', 'title', 'description', 'background', )
     ordering = ('name', )
     actions = EntityAdmin.actions + [
-        'duplicate', 'heal', 'damage', 'equip', 'roll', 'fight', 'randomize', 'generate_stats']
+        'duplicate', 'heal', 'damage', 'roll', 'fight', 'randomize', 'generate_stats', 'equip']
     autocomplete_fields = ('campaign', 'player', )
     save_on_top = True
     actions_on_bottom = True

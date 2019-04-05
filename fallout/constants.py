@@ -305,7 +305,7 @@ LEVELED_STATS_MULT = 10
 # Computed statistics from S.P.E.C.I.A.L.
 COMPUTED_STATS = (
     ('hit_points_per_level', lambda s, c: 3 + (s.endurance // 2)),
-    ('skill_points_per_level', lambda s, c: 5 + (2 * s.intelligence)),
+    ('skill_points_per_level', lambda s, c: (5 + (2 * s.intelligence)) * 2),
     ('max_health', lambda s, c: (15 + (s.strength + (2 * s.endurance)) + ((c.level - 1) * s.hit_points_per_level))),
     ('max_action_points', lambda s, c: 5 + (s.agility // 2)),
     # Secondary statistics

@@ -205,12 +205,16 @@ DAMAGE_RADIATION = 'radiation'
 DAMAGE_GAZ_CONTACT = 'gas_contact'
 DAMAGE_GAZ_INHALED = 'gas_inhaled'
 DAMAGE_RAW = 'raw'
-DAMAGE_HEAL = 'heal'
-DAMAGE_HEAL_RAD = 'heal_rad'
 DAMAGE_THIRST = 'thirst'
 DAMAGE_HUNGER = 'hunger'
 DAMAGE_SLEEP = 'sleep'
-DAMAGES_TYPES = (
+HEAL_THIRST = 'heal_thirst'
+HEAL_HUNGER = 'heal_hunger'
+HEAL_SLEEP = 'heal_sleep'
+HEAL_HEALTH = 'heal'
+HEAL_RADIATION = 'heal_rad'
+
+DAMAGES = (
     (DAMAGE_NORMAL, _("dégâts normaux")),
     (DAMAGE_LASER, _("dégâts de laser")),
     (DAMAGE_PLASMA, _("dégâts de plasma")),
@@ -222,15 +226,25 @@ DAMAGES_TYPES = (
     (DAMAGE_GAZ_CONTACT, _("dégâts de gaz (contact)")),
     (DAMAGE_GAZ_INHALED, _("dégâts de gaz (inhalé)")),
     (DAMAGE_RAW, _("dégâts directs")),
-    (DAMAGE_HEAL, _("soins de santé")),
-    (DAMAGE_HEAL_RAD, _("soins de radiations")),
-    (DAMAGE_THIRST, _("altérations de soif")),
-    (DAMAGE_HUNGER, _("altérations de faim")),
-    (DAMAGE_SLEEP, _("altérations de sommeil")),
+    (DAMAGE_THIRST, _("augmentation de la soif")),
+    (DAMAGE_HUNGER, _("augmentation de la faim")),
+    (DAMAGE_SLEEP, _("augmentation du sommeil")),
 )
-LIST_DAMAGES_TYPES = dict(DAMAGES_TYPES)
-PHYSICAL_DAMAGES = (DAMAGE_NORMAL, DAMAGE_LASER, DAMAGE_PLASMA, DAMAGE_EXPLOSIVE, DAMAGE_FIRE)
-NO_DAMAGES = (DAMAGE_RAW, DAMAGE_HEAL, DAMAGE_HEAL_RAD, DAMAGE_THIRST, DAMAGE_HUNGER, DAMAGE_SLEEP)
+HEALS = (
+    (HEAL_HEALTH, _("soins de santé")),
+    (HEAL_RADIATION, _("soins de radiations")),
+    (HEAL_THIRST, _("diminution de la soif")),
+    (HEAL_HUNGER, _("diminution de la faim")),
+    (HEAL_SLEEP, _("diminution du sommeil")),
+)
+DAMAGES_TYPES = (
+    (_("dégâts"), DAMAGES),
+    (_("soins"), HEALS),
+)
+LIST_DAMAGES_TYPES = dict(DAMAGES + HEALS)
+LIST_PHYSICAL_DAMAGE = (DAMAGE_NORMAL, DAMAGE_LASER, DAMAGE_PLASMA, DAMAGE_EXPLOSIVE, DAMAGE_FIRE)
+LIST_HEALS = (HEAL_HEALTH, HEAL_RADIATION, HEAL_THIRST, HEAL_HUNGER, HEAL_SLEEP)
+LIST_NON_DAMAGE = (DAMAGE_RAW, DAMAGE_THIRST, DAMAGE_HUNGER, DAMAGE_SLEEP) + HEALS
 
 # Damage / resistance
 DAMAGE_RESISTANCE = {

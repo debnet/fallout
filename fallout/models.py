@@ -188,7 +188,7 @@ class Campaign(CommonModel):
         super().save(*args, **kwargs)
         if hours <= 0:
             return
-        for character in self.characters.filter(is_active=True):
+        for character in self.characters.filter(is_active=True).exclude(health__lte=0):
             character.update_needs(hours=hours, radiation=self.radiation, resting=resting, needs=self.needs, save=False)
             character.apply_effects(save=False)
             character.save()
@@ -628,7 +628,7 @@ class Character(Entity, Stats):
         """
         Retourne le nombre de points de compétences utilisées
         """
-        return sum(getattr(self, skill) * (0.5 if skill in self.tag_skills else 1.0) for skill in LIST_SKILLS)
+        return sum(getattr(self, skill) * (1 if skill in self.tag_skills else 2) for skill in LIST_SKILLS)
 
     @property
     def required_experience(self) -> int:
@@ -779,7 +779,10 @@ class Character(Entity, Stats):
         """
         stats = Stats.get(self)
         for field in Stats._meta.fields:
-            setattr(self, field.name, getattr(stats, field.name, 0))
+            value = getattr(stats, field.name, 0)
+            if field.name in LIST_SKILLS:
+                self.skill_points += value * (2, 1)[field.name in self.tag_skills]
+            setattr(self, field.name, value)
         self.heal(save=save)
 
     def heal(self, health=True, action_points=True, needs=True, save=True):
@@ -1062,7 +1065,7 @@ class Character(Entity, Stats):
         # Hit chance modifiers
         attacker_hit_chance += getattr(attacker_weapon, 'hit_chance_modifier', 0)  # Weapon hit_count chance modifier
         attacker_hit_chance += getattr(attacker_ammo, 'hit_chance_modifier', 0)  # Ammo hit_count chance modifier
-        attacker_hit_chance *= getattr(attacker_weapon_equipment, 'condition', 1.0)  # Weapon condition
+        attacker_hit_chance *= getattr(attacker_weapon_equipment, 'condition', 1.0) or 1.0  # Weapon condition
         defender_armor_class = getattr(defender_armor, 'armor_class', 0) + target.stats.armor_class
         defender_armor_class -= int((5 - target.stats.luck) * LUCK_ROLL_MULT)  # Luck-based armor class
         defender_armor_class *= max(1.0 + (  # Armor class modifiers by weapon/ammo
@@ -1118,9 +1121,9 @@ class Character(Entity, Stats):
                     getattr(attacker_weapon, 'critical_raw_modifier', 0) +
                     getattr(attacker_ammo, 'critical_raw_modifier', 0))
                 critical_raw_damage = force_raw_damage or randint(1, 100) <= critical_raw_chance
-                if attacker_damage_type not in NO_DAMAGES and critical_raw_damage:
+                if attacker_damage_type not in LIST_NON_DAMAGE and critical_raw_damage:
                     attacker_damage_type = DAMAGE_RAW
-            damage = max(damage, 0.0)  # Avoid negative damage
+            damage = max(damage, 0)  # Avoid negative damage
             # Threshold/resistance modifiers from weapon/ammo
             threshold_modifier = (
                 getattr(attacker_weapon, 'threshold_modifier', 0) +
@@ -1201,10 +1204,10 @@ class Character(Entity, Stats):
         total_damage = raw_damage + randint(min_damage, max_damage)
         base_damage = history.base_damage = total_damage
         # Character already KO
-        if damage_type != DAMAGE_HEAL and self.health <= 0:
+        if damage_type != HEAL_HEALTH and self.health <= 0:
             return history
         damage_threshold, damage_resistance = 0, 0.0
-        if damage_type not in NO_DAMAGES:
+        if damage_type not in LIST_NON_DAMAGE:
             # Armor threshold and resistance
             to_head = damage_type == DAMAGE_GAZ_INHALED or body_part in (PART_EYES, PART_HEAD)
             armor_slot = None if not body_part else ITEM_HELMET if to_head else ITEM_ARMOR
@@ -1219,7 +1222,7 @@ class Character(Entity, Stats):
                 total_damage -= max(armor_threshold, 0)
                 total_damage *= max(1.0 - min(round(armor_resistance / 100.0, 2), 1.0), 0.0)
                 armor_damage = 0
-                if armor.durability and damage_type in PHYSICAL_DAMAGES:
+                if armor.durability and damage_type in LIST_PHYSICAL_DAMAGE:
                     armor_condition_modifier = 1.0 - armor.condition_modifier
                     armor_damage = max(((base_damage - total_damage) / armor.durability) * armor_condition_modifier, 0)
                 # History
@@ -1233,7 +1236,7 @@ class Character(Entity, Stats):
             # Self threshold and resistance
             damage_threshold = self.stats.get_threshold(damage_type)
             damage_resistance = self.stats.get_resistance(damage_type)
-            if damage_type in PHYSICAL_DAMAGES:
+            if damage_type in LIST_PHYSICAL_DAMAGE:
                 damage_threshold += self.stats.damage_threshold
                 damage_resistance += self.stats.damage_resistance
             damage_threshold += threshold_modifier
@@ -1242,17 +1245,17 @@ class Character(Entity, Stats):
             damage_resistance = min(damage_resistance, MAX_DAMAGE_RESISTANCE)
         total_damage -= max(damage_threshold, 0)
         total_damage *= max(1.0 - round(damage_resistance / 100.0, 2), 0.0)
-        total_damage *= (-1.0 if damage_type in (DAMAGE_HEAL, DAMAGE_HEAL_RAD) else 1.0)
+        total_damage *= (-1.0 if damage_type in LIST_HEALS else 1.0)
         total_damage = int(round(total_damage))
         # Apply damage on self
         if total_damage:
-            if damage_type in (DAMAGE_RADIATION, DAMAGE_HEAL_RAD):
+            if damage_type in (DAMAGE_RADIATION, HEAL_RADIATION):
                 self.rads += total_damage
-            elif damage_type == DAMAGE_THIRST:
+            elif damage_type in (DAMAGE_THIRST, HEAL_THIRST):
                 self.thirst += total_damage
-            elif damage_type == DAMAGE_HUNGER:
+            elif damage_type in (DAMAGE_HUNGER, HEAL_HUNGER):
                 self.hunger += total_damage
-            elif damage_type == DAMAGE_SLEEP:
+            elif damage_type in (DAMAGE_SLEEP, HEAL_SLEEP):
                 self.sleep += total_damage
             else:
                 self.health -= total_damage
@@ -1309,7 +1312,7 @@ class Character(Entity, Stats):
                 effect.save(force_insert=True)
         return self
 
-    def levelup(self, stats: str, value: int = 0, save: bool = True) -> int:
+    def levelup(self, stats: str, value: int = 0, save: bool = True, **kwargs) -> int:
         """
         Permet d'augmenter le niveau d'une compétence
         :param stats: Code de la compétence
@@ -1317,13 +1320,12 @@ class Character(Entity, Stats):
         :param save: Sauvegarde le personne ?
         :return: Valeur courante
         """
-        assert self.skill_points, _("Ce personnage n'a pas de points de compétences à distribuer.")
-        assert value <= self.skill_points, _("Ce personnage n'a pas assez de points de compétences.")
         assert stats in LIST_SKILLS, _("Cette compétence ne peut être améliorée.")
-        value = value * (2 if stats in self.tag_skills else 1)
+        assert self.skill_points + (value * (2, 1)[stats in self.tag_skills]) >= self.used_skill_points, _(
+            "Ce personnage n'a pas assez de points de compétences.")
         self.modify_value(stats, value)
         if save:
-            self.save()
+            self.save(**kwargs)
         return getattr(self, stats)
 
     def save(self, *args, reset: bool = True, **kwargs):
@@ -1359,7 +1361,7 @@ class Character(Entity, Stats):
             self.health = self.stats.max_health
             self.action_points = self.stats.max_action_points
         # Loot character if NPC
-        if self.is_active and not self.health and not self.is_player:
+        if self.is_active and self.health <= 0 and not self.is_player:
             self.loot(empty=True)
             self.is_active = False
         # Fixing min value for needs
@@ -1906,7 +1908,7 @@ class Equipment(CommonModel):
             kwargs = {k: v for k, v in kwargs.items() if k.startswith('_')}
             return self.delete(**kwargs)
         self.quantity = max(0, self.quantity) if self.quantity else 0
-        self.condition = max(0.0, min(1.0, self.condition or 1.0)) if self.item.is_repairable else None
+        self.condition = max(0.0, min(1.0, self.condition or 0.0)) if self.item.is_repairable else None
         self.clip_count = max(0, self.clip_count or 0) if self.item.clip_size else None
         return super().save(*args, **kwargs)
 
@@ -2109,7 +2111,7 @@ class CampaignEffect(ActiveEffect):
             return damages
         game_date = self.campaign.current_game_date
         while self.next_date and self.next_date <= game_date:
-            for character in self.campaign.characters.filter(is_active=True):
+            for character in self.campaign.characters.filter(is_active=True).exclude(health__lte=0):
                 damage = character.damage(save=save, **self.effect.damage_config)
                 damages[character] = damages.get(character, []) + [damage]
             self.next_date += self.effect.interval

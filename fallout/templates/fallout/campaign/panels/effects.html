@@ -55,8 +55,12 @@
                         <div class="col-auto">
                             <label for="damage-type" class="sr-only">{% trans "Type de dégâts" %}</label>
                             <select class="form-control custom-select" id="damage-type" name="damage_type">
-                                {% for code, label in damage_types %}
-                                    <option value="{{ code }}">{{ label }}</option>
+                                {% for group_label, types in damage_types %}
+                                    <optgroup label="{{ group_label }}">
+                                        {% for code, label in types %}
+                                            <option value="{{ code }}">{{ label }}</option>
+                                        {% endfor %}
+                                    </optgroup>
                                 {% endfor %}
                             </select>
                         </div>
@@ -71,13 +75,13 @@
                         </div>
                         <div class="col-auto">
                             <input id="min-damage" class="form-control ismall"
-                                   type="number" name="min_damage" value="0" />
+                                   type="number" name="min_damage" value="0" min="0" />
                             <span class="ml-1 mr-1 font-weight-bold">&minus;</span>
                             <input id="min-damage" class="form-control ismall"
-                                   type="number" name="max_damage" value="0" />
+                                   type="number" name="max_damage" value="0" min="0" />
                             <span class="ml-1 mr-1 font-weight-bold">&plus;</span>
                             <input id="min-damage" class="form-control ismall"
-                                   type="number" name="raw_damage" value="0" />
+                                   type="number" name="raw_damage" value="0" min="0" />
                         </div>
                         <div class="col-auto">
                             <button type="submit" class="btn btn-primary"

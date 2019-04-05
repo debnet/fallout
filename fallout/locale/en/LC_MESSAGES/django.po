@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-04-01 14:51+0200\n"
+"POT-Creation-Date: 2019-04-05 03:17+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -499,20 +499,32 @@ msgstr "inhaled gas damage"
 msgid "dégâts directs"
 msgstr "direct damage"
 
+msgid "augmentation de la soif"
+msgstr "thirst increase"
+
+msgid "augmentation de la faim"
+msgstr "hunger increase"
+
+msgid "augmentation du sommeil"
+msgstr "sleep increase"
+
 msgid "soins de santé"
 msgstr "health cure"
 
 msgid "soins de radiations"
 msgstr "radiation cure"
 
-msgid "altérations de soif"
-msgstr "thirst alteration"
+msgid "diminution de la soif"
+msgstr "thirst decrease"
 
-msgid "altérations de faim"
-msgstr "hunger alteration"
+msgid "diminution de la faim"
+msgstr "hunger decrease"
 
-msgid "altérations de sommeil"
-msgstr "sleep alteration"
+msgid "diminution du sommeil"
+msgstr "sleep decrease"
+
+msgid "soins"
+msgstr "heals"
 
 msgid "N"
 msgstr "N"
@@ -1030,14 +1042,11 @@ msgstr "Min. and max. bounds are not correct."
 msgid "Ce personnage doit être préalablement enregistré avant d'être dupliqué."
 msgstr "This character must be saved before to be duplicated."
 
-msgid "Ce personnage n'a pas de points de compétences à distribuer."
-msgstr "This character don't have any skill point to spend."
+msgid "Cette compétence ne peut être améliorée."
+msgstr "This skill can not be improved."
 
 msgid "Ce personnage n'a pas assez de points de compétences."
 msgstr "This character don't have enough skill points."
-
-msgid "Cette compétence ne peut être améliorée."
-msgstr "This skill can not be improved."
 
 msgid "valeur"
 msgstr "value"
@@ -1731,6 +1740,9 @@ msgstr "Equip"
 
 msgid "Utiliser"
 msgstr "Use"
+
+msgid "Armer"
+msgstr "Arm"
 
 msgid "+"
 msgstr "+"

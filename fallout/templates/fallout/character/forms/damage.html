@@ -28,8 +28,12 @@
                     <label for="{{ code }}-damage-type" class="sr-only">{% trans "type" %}</label>
                     <select class="form-control form-control-sm custom-select" id="{{ code }}-damage-type"
                             name="damage_type">
-                        {% for code, label in damage_types %}
-                            <option value="{{ code }}">{{ label }}</option>
+                        {% for group_label, types in damage_types %}
+                            <optgroup label="{{ group_label }}">
+                                {% for code, label in types %}
+                                    <option value="{{ code }}">{{ label }}</option>
+                                {% endfor %}
+                            </optgroup>
                         {% endfor %}
                     </select>
                 </td>
@@ -51,7 +55,7 @@
                 </td>
                 <td class="text-right">
                     <input id="{{ code }}-raw-damage" class="form-control form-control-sm ismall"
-                           type="number" name="raw_damage" value="0" />
+                           type="number" name="raw_damage" value="0" min="0" />
                 </td>
             </tr>
             <tr>
@@ -60,7 +64,7 @@
                 </td>
                 <td class="text-right">
                     <input id="{{ code }}-min-damage" class="form-control form-control-sm ismall"
-                           type="number" name="min_damage" value="0" />
+                           type="number" name="min_damage" value="0" min="0" />
                 </td>
             </tr>
             <tr>
@@ -69,7 +73,7 @@
                 </td>
                 <td class="text-right">
                     <input id="{{ code }}-max-damage" class="form-control form-control-sm ismall"
-                           type="number" name="max_damage" value="0" />
+                           type="number" name="max_damage" value="0" min="0" />
                 </td>
             </tr>
         </tbody>
