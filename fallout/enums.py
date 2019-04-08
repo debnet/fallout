@@ -68,7 +68,7 @@ SECONDARY_STATS = (
     (STATS_MAX_HEALTH, _("santé maximale")),
     (STATS_MAX_ACTION_POINTS, _("points d'action max.")),
     (STATS_CARRY_WEIGHT, _("charge maximale")),
-    (STATS_ARMOR_CLASS, _("esquive")),
+    (STATS_ARMOR_CLASS, _("classe d'armure")),
     (STATS_MELEE_DAMAGE, _("dégâts en mêlée")),
     (STATS_SEQUENCE, _("initiative")),
     (STATS_HEALING_RATE, _("taux de regénération")),

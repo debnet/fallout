@@ -29,7 +29,8 @@
                     </td>
                     <td class="text-right">
                         {% if view or not authorized %}
-                            <strong class="text-{{ s.css|default:'dark' }}" title="{{ title }}" data-toggle="tooltip" data-placement="top">
+                            <strong class="text-{{ s.css|default:'dark' }}" {% if s.title %}title="{{ s.title }}{% endif %}"
+                                    data-html="true" data-toggle="tooltip" data-placement="left">
                                 {{ s.lvalue|floatformat:0 }}{% if s.rvalue is not None %}&nbsp;/&nbsp;{{ s.rvalue|floatformat:0 }}{% endif %}
                                 {% if s.end %}{{ s.end }}{% endif %}
                             </strong>

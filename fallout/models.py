@@ -266,7 +266,7 @@ class Stats(Resistance):
     # Secondary statistics
     max_health = models.PositiveSmallIntegerField(default=0, verbose_name=_("santé maximale"))
     max_action_points = models.PositiveSmallIntegerField(default=0, verbose_name=_("points d'action max."))
-    armor_class = models.SmallIntegerField(default=0, verbose_name=_("esquive"))
+    armor_class = models.SmallIntegerField(default=0, verbose_name=_("classe d'armure"))
     carry_weight = models.SmallIntegerField(default=0, verbose_name=_("charge maximale"))
     melee_damage = models.SmallIntegerField(default=0, verbose_name=_("dégâts en mêlée"))
     sequence = models.SmallIntegerField(default=0, verbose_name=_("initiative"))
@@ -419,7 +419,11 @@ class Statistics(Stats):
 
 
 # Tuple pour les données des statistiques
-StatInfo = namedtuple('StatInfo', ('code', 'label', 'lvalue', 'rvalue', 'css', 'rate', 'end'))
+StatInfo = namedtuple('StatInfo', ('code', 'label', 'lvalue', 'rvalue', 'css', 'rate', 'end', 'title'))
+
+# Sous-titre pour les bonus d'équipements
+EQUIP_TITLE = _("Armure : <strong>{armor}</strong><br>Casque : <strong>{helmet}</strong>")
+EMPTY = _("absent")
 
 
 class Character(Entity, Stats):
@@ -486,6 +490,9 @@ class Character(Entity, Stats):
         :return: Statistiques
         """
         if not self.has_stats:
+            self.charge = self.charge or self.equipments.aggregate(
+                charge=Sum(F('quantity') * F('item__weight'), output_field=models.FloatField())
+            ).get('charge') or 0.0
             return self
         try:
             assert not self.statistics.obsolete
@@ -555,7 +562,7 @@ class Character(Entity, Stats):
         Retourne le S.P.E.C.I.A.L.
         """
         for code, label, value in self._get_stats(SPECIALS):
-            yield StatInfo(code, label, value, None, get_class(value, maximum=10), None, None)
+            yield StatInfo(code, label, value, None, get_class(value, maximum=10), None, None, None)
 
     @property
     def skills(self) -> Iterable[StatInfo]:
@@ -563,7 +570,7 @@ class Character(Entity, Stats):
         Retourne les compétences
         """
         for code, label, value in self._get_stats(SKILLS):
-            yield StatInfo(code, label, value, None, get_class(value, maximum=100), None, None)
+            yield StatInfo(code, label, value, None, get_class(value, maximum=100), None, None, None)
 
     @property
     def general_stats(self) -> Iterable[StatInfo]:
@@ -590,7 +597,7 @@ class Character(Entity, Stats):
                 if carry_weight:
                     yield StatInfo(
                         STATS_CARRY_WEIGHT, _("charge"), charge, carry_weight,
-                        get_class(charge, carry_weight, reverse=True), (charge / carry_weight * 100.0), None)
+                        get_class(charge, carry_weight, reverse=True), (charge / carry_weight * 100.0), None, None)
                 rvalue = self.required_experience
             elif code in LIST_NEEDS:
                 rvalue = 1000
@@ -598,10 +605,10 @@ class Character(Entity, Stats):
                 values = (1.000, 0.800, 0.600, 0.400, 0.200, 0.000)
                 rclass = get_class(lvalue, rvalue, reverse=True, classes=classes, values=values)
             rate = ((lvalue / rvalue) * 100.0) if rvalue else None
-            yield StatInfo(code, label, lvalue, rvalue, rclass, rate, None)
+            yield StatInfo(code, label, lvalue, rvalue, rclass, rate, None, None)
         # Secondary stats
         for statinfo in self.secondary_stats:
-            if statinfo.code in (STATS_MAX_HEALTH, STATS_MAX_ACTION_POINTS, STATS_CARRY_WEIGHT):
+            if statinfo.code in (STATS_MAX_HEALTH, STATS_MAX_ACTION_POINTS, STATS_CARRY_WEIGHT, STATS_ARMOR_CLASS):
                 continue
             yield statinfo
 
@@ -611,17 +618,31 @@ class Character(Entity, Stats):
         Retourne les statistiques secondaires
         """
         for code, label, value in self._get_stats(SECONDARY_STATS):
-            yield StatInfo(code, label, value, None, None, None, None)
+            yield StatInfo(code, label, value, None, None, None, None, None)
 
     @property
     def resistances(self) -> Iterable[StatInfo]:
         """
         Retourne les résistances
         """
+        armor, helmet = self.get_from_inventory(slot=ITEM_ARMOR), self.get_from_inventory(slot=ITEM_HELMET)
+        # Armor classe
+        armor, helmet = getattr(armor, 'item', None), getattr(helmet, 'item', None)
+        code, label, value = STATS_ARMOR_CLASS, LIST_ALL_STATS.get(STATS_ARMOR_CLASS), self.stats.armor_class
+        armor_v, helmet_v = getattr(armor, code, 0), getattr(helmet, code, 0)
+        title = EQUIP_TITLE.format(armor=armor_v, helmet=helmet_v)
+        yield StatInfo(code, label, value, None, 'primary' if armor_v or helmet_v else None, None, None, title)
+        # Damage threshold and damage resistance
         for threshold, resistance in zip(self._get_stats(THRESHOLDS), self._get_stats(RESISTANCES)):
             (code_t, label_t, value_t), (code_r, label_r, value_r) = threshold, resistance
-            yield StatInfo(code_t, label_t, value_t, None, None, None, None)
-            yield StatInfo(code_r, label_r, min(value_r, 95), None, None, None, '%')
+            armor_t, helmet_t = getattr(armor, code_t, 0), getattr(helmet, code_t, 0)
+            armor_r, helmet_r = getattr(armor, code_r, 0), getattr(helmet, code_r, 0)
+            css_t, css_r = 'primary' if armor_t or helmet_t else None, 'primary' if armor_r or helmet_r else None
+            title_t, title_r = (
+                EQUIP_TITLE.format(armor=armor_t or EMPTY, helmet=helmet_t or EMPTY),
+                EQUIP_TITLE.format(armor=f"{armor_r} %" if armor_r else EMPTY, helmet=f"{helmet_r} %" if helmet_r else EMPTY))
+            yield StatInfo(code_t, label_t, value_t, None, css_t, None, None, title_t if css_t else None)
+            yield StatInfo(code_r, label_r, min(value_r, 95), None, css_r, None, '%', title_r if css_r else None)
 
     @property
     def used_skill_points(self) -> float:
@@ -842,14 +863,16 @@ class Character(Entity, Stats):
         if stats in LIST_SPECIALS:
             history.roll = randint(1, 10)
             history.success = history.roll <= (history.value + history.modifier)
-            history.critical = history.roll <= CRITICAL_SUCCESS_D10 \
-                if history.success else history.roll >= CRITICAL_FAIL_D10
+            history.critical = (
+                history.roll <= CRITICAL_SUCCESS_D10
+                if history.success else history.roll >= CRITICAL_FAIL_D10)
         else:
             history.roll = randint(1, 100)
             roll_modifier = int(round((5 - self.stats.luck) * LUCK_ROLL_MULT, 0))
             history.success = history.roll <= (history.value + history.modifier)
-            history.critical = history.roll <= max(1, CRITICAL_SUCCESS_D100 - roll_modifier) \
-                if history.success else history.roll >= min(100, CRITICAL_FAIL_D100 - roll_modifier)
+            history.critical = history.roll <= (
+                max(1, CRITICAL_SUCCESS_D100 - roll_modifier)
+                if history.success else history.roll >= min(100, CRITICAL_FAIL_D100 - roll_modifier))
         if log:
             history.save()
         if xp:
@@ -1348,10 +1371,12 @@ class Character(Entity, Stats):
             Character.reset_stats(self)
         if self.pk:
             # Fixing health and action points
-            self.health = self.stats.max_health if has_max_health and self.health > 0 else \
-                max(0, min(self.health, self.stats.max_health))
-            self.action_points = self.stats.max_action_points if has_max_action_points and self.action_points > 0 else \
-                max(0, min(self.action_points, self.stats.max_action_points))
+            self.health = (
+                self.stats.max_health if has_max_health and self.health > 0 else
+                max(0, min(self.health, self.stats.max_health)))
+            self.action_points = (
+                self.stats.max_action_points if has_max_action_points and self.action_points > 0 else
+                max(0, min(self.action_points, self.stats.max_action_points)))
             # Remove current character on campaign if character is added or removed
             for campaign_id in self.modified.get('campaign_id') or []:
                 if not campaign_id:
@@ -1491,7 +1516,7 @@ class Item(Entity, Resistance, Damage):
     min_burst_range = models.PositiveIntegerField(default=0, verbose_name=_("portée min. en rafale"))
     max_burst_range = models.PositiveIntegerField(default=0, verbose_name=_("portée max. en rafale"))
     hit_chance_modifier = models.SmallIntegerField(default=0, verbose_name=_("modificateur de précision"))
-    armor_class_modifier = models.SmallIntegerField(default=0, verbose_name=_("modificateur d'esquive"))
+    armor_class_modifier = models.SmallIntegerField(default=0, verbose_name=_("modificateur classe d'armure"))
     threshold_modifier = models.SmallIntegerField(default=0, verbose_name=_("modificateur d'absorption"))
     threshold_rate_modifier = models.SmallIntegerField(default=0, verbose_name=_("modificateur taux d'absorption"))
     resistance_modifier = models.SmallIntegerField(default=0, verbose_name=_("modificateur de résistance"))
@@ -1508,7 +1533,7 @@ class Item(Entity, Resistance, Damage):
     critical_damage = models.SmallIntegerField(default=0, verbose_name=_("dégâts critiques"))
     critical_damage_modifier = models.SmallIntegerField(default=0, verbose_name=_("modificateur dégâts critiques"))
     # Resistances
-    armor_class = models.SmallIntegerField(default=0, verbose_name=_("esquive"))
+    armor_class = models.SmallIntegerField(default=0, verbose_name=_("classe d'armure"))
     # Effets and ammunitions
     effects = models.ManyToManyField(
         'Effect', blank=True,

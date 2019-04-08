@@ -50,7 +50,7 @@
                                     {{ loot.charge|floatformat:2 }} {% trans "kg" %}
                                 </small>
                                 <small class="badge badge-warning align-middle">
-                                    {{ loot.value|floatformat:2 }} {% trans "$" %}
+                                    {{ loot.value|floatformat:2 }} {% trans "¤" %}
                                 </small>
                                 {% for modifier in item.modifiers.all %}
                                     {% if modifier.stats in 'rads hunger thirst sleep' %}
@@ -92,20 +92,20 @@
                                     <small class="text-muted">{{ item.description }}</small>
                                 </p>
                             {% endif %}
-                            {% if authorized and item.label_damage %}
+                            {% if item.label_damage %}
                                 <p class="card-text collapse-form collapse show">
                                     <small class="font-weight-bold">{{ item.long_label_damage }}</small>
                                 </p>
                             {% endif %}
                             {% with resistances=item.resistances %}
-                                {% if authorized and resistances %}
+                                {% if resistances %}
                                     <div class="table-responsive collapse-form collapse show">
                                         <table class="table table-sm mb-0 small">
                                             <thead class="thead-dark">
                                                 <tr>
                                                     <th scope="col" class="text-center font-weight-bold"
-                                                        title="{% trans "esquive" %}" data-toggle="tooltip" data-placement="bottom">
-                                                        {% trans "AC" %}
+                                                        title="{% trans "classe d'armure" %}" data-toggle="tooltip" data-placement="bottom">
+                                                        {% trans "CA" %}
                                                     </th>
                                                     {% for resistance in resistances %}
                                                         <th scope="col" class="text-center font-weight-bold"

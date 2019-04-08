@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-04-05 03:17+0200\n"
+"POT-Creation-Date: 2019-04-08 15:34+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -307,8 +307,8 @@ msgstr "max. action points"
 msgid "charge maximale"
 msgstr "max. weight"
 
-msgid "esquive"
-msgstr "evasion"
+msgid "classe d'armure"
+msgstr "armor class"
 
 msgid "dégâts en mêlée"
 msgstr "melee damage"
@@ -997,6 +997,13 @@ msgstr "date"
 msgid "statistiques"
 msgstr "stats"
 
+#, python-brace-format
+msgid "Armure : <strong>{armor}</strong><br>Casque : <strong>{helmet}</strong>"
+msgstr "Armor: <strong>{armor}</strong><br>Helmet: <strong>{helmet}</strong>"
+
+msgid "absent"
+msgstr "empty"
+
 msgid "contexte"
 msgstr "background"
 
@@ -1105,8 +1112,8 @@ msgstr "burst maximum range"
 msgid "modificateur de précision"
 msgstr "accuracy modifier"
 
-msgid "modificateur d'esquive"
-msgstr "evasion modifier"
+msgid "modificateur classe d'armure"
+msgstr "armor class modifier"
 
 msgid "recharge unitaire ?"
 msgstr "single charge?"
@@ -1525,14 +1532,14 @@ msgstr "AP"
 msgid "kg"
 msgstr "kg"
 
-msgid "$"
-msgstr "$"
+msgid "¤"
+msgstr "¤"
 
 msgid "incassable"
 msgstr "unbreakable"
 
-msgid "AC"
-msgstr "CA"
+msgid "CA"
+msgstr "AC"
 
 msgid "Quantité"
 msgstr "Quantity"
