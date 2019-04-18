@@ -31,7 +31,8 @@
                                     {% localize off %}
                                     <div class="progress-bar progress-bar-striped bg-{{ s.css }}" role="progressbar"
                                          aria-valuenow="{{ s.lvalue }}" aria-valuemin="0" aria-valuemax="{{ s.rvalue }}"
-                                         style="width: {{ s.rate }}%" title="{{ s.title }}" data-toggle="tooltip" data-placement="top">
+                                         style="width: {{ s.rate }}%" {% if s.title %}title="{{ s.title }}"{% endif %}
+                                         data-toggle="tooltip" data-placement="top">
                                     {% endlocalize %}
                                     </div>
                                 </div>

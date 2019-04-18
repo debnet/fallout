@@ -580,7 +580,7 @@ class Character(Entity, Stats):
         """
         for code, label in GENERAL_STATS:
             lvalue = getattr(self, code, 0)
-            rvalue, rclass = None, None
+            rvalue, rclass, title = None, None, None
             if code == STATS_HEALTH:
                 code = STATS_MAX_HEALTH
                 rvalue = getattr(self.stats, STATS_MAX_HEALTH, 0)
@@ -604,8 +604,9 @@ class Character(Entity, Stats):
                 classes = ('primary', 'success', 'warning', 'danger', 'muted', 'muted')
                 values = (1.000, 0.800, 0.600, 0.400, 0.200, 0.000)
                 rclass = get_class(lvalue, rvalue, reverse=True, classes=classes, values=values)
+                title = self.get_need_label(code)
             rate = ((lvalue / rvalue) * 100.0) if rvalue else None
-            yield StatInfo(code, label, lvalue, rvalue, rclass, rate, None, None)
+            yield StatInfo(code, label, lvalue, rvalue, rclass, rate, None, title)
         # Secondary stats
         for statinfo in self.secondary_stats:
             if statinfo.code in (STATS_MAX_HEALTH, STATS_MAX_ACTION_POINTS, STATS_CARRY_WEIGHT, STATS_ARMOR_CLASS):
