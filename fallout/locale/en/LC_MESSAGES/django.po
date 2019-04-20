@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-04-08 15:34+0200\n"
+"POT-Creation-Date: 2019-04-20 03:48+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1693,6 +1693,12 @@ msgstr "Burst attack"
 
 msgid "Attaque simple"
 msgstr "Simple attack"
+
+msgid "Joueurs"
+msgstr "Players"
+
+msgid "Non joueurs"
+msgstr "Non players"
 
 msgid "dst."
 msgstr "dst."

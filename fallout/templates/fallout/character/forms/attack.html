@@ -13,6 +13,13 @@
             <tbody>
                 {% if burst %}
                     {% for c in characters %}
+                        {% ifchanged c.is_player %}
+                            <tr>
+                                <td colspan="2" class="text-center font-weight-bold">
+                                    {% if c.is_player %}{% trans "Joueurs" %}{% else %}{% trans "Non joueurs" %}{% endif %}
+                                </td>
+                            </tr>
+                        {% endifchanged %}
                         {% if c != character %}
                             <tr class="check-control">
                                 <td>
@@ -38,11 +45,20 @@
                     <tr>
                         <td colspan="2">
                             <select class="form-control form-control-sm custom-select" id="{{ code }}-target" name="target">
-                                {% for c in characters %}
-                                    {% if c != character %}
-                                        <option value="{{ c.id }}">{{ c.name }}</option>
-                                    {% endif %}
-                                {% endfor %}
+                                <optgroup label="{% trans "Joueurs" %}">
+                                    {% for c in characters %}
+                                        {% if c.is_player and c != character %}
+                                            <option value="{{ c.id }}">{{ c.name }}</option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </optgroup>
+                                <optgroup label="{% trans "Non joueurs" %}">
+                                    {% for c in characters %}
+                                        {% if not c.is_player and c != character %}
+                                            <option value="{{ c.id }}">{{ c.name }}</option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </optgroup>
                             </select>
                         </td>
                     </tr>
