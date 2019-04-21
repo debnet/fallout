@@ -229,6 +229,9 @@ SURVIVAL_EFFECTS = (
     (STATS_SLEEP, SLEEP_EFFECTS),
 )
 
+# S.P.E.C.I.A.L.
+SPECIAL_POINTS = 40
+
 # Survival modifiers when resting
 NEEDS_RESTING_RATE = 0.75
 NEEDS_NORMAL_RATE = 1.00

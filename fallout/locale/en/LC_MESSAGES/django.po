@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-04-20 03:48+0200\n"
+"POT-Creation-Date: 2019-04-21 04:42+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -72,6 +72,9 @@ msgstr "{character}: {error}"
 
 msgid "Attaquer un autre personnage"
 msgstr "Attack another character"
+
+msgid "Déplacer les personnages sélectionnés"
+msgstr "Move selected characters"
 
 msgid "Lâcher tous les équipements"
 msgstr "Drop all equipments"
@@ -763,14 +766,14 @@ msgstr "success"
 msgid "critique"
 msgstr "critical"
 
+msgid "Campagne"
+msgstr "Campaign"
+
 msgid "Nombre"
 msgstr "Count"
 
 msgid "Nom"
 msgstr "Name"
-
-msgid "Campagne"
-msgstr "Campaign"
 
 msgid "Niveau"
 msgstr "Level"
@@ -1667,8 +1670,14 @@ msgstr "The following characters will be equiped:"
 msgid "Les personnages suivants vont attaquer :"
 msgstr "The following characters attack:"
 
+msgid "Déplacer les personnages"
+msgstr "Move characters"
+
+msgid "Les personnages suivants seront déplacés :"
+msgstr "The following characters will be moved:"
+
 msgid "Les personnages suivants seront affectés :"
-msgstr "The follwing characters will be affected:"
+msgstr "The following characters will be affected:"
 
 msgid "Modifier le personnage"
 msgstr "Edit character"

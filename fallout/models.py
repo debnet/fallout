@@ -490,9 +490,6 @@ class Character(Entity, Stats):
         :return: Statistiques
         """
         if not self.has_stats:
-            self.charge = self.charge or self.equipments.aggregate(
-                charge=Sum(F('quantity') * F('item__weight'), output_field=models.FloatField())
-            ).get('charge') or 0.0
             return self
         try:
             assert not self.statistics.obsolete
@@ -644,6 +641,17 @@ class Character(Entity, Stats):
                 EQUIP_TITLE.format(armor=f"{armor_r} %" if armor_r else EMPTY, helmet=f"{helmet_r} %" if helmet_r else EMPTY))
             yield StatInfo(code_t, label_t, value_t, None, css_t, None, None, title_t if css_t else None)
             yield StatInfo(code_r, label_r, min(value_r, 95), None, css_r, None, '%', title_r if css_r else None)
+
+    @property
+    def charge(self) -> float:
+        """
+        Retourne la charge totale de l'équipement du personnage
+        """
+        if self.has_stats:
+            return self.charge
+        return self.equipments.aggregate(
+            charge=Sum(F('quantity') * F('item__weight'), output_field=models.FloatField())
+        ).get('charge') or 0.0
 
     @property
     def used_skill_points(self) -> float:
@@ -1011,10 +1019,12 @@ class Character(Entity, Stats):
         attacker_weapon = history.attacker_weapon = getattr(attacker_weapon_equipment, 'item', None)
         attacker_ammo = history.attacker_ammo = getattr(attacker_ammo_equipment, 'item', None)
         # Fight conditions
-        if attacker_weapon and (
-                (attacker_weapon.clip_size and attacker_weapon_equipment.clip_count <= 0) or
-                (attacker_weapon.is_throwable and attacker_weapon_equipment.quantity <= 0)):
-            history.status = STATUS_NO_MORE_AMMO
+        if attacker_weapon:
+            if attacker_weapon.clip_size and attacker_weapon_equipment.clip_count <= 0:
+                history.status = STATUS_NO_MORE_AMMO
+            elif attacker_weapon.is_throwable and attacker_weapon_equipment.quantity <= 0:
+                if not is_grenade or (is_burst and not hit_count):
+                    history.status = STATUS_NO_MORE_AMMO
         elif target.health <= 0:
             history.status = STATUS_TARGET_DEAD
         elif (attacker_weapon_equipment and attacker_weapon_equipment.condition is not None and
@@ -1175,7 +1185,7 @@ class Character(Entity, Stats):
         if attacker_weapon_equipment and attacker_weapon:
             if is_grenade and (not is_burst or not hit_count):
                 attacker_weapon_equipment.quantity -= 1
-            elif attacker_weapon.is_throwable:
+            elif not is_grenade and attacker_weapon.is_throwable:
                 attacker_weapon_equipment.drop(quantity=1, save=False)
             elif attacker_weapon.clip_size:
                 attacker_weapon_equipment.clip_count -= 1

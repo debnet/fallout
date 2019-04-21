@@ -216,17 +216,23 @@ def view_character(request, character_id):
                     force_raw_damage=bool(data.get('force_raw_damage', False)),
                     is_grenade=bool(data.get('is_grenade', False)),
                     is_action=bool(data.get('is_action', False)))
-                results = {}
-                for history in histories:
-                    results.setdefault(history.defender, dict(attacker=history.attacker, fail=0, success=0, damage=0))
-                    results[history.defender]['fail'] += int(history.success is False)
-                    results[history.defender]['success'] += int(history.success is True)
-                    results[history.defender]['damage'] += history.damage.real_damage if history.damage else 0
-                for defender, result in results.items():
-                    from django.contrib.messages import constants
-                    messages.add_message(request, constants.SUCCESS if result['damage'] else constants.ERROR, _(
-                        "<strong>{attacker} vs {defender}</strong> {fail} coups ratés et {success} "
-                        "coups au but pour {damage} dégâts").format(defender=defender, **result))
+                if bool(data.get('is_grenade', False)):
+                    for history in histories:
+                        messages.add_message(request, history.message_level, _(
+                            "<strong>{attacker} vs {defender}</strong> {label}").format(
+                            attacker=history.attacker, defender=history.defender, label=history.long_label))
+                else:
+                    results = {}
+                    for history in histories:
+                        results.setdefault(history.defender, dict(attacker=history.attacker, fail=0, success=0, damage=0))
+                        results[history.defender]['fail'] += int(history.success is False)
+                        results[history.defender]['success'] += int(history.success is True)
+                        results[history.defender]['damage'] += history.damage.real_damage if history.damage else 0
+                    for defender, result in results.items():
+                        from django.contrib.messages import constants
+                        messages.add_message(request, constants.SUCCESS if result['damage'] else constants.ERROR, _(
+                            "<strong>{attacker} vs {defender}</strong> {fail} coups ratés et {success} "
+                            "coups au but pour {damage} dégâts").format(defender=defender, **result))
             elif type == 'damage':
                 result = character.damage(
                     raw_damage=int(data.get('raw_damage') or 0),

@@ -172,7 +172,7 @@ class CharacterAdmin(EntityAdmin):
     search_fields = ('name', 'title', 'description', 'background', )
     ordering = ('name', )
     actions = EntityAdmin.actions + [
-        'duplicate', 'heal', 'damage', 'roll', 'fight', 'randomize', 'generate_stats', 'equip']
+        'duplicate', 'heal', 'damage', 'roll', 'fight', 'randomize', 'generate_stats', 'move', 'equip', 'loot']
     autocomplete_fields = ('campaign', 'player', )
     save_on_top = True
     actions_on_bottom = True
@@ -194,7 +194,7 @@ class CharacterAdmin(EntityAdmin):
 
     def duplicate(self, request, queryset):
         """
-        Action spécifique pour dupliquer un ou plusieurs personnages
+        Action spécifique pour dupliquer les personnages sélectionnés
         """
         if 'duplicate' in request.POST:
             form = DuplicateCharacterForm(request.POST)
@@ -221,7 +221,7 @@ class CharacterAdmin(EntityAdmin):
 
     def randomize(self, request, queryset):
         """
-        Action spécifique pour randomiser les compétences d'un personnage
+        Action spécifique pour randomiser les compétences des personnages sélectionnés
         """
         if 'randomize' in request.POST:
             form = RandomizeCharacterForm(request.POST)
@@ -258,7 +258,7 @@ class CharacterAdmin(EntityAdmin):
 
     def damage(self, request, queryset):
         """
-        Action spécifique pour effectuer un lancer de compétence
+        Action spécifique pour infliger des dégats aux personnages sélectionnés
         """
         if 'damage' in request.POST:
             form = DamageCharacterForm(request.POST)
@@ -295,17 +295,41 @@ class CharacterAdmin(EntityAdmin):
             'form': form, 'characters': queryset, 'targets': request.POST.getlist(admin.ACTION_CHECKBOX_NAME)})
     fight.short_description = _("Attaquer un autre personnage")
 
+    def move(self, request, queryset):
+        """
+        Action spécifique pour déplacer les personnages sélectionnés
+        """
+        if 'move' in request.POST:
+            form = CampaignForm(request.POST)
+            if form.is_valid():
+                queryset.update(**form.cleaned_data)
+                return HttpResponseRedirect(request.get_full_path())
+        else:
+            form = CampaignForm()
+        return render(request, 'fallout/character/admin/move.html', {
+            'form': form, 'characters': queryset, 'targets': request.POST.getlist(admin.ACTION_CHECKBOX_NAME)})
+    move.short_description = _("Déplacer les personnages sélectionnés")
+
     def loot(self, request, queryset):
+        """
+        Action spécifique pour looter les personnages sélectionnés
+        """
         for character in queryset:
             character.loot(empty=True)
     loot.short_description = _("Lâcher tous les équipements")
 
     def generate_stats(self, request, queryset):
+        """
+        Action pour générer les statistiques des personnages sélectionnés
+        """
         for character in queryset:
             character.generate_stats()
     generate_stats.short_description = _("Générer les statistiques secondaires")
 
     def heal(self, request, queryset):
+        """
+        Action pour soigner les personnages sélectionnés
+        """
         for character in queryset:
             character.heal()
     heal.short_description = _("Soigner les personnages sélectionnés")
