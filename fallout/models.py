@@ -917,6 +917,10 @@ class Character(Entity, Stats):
         :return: Liste d'historiques de combat
         """
         assert targets, _("Une attaque en rafale doit cibler au moins un personnage.")
+        # Fetch characters for optimisation
+        query = Character.objects.select_related('statistics')
+        targets = [(target if isinstance(target, Character) else query.get(id=target), target_range)
+                   for target, target_range in targets]
         histories = []
         if is_grenade:
             attacker_weapon_equipment = self.get_from_inventory(slot=ITEM_GRENADE)
@@ -933,11 +937,6 @@ class Character(Entity, Stats):
             attacker_weapon = getattr(attacker_weapon_equipment, 'item', None)
             assert attacker_weapon and attacker_weapon.burst_count != 0, _(
                 "L'attaquant ne possède pas d'arme ou celle-ci ne permet pas d'attaque en rafale.")
-
-            # Fetch characters for optimisation
-            query = Character.objects.select_related('statistics')
-            targets = [(target if isinstance(target, Character) else query.get(id=target), target_range)
-                       for target, target_range in targets]
 
             target, target_range, hit_count, dead_targets = None, 0, 0, set()
             for hit_count in range(attacker_weapon.burst_count):
@@ -967,13 +966,13 @@ class Character(Entity, Stats):
                             getattr(attacker_ammo, 'condition_modifier', 0.0))))
                     attacker_weapon_equipment.condition -= attacker_weapon_damage
             attacker_weapon_equipment.save()
-            # Saves characters
-            for target, target_range in targets:
-                target.save()
-                if not target.health and target.reward:
-                    self.add_experience(target.reward, save=False)
-                else:
-                    self.add_experience(max(target.level - self.level, 1) * XP_GAIN_BURST, save=False)
+        # Saves characters
+        for target, target_range in targets:
+            target.save()
+            if target.health <= 0 and target.reward:
+                self.add_experience(target.reward, save=False)
+            else:
+                self.add_experience(max(target.level - self.level, 1) * XP_GAIN_BURST, save=False)
         self.save()
         return histories
 
@@ -1172,7 +1171,7 @@ class Character(Entity, Stats):
                 raw_damage=damage, damage_type=attacker_damage_type, body_part=body_part, save=not is_burst,
                 threshold_modifier=threshold_modifier, threshold_rate_modifier=threshold_rate_modifier,
                 resistance_modifier=resistance_modifier)
-            if not target.health:
+            if target.health <= 0:
                 history.status = STATUS_TARGET_KILLED
             # On hit_count effects
             for item in (attacker_weapon, attacker_ammo, defender_armor):
@@ -1200,7 +1199,7 @@ class Character(Entity, Stats):
         self.action_points -= max(ap_cost, 0)
         if not is_burst:
             # Experience only on single shot
-            if not target.health and target.reward:
+            if target.health <= 0 and target.reward:
                 self.add_experience(target.reward, save=False)
             else:
                 self.add_experience(max(target.level - self.level, 1) * XP_GAIN_FIGHT[history.success], save=False)
