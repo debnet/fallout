@@ -879,9 +879,8 @@ class Character(Entity, Stats):
             history.roll = randint(1, 100)
             roll_modifier = int(round((5 - self.stats.luck) * LUCK_ROLL_MULT, 0))
             history.success = history.roll <= (history.value + history.modifier)
-            history.critical = history.roll <= (
-                max(1, CRITICAL_SUCCESS_D100 - roll_modifier)
-                if history.success else history.roll >= min(100, CRITICAL_FAIL_D100 - roll_modifier))
+            history.critical = history.roll <= max(1, CRITICAL_SUCCESS_D100 - roll_modifier) \
+                if history.success else history.roll >= min(100, CRITICAL_FAIL_D100 - roll_modifier)
         if log:
             history.save()
         if xp:
