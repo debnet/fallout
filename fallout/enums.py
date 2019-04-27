@@ -433,7 +433,7 @@ RADS_LABELS = {
 
 # Dehydration effets
 THIRST_LABELS = {
-    (0, 199): _("Rassasié"),
+    (0, 199): _("Désaltéré"),
     (200, 399): _("Faiblement assoiffé"),
     (400, 599): _("Modérément assoiffé"),
     (600, 799): _("Fortement assoiffé"),
