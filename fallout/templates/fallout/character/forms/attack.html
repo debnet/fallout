@@ -45,6 +45,7 @@
                     <tr>
                         <td colspan="2">
                             <select class="form-control form-control-sm custom-select" id="{{ code }}-target" name="target">
+                                <option value=""></option>
                                 <optgroup label="{% trans "Joueurs" %}">
                                     {% for c in characters %}
                                         {% if c.is_player and c != character %}
