@@ -2144,7 +2144,7 @@ class CampaignEffect(ActiveEffect):
         if not self.campaign or not self.effect.damage_config:
             return damages
         game_date = self.campaign.current_game_date
-        while self.next_date and self.next_date <= game_date:
+        while self.next_date and self.next_date <= game_date and (not self.end_date or game_date <= self.end_date):
             for character in self.campaign.characters.filter(is_active=True).exclude(health__lte=0):
                 damage = character.damage(save=save, **self.effect.damage_config)
                 damages[character] = damages.get(character, []) + [damage]
@@ -2219,7 +2219,7 @@ class CharacterEffect(ActiveEffect):
         if not character.campaign or not self.effect.damage_config:
             return damages
         game_date = character.campaign.current_game_date
-        while self.next_date and self.next_date <= game_date:
+        while self.next_date and self.next_date <= game_date and (not self.end_date or game_date <= self.end_date):
             damages.append(character.damage(save=save, **self.effect.damage_config))
             if not self.effect.interval:
                 break
