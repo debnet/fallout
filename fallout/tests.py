@@ -1,6 +1,7 @@
 # coding: utf-8
 from common.tests import create_api_test_class
 from django.contrib.admin import site
+from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 from model_mommy import mommy
@@ -13,6 +14,7 @@ def create_admin_tests():
     Crée des tests génériques de navigation sur l'ensemble des pages de l'administration
     :return: Tests
     """
+    User = get_user_model()
     tests = {}
     base_urls, namespace, app_label = site.urls
     for base_url in base_urls:
@@ -28,16 +30,20 @@ def create_admin_tests():
             if not test:
 
                 def setup(cls):
-                    cls.player = Player.objects.create_superuser('admin', '', '')
+                    try:
+                        cls.user = User.objects.get(username='admin')
+                    except User.DoesNotExist:
+                        cls.user = User.objects.create_superuser('admin', '', '')
                     cls.instance = mommy.make(cls.model)
 
                 def get(self, url=url, pk_required=pk_required):
-                    url = reverse(f'{namespace}:{url.name}', args=(self.instance.pk, ) if pk_required else ())
-                    response = self.client.get(url)
-                    self.assertEqual(response.status_code, 302)
-                    self.client.force_login(self.player)
-                    response = self.client.get(url)
+                    self.client.logout()
+                    self.client.force_login(self.user)
+                    view_name = f'{namespace}:{url.name}'
+                    url = reverse(view_name, args=(self.instance.pk, ) if pk_required else ())
+                    response = self.client.get(url, follow=True)
                     self.assertEqual(response.status_code, 200)
+                    self.assertEqual(response.resolver_match.view_name, view_name)
                     return url
 
                 test_name = f'{model._meta.object_name}AdminPageCheckTest'

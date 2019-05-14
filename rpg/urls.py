@@ -6,9 +6,6 @@ from django.urls import include, path
 from django.views.generic import RedirectView
 from rest_framework.authtoken import views as drf_views
 
-from fallout.urls import urlpatterns as fallout_urls, api_urlpatterns as fallout_api
-
-
 admin.site.site_header = 'Fallout RPG'
 
 urlpatterns = [
@@ -20,17 +17,15 @@ urlpatterns = [
     path('api/', include('rest_framework.urls', namespace='rest_framework')),
     path('api/auth/', drf_views.obtain_auth_token, name='token'),
     # Fallout RPG
-    path('', include(fallout_urls)),
-    path('api/', include(fallout_api)),
+    path('', include('fallout.urls', namespace='fallout')),
+    path('api/', include('fallout.api', namespace='fallout-api')),
 ]
 
 # Common framework
 if 'common' in settings.INSTALLED_APPS:
-    from common.urls import urlpatterns as common_urls
-    from common.api.urls import urlpatterns as common_api
     urlpatterns += [
-        path('common/', include(common_urls, namespace='common')),
-        path('api/common/', include(common_api, namespace='common-api'))]
+        path('common/', include('common.urls', namespace='common')),
+        path('api/common/', include('common.api.urls', namespace='common-api'))]
 
 # Debug
 if settings.DEBUG:

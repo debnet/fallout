@@ -3,6 +3,7 @@ from common.api.serializers import BaseCustomSerializer, CommonModelSerializer
 from common.api.utils import (
     create_api, disable_relation_fields, api_view_with_serializer,
     create_model_serializer, to_model_serializer)
+from django.urls import path
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
@@ -395,3 +396,24 @@ def loottemplate_open(request, template_id):
         return loot_template.create(**request.validated_data)
     except Exception as exception:
         raise ValidationError(str(exception))
+
+
+namespace = 'fallout-api'
+app_name = 'fallout'
+urlpatterns = [
+    path('campaign/<int:campaign_id>/next/', campaign_next_turn, name='campaign_next_turn'),
+    path('campaign/<int:campaign_id>/clear/', campaign_clear_loot, name='campaign_clear_loot'),
+    path('campaign/<int:campaign_id>/roll/', campaign_roll, name='campaign_roll'),
+    path('campaign/<int:campaign_id>/damage/', campaign_damage, name='campaign_damage'),
+    path('character/<int:character_id>/roll/', character_roll, name='character_roll'),
+    path('character/<int:character_id>/fight/', character_fight, name='character_fight'),
+    path('character/<int:character_id>/burst/', character_burst, name='character_burst'),
+    path('character/<int:character_id>/damage/', character_damage, name='character_damage'),
+    path('equipment/<int:equipment_id>/equip/', equipment_equip, name='equipment_equip'),
+    path('equipment/<int:equipment_id>/use/', equipment_use, name='equipment_use'),
+    path('equipment/<int:equipment_id>/reload/', equipment_reload, name='equipment_reload'),
+    path('equipment/<int:equipment_id>/drop/', equipment_drop, name='equipment_drop'),
+    path('loot/<int:loot_id>/take/', loot_take, name='loot_take'),
+    path('loottemplate/<int:template_id>/open/', loottemplate_open, name='loottemplate_open'),
+] + router.urls
+urls = (urlpatterns, namespace, app_name)
