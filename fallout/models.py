@@ -62,11 +62,11 @@ def get_class(value: Union[int, float], maximum: Union[int, float], classes: Tup
         return default
     classes = classes or ('primary', 'success', 'warning', 'danger')
     classes = reversed(classes) if reverse else classes
-    values = values or (1.000, 0.666, 0.333, 0.000)
+    values = values or (1.0000, 0.6666, 0.3333, 0.0000)
     rate = value / maximum
-    for c, v in zip(classes, values):
-        if rate >= v:
-            return c
+    for _class, _value in zip(classes, values):
+        if rate >= _value:
+            return _class
     return default
 
 

@@ -34,8 +34,8 @@ def view_campaign(request, campaign_id):
     if not request.user.is_superuser:
         campaigns = campaigns.filter(Q(characters__player=request.user) | Q(game_master=request.user))
     campaign = campaigns.filter(id=campaign_id).first()
-    characters = Character.objects.select_related('statistics', 'campaign__current_character').filter(
-        campaign=campaign, is_active=True)
+    characters = Character.objects.select_related(
+        'player', 'statistics', 'campaign__current_character').filter(campaign=campaign, is_active=True)
     if not request.user.is_superuser:
         characters = characters.filter(Q(player=request.user) | Q(campaign__game_master=request.user))
     loots = Loot.objects.select_related('item').filter(campaign=campaign).order_by('item__name')
@@ -173,7 +173,7 @@ def view_character(request, character_id):
         character and character.campaign and character.campaign.game_master_id == request.user.id))
     characters = characters.filter(campaign_id=character.campaign_id if character else None)
 
-    logs = Log.objects.filter(character=character)
+    logs = Log.objects.select_related('player').filter(character=character)
     if not authorized:
         logs = logs.exclude(private=True)
 
