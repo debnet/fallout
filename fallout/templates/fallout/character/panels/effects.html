@@ -21,14 +21,14 @@
             </form>
             <hr />
         {% endif %}
-        {% if campaign_effects %}
-            <h4 class="text-center mb-3">{% trans "Général" %}</h4>
-            {% with effects=campaign_effects scope='campaign' %}
-                {% include "fallout/character/forms/effects.html" %}
-            {% endwith %}
-            <hr />
-        {% endif %}
     </div>
+    {% if campaign_effects %}
+        <h4 class="text-center mb-3">{% trans "Général" %}</h4>
+        {% with effects=campaign_effects scope='campaign' %}
+            {% include "fallout/character/forms/effects.html" %}
+        {% endwith %}
+        <hr />
+    {% endif %}
     <h4 class="text-center mb-3">{% trans "Personnage" %}</h4>
     {% with effects=character_effects scope='character' %}
         {% include "fallout/character/forms/effects.html" %}
