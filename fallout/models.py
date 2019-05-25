@@ -788,16 +788,16 @@ class Character(Entity, Stats):
         self.experience = sum((l - 1) * BASE_XP for l in range(2, level + 1))
         self.check_level()
         # Randomly distribute a fraction of the skill points on tag skills
-        skill_points = self.skill_points
+        skill_points = self.skill_points - self.used_skill_points
         for i in range(int(skill_points * rate)):
-            self.modify_value(choice(self.tag_skills), 2)
+            self.modify_value(choice(self.tag_skills), 1)
             skill_points -= 1
         # Randomly distribute remaining skill points on other skills
         other_skills = list(set(LIST_SKILLS) - set(self.tag_skills)) if rate else list(LIST_SKILLS)
-        while skill_points:
+        while skill_points > 0:
             skill = choice(other_skills)
-            self.modify_value(skill, 2 if skill in self.tag_skills else 1)
-            skill_points -= 1
+            self.modify_value(skill, 1)
+            skill_points -= 1 if skill in self.tag_skills else 2
         # Reset health and action points to their maximum
         self.heal()
 
