@@ -772,6 +772,9 @@ class Character(Entity, Stats):
             self.skill_points += self.stats.skill_points_per_level
             if self.stats.perk_rate and not self.level % self.stats.perk_rate:
                 self.perk_points += 1
+            if not self.has_stats:
+                self.max_health += self.stats.hit_points_per_level
+            self.health += self.stats.hit_points_per_level
             level += 1
         return level, needed_xp
 
