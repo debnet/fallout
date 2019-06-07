@@ -188,6 +188,8 @@ class Campaign(CommonModel):
         super().save(*args, **kwargs)
         if hours <= 0:
             return
+        for effect in self.effects:
+            effect.apply_all(save=False)
         for character in self.characters.filter(is_active=True).exclude(health__lte=0):
             character.update_needs(hours=hours, radiation=self.radiation, resting=resting, needs=self.needs, save=False)
             character.apply_effects(save=False)
@@ -1304,10 +1306,9 @@ class Character(Entity, Stats):
             history.save()
         return history
 
-    def apply_effects(self, campaign: bool = True, save: bool = True) -> List['DamageHistory']:
+    def apply_effects(self, save: bool = True) -> List['DamageHistory']:
         """
-        Applique les effets actifs de la campagne et/ou du personnage
-        :param campaign: Applique les effets actifs de la campagne
+        Applique les effets actifs du personnage
         :param save: Sauvegarde les données relatives aux personnages
         :return: Liste des dégâts éventuellement subis
         """
@@ -1316,10 +1317,6 @@ class Character(Entity, Stats):
             damage = effect.apply(self, save=save)
             if damage:
                 damages.append(damage)
-        if campaign and self.campaign:
-            for effect in self.campaign.effects:
-                for damage in effect.apply(self, save=save):
-                    damages.append(damage)
         return damages
 
     def duplicate(self, equipments: bool = True, effects: bool = True,
@@ -1819,7 +1816,7 @@ class Equipment(CommonModel):
             "Le personnage doit posséder la quantité d'objets qu'il souhaite jeter.")
         assert not is_action or self.character.action_points >= AP_COST_USE, _(
             "Le personnage ne possède plus assez de points d'actions pour jeter cet objet.")
-        if self.slot:
+        if self.slot and not self.item.is_throwable:
             self.equip(is_action=False)
         loot = Loot.create(
             campaign=self.character.campaign, item=self.item,
@@ -2146,9 +2143,10 @@ class CampaignEffect(ActiveEffect):
         damages = {}
         if not self.campaign or not self.effect.damage_config:
             return damages
+        characters = self.campaign.characters.filter(is_active=True).exclude(health__lte=0)
         game_date = self.campaign.current_game_date
         while self.next_date and self.next_date <= game_date and (not self.end_date or game_date <= self.end_date):
-            for character in self.campaign.characters.filter(is_active=True).exclude(health__lte=0):
+            for character in characters:
                 damage = character.damage(save=save, **self.effect.damage_config)
                 damages[character] = damages.get(character, []) + [damage]
             self.next_date += self.effect.interval
@@ -2819,7 +2817,7 @@ class Log(CommonModel):
 
     @property
     def log_id(self):
-        return str(self.id or 0)
+        return str(self.pk or 0)
 
     def __str__(self):
         return _("{character} ({date})").format(character=self.character, date=self.game_date or self.date)

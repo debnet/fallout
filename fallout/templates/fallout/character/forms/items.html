@@ -9,6 +9,8 @@
                         <div class="card-header">
                             {% if equip.quantity > 0 and not item.is_repairable %}
                                 <span class="badge badge-dark align-middle">{{ equip.quantity }}</span>
+                            {% elif not equip.quantity %}
+                                <span class="badge badge-danger align-middle">{% trans "vide" %}</span>
                             {% endif %}
                             <span class="card-title">{{ item.name }}</span>
                             {% if item.title %}
