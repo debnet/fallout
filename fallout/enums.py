@@ -423,41 +423,41 @@ LIST_FIGHT_STATUS = dict(FIGHT_STATUS)
 
 # Radiation effects
 RADS_LABELS = {
-    (0, 199): _("Etat normal"),
-    (200, 399): _("Faiblement irradié"),
-    (400, 599): _("Modérément irradié"),
-    (600, 799): _("Fortement irradié"),
-    (800, 999): _("Dangereusement irradié"),
+    (0, 200): _("Etat normal"),
+    (200, 400): _("Faiblement irradié"),
+    (400, 600): _("Modérément irradié"),
+    (600, 800): _("Fortement irradié"),
+    (800, 1000): _("Dangereusement irradié"),
     (1000, None): _("Mortellement irradié"),
 }
 
 # Dehydration effets
 THIRST_LABELS = {
-    (0, 199): _("Désaltéré"),
-    (200, 399): _("Faiblement assoiffé"),
-    (400, 599): _("Modérément assoiffé"),
-    (600, 799): _("Fortement assoiffé"),
-    (800, 999): _("Dangereusement assoiffé"),
+    (0, 200): _("Désaltéré"),
+    (200, 400): _("Faiblement assoiffé"),
+    (400, 600): _("Modérément assoiffé"),
+    (600, 800): _("Fortement assoiffé"),
+    (800, 1000): _("Dangereusement assoiffé"),
     (1000, None): _("Mortellement assoiffé"),
 }
 
 # Hunger effects
 HUNGER_LABELS = {
-    (0, 199): _("Rassasié"),
-    (200, 399): _("Faiblement affamé"),
-    (400, 599): _("Modérément affamé"),
-    (600, 799): _("Fortement affamé"),
-    (800, 999): _("Dangereusement affamé"),
+    (0, 200): _("Rassasié"),
+    (200, 400): _("Faiblement affamé"),
+    (400, 600): _("Modérément affamé"),
+    (600, 800): _("Fortement affamé"),
+    (800, 1000): _("Dangereusement affamé"),
     (1000, None): _("Mortellement affamé"),
 }
 
 # Sleep deprivation effects
 SLEEP_LABELS = {
-    (0, 199): _("Reposé"),
-    (200, 399): _("Faiblement fatigué"),
-    (400, 599): _("Modérément fatigué"),
-    (600, 799): _("Fortement fatigué"),
-    (800, 999): _("Dangereusement fatigué"),
+    (0, 200): _("Reposé"),
+    (200, 400): _("Faiblement fatigué"),
+    (400, 600): _("Modérément fatigué"),
+    (600, 800): _("Fortement fatigué"),
+    (800, 1000): _("Dangereusement fatigué"),
     (1000, None): _("Mortellement fatigué"),
 }
 

@@ -16,7 +16,7 @@ djangorestframework-simplejwt==4.3
 flake8==3.7.7
 ipython==7.5.0
 markdown2==2.3.8
-psycopg2==2.8.2
+psycopg2-binary==2.8.3
 pytest==4.6.2
 pytest-cov==2.7.1
 pytest-django==3.5.0

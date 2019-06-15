@@ -682,8 +682,8 @@ class Character(Entity, Stats):
             STATS_HUNGER: (HUNGER_LABELS, HUNGER_EFFECTS),
             STATS_SLEEP: (SLEEP_LABELS, SLEEP_EFFECTS),
         }[need]
-        label = next(iter(label for (mini, maxi), label in labels.items() if mini <= value <= (maxi or float('inf'))))
-        effects = next(iter(modifiers for (mini, maxi), modifiers in effects.items() if mini <= value <= (maxi or float('inf'))))
+        label = next(iter(label for (mini, maxi), label in labels.items() if mini <= value < (maxi or float('inf'))))
+        effects = next(iter(modifiers for (mini, maxi), modifiers in effects.items() if mini <= value < (maxi or float('inf'))))
         effects = ", ".join(f"{modifier} {LIST_ALL_STATS[stats]}" for stats, (modifier, mini, maxi) in effects.items())
         effects = effects or _("aucun malus")
         if label:

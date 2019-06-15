@@ -249,9 +249,6 @@ class Base(Configuration):
     DATA_UPLOAD_MAX_MEMORY_SIZE = values.IntegerValue(10485760)
     FILE_UPLOAD_PERMISSIONS = values.IntegerValue(0o644)
 
-    # Surveillance des accès aux services
-    IP_DETECTION = values.BooleanValue(False)
-
     # Stocke le token CSRF en session plutôt que dans un cookie
     CSRF_USE_SESSIONS = values.BooleanValue(False)
 

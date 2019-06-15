@@ -107,23 +107,23 @@ RACES_STATS = {
 
 # Radiation effects
 RADS_EFFECTS = {
-    (0, 199): {},
-    (200, 399): {
+    (0, 200): {},
+    (200, 400): {
         SPECIAL_STRENGTH: (-1, None, None),
     },
-    (400, 599): {
+    (400, 600): {
         STATS_HEALING_RATE: (-3, 0, None),
         SPECIAL_STRENGTH: (-1, 1, None),
         SPECIAL_AGILITY: (-1, 1, None),
     },
-    (600, 799): {
+    (600, 800): {
         STATS_HEALING_RATE: (-5, 0, None),
         STATS_MAX_HEALTH: (-5, 0, None),
         SPECIAL_STRENGTH: (-2, 1, None),
         SPECIAL_ENDURANCE: (-1, 1, None),
         SPECIAL_AGILITY: (-2, 1, None),
     },
-    (800, 999): {
+    (800, 1000): {
         STATS_HEALING_RATE: (-10, 0, None),
         STATS_MAX_HEALTH: (-15, 0, None),
         SPECIAL_STRENGTH: (-4, 1, None),
@@ -147,20 +147,20 @@ RADS_EFFECTS = {
 
 # Dehydration effets
 THIRST_EFFECTS = {
-    (0, 199): {},
-    (200, 399): {
+    (0, 200): {},
+    (200, 400): {
         SPECIAL_ENDURANCE: (-1, 1, None),
     },
-    (400, 599): {
+    (400, 600): {
         SPECIAL_PERCEPTION: (-1, 1, None),
         SPECIAL_ENDURANCE: (-2, 1, None),
     },
-    (600, 799): {
+    (600, 800): {
         SPECIAL_PERCEPTION: (-2, 1, None),
         SPECIAL_ENDURANCE: (-2, 1, None),
         SPECIAL_INTELLIGENCE: (-1, 1, None),
     },
-    (800, 999): {
+    (800, 1000): {
         SPECIAL_PERCEPTION: (-2, 1, None),
         SPECIAL_ENDURANCE: (-3, 1, None),
         SPECIAL_INTELLIGENCE: (-1, 1, None),
@@ -173,20 +173,20 @@ THIRST_EFFECTS = {
 
 # Hunger effects
 HUNGER_EFFECTS = {
-    (0, 199): {},
-    (200, 399): {
+    (0, 200): {},
+    (200, 400): {
         SPECIAL_STRENGTH: (-1, 1, None),
     },
-    (400, 599): {
+    (400, 600): {
         SPECIAL_STRENGTH: (-2, 1, None),
         SPECIAL_CHARISMA: (-1, 1, None),
     },
-    (600, 799): {
+    (600, 800): {
         SPECIAL_STRENGTH: (-3, 1, None),
         SPECIAL_PERCEPTION: (-1, 1, None),
         SPECIAL_CHARISMA: (-2, 1, None),
     },
-    (800, 999): {
+    (800, 1000): {
         SPECIAL_STRENGTH: (-3, 1, None),
         SPECIAL_PERCEPTION: (-2, 1, None),
         SPECIAL_CHARISMA: (-2, 1, None),
@@ -198,20 +198,20 @@ HUNGER_EFFECTS = {
 
 # Sleep deprivation effects
 SLEEP_EFFECTS = {
-    (0, 199): {},
-    (200, 399): {
+    (0, 200): {},
+    (200, 400): {
         SPECIAL_AGILITY: (-1, 1, None),
     },
-    (400, 599): {
+    (400, 600): {
         SPECIAL_INTELLIGENCE: (-1, 1, None),
         SPECIAL_AGILITY: (-2, 1, None),
     },
-    (600, 799): {
+    (600, 800): {
         SPECIAL_ENDURANCE: (-1, 1, None),
         SPECIAL_INTELLIGENCE: (-2, 1, None),
         SPECIAL_AGILITY: (-3, 1, None),
     },
-    (800, 999): {
+    (800, 1000): {
         SPECIAL_ENDURANCE: (-2, 1, None),
         SPECIAL_INTELLIGENCE: (-2, 1, None),
         SPECIAL_AGILITY: (-3, 1, None),
