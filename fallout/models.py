@@ -1839,7 +1839,7 @@ class Equipment(CommonModel):
         assert self.slot == ITEM_WEAPON and self.item.clip_size, _(
             "Cet objet n'est pas une arme équipée ou ne peut être rechargé.")
         assert not is_action or self.character.action_points >= self.item.ap_cost_reload, _(
-            "Le personnage ne possède plus assez de points d'actions pour jeter cet objet.")
+            "Le personnage ne possède plus assez de points d'actions pour recharger cette arme.")
         ammo = Equipment.objects.filter(character_id=self.character_id, slot=ITEM_AMMO).first()
         assert ammo and ammo.quantity > 0, _(
             "Il n'y a aucun type de munition équipé ou le nombre de munitions disponibles est insuffisant.")

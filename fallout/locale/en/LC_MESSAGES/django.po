@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-06-07 11:34+0200\n"
+"POT-Creation-Date: 2019-06-21 01:11+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1195,6 +1195,9 @@ msgstr "This character doesn't have enough action points in order to throw this 
 
 msgid "Cet objet n'est pas une arme équipée ou ne peut être rechargé."
 msgstr "This item is not a equipped weapon or can't be reloaded."
+
+msgid "Le personnage ne possède plus assez de points d'actions pour recharger cette arme."
+msgstr "This character doesn't have enough action points in order to reload this weapon."
 
 msgid "Il n'y a aucun type de munition équipé ou le nombre de munitions disponibles est insuffisant."
 msgstr "There is no equipped ammunition or there is not enough ammunitions left."
