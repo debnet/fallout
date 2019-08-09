@@ -1013,6 +1013,7 @@ class Character(Entity, Stats):
         :param simulation: Fait une simulation du combat ?
         :return: Historique de combat
         """
+        target_range = int(target_range)
         if isinstance(target, (int, str)):
             target = Character.objects.select_related('statistics').get(pk=target)
         history = FightHistory(
