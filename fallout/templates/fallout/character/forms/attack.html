@@ -1,7 +1,7 @@
 {% load i18n %}
 
 {% if characters %}
-    <form method="post" action="{{ request.path }}">
+    <form id="{{ code }}" method="post" action="{{ request.path }}">
         <table class="table table-sm table-striped">
             <thead class="thead-dark">
                 <tr>
@@ -85,10 +85,10 @@
                     </tr>
                 {% endif %}
                 <tr>
-                    <td><label for="{{ code }}-hit-modifier" class="d-inline">{% trans "modificateur" %}</label></td>
+                    <td><label for="{{ code }}-hit-chance-modifier" class="d-inline">{% trans "modificateur" %}</label></td>
                     <td class="text-right">
-                        <input id="{{ code }}-hit-modifier" class="form-control form-control-sm ismall"
-                               type="number" name="hit_modifier" value="0" />
+                        <input id="{{ code }}-hit-chance-modifier" class="form-control form-control-sm ismall"
+                               type="number" name="hit_chance_modifier" value="0" />
                     </td>
                 </tr>
                 <tr>
@@ -129,12 +129,16 @@
             <tfoot class="thead-dark">
                 <tr>
                     <th class="text-right align-middle" colspan="2">
+                        <button class="btn btn-sm btn-light" type="button" data-simulation="#{{ code }}">
+                            {% trans "Simuler" %}
+                        </button>
                         <button class="btn btn-sm btn-primary" type="submit">{% trans "OK" %}</button>
                     </th>
                 </tr>
             </tfoot>
         </table>
         {% if not view %}
+            <input type="hidden" name="character" value="{{ character.id }}" />
             <input type="hidden" name="type" value="{% if burst %}burst{% else %}fight{% endif %}" />
             {% csrf_token %}
         {% endif %}

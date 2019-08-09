@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-06-21 01:11+0200\n"
+"POT-Creation-Date: 2019-08-10 00:17+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1037,6 +1037,9 @@ msgstr "regeneration"
 msgid "spécialités"
 msgstr "speciality"
 
+msgid "données complémentaires"
+msgstr "additional data"
+
 msgid "aucun malus"
 msgstr "no malus"
 
@@ -1424,8 +1427,36 @@ msgid "{label} : {status}"
 msgstr "{label}: {status}"
 
 #, python-brace-format
-msgid "{label} : {status} - {real_damage} {damage_type} infligés ({body_part})"
-msgstr "{label}: {status} - {real_damage} {damage_type} inflicted ({body_part})"
+msgid "{label} : {status} - {damage}"
+msgstr "{label}: {status} - {damage}"
+
+#, python-brace-format
+msgid "{real_damage} ({raw_damage}) {damage_type} infligés ({body_part})"
+msgstr "{real_damage} ({raw_damage}) {damage_type} inflicted ({body_part})"
+
+#, python-brace-format
+msgid "{weapon} ({skill_name} = {skill}%)"
+msgstr "{weapon} ({skill_name} = {skill}%)"
+
+msgid "Combat à mains nues"
+msgstr "Fighting with bare hands"
+
+#, python-brace-format
+msgid "Résultat : {label} - {hit_roll} pour {hit_chance} (+{hit_modifier})"
+msgstr "Result: {label} - {hit_roll} for {hit_chance} (+{hit_modifier})"
+
+#, python-brace-format
+msgid ""
+"{attacker} vs. {defender}\n"
+"{weapon_label}\n"
+"{hit_label}"
+msgstr "{attacker} vs. {defender}\n{weapon_label}\n{hit_label}"
+
+#, python-brace-format
+msgid ""
+"{base}\n"
+"{damage}"
+msgstr "{base}\n{damage}"
 
 #, python-brace-format
 msgid "{attacker} vs. {defender} - {long_label}"
@@ -1505,18 +1536,6 @@ msgstr ""
 msgid "Butins"
 msgstr "Loots"
 
-msgid "Actif depuis"
-msgstr "Active since"
-
-msgid "Actif encore"
-msgstr "Active until"
-
-msgid "dans"
-msgstr "in"
-
-msgid "Supprimer"
-msgstr "Delete"
-
 msgid "PJ"
 msgstr "PC"
 
@@ -1528,6 +1547,18 @@ msgstr "KO"
 
 msgid "Actif"
 msgstr "Active"
+
+msgid "Actif depuis"
+msgstr "Active since"
+
+msgid "Actif encore"
+msgstr "Active until"
+
+msgid "dans"
+msgstr "in"
+
+msgid "Supprimer"
+msgstr "Delete"
 
 msgid "Joueur"
 msgstr "Player"
@@ -1736,6 +1767,9 @@ msgstr "Grenade"
 msgid "Action"
 msgstr "Action"
 
+msgid "Simuler"
+msgstr "Simulate"
+
 msgid "valeur fixe"
 msgstr "fixed value"
 
@@ -1847,8 +1881,11 @@ msgstr "Login"
 msgid "Personnages"
 msgstr "Characters"
 
-msgid "(Campagne courante)"
-msgstr "(Current campaign)"
+msgid "Campagne courante"
+msgstr "Current campaign"
+
+msgid "Tableau de bord"
+msgstr "Dashboard"
 
 msgid "0 s"
 msgstr "0 s"
@@ -1894,16 +1931,16 @@ msgid "<strong>{character}</strong> {label}"
 msgstr "<strong>{character}</strong> {label}"
 
 #, python-brace-format
+msgid "<strong>Erreur</strong> {error}"
+msgstr "<strong>Error</strong> {error}"
+
+#, python-brace-format
 msgid "<strong>{character}</strong> vient de passer au niveau <strong>{level}</strong> et a besoin de <strong>{experience}</strong> points d'expérience pour passer au niveau suivant."
 msgstr "<strong>{character}</strong> goes to level <strong>{level}</strong> and needs <strong>{experience}</strong> experience points to pass the next level."
 
 #, python-brace-format
 msgid "<strong>{character}</strong> a encore besoin de <strong>{experience}</strong> points d'expérience pour passer au niveau suivant."
 msgstr "<strong>{character}</strong> still needs <strong>{experience}</strong> experience points to pass the next level."
-
-#, python-brace-format
-msgid "<strong>Erreur</strong> {error}"
-msgstr "<strong>Error</strong> {error}"
 
 #, python-brace-format
 msgid "<strong>{attacker} vs {defender}</strong> {label}"

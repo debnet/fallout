@@ -1,9 +1,27 @@
-{% load i18n l10n tools %}
+{% extends "fallout/base.html" %}
+{% load i18n l10n tools custom %}
+{% get_current_language as LANGUAGE_CODE %}
 
-<div class="row">
-    {% for character in characters %}
-        <div class="col-xl-3 col-lg-4 col-md-6 col-12 mb-3">
-            <div class="card h-100">
+{% block navbar %}
+    {% include "fallout/navbar.html" %}
+{% endblock %}
+
+{% block actions %}
+    <a class="dropdown-item" href="{% url 'admin:fallout_campaign_add' %}">{% trans "Ajouter une campagne" %}</a>
+    {% if campaign %}
+    <a class="dropdown-item" href="{% url 'admin:fallout_campaign_change' campaign.id %}">{% trans "Modifier la campagne" %}</a>
+    {% endif %}
+    <a class="dropdown-item" href="{% url 'admin:fallout_character_add' %}?campaign={{ campaign.id }}">{% trans "Ajouter un personnage" %}</a>
+{% endblock %}
+
+{% block content %}
+    <div>
+        <input type="range" class="range custom-range" min="-100" max="100" step="10" value="0" id="modifier">
+    </div>
+    <div class="card-deck">
+        {% for character in characters %}
+            {% if character.is_player %}
+            <div class="card">
                 <div class="card-header">
                     <span class="card-title"><a href="{% url 'fallout:character' character.id %}">{{ character.name }}</a></span>
                     {% if character.title %}<small class="card-subtitle mb-2 text-muted">{{ character.title }}</small>{% endif %}
@@ -40,7 +58,38 @@
                         {% endwith %}
                     {% endfor %}
                 </div>
+                <div class="card-body">
+                    {% include 'fallout/character/forms/stats.html' with character=character stats=character.special levelup=0 %}
+                    {% include 'fallout/character/forms/stats.html' with character=character stats=character.skills levelup=0 %}
+                </div>
             </div>
-        </div>
-    {% endfor %}
-</div>
+            {% endif %}
+        {% endfor %}
+    </div>
+{% endblock %}
+
+{% block style %}
+<style type="text/css">
+    .popover .arrow {
+        display: none;
+    }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script type="application/javascript">
+$(function() {
+	$('.range').on('input', function() {
+	    let val = $(this).val();
+		$('input[type="hidden"][name="modifier"]').val(val);
+		let style = (val > 0 ? 'text-success' : (val < 0 ? 'text-danger' : ''));
+		val = val > 0 ? '+' + val : val;
+		$(this).popover('dispose').popover({
+            html: true,
+            content: '<strong class="' + style +  '">' + val + '%</strong>',
+            placement: 'top',
+            offset: 'calc(50% + ' + val/2 + '%)'});
+	});
+});
+</script>
+{% endblock %}

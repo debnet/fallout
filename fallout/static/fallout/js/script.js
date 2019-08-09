@@ -9,8 +9,8 @@ $(document).ready(function($) {
 
     // (Dés)activation des contrôles ciblés par des cases à cocher
     $('input[type=checkbox]').click(function (event) {
-        var input = $('#' + $(this).data('target'));
-        var checked = $(this).is(':checked');
+        let input = $('#' + $(this).data('target'));
+        let checked = $(this).is(':checked');
         input.prop('disabled', !checked);
     });
 
@@ -20,7 +20,7 @@ $(document).ready(function($) {
 
     // Affichage du premier onglet par défaut
     if ($('.tab-pane.active').length === 0) {
-        var activePanel = $('#' + localStorage.activePanel);
+        let activePanel = $('#' + localStorage.activePanel);
         if (activePanel.length) {
             activePanel.click();
         } else {
@@ -32,7 +32,7 @@ $(document).ready(function($) {
     function transformData(data, label, value, other) {
         label = label || 'name';
         value = value || 'id';
-        var result = [];
+        let result = [];
         data['results'].forEach(function (e) {
             result.push({
                 value: e[label] + (other ? ' (' + e[other] + ')' : ''),
@@ -113,15 +113,15 @@ $(document).ready(function($) {
     });
 
     // Jets de dés
-    var diceRoller = new DiceRoller();
+    let diceRoller = new DiceRoller();
 
     $('#diceroll').on('shown.bs.modal', function () {
         $('#diceroll-input').trigger('focus').select();
     });
 
     $('#diceroll-form').on('submit', function () {
-        var value = $('#diceroll-input').val();
-        var roll = diceRoller.roll(value);
+        let value = $('#diceroll-input').val();
+        let roll = diceRoller.roll(value);
         $('#diceroll-output').val(roll.getNotation());
         return false;
     });
@@ -132,6 +132,32 @@ $(document).ready(function($) {
 
     // Popups
     $('[data-toggle="tooltip"]').tooltip();
+
+    // Simulation
+    $('[data-simulation]').on('click', function () {
+        let form = $($(this).data('simulation'));
+        let data = {};
+        $.each(form.serializeArray(), function (i, e) {
+            let current = data[e.name];
+            if (Array.isArray(current)) {
+                data[e.name].push(e.value);
+            } else if (current !== undefined) {
+                data[e.name] = [current];
+                data[e.name].push(e.value);
+            } else data[e.name] = e.value;
+        });
+        $.post('/simulation/', data, function (result) {
+            if (result) {
+                if (Array.isArray(result)) {
+                    let messages = [];
+                    $.each(result, function (i, e) {
+                        messages.push(e.description);
+                    });
+                    alert(messages.join('\n\n'))
+                } else alert(`${result.description}`);
+            }
+        });
+    });
 
     // Désactiver le re-POST
     window.history.replaceState(null, document.title, location.href);

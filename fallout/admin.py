@@ -37,6 +37,9 @@ class LootInline(admin.TabularInline):
     extra = 1
     autocomplete_fields = ('item', )
 
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('campaign', 'item')
+
 
 class CampaignEffectInlineAdmin(EntityTabularInline):
     """
@@ -45,6 +48,9 @@ class CampaignEffectInlineAdmin(EntityTabularInline):
     model = CampaignEffect
     extra = 1
     autocomplete_fields = ('effect', )
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('campaign', 'effect')
 
 
 @admin.register(Campaign)
@@ -77,6 +83,12 @@ class CampaignAdmin(CommonAdmin):
     save_on_top = True
     actions_on_bottom = True
 
+    def get_queryset(self, request):
+        queryset = super().get_queryset(request)
+        if not request.user.is_superuser:
+            queryset = queryset.filter(game_master=request.user)
+        return queryset
+
 
 class EquipmentInlineAdmin(EntityTabularInline):
     """
@@ -86,6 +98,9 @@ class EquipmentInlineAdmin(EntityTabularInline):
     extra = 1
     autocomplete_fields = ('item', )
 
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('character', 'item')
+
 
 class CharacterEffectInlineAdmin(EntityTabularInline):
     """
@@ -94,6 +109,9 @@ class CharacterEffectInlineAdmin(EntityTabularInline):
     model = CharacterEffect
     extra = 1
     autocomplete_fields = ('effect', )
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('character', 'effect')
 
 
 @admin.register(Statistics)
@@ -132,7 +150,10 @@ class StatsAdmin(CommonAdmin):
     campaign_name.admin_order_field = 'character__campaign__name'
 
     def get_queryset(self, request):
-        return super().get_queryset(request).select_related('character__campaign')
+        queryset = super().get_queryset(request).select_related('character__campaign')
+        if not request.user.is_superuser:
+            queryset = queryset.filter(character__campaign__game_master=request.user)
+        return queryset
 
     def get_list_display(self, request):
         return 'character_name', 'campaign_name', 'charge', 'date', 'obsolete'
@@ -150,7 +171,7 @@ class CharacterAdmin(EntityAdmin):
             classes=('wide', ),
         )),
         (_("Informations techniques"), dict(
-            fields=('player', 'campaign', ),
+            fields=('player', 'campaign', 'extra_data', ),
             classes=('wide', ),
         )),
         (_("Spécialités"), dict(
@@ -160,7 +181,7 @@ class CharacterAdmin(EntityAdmin):
         *(
             (title, dict(fields=tuple(a for a, b in fields), classes=('wide', 'collapse', )))
             for title, fields in ALL_STATS
-        )
+        ),
     ])
     inlines = [EquipmentInlineAdmin, CharacterEffectInlineAdmin]
     list_display_links = ('name', )
@@ -374,7 +395,10 @@ class CharacterAdmin(EntityAdmin):
     equip.short_description = _("Equiper les personnages sélectionnés")
 
     def get_queryset(self, request):
-        return super().get_queryset(request).select_related('statistics')
+        queryset = super().get_queryset(request).select_related('statistics')
+        if not request.user.is_superuser:
+            queryset = queryset.filter(campaign__game_master=request.user)
+        return queryset
 
 
 class ItemModifierInline(admin.TabularInline):
@@ -383,6 +407,9 @@ class ItemModifierInline(admin.TabularInline):
     """
     model = ItemModifier
     extra = 1
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('item')
 
 
 @admin.register(Item)
@@ -480,6 +507,9 @@ class EffectModifierInline(admin.TabularInline):
     """
     model = EffectModifier
     extra = 1
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('effect')
 
 
 @admin.register(Effect)
@@ -607,6 +637,9 @@ class LootTemplateItemInline(EntityTabularInline):
     model = LootTemplateItem
     extra = 1
     autocomplete_fields = ('item', )
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('template', 'item')
 
 
 @admin.register(LootTemplate)

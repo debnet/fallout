@@ -469,6 +469,8 @@ class Character(Entity, Stats):
     regeneration = models.FloatField(default=0.0, verbose_name=_("regénération"))
     # Tag skills
     tag_skills = MultiSelectField(max_length=200, choices=SKILLS, blank=True, verbose_name=_("spécialités"))
+    # Extra data
+    extra_data = JsonField(blank=True, null=True, verbose_name=_("données complémentaires"))
     # Cache
     _stats = {}
     _inventory = _equipment = _effects = None
@@ -910,7 +912,8 @@ class Character(Entity, Stats):
         return loots
 
     def burst(self, targets: List[Tuple[Union['Character', int], int]], hit_chance_modifier: int = 0,
-              is_grenade: bool = False, is_action: bool = True, log: bool = True, **kwargs) -> List['FightHistory']:
+              is_grenade: bool = False, is_action: bool = True, log: bool = True,
+              simulation: bool = False, **kwargs) -> List['FightHistory']:
         """
         Permet de lancer une attaque en rafale sur un groupe d'ennemis
         :param targets: Liste de personnages ciblés avec leur distance relative (en cases) pour chacun dans un tuple
@@ -918,6 +921,7 @@ class Character(Entity, Stats):
         :param is_grenade: Lance une grenade équipée ?
         :param is_action: Consomme les points d'action de l'attaquant ?
         :param log: Historise le combat ?
+        :param simulation: Fait une simulation du combat ?
         :return: Liste d'historiques de combat
         """
         assert targets, _("Une attaque en rafale doit cibler au moins un personnage.")
@@ -934,7 +938,8 @@ class Character(Entity, Stats):
             for hit_count, (target, target_range) in enumerate(targets):
                 history = self.fight(
                     target, is_burst=True, is_grenade=True, target_range=int(target_range),
-                    hit_chance_modifier=hit_chance_modifier, is_action=is_action, hit_count=hit_count, log=log, **kwargs)
+                    hit_chance_modifier=hit_chance_modifier, is_action=is_action, hit_count=hit_count,
+                    log=log, simulation=simulation, **kwargs)
                 histories.append(history)
         else:
             attacker_weapon_equipment = self.get_from_inventory(slot=ITEM_WEAPON)
@@ -948,7 +953,8 @@ class Character(Entity, Stats):
                     target, target_range = choice(targets)
                 history = self.fight(
                     target, is_burst=True, target_range=int(target_range), weapon_equipment=attacker_weapon_equipment,
-                    hit_chance_modifier=hit_chance_modifier, is_action=is_action, hit_count=hit_count, log=log, **kwargs)
+                    hit_chance_modifier=hit_chance_modifier, is_action=is_action, hit_count=hit_count,
+                    log=log, simulation=simulation, **kwargs)
                 histories.append(history)
                 if history.status in (STATUS_TARGET_DEAD, STATUS_TARGET_KILLED):
                     dead_targets.add(target)
@@ -962,29 +968,32 @@ class Character(Entity, Stats):
                 attacker_ammo = getattr(attacker_weapon_equipment, 'item', None)
                 attacker_remaining_ammo = min(attacker_ammo_equipment.quantity, attacker_remaining_ammo)
                 attacker_ammo_equipment.quantity -= attacker_remaining_ammo
-                attacker_ammo_equipment.save()
+                if not simulation:
+                    attacker_ammo_equipment.save()
                 if attacker_weapon.durability:
                     attacker_weapon_damage = (
                         attacker_remaining_ammo * (1.0 / attacker_weapon.durability) * (1.0 - (
                             getattr(attacker_weapon, 'condition_modifier', 0.0) +
                             getattr(attacker_ammo, 'condition_modifier', 0.0))))
                     attacker_weapon_equipment.condition -= attacker_weapon_damage
-            attacker_weapon_equipment.save()
+            if not simulation:
+                attacker_weapon_equipment.save()
         # Saves characters
-        for target, target_range in targets:
-            target.save()
-            if target.health <= 0 and target.reward:
-                self.add_experience(target.reward, save=False)
-            else:
-                self.add_experience(max(target.level - self.level, 1) * XP_GAIN_BURST, save=False)
-        self.save()
+        if not simulation:
+            for target, target_range in targets:
+                target.save()
+                if target.health <= 0 and target.reward:
+                    self.add_experience(target.reward, save=False)
+                else:
+                    self.add_experience(max(target.level - self.level, 1) * XP_GAIN_BURST, save=False)
+            self.save()
         return histories
 
     def fight(self, target: Union['Character', int], target_range: int = 1, target_part: BODY_PARTS = None,
               hit_chance_modifier: int = 0, is_burst: bool = False, is_grenade: bool = False, is_action: bool = True,
               hit_count: int = 0, log: bool = True, no_weapon: bool = False,
               force_success: bool = False, force_critical: bool = False, force_raw_damage: bool = False,
-              weapon_equipment: Optional['Equipment'] = None) -> 'FightHistory':
+              weapon_equipment: Optional['Equipment'] = None, simulation: bool = False, **kwargs) -> 'FightHistory':
         """
         Calcul un round de combat entre deux personnages
         :param target: Personnage ciblé
@@ -1001,12 +1010,13 @@ class Character(Entity, Stats):
         :param force_critical: Force un coup critique ?
         :param force_raw_damage: Force les dégâts bruts ?
         :param weapon_equipment: Arme équipée pour l'attaque en rafale (optimisation)
+        :param simulation: Fait une simulation du combat ?
         :return: Historique de combat
         """
         if isinstance(target, (int, str)):
             target = Character.objects.select_related('statistics').get(pk=target)
         history = FightHistory(
-            attacker=self, defender=target, range=target_range, burst=is_burst, hit_count=hit_count + 1)
+            attacker=self, defender=target, range=int(target_range), burst=bool(is_burst), hit_count=hit_count + 1)
         history.game_date = self.campaign and self.campaign.current_game_date
         # Equipment
         if is_grenade:
@@ -1047,7 +1057,7 @@ class Character(Entity, Stats):
                 history.status = STATUS_NOT_ENOUGH_AP
         # Premature end of fight
         if history.status:
-            if log:
+            if log and not simulation:
                 history.save()
             return history
         # Targetted body part modifiers and equipment
@@ -1109,18 +1119,18 @@ class Character(Entity, Stats):
             getattr(attacker_weapon, 'armor_class_modifier', 0) +
             getattr(attacker_ammo, 'armor_class_modifier', 0)) / 100.0, 0.0)
         attacker_hit_chance -= defender_armor_class   # Defender armor class modifier
-        attacker_hit_chance += hit_chance_modifier  # Other modifiers
+        attacker_hit_chance += int(hit_chance_modifier)  # Other modifiers
         attacker_hit_chance = max(min(attacker_hit_chance, MAX_HIT_CHANCE), 0)
         # Force hit chance to null if target is farther than weapon range
-        if target_range - attacker_max_range > 0:
+        if int(target_range) - attacker_max_range > 0:
             attacker_hit_chance = 0
         # Hit roll and history
-        history.hit_modifier = hit_chance_modifier
+        history.hit_modifier = int(hit_chance_modifier)
         history.hit_chance = int(round(attacker_hit_chance))
         history.status = STATUS_HIT_FAILED
         history.hit_roll = randint(1, 100)
-        history.success = force_success or history.hit_roll <= history.hit_chance
-        history.critical = force_critical or history.hit_roll >= min(100, CRITICAL_FAIL_D100 - roll_modifier)
+        history.success = bool(force_success) or history.hit_roll <= history.hit_chance
+        history.critical = bool(force_critical) or history.hit_roll >= min(100, CRITICAL_FAIL_D100 - roll_modifier)
         if history.success:
             # Apply damage
             attacker_damage_type = (  # Damage type
@@ -1143,7 +1153,7 @@ class Character(Entity, Stats):
                 getattr(attacker_weapon, 'critical_modifier', 0) +
                 getattr(attacker_ammo, 'critical_modifier', 0))
             history.status = STATUS_HIT_SUCCEED
-            history.critical = force_critical or history.hit_roll <= critical_chance
+            history.critical = bool(force_critical) or history.hit_roll <= critical_chance
             # Critical damage
             if history.critical:
                 damage *= max(1.0 + (  # Critical damage modifiers (in %) by weapon/ammo
@@ -1174,16 +1184,17 @@ class Character(Entity, Stats):
             history.damage = target.damage(
                 raw_damage=damage, damage_type=attacker_damage_type, body_part=body_part, save=not is_burst,
                 threshold_modifier=threshold_modifier, threshold_rate_modifier=threshold_rate_modifier,
-                resistance_modifier=resistance_modifier)
+                resistance_modifier=resistance_modifier, simulation=simulation)
             if target.health <= 0:
                 history.status = STATUS_TARGET_KILLED
             # On hit_count effects
-            for item in (attacker_weapon, attacker_ammo, defender_armor):
-                if not item:
-                    continue
-                for effect in item.effects.all():
-                    effect.affect(target)
-            target.apply_effects()  # Apply effects immediatly
+            if not simulation:
+                for item in (attacker_weapon, attacker_ammo, defender_armor):
+                    if not item:
+                        continue
+                    for effect in item.effects.all():
+                        effect.affect(target)
+                target.apply_effects()  # Apply effects immediatly
         # Clip count & weapon condition
         if attacker_weapon_equipment and attacker_weapon:
             if is_grenade and (not is_burst or not hit_count):
@@ -1197,25 +1208,27 @@ class Character(Entity, Stats):
                     getattr(attacker_weapon, 'condition_modifier', 0.0) +
                     getattr(attacker_ammo, 'condition_modifier', 0.0)))
                 attacker_weapon_equipment.condition -= attacker_weapon_damage
-            if not weapon_equipment:  # Optimisation: don't save if weapon is provided by burst attack
+            if not weapon_equipment and not simulation:
+                # Optimisation: don't save if weapon is provided by burst attack
                 attacker_weapon_equipment.save()
         # Save character and return history
-        self.action_points -= max(ap_cost, 0)
-        if not is_burst:
-            # Experience only on single shot
-            if target.health <= 0 and target.reward:
-                self.add_experience(target.reward, save=False)
-            else:
-                self.add_experience(max(target.level - self.level, 1) * XP_GAIN_FIGHT[history.success], save=False)
-            self.save()
-        if log:
-            history.save()
+        if not simulation:
+            self.action_points -= max(ap_cost, 0)
+            if not is_burst:
+                # Experience only on single shot
+                if target.health <= 0 and target.reward:
+                    self.add_experience(target.reward, save=False)
+                else:
+                    self.add_experience(max(target.level - self.level, 1) * XP_GAIN_FIGHT[history.success], save=False)
+                self.save()
+            if log and not simulation:
+                history.save()
         return history
 
     def damage(self, raw_damage: float = 0.0, min_damage: int = 0, max_damage: int = 0,
                damage_type: str = '', body_part: str = '',
-               threshold_modifier: int = 0, threshold_rate_modifier: int = 0,
-               resistance_modifier: int = 0, save: bool = True, log: bool = True) -> 'DamageHistory':
+               threshold_modifier: int = 0, threshold_rate_modifier: int = 0, resistance_modifier: int = 0,
+               save: bool = True, log: bool = True, simulation: bool = True) -> 'DamageHistory':
         """
         Inflige des dégâts au personnage
         :param raw_damage: Dégâts bruts
@@ -1228,6 +1241,7 @@ class Character(Entity, Stats):
         :param resistance_modifier: Modificateur de résistance aux dégâts (appliqué à l'armure et au personnage)
         :param save: Sauvegarder les modifications sur le personnage ?
         :param log: Historise les dégâts ?
+        :param simulation: Fait une simulation des dégâts ?
         :return: Nombre de dégâts
         """
         threshold_rate_modifier = round(threshold_rate_modifier / 100.0, 2)
@@ -1267,7 +1281,7 @@ class Character(Entity, Stats):
                 history.armor_resistance = armor_resistance
                 history.armor_damage = armor_damage
             # Condition decrease on armor
-            if history.armor_damage > 0:
+            if history.armor_damage > 0 and not simulation:
                 armor_equipment.condition -= armor_damage
                 armor_equipment.save()
             # Self threshold and resistance
@@ -1296,13 +1310,13 @@ class Character(Entity, Stats):
                 self.sleep += total_damage
             else:
                 self.health -= total_damage
-            if save:
+            if save and not simulation:
                 self.save()
         # History
         history.damage_threshold = damage_threshold
         history.damage_resistance = damage_resistance
         history.real_damage = total_damage
-        if log:
+        if log and not simulation:
             history.save()
         return history
 
@@ -2787,9 +2801,36 @@ class FightHistory(CommonModel):
         if not self.damage:
             return _("{label} : {status}").format(
                 label=self.label, status=self.get_status_display())
-        return _("{label} : {status} - {real_damage} {damage_type} infligés ({body_part})").format(
-            label=self.label, status=self.get_status_display(), real_damage=self.damage.real_damage,
+        return _("{label} : {status} - {damage}").format(
+            label=self.label, status=self.get_status_display(), damage=self.damage_label)
+
+    @property
+    def damage_label(self) -> str:
+        """
+        Libellé des dégâts infligés
+        :return:
+        """
+        if not self.damage:
+            return ''
+        return _("{real_damage} ({raw_damage}) {damage_type} infligés ({body_part})").format(
+            real_damage=self.damage.real_damage, raw_damage=int(self.damage.raw_damage),
             damage_type=self.damage.get_damage_type_display(), body_part=self.get_body_part_display())
+
+    @property
+    def description(self) -> str:
+        weapon_label = (_("{weapon} ({skill_name} = {skill}%)").format(
+            weapon=self.attacker_weapon,
+            skill_name=self.attacker_weapon.get_skill_display(),
+            skill=getattr(self.attacker.stats, self.attacker_weapon.skill)
+        ) if self.attacker_weapon else _("Combat à mains nues"))
+        hit_label = _("Résultat : {label} - {hit_roll} pour {hit_chance} (+{hit_modifier})").format(
+            label=self.label.capitalize(), hit_roll=self.hit_roll,
+            hit_chance=self.hit_chance, hit_modifier=self.hit_modifier)
+        base_label = _("{attacker} vs. {defender}\n{weapon_label}\n{hit_label}").format(
+            attacker=self.attacker, defender=self.defender, weapon_label=weapon_label, hit_label=hit_label)
+        if not self.damage:
+            return base_label
+        return _("{base}\n{damage}").format(base=base_label, damage=self.damage_label)
 
     def __str__(self) -> str:
         return _("{attacker} vs. {defender} - {long_label}").format(

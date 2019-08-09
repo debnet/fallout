@@ -2,25 +2,35 @@
 
 <form method="post" action="{{ request.path }}">
     <table class="table table-sm table-striped">
+        {% if label %}
         <thead class="thead-dark">
             <th class="text-center" colspan="2">{{ label }}</th>
         </thead>
+        {% endif %}
         <tbody>
-            {% if not view and authorized %}
+            {% if not view and authorized and label %}
                 <tr class="collapse-form collapse show">
                     <td>
-                        <label for="{{ code }}-modifier" class="d-inline">{% trans "modificateur" %}</label>
+                        <label for="{{ code }}-modifier-{{ character.id }}" class="d-inline">
+                            {% trans "modificateur" %}
+                        </label>
                     </td>
                     <td class="text-right">
-                        <input id="{{ code }}-modifier" class="form-control form-control-sm itiny"
+                        <input id="{{ code }}-modifier-{{ character.id }}" class="form-control form-control-sm itiny"
                                type="number" name="modifier" value="" />
                     </td>
                 </tr>
+            {% else %}
+                <input id="{{ code }}-modifier-{{ character.id }}" type="hidden" name="modifier" value="" />
             {% endif %}
             {% for s in stats %}
                 {% with title=character.labels|get:s.code|default:"" modifier=character.stats.modifiers|get:s.code %}
                 <tr>
                     <td>
+                        {% if s.code in character.extra_data %}
+                            <span title="{{ character.extra_data|get:s.code }}"
+                                  data-toggle="tooltip" data-placement="top" class="text-primary">&diams;</span>
+                        {% endif %}
                         <span {% if modifier %}title="{% if modifier > 0 %}+{% endif %}{{ modifier|default:"" }}" data-toggle="tooltip" data-placement="right"
                               class="{% if modifier > 0 %}text-success{% elif modifier < 0 %}text-danger{% endif %} pr-1"{% endif %}>
                             {% if modifier > 0 %}&blacktriangle;{% elif modifier < 0 %}&blacktriangledown;{% endif %}
@@ -54,6 +64,7 @@
     </table>
     {% if not view %}
         <input type="hidden" name="type" value="stats" />
+        <input type="hidden" name="character" value="{{ character.id }}" />
         {% csrf_token %}
     {% endif %}
 </form>

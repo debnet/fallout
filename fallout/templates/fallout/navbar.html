@@ -47,10 +47,16 @@
             {% endwith %}
         </div>
     </li>
-    {% if campaign and character %}
+    {% if campaign %}
+        {% if character or dashboard %}
         <li class="nav-item">
-            <a class="nav-link" href="{% url 'fallout:campaign' campaign.id %}">{% trans "(Campagne courante)" %}</a>
+            <a class="nav-link" href="{% url 'fallout:campaign' campaign.id %}">{% trans "Campagne courante" %}</a>
         </li>
+        {% elif authorized %}
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'fallout:dashboard' campaign.id %}">{% trans "Tableau de bord" %}</a>
+        </li>
+        {% endif %}
     {% endif %}
 </ul>
 {% if campaign %}

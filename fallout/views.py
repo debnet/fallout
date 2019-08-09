@@ -1,5 +1,5 @@
 # coding: utf-8
-from common.utils import render_to
+from common.utils import render_to, ajax_request
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
@@ -8,7 +8,7 @@ from django.http import Http404
 from django.shortcuts import redirect
 from django.utils.translation import gettext as _
 
-from fallout.enums import BODY_PARTS, DAMAGES_TYPES, ROLL_STATS
+from fallout.enums import BODY_PARTS, DAMAGES_TYPES, LIST_SPECIALS, ROLL_STATS
 from fallout.models import (
     Campaign, Character, CampaignEffect, CharacterEffect, Effect,
     Equipment, Item, Loot, LootTemplate, RollHistory, FightHistory, Log)
@@ -23,13 +23,57 @@ def view_index(request):
 
 
 @login_required
+@render_to('fallout/campaign/dashboard.html')
+def view_dashboard(request, campaign_id):
+    """
+    Vue générale
+    """
+    campaigns = Campaign.objects.select_related('current_character')
+    if not request.user.is_superuser:
+        campaigns = campaigns.filter(Q(characters__player=request.user) | Q(game_master=request.user))
+    campaign = campaigns.filter(id=campaign_id).first()
+    characters = Character.objects.select_related(
+        'player', 'statistics', 'campaign__current_character').filter(campaign=campaign, is_active=True)
+    if not request.user.is_superuser:
+        characters = characters.filter(Q(player=request.user) | Q(campaign__game_master=request.user))
+
+    authorized = request.user and (request.user.is_superuser or (
+        campaign and campaign.game_master_id == request.user.id))
+
+    try:
+        if request.method == 'POST' and authorized:
+            data = request.POST
+            if 'roll' in data:
+                stats = data.get('roll')
+                modifier = int(data.get('modifier') or 0)
+                modifier = int(modifier / 10) if stats in LIST_SPECIALS else modifier
+                character = characters.filter(id=data.get('character')).first()
+                result = character.roll(stats=stats, modifier=modifier)
+                messages.add_message(request, result.message_level, _(
+                    "<strong>{character}</strong> {label}").format(
+                        character=character, label=result.long_label))
+    except ValidationError as error:
+        for field, errors in error.message_dict.items():
+            for error in (errors if isinstance(errors, list) else [errors]):
+                messages.error(request, _("<strong>Erreur</strong> {error}").format(error=error))
+
+    return {
+        'dashboard': True,
+        'authorized': authorized,
+        # Lists
+        'campaigns': campaigns.distinct().order_by('name'),
+        'characters': characters.order_by('-is_player', 'name'),
+        # Campaign
+        'campaign': campaign,
+    }
+
+
+@login_required
 @render_to('fallout/campaign/campaign.html')
 def view_campaign(request, campaign_id):
     """
     Vue principale des campagnes
     """
-    data = request.POST
-
     campaigns = Campaign.objects.select_related('current_character')
     if not request.user.is_superuser:
         campaigns = campaigns.filter(Q(characters__player=request.user) | Q(game_master=request.user))
@@ -45,6 +89,7 @@ def view_campaign(request, campaign_id):
 
     try:
         if request.method == 'POST' and authorized:
+            data = request.POST
             type = data.get('type')
             method = data.get('method')
             if type == 'loot':
@@ -156,8 +201,6 @@ def view_character(request, character_id):
     """
     Vue principale des personnages
     """
-    data, get_data = request.POST, request.GET
-
     campaigns = Campaign.objects.select_related('current_character')
     if not request.user.is_superuser:
         campaigns = campaigns.filter(Q(characters__player=request.user) | Q(game_master=request.user))
@@ -178,9 +221,10 @@ def view_character(request, character_id):
         logs = logs.exclude(private=True)
 
     try:
-        type = data.get('type')
-        method = data.get('method')
         if request.method == 'POST' and character and authorized:
+            data = request.POST
+            type = data.get('type')
+            method = data.get('method')
             if type == 'stats':
                 if 'roll' in data:
                     result = character.roll(
@@ -197,7 +241,7 @@ def view_character(request, character_id):
                     target=data.get('target'),
                     target_part=data.get('target_part'),
                     target_range=int(data.get('target_range')),
-                    hit_chance_modifier=int(data.get('hit_modifier') or 0),
+                    hit_chance_modifier=int(data.get('hit_chance_modifier') or 0),
                     force_success=bool(data.get('force_success', False)),
                     force_critical=bool(data.get('force_critical', False)),
                     force_raw_damage=bool(data.get('force_raw_damage', False)),
@@ -210,7 +254,7 @@ def view_character(request, character_id):
             elif type == 'burst' and data.get('targets'):
                 histories = character.burst(
                     targets=list(zip(data.getlist('targets') or [], data.getlist('ranges') or [])),
-                    hit_chance_modifier=int(data.get('hit_modifier') or 0),
+                    hit_chance_modifier=int(data.get('hit_chance_modifier') or 0),
                     force_success=bool(data.get('force_success', False)),
                     force_critical=bool(data.get('force_critical', False)),
                     force_raw_damage=bool(data.get('force_raw_damage', False)),
@@ -302,8 +346,9 @@ def view_character(request, character_id):
                         player=request.user, character=character, text=log_text, private=log_private,
                         game_date=getattr(character.campaign, 'current_game_date', None))
         if request.method == 'GET' and character:
-            if 'delete' in get_data:
-                log_id = int(get_data.get('delete') or 0)
+            data = request.GET
+            if 'delete' in data:
+                log_id = int(data.get('delete') or 0)
                 log_to_delete = logs.filter(id=log_id)
                 if not authorized:
                     log_to_delete = log_to_delete.filter(player=request.user)
@@ -386,3 +431,26 @@ def thumbnails(request):
         'directories': directories,
         'images': sorted(images, key=lambda e: e[0]),
     }
+
+
+@login_required
+@ajax_request
+def simulation(request):
+    if request.method == 'POST':
+        try:
+            data = request.POST
+            attacker = Character.objects.select_related('statistics').get(pk=data.get('character'))
+            if data.get('type') == 'burst':
+                targets = list(zip(data.getlist('targets[]') or [], data.getlist('ranges[]') or []))
+                data = data.dict()
+                data.pop('character'), data.pop('targets[]'), data.pop('ranges[]')
+                results = attacker.burst(**data, targets=targets, simulation=True)
+                return [result.to_dict(extra=('description',)) for result in results]
+            else:
+                data = data.dict()
+                data.pop('character')
+                result = attacker.fight(**data, simulation=True)
+                return result.to_dict(extra=('description',))
+        except:  # noqa
+            pass
+    return None
