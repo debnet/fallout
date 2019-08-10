@@ -498,7 +498,10 @@ class EquipmentAdmin(CommonAdmin):
     actions_on_bottom = True
 
     def get_queryset(self, request):
-        return super().get_queryset(request).select_related('character', 'item')
+        queryset = super().get_queryset(request).select_related('character', 'item')
+        if not request.user.is_superuser:
+            queryset = queryset.filter(character__campaign__game_master=request.user)
+        return queryset
 
 
 class EffectModifierInline(admin.TabularInline):
@@ -581,7 +584,10 @@ class CampaignEffectAdmin(CommonAdmin):
     actions_on_bottom = True
 
     def get_queryset(self, request):
-        return super().get_queryset(request).select_related('campaign', 'effect')
+        queryset = super().get_queryset(request).select_related('campaign', 'effect')
+        if not request.user.is_superuser:
+            queryset = queryset.filter(campaign__game_master=request.user)
+        return queryset
 
 
 @admin.register(CharacterEffect)
@@ -604,7 +610,10 @@ class CharacterEffectAdmin(CommonAdmin):
     actions_on_bottom = True
 
     def get_queryset(self, request):
-        return super().get_queryset(request).select_related('character', 'effect')
+        queryset = super().get_queryset(request).select_related('character', 'effect')
+        if not request.user.is_superuser:
+            queryset = queryset.filter(character__campaign__game_master=request.user)
+        return queryset
 
 
 @admin.register(Loot)
@@ -627,7 +636,10 @@ class Loot(CommonAdmin):
     actions_on_bottom = True
 
     def get_queryset(self, request):
-        return super().get_queryset(request).select_related('campaign', 'item')
+        queryset = super().get_queryset(request).select_related('campaign', 'item')
+        if not request.user.is_superuser:
+            queryset = queryset.filter(campaign__game_master=request.user)
+        return queryset
 
 
 class LootTemplateItemInline(EntityTabularInline):
@@ -697,7 +709,10 @@ class RollHistoryAdmin(CommonAdmin):
     autocomplete_fields = ('character', )
 
     def get_queryset(self, request):
-        return super().get_queryset(request).select_related('character')
+        queryset = super().get_queryset(request).select_related('character')
+        if not request.user.is_superuser:
+            queryset = queryset.filter(character__campaign__game_master=request.user)
+        return queryset
 
 
 @admin.register(DamageHistory)
@@ -732,7 +747,10 @@ class DamageHistoryAdmin(CommonAdmin):
     autocomplete_fields = ('character', 'armor', )
 
     def get_queryset(self, request):
-        return super().get_queryset(request).select_related('character')
+        queryset = super().get_queryset(request).select_related('character')
+        if not request.user.is_superuser:
+            queryset = queryset.filter(character__campaign__game_master=request.user)
+        return queryset
 
 
 @admin.register(FightHistory)
@@ -778,7 +796,10 @@ class FightHistoryAdmin(CommonAdmin):
     real_damage.admin_order_field = 'damage__real_damage'
 
     def get_queryset(self, request):
-        return super().get_queryset(request).select_related('attacker', 'defender')
+        queryset = super().get_queryset(request).select_related('attacker', 'defender')
+        if not request.user.is_superuser:
+            queryset = queryset.filter(attacker__campaign__game_master=request.user)
+        return queryset
 
 
 @admin.register(Log)
@@ -795,4 +816,7 @@ class LogAdmin(CommonAdmin):
     autocomplete_fields = ('player', 'character', )
 
     def get_queryset(self, request):
-        return super().get_queryset(request).select_related('player', 'character')
+        queryset = super().get_queryset(request).select_related('player', 'character')
+        if not request.user.is_superuser:
+            queryset = queryset.filter(character__campaign__game_master=request.user)
+        return queryset
