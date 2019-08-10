@@ -798,7 +798,9 @@ class FightHistoryAdmin(CommonAdmin):
     def get_queryset(self, request):
         queryset = super().get_queryset(request).select_related('attacker', 'defender')
         if not request.user.is_superuser:
-            queryset = queryset.filter(attacker__campaign__game_master=request.user)
+            queryset = queryset.filter(
+                Q(attacker__campaign__game_master=request.user) |
+                Q(defender__campaign__game_master=request.user))
         return queryset
 
 
