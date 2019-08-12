@@ -147,8 +147,10 @@ $(document).ready(function($) {
             } else data[e.name] = e.value;
         });
         $.post('/simulation/', data, function (result) {
-            if (result) {
-                if (Array.isArray(result)) {
+            if (result !== '') {
+                if (typeof result == 'string') {
+                    alert(result);
+                } else if (Array.isArray(result)) {
                     let messages = [];
                     $.each(result, function (i, e) {
                         messages.push(e.description);

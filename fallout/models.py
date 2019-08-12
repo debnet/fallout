@@ -990,7 +990,7 @@ class Character(Entity, Stats):
         return histories
 
     def fight(self, target: Union['Character', int], target_range: int = 1, target_part: BODY_PARTS = None,
-              hit_chance_modifier: int = 0, is_burst: bool = False, is_grenade: bool = False, is_action: bool = True,
+              hit_chance_modifier: int = 0, is_burst: bool = False, is_grenade: bool = False, is_action: bool = False,
               hit_count: int = 0, log: bool = True, no_weapon: bool = False,
               force_success: bool = False, force_critical: bool = False, force_raw_damage: bool = False,
               weapon_equipment: Optional['Equipment'] = None, simulation: bool = False, **kwargs) -> 'FightHistory':
@@ -2813,7 +2813,7 @@ class FightHistory(CommonModel):
         """
         if not self.damage:
             return ''
-        return _("{real_damage} ({raw_damage}) {damage_type} infligés ({body_part})").format(
+        return _("{real_damage} {damage_type} infligés ({body_part}) sur {raw_damage}").format(
             real_damage=self.damage.real_damage, raw_damage=int(self.damage.raw_damage),
             damage_type=self.damage.get_damage_type_display(), body_part=self.get_body_part_display())
 
@@ -2824,11 +2824,12 @@ class FightHistory(CommonModel):
             skill_name=self.attacker_weapon.get_skill_display(),
             skill=getattr(self.attacker.stats, self.attacker_weapon.skill)
         ) if self.attacker_weapon else _("Combat à mains nues"))
-        hit_label = _("Résultat : {label} - {hit_roll} pour {hit_chance} (+{hit_modifier})").format(
-            label=self.label.capitalize(), hit_roll=self.hit_roll,
-            hit_chance=self.hit_chance, hit_modifier=self.hit_modifier)
+        hit_label = _("{status} - {label} : {hit_roll} pour {hit_chance} (+{hit_modifier})").format(
+            status=self.get_status_display().capitalize(), label=self.label.capitalize(),
+            hit_roll=self.hit_roll, hit_chance=self.hit_chance, hit_modifier=self.hit_modifier)
         base_label = _("{attacker} vs. {defender}\n{weapon_label}\n{hit_label}").format(
-            attacker=self.attacker, defender=self.defender, weapon_label=weapon_label, hit_label=hit_label)
+            attacker=self.attacker, defender=self.defender,
+            weapon_label=weapon_label, hit_label=hit_label)
         if not self.damage:
             return base_label
         return _("{base}\n{damage}").format(base=base_label, damage=self.damage_label)

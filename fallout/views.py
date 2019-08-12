@@ -451,6 +451,6 @@ def simulation(request):
                 data.pop('character')
                 result = attacker.fight(**data, simulation=True)
                 return result.to_dict(extra=('description',))
-        except:  # noqa
-            pass
-    return None
+        except Exception as e:  # noqa
+            return str(e)
+    return ""

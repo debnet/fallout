@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-08-10 00:17+0200\n"
+"POT-Creation-Date: 2019-08-12 16:34+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1431,8 +1431,8 @@ msgid "{label} : {status} - {damage}"
 msgstr "{label}: {status} - {damage}"
 
 #, python-brace-format
-msgid "{real_damage} ({raw_damage}) {damage_type} infligés ({body_part})"
-msgstr "{real_damage} ({raw_damage}) {damage_type} inflicted ({body_part})"
+msgid "{real_damage} {damage_type} infligés ({body_part}) sur {raw_damage}"
+msgstr "{real_damage} {damage_type} of {raw_damage} inflicted ({body_part})"
 
 #, python-brace-format
 msgid "{weapon} ({skill_name} = {skill}%)"
@@ -1442,21 +1442,26 @@ msgid "Combat à mains nues"
 msgstr "Fighting with bare hands"
 
 #, python-brace-format
-msgid "Résultat : {label} - {hit_roll} pour {hit_chance} (+{hit_modifier})"
-msgstr "Result: {label} - {hit_roll} for {hit_chance} (+{hit_modifier})"
+msgid "{status} - {label} : {hit_roll} pour {hit_chance} (+{hit_modifier})"
+msgstr "{status} - {label}: {hit_roll} for {hit_chance} (+{hit_modifier})"
 
 #, python-brace-format
 msgid ""
 "{attacker} vs. {defender}\n"
 "{weapon_label}\n"
 "{hit_label}"
-msgstr "{attacker} vs. {defender}\n{weapon_label}\n{hit_label}"
+msgstr ""
+"{attacker} vs. {defender}\n"
+"{weapon_label}\n"
+"{hit_label}"
 
 #, python-brace-format
 msgid ""
 "{base}\n"
 "{damage}"
-msgstr "{base}\n{damage}"
+msgstr ""
+"{base}\n"
+"{damage}"
 
 #, python-brace-format
 msgid "{attacker} vs. {defender} - {long_label}"

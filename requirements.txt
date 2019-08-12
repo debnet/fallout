@@ -2,7 +2,7 @@ Django==2.2.4
 Pillow==6.1
 celery[redis]
 coreapi
-common-framework==2019.8.1
+common-framework==2019.8.8
 dj-database-url==0.5.0
 django-compressor==2.3
 django-configurations==2.1
