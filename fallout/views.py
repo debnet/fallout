@@ -221,11 +221,10 @@ def view_character(request, character_id):
         logs = logs.exclude(private=True)
 
     try:
-        if request.method == 'POST' and character and authorized:
+        if request.method == 'POST' and character:
             data = request.POST
-            type = data.get('type')
-            method = data.get('method')
-            if type == 'stats':
+            type, method = data.get('type'), data.get('method')
+            if authorized and type == 'stats':
                 if 'roll' in data:
                     result = character.roll(
                         stats=data.get('roll'),
@@ -236,7 +235,7 @@ def view_character(request, character_id):
                 elif 'levelup' in data:
                     stats = data.get('levelup')
                     character.levelup(stats, 1, _ignore_log=True)
-            elif type == 'fight' and data.get('target'):
+            elif authorized and type == 'fight' and data.get('target'):
                 result = character.fight(
                     target=data.get('target'),
                     target_part=data.get('target_part'),
@@ -251,7 +250,7 @@ def view_character(request, character_id):
                 messages.add_message(request, result.message_level, _(
                     "<strong>{attacker} vs {defender}</strong> {label}").format(
                         attacker=result.attacker, defender=result.defender, label=result.long_label))
-            elif type == 'burst' and data.get('targets'):
+            elif authorized and type == 'burst' and data.get('targets'):
                 histories = character.burst(
                     targets=list(zip(data.getlist('targets') or [], data.getlist('ranges') or [])),
                     hit_chance_modifier=int(data.get('hit_chance_modifier') or 0),
@@ -277,7 +276,7 @@ def view_character(request, character_id):
                         messages.add_message(request, constants.SUCCESS if result['damage'] else constants.ERROR, _(
                             "<strong>{attacker} vs {defender}</strong> {fail} coups ratés et {success} "
                             "coups au but pour {damage} dégâts").format(defender=defender, **result))
-            elif type == 'damage':
+            elif authorized and type == 'damage':
                 result = character.damage(
                     raw_damage=int(data.get('raw_damage') or 0),
                     min_damage=int(data.get('min_damage') or 0),
@@ -287,7 +286,7 @@ def view_character(request, character_id):
                 messages.add_message(request, result.message_level, _(
                     "<strong>{character}</strong> {label}").format(
                         character=character, label=result.label))
-            elif type == 'item':
+            elif authorized and type == 'item':
                 item_id, item_name = data.get('item-id'), data.get('item-name')
                 if method == 'add':
                     quantity = int(data.get('quantity') or 1)
@@ -311,7 +310,7 @@ def view_character(request, character_id):
                         equip.drop(quantity=int(data.get('quantity') or 1), is_action=is_action)
                     elif method == 'secondary':
                         equip.set_secondary()
-            elif type == 'effect':
+            elif authorized and type == 'effect':
                 effect_id, effect_name = data.get('effect-id'), data.get('effect-name')
                 if method == 'add':
                     filter = dict(pk=effect_id) if effect_id else dict(name__icontains=effect_name)
@@ -324,7 +323,7 @@ def view_character(request, character_id):
                     elif scope == 'campaign':
                         CampaignEffect.objects.filter(pk=effect_id).delete()
                         Character.reset_stats(character)
-            elif type == 'action':
+            elif authorized and type == 'action':
                 character.health, character.action_points = int(data.get('hp')), int(data.get('ap'))
                 character.experience, character.karma = int(data.get('xp')), int(data.get('karma'))
                 character.rads = int(data.get('rads'))
@@ -332,9 +331,7 @@ def view_character(request, character_id):
                 character.hunger = int(data.get('hunger'))
                 character.sleep = int(data.get('sleep'))
                 character.save()
-        # All users
-        if request.method == 'POST' and character:
-            if type == 'log':
+            elif type == 'log':
                 log_id, log_text, log_private = int(data.get('log') or 0), data.get('text'), bool(data.get('private'))
                 if log_id and method == 'edit':
                     log_to_edit = logs.filter(id=log_id)
