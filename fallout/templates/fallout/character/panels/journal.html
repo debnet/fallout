@@ -47,7 +47,7 @@
                     <a href="?delete={{ log.id }}">{% trans "Supprimer" %}</a>
                 </div>
             {% endif %}
-            <div class="markdown">{% markdown %}{{ log.text }}{% endmarkdown %}</div>
+            <div class="markdown">{% markdown 'header-ids' 'tables' 'break-on-newline' %}{{ log.text }}{% endmarkdown %}</div>
             <hr />
         </div>
     {% endfor %}
