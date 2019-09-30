@@ -366,7 +366,7 @@ def view_character(request, character_id):
         # Lists
         'campaigns': campaigns.distinct().order_by('name'),
         'characters': characters.order_by('-is_player', 'name'),
-        'logs': logs.order_by('-game_date', '-date'),
+        'logs': logs.order_by(*('game_date', 'date') if 'sort' in request.GET else ('-game_date', 'date')),
         # Character
         'character': character,
         'inventory': inventory,
