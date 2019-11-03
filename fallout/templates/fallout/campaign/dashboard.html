@@ -16,7 +16,7 @@
 
 {% block content %}
     <div>
-        <input type="range" class="range custom-range" min="-100" max="100" step="10" value="0" id="modifier">
+        <input type="range" class="range custom-range" min="-100" max="100" step="10" value="{{ request.POST.modifier|default:0 }}" id="modifier">
     </div>
     <div class="card-deck">
         {% for character in characters %}
@@ -79,17 +79,22 @@
 {% block scripts %}
 <script type="application/javascript">
 $(function() {
-	$('.range').on('input', function() {
-	    let val = $(this).val();
-		$('input[type="hidden"][name="modifier"]').val(val);
-		let style = (val > 0 ? 'text-success' : (val < 0 ? 'text-danger' : ''));
-		val = val > 0 ? '+' + val : val;
-		$(this).popover('dispose').popover({
+    let show_popover = function(element) {
+        let val = $(element).val();
+        let style = (val > 0 ? 'text-success' : (val < 0 ? 'text-danger' : ''));
+        val = val > 0 ? '+' + val : val;
+        $(element).popover('dispose').popover({
             html: true,
             content: '<strong class="' + style +  '">' + val + '%</strong>',
             placement: 'top',
             offset: 'calc(50% + ' + val/2 + '%)'});
-	});
+        return val;
+    };
+    show_popover('.range');
+	$('.range').on('input', function() {
+	    let val = show_popover(this);
+        $('input[type="hidden"][name="modifier"]').val(val);
+	}).click();
 });
 </script>
 {% endblock %}
