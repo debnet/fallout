@@ -14,10 +14,10 @@ djangorestframework==3.10.3
 djangorestframework-xml==1.4.0
 djangorestframework-simplejwt==4.3
 flake8==3.7.9
-ipython==7.9.0
+ipython==7.10.0
 markdown2==2.3.8
 psycopg2-binary==2.8.4
-pytest==5.3
+pytest==5.3.1
 pytest-cov==2.8.1
 pytest-django==3.7
 pytest-env==0.6.2

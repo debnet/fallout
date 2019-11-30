@@ -6,7 +6,7 @@ from common.api.utils import (
 from django.urls import path
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError, PermissionDenied
 from rest_framework.generics import get_object_or_404
 
 from fallout.enums import BODY_PARTS, DAMAGES_TYPES, LIST_EDITABLE_STATS, ROLL_STATS
@@ -25,6 +25,21 @@ disable_relation_fields(*MODELS)
 router, all_serializers, all_viewsets = create_api(*MODELS)
 
 
+def is_authorized(request, campaign):
+    """
+    Vérifie que l'utilisateur courant peut utiliser l'API
+    :param request: Request
+    :param campaign: Campagne
+    :return: Rien
+    """
+    authorized = request.user and (
+        request.user.is_superuser or
+        (campaign and campaign.game_master_id == request.user.id))
+    if not authorized:
+        raise PermissionDenied()
+    return authorized
+
+
 class NextTurnInputSerializer(BaseCustomSerializer):
     """
     Serializer d'entrée pour changer le tour des personnages dans une campagne
@@ -40,6 +55,7 @@ def campaign_next_turn(request, campaign_id):
     API pour changer le tour des personnages
     """
     campaign = get_object_or_404(Campaign, pk=campaign_id)
+    is_authorized(request, campaign)
     try:
         return campaign.next_turn(**request.validated_data)
     except Exception as exception:
@@ -52,6 +68,7 @@ def campaign_clear_loot(request, campaign_id):
     API pour supprimer tous les butins de la campagne
     """
     campaign = get_object_or_404(Campaign, pk=campaign_id)
+    is_authorized(request, campaign)
     try:
         return campaign.clear_loot()
     except Exception as exception:
@@ -96,9 +113,10 @@ def campaign_roll(request, campaign_id):
     filters.update(is_active=True)
     if group:
         filters.update(is_player=(group == 1))
+    characters = Character.objects.select_related('campaign', 'statistics').filter(**filters)
+    any(is_authorized(request, character.campaign) for character in characters)
     try:
-        return [character.roll(**request.validated_data) for character in
-                Character.objects.select_related('statistics').filter(**filters)]
+        return [character.roll(**request.validated_data) for character in characters]
     except Exception as exception:
         raise ValidationError(str(exception))
 
@@ -108,7 +126,8 @@ def character_roll(request, character_id):
     """
     API pour effectuer un jet de compétence sur un personnage
     """
-    character = get_object_or_404(Character, pk=character_id)
+    character = get_object_or_404(Character.objects.select_related('campaign'), pk=character_id)
+    is_authorized(request, character.campaign)
     try:
         return character.roll(**request.validated_data)
     except Exception as exception:
@@ -177,6 +196,7 @@ def character_fight(request, character_id):
     API permettant d'attaquer un autre personnage
     """
     attacker = get_object_or_404(Character, pk=character_id)
+    is_authorized(request, attacker.campaign)
     try:
         return attacker.fight(**request.validated_data)
     except Exception as exception:
@@ -189,6 +209,7 @@ def character_burst(request, character_id):
     API permettant d'effectuer une attaque en rafale sur un ou plusieurs personnages
     """
     attacker = get_object_or_404(Character, pk=character_id)
+    is_authorized(request, attacker.campaign)
     targets = [(t.get('target'), t.get('target_range')) for t in request.validated_data.pop('targets', {})]
     try:
         return attacker.burst(targets=targets, **request.validated_data)
@@ -243,6 +264,7 @@ def campaign_damage(request, campaign_id):
     """
     characters = Character.objects.select_related('statistics').filter(
         pk__in=request.validated_data.pop('characters', []))
+    any(is_authorized(request, character.campaign) for character in characters)
     try:
         return [character.damage(**request.validated_data) for character in characters]
     except Exception as exception:
@@ -255,6 +277,7 @@ def character_damage(request, character_id):
     API permettant d'infliger des dégâts à un seul personnage
     """
     character = get_object_or_404(Character, pk=character_id)
+    is_authorized(request, character.campaign)
     try:
         return character.damage(**request.validated_data)
     except Exception as exception:
@@ -289,7 +312,8 @@ def equipment_equip(request, equipment_id):
     """
     API permettant de s'équiper ou de déséquiper d'un équipement de l'inventaire
     """
-    equipment = get_object_or_404(Equipment, pk=equipment_id)
+    equipment = get_object_or_404(Equipment.objects.select_related('character__campaign'), pk=equipment_id)
+    is_authorized(request, equipment.character.campaign)
     try:
         return equipment.equip(**request.validated_data)
     except Exception as exception:
@@ -301,7 +325,8 @@ def equipment_use(request, equipment_id):
     """
     API permettant d'utiliser un objet (si applicable)
     """
-    equipment = get_object_or_404(Equipment, pk=equipment_id)
+    equipment = get_object_or_404(Equipment.objects.select_related('character__campaign'), pk=equipment_id)
+    is_authorized(request, equipment.character.campaign)
     try:
         return equipment.use(**request.validated_data)
     except Exception as exception:
@@ -313,7 +338,8 @@ def equipment_reload(request, equipment_id):
     """
     API permettant de recharger une arme à feu (si applicable)
     """
-    equipment = get_object_or_404(Equipment, pk=equipment_id)
+    equipment = get_object_or_404(Equipment.objects.select_related('character__campaign'), pk=equipment_id)
+    is_authorized(request, equipment.character.campaign)
     try:
         return equipment.reload(**request.validated_data)
     except Exception as exception:
@@ -340,7 +366,8 @@ def equipment_drop(request, equipment_id):
     """
     API permettant de séparer d'un équipement et d'en faire un butin
     """
-    equipment = get_object_or_404(Equipment, pk=equipment_id)
+    equipment = get_object_or_404(Equipment.objects.select_related('character__campaign'), pk=equipment_id)
+    is_authorized(request, equipment.character.campaign)
     try:
         return equipment.drop(**request.validated_data)
     except Exception as exception:
@@ -370,7 +397,8 @@ def loot_take(request, loot_id):
     """
     API permettant de ramasser un butin
     """
-    loot = get_object_or_404(Loot, pk=loot_id)
+    loot = get_object_or_404(Loot.objects.select_related('campaign'), pk=loot_id)
+    is_authorized(request, loot.campaign)
     try:
         return loot.take(**request.validated_data)
     except Exception as exception:
@@ -392,6 +420,7 @@ def loottemplate_open(request, template_id):
     API permettant d'ouvrir un butin dans une campagne
     """
     loot_template = get_object_or_404(LootTemplate, pk=template_id)
+    is_authorized(request, request.validated_data.get('campaign'))
     try:
         return loot_template.create(**request.validated_data)
     except Exception as exception:
