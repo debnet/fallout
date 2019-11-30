@@ -763,15 +763,13 @@ class Character(Entity, Stats):
         Vérification du niveau en fonction de l'expérience
         :return: Niveau actuel, expérience requise jusqu'au niveau suivant
         """
-        needed_xp = 0
-        level = 2
-        while True:
+        level = 1
+        needed_xp = BASE_XP
+        while self.experience >= needed_xp:
+            level += 1
             needed_xp += (level - 1) * BASE_XP
             if self.level >= level:
-                level += 1
                 continue
-            if self.experience < needed_xp:
-                break
             self.level += 1
             self.skill_points += self.stats.skill_points_per_level
             if self.stats.perk_rate and not self.level % self.stats.perk_rate:
@@ -779,7 +777,6 @@ class Character(Entity, Stats):
             if not self.has_stats:
                 self.max_health += self.stats.hit_points_per_level
             self.health += self.stats.hit_points_per_level
-            level += 1
         return level, needed_xp
 
     def randomize(self, level: int = None, rate: float = 0.0) -> None:
