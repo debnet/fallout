@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-08-12 16:34+0200\n"
+"POT-Creation-Date: 2019-11-30 03:49+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -154,6 +154,9 @@ msgstr "damages"
 msgid "secondes"
 msgstr "seconds"
 
+msgid "au repos ?"
+msgstr "resting?"
+
 msgid "valider ?"
 msgstr "validate?"
 
@@ -166,6 +169,9 @@ msgstr "statistic"
 msgid "modificateur"
 msgstr "modifier"
 
+msgid "expérience"
+msgstr "experience"
+
 msgid "Tous les personnages"
 msgstr "All characters"
 
@@ -177,9 +183,6 @@ msgstr "Non-player characters only"
 
 msgid "groupe"
 msgstr "group"
-
-msgid "expérience"
-msgstr "experience"
 
 msgid "cible"
 msgstr "target"
@@ -207,6 +210,9 @@ msgstr "action?"
 
 msgid "aucun arme ?"
 msgstr "no weapon?"
+
+msgid "simulation ?"
+msgstr "simulation?"
 
 msgid "cibles"
 msgstr "targets"
@@ -1024,9 +1030,6 @@ msgstr "active?"
 
 msgid "joueur ?"
 msgstr "player?"
-
-msgid "au repos ?"
-msgstr "resting?"
 
 msgid "stats calculées ?"
 msgstr "calculated stats?"

@@ -6,7 +6,7 @@ from common.api.utils import (
 from django.urls import path
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
-from rest_framework.exceptions import ValidationError, PermissionDenied
+from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.generics import get_object_or_404
 
 from fallout.enums import BODY_PARTS, DAMAGES_TYPES, LIST_EDITABLE_STATS, ROLL_STATS
@@ -45,6 +45,7 @@ class NextTurnInputSerializer(BaseCustomSerializer):
     Serializer d'entrée pour changer le tour des personnages dans une campagne
     """
     seconds = serializers.IntegerField(initial=0, label=_("secondes"))
+    resting = serializers.BooleanField(initial=False, label=_("au repos ?"))
     apply = serializers.BooleanField(initial=True, label=_("valider ?"))
     reset = serializers.BooleanField(initial=False, label=_("réinitialiser ?"))
 
@@ -81,6 +82,7 @@ class RollInputSerializer(BaseCustomSerializer):
     """
     stats = serializers.ChoiceField(choices=ROLL_STATS, label=_("statistique"))
     modifier = serializers.IntegerField(initial=0, label=_("modificateur"))
+    xp = serializers.BooleanField(initial=True, label=_("expérience"))
 
 
 class CampaignRollInputSerializer(RollInputSerializer):
@@ -92,11 +94,24 @@ class CampaignRollInputSerializer(RollInputSerializer):
         (1, _("Personnages joueurs uniquement")),
         (2, _("Personnages non joueurs uniquement")))
     group = serializers.ChoiceField(choices=GROUPS, label=_("groupe"))
-    xp = serializers.BooleanField(initial=False, label=_("expérience"))
+
+
+class HistorySerializer(CommonModelSerializer):
+    """
+    Serializer permettant d'afficher les éventuels labels d'un historique
+    """
+    label = serializers.SerializerMethodField()
+    long_label = serializers.SerializerMethodField()
+
+    def get_label(self, obj):
+        return getattr(obj, 'label', None)
+
+    def get_long_label(self, obj):
+        return getattr(obj, 'long_label', None)
 
 
 @to_model_serializer(RollHistory)
-class RollHistorySerializer(CommonModelSerializer):
+class RollHistorySerializer(HistorySerializer):
     """
     Serializer de sortie pour l'affichage des historiques de jets de compétence
     """
@@ -165,6 +180,7 @@ class FightInputSerializer(BaseFightInputSerializer):
     is_grenade = serializers.BooleanField(initial=False, label=_("grenade ?"))
     is_action = serializers.BooleanField(initial=False, label=_("action ?"))
     no_weapon = serializers.BooleanField(initial=False, label=_("aucun arme ?"))
+    simulation = serializers.BooleanField(initial=False, label=_("simulation ?"))
 
 
 class BurstInputSerializer(BaseCustomSerializer):
@@ -178,10 +194,11 @@ class BurstInputSerializer(BaseCustomSerializer):
     force_raw_damage = serializers.BooleanField(initial=False, label=_("dégâts bruts ?"))
     is_grenade = serializers.BooleanField(initial=False, label=_("grenade ?"))
     is_action = serializers.BooleanField(initial=False, label=_("action ?"))
+    simulation = serializers.BooleanField(initial=False, label=_("simulation ?"))
 
 
 @to_model_serializer(FightHistory)
-class FightHistorySerializer(CommonModelSerializer):
+class FightHistorySerializer(HistorySerializer):
     """
     Serializer de sortie pour les attaques
     """
@@ -229,6 +246,7 @@ class DamageInputSerializer(BaseCustomSerializer):
     threshold_modifier = serializers.IntegerField(initial=0, label=_("modificateur d'absorption"))
     threshold_rate_modifier = serializers.IntegerField(initial=0, label=_("modificateur taux d'absorption"))
     resistance_modifier = serializers.IntegerField(initial=0, label=_("modificateur de résistance"))
+    simulation = serializers.BooleanField(initial=False, label=_("simulation ?"))
 
 
 class MultiDamageInputSerializer(DamageInputSerializer):
@@ -250,7 +268,7 @@ class MultiDamageInputSerializer(DamageInputSerializer):
 
 
 @to_model_serializer(DamageHistory)
-class DamageHistorySerializer(CommonModelSerializer):
+class DamageHistorySerializer(HistorySerializer):
     """
     Serializer de sortie des historiques de dégâts
     """
@@ -304,7 +322,7 @@ class ActionInputSerializer(BaseCustomSerializer):
     """
     Serializer d'entrée pour toutes les actions
     """
-    action = serializers.BooleanField(initial=False, label=_("action ?"))
+    is_action = serializers.BooleanField(initial=False, label=_("action ?"))
 
 
 @api_view_with_serializer(['POST'], input_serializer=ActionInputSerializer, serializer=EquipmentSerializer)
@@ -374,7 +392,7 @@ def equipment_drop(request, equipment_id):
         raise ValidationError(str(exception))
 
 
-class LootTakeInputSerializer(BaseCustomSerializer):
+class LootTakeInputSerializer(ActionInputSerializer):
     """
     Serializer d'entrée pour ramasser un butin
     """
