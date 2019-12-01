@@ -24,7 +24,7 @@ class PlayerAdmin(UserAdmin):
     """
     Administration des joueurs
     """
-    list_display = ('id', ) + UserAdmin.list_display
+    list_display = ('id', ) + UserAdmin.list_display + ('nickname', )
     list_display_links = ('username', )
     fieldsets = UserAdmin.fieldsets + (
         (_("Fallout"), {'fields': ('nickname', )}), )
