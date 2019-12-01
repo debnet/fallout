@@ -24,6 +24,8 @@ class PlayerAdmin(UserAdmin):
     """
     Administration des joueurs
     """
+    list_display = ('id', ) + UserAdmin.list_display
+    list_display_links = ('username', )
     fieldsets = UserAdmin.fieldsets + (
         (_("Fallout"), {'fields': ('nickname', )}), )
     filter_horizontal = ('groups', 'user_permissions', )
