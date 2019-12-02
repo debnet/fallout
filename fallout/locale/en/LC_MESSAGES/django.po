@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-11-30 03:49+0100\n"
+"POT-Creation-Date: 2019-12-02 23:57+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1382,12 +1382,12 @@ msgid "dégâts réels"
 msgstr "real damage"
 
 #, python-brace-format
-msgid "{type} de {real_damage} ({body_part})"
-msgstr "{type} of {real_damage} ({body_part})"
+msgid "{real_damage} points de {type} ({body_part})"
+msgstr "{real_damage} points of {type} ({body_part})"
 
 #, python-brace-format
-msgid "{type} de {real_damage}"
-msgstr "{type} of {real_damage}"
+msgid "{real_damage} points de {type}"
+msgstr "{real_damage} points of {type}"
 
 msgid "historique de dégâts"
 msgstr "damage history"

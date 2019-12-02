@@ -1463,6 +1463,14 @@ class Damage(CommonModel):
     body_part = models.CharField(max_length=10, blank=True, choices=BODY_PARTS, verbose_name=_("partie du corps"))
 
     @property
+    def is_heal(self):
+        """
+        Retourne si le type de dégâts est curatif ou non
+        :return: Vrai si curatif, faux sinon
+        """
+        return self.damage_type in HEALS
+
+    @property
     def calculated_damage(self) -> int:
         """
         Calcul unitaire des dégâts de base de l'objet
@@ -2634,13 +2642,13 @@ class DamageHistory(Damage):
     @property
     def label(self) -> str:
         if self.body_part:
-            return _("{type} de {real_damage} ({body_part})").format(
+            return _("{real_damage} points de {type} ({body_part})").format(
+                real_damage=self.real_damage * (1, -1)[self.is_heal],
                 type=self.get_damage_type_display(),
-                real_damage=self.real_damage,
                 body_part=self.get_body_part_display())
-        return _("{type} de {real_damage}").format(
-            type=self.get_damage_type_display(),
-            real_damage=self.real_damage)
+        return _("{real_damage} points de {type}").format(
+            real_damage=self.real_damage * (1, -1)[self.is_heal],
+            type=self.get_damage_type_display())
 
     def __str__(self) -> str:
         return f"{self.character} - {self.label}"

@@ -44,10 +44,10 @@ class NextTurnInputSerializer(BaseCustomSerializer):
     """
     Serializer d'entrée pour changer le tour des personnages dans une campagne
     """
-    seconds = serializers.IntegerField(initial=0, label=_("secondes"))
-    resting = serializers.BooleanField(initial=False, label=_("au repos ?"))
-    apply = serializers.BooleanField(initial=True, label=_("valider ?"))
-    reset = serializers.BooleanField(initial=False, label=_("réinitialiser ?"))
+    seconds = serializers.IntegerField(initial=0, required=False, label=_("secondes"))
+    resting = serializers.BooleanField(initial=False, required=False, label=_("au repos ?"))
+    apply = serializers.BooleanField(initial=True, required=False, label=_("valider ?"))
+    reset = serializers.BooleanField(initial=False, required=False, label=_("réinitialiser ?"))
 
 
 @api_view_with_serializer(['POST'], input_serializer=NextTurnInputSerializer, serializer=SimpleCharacterSerializer)
@@ -81,8 +81,8 @@ class RollInputSerializer(BaseCustomSerializer):
     Serializer d'entrée pour les jets de compétence
     """
     stats = serializers.ChoiceField(choices=ROLL_STATS, label=_("statistique"))
-    modifier = serializers.IntegerField(initial=0, label=_("modificateur"))
-    xp = serializers.BooleanField(initial=True, label=_("expérience"))
+    modifier = serializers.IntegerField(initial=0, required=False, label=_("modificateur"))
+    xp = serializers.BooleanField(initial=True, required=False, label=_("expérience"))
 
 
 class CampaignRollInputSerializer(RollInputSerializer):
@@ -154,7 +154,7 @@ class BaseFightInputSerializer(BaseCustomSerializer):
     Serializer d'entrée de base pour les attaques
     """
     target = serializers.PrimaryKeyRelatedField(queryset=Character.objects.order_by('name'), label=_("cible"))
-    target_range = serializers.IntegerField(initial=1, label=_("distance"))
+    target_range = serializers.IntegerField(initial=1, required=False, label=_("distance"))
 
     def __init__(self, *args, **kwargs):
         """
@@ -172,29 +172,30 @@ class FightInputSerializer(BaseFightInputSerializer):
     """
     Serializer d'entrée pour les attaques
     """
-    target_part = serializers.ChoiceField(choices=BODY_PARTS, allow_blank=True, label=_("partie du corps"))
-    hit_chance_modifier = serializers.IntegerField(initial=0, label=_("modificateur"))
-    force_success = serializers.BooleanField(initial=False, label=_("succès ?"))
-    force_critical = serializers.BooleanField(initial=False, label=_("critique ?"))
-    force_raw_damage = serializers.BooleanField(initial=False, label=_("dégâts bruts ?"))
-    is_grenade = serializers.BooleanField(initial=False, label=_("grenade ?"))
-    is_action = serializers.BooleanField(initial=False, label=_("action ?"))
-    no_weapon = serializers.BooleanField(initial=False, label=_("aucun arme ?"))
-    simulation = serializers.BooleanField(initial=False, label=_("simulation ?"))
+    target_part = serializers.ChoiceField(
+        choices=BODY_PARTS, allow_blank=True, required=False, label=_("partie du corps"))
+    hit_chance_modifier = serializers.IntegerField(initial=0, required=False, label=_("modificateur"))
+    force_success = serializers.BooleanField(initial=False, required=False, label=_("succès ?"))
+    force_critical = serializers.BooleanField(initial=False, required=False, label=_("critique ?"))
+    force_raw_damage = serializers.BooleanField(initial=False, required=False, label=_("dégâts bruts ?"))
+    is_grenade = serializers.BooleanField(initial=False, required=False, label=_("grenade ?"))
+    is_action = serializers.BooleanField(initial=False, required=False, label=_("action ?"))
+    no_weapon = serializers.BooleanField(initial=False, required=False, label=_("aucun arme ?"))
+    simulation = serializers.BooleanField(initial=False, required=False, label=_("simulation ?"))
 
 
 class BurstInputSerializer(BaseCustomSerializer):
     """
     Serializer d'entrée pour les attaques en rafales
     """
-    targets = BaseFightInputSerializer(many=True, label=_("cibles"))
-    hit_chance_modifier = serializers.IntegerField(initial=0, label=_("modificateur"))
-    force_success = serializers.BooleanField(initial=False, label=_("succès ?"))
-    force_critical = serializers.BooleanField(initial=False, label=_("critique ?"))
-    force_raw_damage = serializers.BooleanField(initial=False, label=_("dégâts bruts ?"))
-    is_grenade = serializers.BooleanField(initial=False, label=_("grenade ?"))
-    is_action = serializers.BooleanField(initial=False, label=_("action ?"))
-    simulation = serializers.BooleanField(initial=False, label=_("simulation ?"))
+    targets = BaseFightInputSerializer(many=True, required=False, label=_("cibles"))
+    hit_chance_modifier = serializers.IntegerField(initial=0, required=False, label=_("modificateur"))
+    force_success = serializers.BooleanField(initial=False, required=False, label=_("succès ?"))
+    force_critical = serializers.BooleanField(initial=False, required=False, label=_("critique ?"))
+    force_raw_damage = serializers.BooleanField(initial=False, required=False, label=_("dégâts bruts ?"))
+    is_grenade = serializers.BooleanField(initial=False, required=False, label=_("grenade ?"))
+    is_action = serializers.BooleanField(initial=False, required=False, label=_("action ?"))
+    simulation = serializers.BooleanField(initial=False, required=False, label=_("simulation ?"))
 
 
 @to_model_serializer(FightHistory)
@@ -238,15 +239,20 @@ class DamageInputSerializer(BaseCustomSerializer):
     """
     Serializer d'entrée pour infliger des dégâts à un seul personnages
     """
-    raw_damage = serializers.IntegerField(initial=0, label=_("dégâts bruts"))
-    min_damage = serializers.IntegerField(initial=0, label=_("dégâts min."))
-    max_damage = serializers.IntegerField(initial=0, label=_("dégâts max."))
-    damage_type = serializers.ChoiceField(choices=DAMAGES_TYPES, label=_("type de dégâts"))
-    body_part = serializers.ChoiceField(choices=BODY_PARTS, allow_blank=True, label=_("partie du corps"))
-    threshold_modifier = serializers.IntegerField(initial=0, label=_("modificateur d'absorption"))
-    threshold_rate_modifier = serializers.IntegerField(initial=0, label=_("modificateur taux d'absorption"))
-    resistance_modifier = serializers.IntegerField(initial=0, label=_("modificateur de résistance"))
-    simulation = serializers.BooleanField(initial=False, label=_("simulation ?"))
+    raw_damage = serializers.IntegerField(initial=0, required=False, label=_("dégâts bruts"))
+    min_damage = serializers.IntegerField(initial=0, required=False, label=_("dégâts min."))
+    max_damage = serializers.IntegerField(initial=0, required=False, label=_("dégâts max."))
+    damage_type = serializers.ChoiceField(
+        choices=DAMAGES_TYPES, required=False, label=_("type de dégâts"))
+    body_part = serializers.ChoiceField(
+        choices=BODY_PARTS, allow_blank=True, required=False, label=_("partie du corps"))
+    threshold_modifier = serializers.IntegerField(
+        initial=0, required=False, label=_("modificateur d'absorption"))
+    threshold_rate_modifier = serializers.IntegerField(
+        initial=0, required=False, label=_("modificateur taux d'absorption"))
+    resistance_modifier = serializers.IntegerField(
+        initial=0, required=False, label=_("modificateur de résistance"))
+    simulation = serializers.BooleanField(initial=False, required=False, label=_("simulation ?"))
 
 
 class MultiDamageInputSerializer(DamageInputSerializer):
@@ -322,7 +328,7 @@ class ActionInputSerializer(BaseCustomSerializer):
     """
     Serializer d'entrée pour toutes les actions
     """
-    is_action = serializers.BooleanField(initial=False, label=_("action ?"))
+    is_action = serializers.BooleanField(initial=False, required=False, label=_("action ?"))
 
 
 @api_view_with_serializer(['POST'], input_serializer=ActionInputSerializer, serializer=EquipmentSerializer)
@@ -368,7 +374,7 @@ class ActionWithQuantityInputSerializer(ActionInputSerializer):
     """
     Serializer d'entrée pour effectuer une action impliquant une quantité
     """
-    quantity = serializers.IntegerField(initial=1, label=_("quantité"))
+    quantity = serializers.IntegerField(initial=1, required=False, label=_("quantité"))
 
 
 @to_model_serializer(Loot)
@@ -397,7 +403,7 @@ class LootTakeInputSerializer(ActionInputSerializer):
     Serializer d'entrée pour ramasser un butin
     """
     character = serializers.PrimaryKeyRelatedField(queryset=Character.objects.order_by('name'), label=_("personnage"))
-    count = serializers.IntegerField(initial=1, label=_("nombre"))
+    count = serializers.IntegerField(initial=1, required=False, label=_("nombre"))
 
     def __init__(self, *args, **kwargs):
         """
@@ -427,9 +433,11 @@ class LootTemplateOpenInputSerializer(BaseCustomSerializer):
     """
     Serializer d'entrée pour l'ouverture des butins
     """
-    campaign = serializers.PrimaryKeyRelatedField(queryset=Campaign.objects.order_by('name'), label=_("campagne"))
+    campaign = serializers.PrimaryKeyRelatedField(
+        queryset=Campaign.objects.order_by('name'), label=_("campagne"))
     character = serializers.PrimaryKeyRelatedField(
-        allow_empty=True, allow_null=True, queryset=Character.objects.order_by('name'), label=_("personnage"))
+        allow_empty=True, allow_null=True, required=False,
+        queryset=Character.objects.order_by('name'), label=_("personnage"))
 
 
 @api_view_with_serializer(['POST'], input_serializer=LootTemplateOpenInputSerializer, serializer=LootSerializer)
