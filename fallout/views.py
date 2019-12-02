@@ -1,12 +1,14 @@
 # coding: utf-8
 from common.utils import render_to, ajax_request
 from django.contrib import messages
+from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.db.models import Q
 from django.http import Http404
 from django.shortcuts import redirect
 from django.utils.translation import gettext as _
+from rest_framework.authtoken.models import Token
 
 from fallout.enums import BODY_PARTS, DAMAGES_TYPES, LIST_SPECIALS, ROLL_STATS
 from fallout.models import (
@@ -20,6 +22,21 @@ def view_index(request):
     Page d'accueil
     """
     return view_campaign(request, 0)
+
+
+def view_token(request, token):
+    """
+    Accès par jeton d'authentification
+    """
+    token = Token.objects.select_related('user').filter(key=token).first()
+    if token:
+        login(request, token.user)
+    campaign_id, character_id = request.GET.get('campaign'), request.GET.get('character')
+    if campaign_id:
+        return redirect('fallout:campaign', campaign_id)
+    elif character_id:
+        return redirect('fallout:character', character_id)
+    return redirect('fallout:index')
 
 
 @login_required

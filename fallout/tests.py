@@ -56,8 +56,7 @@ def create_admin_tests():
 
 
 # Tests automatisées de l'interface d'administration
-for model, test in create_admin_tests().items():
-    locals().update({test.name: test})
+create_admin_tests()
 
 
 RECIPES = {}

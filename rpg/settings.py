@@ -97,7 +97,6 @@ class Base(Configuration):
     # Authentication backends
     AUTHENTICATION_BACKENDS = (
         'django.contrib.auth.backends.ModelBackend',
-        'common.auth.LdapAuthenticationBackend',
     )
 
     # Password validation
