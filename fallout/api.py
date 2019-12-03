@@ -213,7 +213,7 @@ def character_fight(request, character_id):
     """
     API permettant d'attaquer un autre personnage
     """
-    attacker = get_object_or_404(Character, pk=character_id)
+    attacker = get_object_or_404(Character.objects.select_related('campaign'), pk=character_id)
     is_authorized(request, attacker.campaign)
     try:
         return attacker.fight(**request.validated_data)
@@ -226,7 +226,7 @@ def character_burst(request, character_id):
     """
     API permettant d'effectuer une attaque en rafale sur un ou plusieurs personnages
     """
-    attacker = get_object_or_404(Character, pk=character_id)
+    attacker = get_object_or_404(Character.objects.select_related('campaign'), pk=character_id)
     is_authorized(request, attacker.campaign)
     targets = [(t.get('target'), t.get('target_range')) for t in request.validated_data.pop('targets', {})]
     try:
@@ -300,10 +300,34 @@ def character_damage(request, character_id):
     """
     API permettant d'infliger des dégâts à un seul personnage
     """
-    character = get_object_or_404(Character, pk=character_id)
+    character = get_object_or_404(Character.objects.select_related('campaign'), pk=character_id)
     is_authorized(request, character.campaign)
     try:
         return character.damage(**request.validated_data)
+    except Exception as exception:
+        raise ValidationError(str(exception))
+
+
+class CharacterCopySerializer(BaseCustomSerializer):
+    """
+    Serializer d'entrée pour la copie de personnages
+    """
+    campaign = serializers.PrimaryKeyRelatedField(
+        queryset=Campaign.objects.order_by('name'), label=_("campagne"))
+    name = serializers.CharField(allow_blank=True, required=False, label=_("nom"))
+    equipments = serializers.BooleanField(initial=True, required=False, label=_("équipements ?"))
+    effects = serializers.BooleanField(initial=True, required=False, label=_("effets ?"))
+
+
+@api_view_with_serializer(['POST'], input_serializer=CharacterCopySerializer, serializer=SimpleCharacterSerializer)
+def character_copy(request, character_id):
+    """
+    API permettant de copier un personnage dans une campagne
+    """
+    character = get_object_or_404(Character, pk=character_id)
+    is_authorized(request, request.validated_data.get('campaign'))
+    try:
+        return character.duplicate(**request.validated_data)
     except Exception as exception:
         raise ValidationError(str(exception))
 
@@ -464,6 +488,7 @@ urlpatterns = [
     path('character/<int:character_id>/fight/', character_fight, name='character_fight'),
     path('character/<int:character_id>/burst/', character_burst, name='character_burst'),
     path('character/<int:character_id>/damage/', character_damage, name='character_damage'),
+    path('character/<int:character_id>/copy/', character_copy, name='character_copy'),
     path('equipment/<int:equipment_id>/equip/', equipment_equip, name='equipment_equip'),
     path('equipment/<int:equipment_id>/use/', equipment_use, name='equipment_use'),
     path('equipment/<int:equipment_id>/reload/', equipment_reload, name='equipment_reload'),

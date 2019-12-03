@@ -1326,9 +1326,7 @@ class Character(Entity, Stats):
         """
         damages = []
         for effect in self.effects:
-            damage = effect.apply(self, save=save)
-            if damage:
-                damages.append(damage)
+            damages.extend(effect.apply(self, save=save))
         return damages
 
     def duplicate(self, equipments: bool = True, effects: bool = True,
