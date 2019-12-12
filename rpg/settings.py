@@ -167,6 +167,7 @@ class Base(Configuration):
         'DEFAULT_AUTHENTICATION_CLASSES': (
             'rest_framework.authentication.TokenAuthentication',
             'rest_framework.authentication.SessionAuthentication',
+            'rest_framework_simplejwt.authentication.JWTAuthentication',
         ),
         'DEFAULT_RENDERER_CLASSES': (
             'rest_framework.renderers.JSONRenderer',
@@ -178,7 +179,6 @@ class Base(Configuration):
             'rest_framework.parsers.FormParser',
             'rest_framework.parsers.MultiPartParser',
             'rest_framework.parsers.FileUploadParser',
-            'rest_framework_xml.parsers.XMLParser',
         ),
         'DEFAULT_PAGINATION_CLASS': 'common.api.pagination.CustomPageNumberPagination',
         'PAGE_SIZE': 10,
