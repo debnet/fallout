@@ -767,7 +767,7 @@ class Character(Entity, Stats):
         needed_xp = BASE_XP
         while self.experience >= needed_xp:
             level += 1
-            needed_xp += (level - 1) * BASE_XP
+            needed_xp += level * BASE_XP
             if self.level >= level:
                 continue
             self.level += 1
