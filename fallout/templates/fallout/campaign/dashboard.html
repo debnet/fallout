@@ -59,8 +59,8 @@
                     {% endfor %}
                 </div>
                 <div class="card-body">
-                    {% include 'fallout/character/forms/stats.html' with character=character stats=character.special levelup=0 %}
-                    {% include 'fallout/character/forms/stats.html' with character=character stats=character.skills levelup=0 %}
+                    {% include 'fallout/character/forms/stats.html' with character=character stats=character.special levelup=0 code="special" %}
+                    {% include 'fallout/character/forms/stats.html' with character=character stats=character.skills levelup=0 code="skill" %}
                 </div>
             </div>
             {% endif %}
@@ -80,21 +80,27 @@
 <script type="application/javascript">
 $(function() {
     let show_popover = function(element) {
-        let val = $(element).val();
-        let style = (val > 0 ? 'text-success' : (val < 0 ? 'text-danger' : ''));
-        val = val > 0 ? '+' + val : val;
+        let value = $(element).val();
+        let style = (value > 0 ? 'text-success' : (value < 0 ? 'text-danger' : ''));
+        let display_value = value > 0 ? '+' + value : value;
         $(element).popover('dispose').popover({
             html: true,
-            content: '<strong class="' + style +  '">' + val + '%</strong>',
+            content: '<strong class="' + style +  '">' + display_value + '%</strong>',
             placement: 'top',
-            offset: 'calc(50% + ' + val/2 + '%)'});
-        return val;
+            offset: 'calc(50% + ' + value / 2 + '%)'});
+        return value;
     };
     show_popover('.range');
 	$('.range').on('input', function() {
-	    let val = show_popover(this);
-        $('input[type="hidden"][name="modifier"]').val(val);
-	}).click();
+	    let value = show_popover(this);
+        $('input[type="hidden"][name="modifier"]').val(value);
+        $('.stats').each(function(i, e) {
+            let modifier = parseInt($(e).data('code') === 'special' ? (value / 10) : value);
+            let new_value = parseInt($(e).data('value')) + modifier;
+            console.log(modifier, new_value);
+            $(e).text(new_value);
+        });
+	}).trigger('input').click();
 });
 </script>
 {% endblock %}

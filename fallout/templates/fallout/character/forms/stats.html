@@ -53,7 +53,7 @@
                                 {% endif %}
                             {% endif %}
                             <button class="btn btn-sm btn-{{ s.css }} itiny" type="submit" name="roll" value="{{ s.code }}">
-                                <strong>{{ s.lvalue|floatformat:0 }}</strong>
+                                <strong class="stats" data-code="{{ code }}" data-value="{{ s.lvalue|floatformat:0 }}">{{ s.lvalue|floatformat:0 }}</strong>
                             </button>
                         {% endif %}
                     </td>
