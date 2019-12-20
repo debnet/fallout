@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-12-02 23:57+0100\n"
+"POT-Creation-Date: 2019-12-20 03:19+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -247,11 +247,23 @@ msgstr "resistance modifier"
 msgid "personnages"
 msgstr "characters"
 
-msgid "quantité"
-msgstr "quantity"
+msgid "nom"
+msgstr "name"
 
 msgid "nombre"
-msgstr "number"
+msgstr "count"
+
+msgid "équipements ?"
+msgstr "equipments?"
+
+msgid "effets ?"
+msgstr "effects?"
+
+msgid "actif ?"
+msgstr "active?"
+
+msgid "quantité"
+msgstr "quantity"
 
 msgid "Fallout RPG"
 msgstr "Fallout RPG"
@@ -784,6 +796,9 @@ msgstr "Count"
 msgid "Nom"
 msgstr "Name"
 
+msgid "Actif ?"
+msgstr "Active?"
+
 msgid "Niveau"
 msgstr "Level"
 
@@ -885,9 +900,6 @@ msgstr "player"
 
 msgid "joueurs"
 msgstr "players"
-
-msgid "nom"
-msgstr "name"
 
 msgid "titre"
 msgstr "title"
@@ -1024,9 +1036,6 @@ msgstr "race"
 
 msgid "niveau"
 msgstr "level"
-
-msgid "actif ?"
-msgstr "active?"
 
 msgid "joueur ?"
 msgstr "player?"

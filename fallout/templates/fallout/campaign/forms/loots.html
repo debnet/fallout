@@ -144,7 +144,7 @@
                                 {% if loot.quantity > 1 %}
                                     <label class="sr-only" for="quantity-{{ loot.id }}">{% trans "Quantité" %}</label>
                                     <select name="quantity-{{ loot.id }}" id="quantity-{{ loot.id }}"
-                                            class="form-control form-control-sm custom-select ismall mr-1">
+                                            class="form-control form-control-sm custom-select custom-select-sm ismall mr-1">
                                         {% for i in 0|range:loot.quantity %}
                                             <option value="{{ i }}">{{ i }}</option>
                                         {% endfor %}

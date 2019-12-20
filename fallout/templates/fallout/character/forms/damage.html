@@ -26,8 +26,8 @@
             <tr>
                 <td colspan="2">
                     <label for="{{ code }}-damage-type" class="sr-only">{% trans "type" %}</label>
-                    <select class="form-control form-control-sm custom-select" id="{{ code }}-damage-type"
-                            name="damage_type">
+                    <select class="form-control form-control-sm custom-select custom-select-sm"
+                            id="{{ code }}-damage-type" name="damage_type">
                         {% for group_label, types in damage_types %}
                             <optgroup label="{{ group_label }}">
                                 {% for code, label in types %}
@@ -41,7 +41,8 @@
             <tr>
                 <td><label for="{{ code }}-body-part" class="d-inline">{% trans "cible" %}</label></td>
                 <td class="text-right">
-                    <select class="form-control form-control-sm custom-select" id="{{ code }}-body-part" name="body_part">
+                    <select class="form-control form-control-sm custom-select custom-select-sm"
+                            id="{{ code }}-body-part" name="body_part">
                         <option value="">{% trans "non ciblé" %}</option>
                         {% for code, label in body_parts %}
                             <option value="{{ code }}">{{ label }}</option>

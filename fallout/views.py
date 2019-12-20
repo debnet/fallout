@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
-from django.db.models import Q
+from django.db.models import Count, Q
 from django.http import Http404
 from django.shortcuts import redirect
 from django.utils.translation import gettext as _
@@ -45,7 +45,10 @@ def view_dashboard(request, campaign_id):
     """
     Vue générale
     """
-    campaigns = Campaign.objects.select_related('current_character')
+    campaigns = Campaign.objects.annotate(
+        pcs=Count('characters', filter=Q(characters__is_player=True)),
+        npcs=Count('characters', filter=Q(characters__is_player=False)),
+    ).select_related('current_character')
     if not request.user.is_superuser:
         campaigns = campaigns.filter(Q(characters__player=request.user) | Q(game_master=request.user))
     campaign = campaigns.filter(id=campaign_id).first()
@@ -91,7 +94,10 @@ def view_campaign(request, campaign_id):
     """
     Vue principale des campagnes
     """
-    campaigns = Campaign.objects.select_related('current_character')
+    campaigns = Campaign.objects.annotate(
+        pcs=Count('characters', filter=Q(characters__is_player=True)),
+        npcs=Count('characters', filter=Q(characters__is_player=False)),
+    ).select_related('current_character')
     if not request.user.is_superuser:
         campaigns = campaigns.filter(Q(characters__player=request.user) | Q(game_master=request.user))
     campaign = campaigns.filter(id=campaign_id).first()
@@ -219,7 +225,10 @@ def view_character(request, character_id):
     """
     Vue principale des personnages
     """
-    campaigns = Campaign.objects.select_related('current_character')
+    campaigns = Campaign.objects.annotate(
+        pcs=Count('characters', filter=Q(characters__is_player=True)),
+        npcs=Count('characters', filter=Q(characters__is_player=False)),
+    ).select_related('current_character')
     if not request.user.is_superuser:
         campaigns = campaigns.filter(Q(characters__player=request.user) | Q(game_master=request.user))
     characters = Character.objects.select_related(

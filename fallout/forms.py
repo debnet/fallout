@@ -19,6 +19,7 @@ class DuplicateCharacterForm(CampaignForm):
     """
     count = forms.IntegerField(min_value=0, initial=1, label=_("Nombre"))
     name = forms.CharField(required=False, label=_("Nom"))
+    is_active = forms.BooleanField(required=False, initial=True, label=_("Actif ?"))
 
 
 class RandomizeCharacterForm(forms.Form):

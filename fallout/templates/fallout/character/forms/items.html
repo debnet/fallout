@@ -142,7 +142,7 @@
                                         {% if equip.current_condition < 100 %}
                                             <label class="sr-only" for="condition-{{ loot.id }}">{% trans "Etat" %}</label>
                                             <select name="condition" id="condition-{{ loot.id }}"
-                                                    class="form-control form-control-sm custom-select ismall mr-1">
+                                                    class="form-control form-control-sm custom-select custom-select-sm ismall mr-1">
                                                 {% for i in 100|range:equip.current_condition %}
                                                     <option value="{{ i }}">{{ i }}</option>
                                                 {% endfor %}
@@ -154,7 +154,7 @@
                                         {% if equip.quantity > 1 %}
                                             <label class="sr-only" for="quantity-{{ loot.id }}">{% trans "Quantité" %}</label>
                                             <select name="quantity" id="quantity-{{ loot.id }}"
-                                                    class="form-control form-control-sm custom-select ismall mr-1">
+                                                    class="form-control form-control-sm custom-select custom-select-sm ismall mr-1">
                                                 {% for i in 0|range:equip.quantity %}
                                                     <option value="{{ i }}">{{ i }}</option>
                                                 {% endfor %}
@@ -167,7 +167,7 @@
                                         {% if equip.current_condition < 100 %}
                                             <label class="sr-only" for="condition-{{ loot.id }}">{% trans "Condition" %}</label>
                                             <select name="condition" id="condition-{{ loot.id }}"
-                                                    class="form-control form-control-sm custom-select ismall mr-1">
+                                                    class="form-control form-control-sm custom-select custom-select-sm ismall mr-1">
                                                 {% for i in 100|range:equip.current_condition %}
                                                     <option value="{{ i }}">{{ i }}</option>
                                                 {% endfor %}

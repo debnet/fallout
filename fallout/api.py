@@ -315,8 +315,10 @@ class CharacterCopySerializer(BaseCustomSerializer):
     campaign = serializers.PrimaryKeyRelatedField(
         queryset=Campaign.objects.order_by('name'), label=_("campagne"))
     name = serializers.CharField(allow_blank=True, required=False, label=_("nom"))
+    count = serializers.IntegerField(initial=1, required=False, label=_("nombre"))
     equipments = serializers.BooleanField(initial=True, required=False, label=_("équipements ?"))
     effects = serializers.BooleanField(initial=True, required=False, label=_("effets ?"))
+    is_active = serializers.BooleanField(initial=True, required=False, label=_("actif ?"))
 
 
 @api_view_with_serializer(['POST'], input_serializer=CharacterCopySerializer, serializer=SimpleCharacterSerializer)
@@ -326,8 +328,16 @@ def character_copy(request, character_id):
     """
     character = get_object_or_404(Character, pk=character_id)
     is_authorized(request, request.validated_data.get('campaign'))
+    name, count = request.validated_data.pop('name'), request.validated_data.pop('count')
     try:
-        return character.duplicate(**request.validated_data)
+        character_name = character.name
+        characters = []
+        for nb in range(count):
+            new_name = f'{name or character_name} {nb + 1}' if count > 1 else name
+            characters.append(character.duplicate(name=new_name, **request.validated_data))
+            if count > 1:  # Recharge le personnage d'origine
+                character = Character.objects.get(pk=character_id)
+        return characters
     except Exception as exception:
         raise ValidationError(str(exception))
 

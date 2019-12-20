@@ -10,6 +10,14 @@
                 {% for campaign in campaigns %}
                     <a class="dropdown-item{% if campaign == current_campaign %} active{% endif %}"
                        href="{% url 'fallout:campaign' campaign.id %}">
+                        {% if authorized %}
+                        {% if campaign.pcs %}
+                            <small class="badge badge-success align-middle">{{ campaign.pcs }}</small>
+                        {% endif %}
+                        {% if campaign.npcs %}
+                            <small class="badge badge-warning align-middle">{{ campaign.npcs }}</small>
+                        {% endif %}
+                        {% endif %}
                         {{ campaign.name }}
                         {% if campaign.title %}
                             <small class="{% if campaign != current_campaign %}text-muted{% endif %}">{{ campaign.title }}</small>
@@ -28,10 +36,6 @@
                 {% for character in characters %}
                     <a class="dropdown-item{% if character == current_character %} active{% endif %}"
                        href="{% url 'fallout:character' character.id %}">
-                        {{ character.name }}
-                        {% if character.title %}
-                            <small class="{% if character != current_character %}text-muted{% endif %}">{{ character.title }}</small>
-                        {% endif %}
                         {% if character.is_player %}
                             <small class="badge badge-success align-middle">{% trans "PJ" %}</small>
                         {% else %}
@@ -41,6 +45,10 @@
                             <small class="badge badge-danger align-middle">{% trans "KO" %}</small>
                         {% elif character.campaign.current_character == character %}
                             <small class="badge badge-info align-middle">{% trans "Actif" %}</small>
+                        {% endif %}
+                        {{ character.name }}
+                        {% if character.title %}
+                            <small class="{% if character != current_character %}text-muted{% endif %}">{{ character.title }}</small>
                         {% endif %}
                     </a>
                 {% endfor %}
@@ -71,7 +79,7 @@
             {% endwith %}
         </label>
         {% if authorized %}
-            <select class="form-control form-control-sm custom-select ilarge ml-2 mr-2" name="seconds">
+            <select class="form-control form-control-sm custom-select custom-select-sm ilarge ml-2 mr-2" name="seconds">
                 <option value="0" selected="selected">{% trans "0 s" %}</option>
                 <option value="30">{% trans "30 s" %}</option>
                 <option value="60">{% trans "1 mn" %}</option>

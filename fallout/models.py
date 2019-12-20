@@ -1329,12 +1329,13 @@ class Character(Entity, Stats):
             damages.extend(effect.apply(self, save=save))
         return damages
 
-    def duplicate(self, equipments: bool = True, effects: bool = True,
+    def duplicate(self, equipments: bool = True, effects: bool = True, is_active: bool = True,
                   campaign: Union[int, 'Campaign'] = None, name: str = None) -> 'Character':
         """
         Duplique ce personnage
         :param equipments: Duplique également les équipements
         :param effects: Duplique également les effets
+        :param is_active: Active le personnage ?
         :param campaign: Campagne de destination
         :param name: Nouveau nom
         :return: Personnage
@@ -1343,6 +1344,7 @@ class Character(Entity, Stats):
         character_id = self.pk
         self.name = name or f"* {self.name.replace('* ', '')}"
         self.campaign_id = getattr(campaign, 'pk', campaign) or self.campaign_id
+        self.is_active = is_active
         self.save(force_insert=True)
         if equipments:
             for equipment in Equipment.objects.filter(character_id=character_id):
@@ -1466,7 +1468,7 @@ class Damage(CommonModel):
         Retourne si le type de dégâts est curatif ou non
         :return: Vrai si curatif, faux sinon
         """
-        return self.damage_type in HEALS
+        return self.damage_type in LIST_HEALS
 
     @property
     def calculated_damage(self) -> int:
@@ -2628,7 +2630,7 @@ class DamageHistory(Damage):
         """
         Classe CSS associée
         """
-        return ('success', 'warning')[self.real_damage >= 0]
+        return ('success', 'warning')[self.is_heal]
 
     @property
     def message_level(self) -> str:
