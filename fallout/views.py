@@ -238,7 +238,7 @@ def view_character(request, character_id):
         characters = characters.filter(Q(player=request.user) | Q(campaign__game_master=request.user))
     character = characters.filter(id=character_id).first()
     if not character:
-        raise Http404
+        raise Http404()
 
     authorized = request.user and (request.user.is_superuser or (
         character and character.campaign and character.campaign.game_master_id == request.user.id))
