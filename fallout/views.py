@@ -46,8 +46,8 @@ def view_dashboard(request, campaign_id):
     Vue générale
     """
     campaigns = Campaign.objects.annotate(
-        pcs=Count('characters', filter=Q(characters__is_player=True)),
-        npcs=Count('characters', filter=Q(characters__is_player=False)),
+        pcs=Count('characters', filter=Q(characters__is_player=True, is_active=True)),
+        npcs=Count('characters', filter=Q(characters__is_player=False, is_active=True)),
     ).select_related('current_character')
     if not request.user.is_superuser:
         campaigns = campaigns.filter(Q(characters__player=request.user) | Q(game_master=request.user))
@@ -95,8 +95,8 @@ def view_campaign(request, campaign_id):
     Vue principale des campagnes
     """
     campaigns = Campaign.objects.annotate(
-        pcs=Count('characters', filter=Q(characters__is_player=True)),
-        npcs=Count('characters', filter=Q(characters__is_player=False)),
+        pcs=Count('characters', filter=Q(characters__is_player=True, is_active=True)),
+        npcs=Count('characters', filter=Q(characters__is_player=False, is_active=True)),
     ).select_related('current_character')
     if not request.user.is_superuser:
         campaigns = campaigns.filter(Q(characters__player=request.user) | Q(game_master=request.user))
@@ -226,8 +226,8 @@ def view_character(request, character_id):
     Vue principale des personnages
     """
     campaigns = Campaign.objects.annotate(
-        pcs=Count('characters', filter=Q(characters__is_player=True)),
-        npcs=Count('characters', filter=Q(characters__is_player=False)),
+        pcs=Count('characters', filter=Q(characters__is_player=True, is_active=True)),
+        npcs=Count('characters', filter=Q(characters__is_player=False, is_active=True)),
     ).select_related('current_character')
     if not request.user.is_superuser:
         campaigns = campaigns.filter(Q(characters__player=request.user) | Q(game_master=request.user))
