@@ -29,6 +29,7 @@ class PlayerAdmin(UserAdmin):
     fieldsets = UserAdmin.fieldsets + (
         (_("Fallout"), {'fields': ('nickname', )}), )
     filter_horizontal = ('groups', 'user_permissions', )
+    search_fields = UserAdmin.search_fields + ('nickname', )
 
 
 class LootInline(admin.TabularInline):

@@ -1342,7 +1342,7 @@ class Character(Entity, Stats):
         """
         assert self.pk, _("Ce personnage doit être préalablement enregistré avant d'être dupliqué.")
         character_id = self.pk
-        self.name = name or f"* {self.name.replace('* ', '')}"
+        self.name = name or self.name
         self.campaign_id = getattr(campaign, 'pk', campaign) or self.campaign_id
         self.is_active = is_active
         self.save(force_insert=True)
