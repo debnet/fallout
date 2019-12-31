@@ -421,7 +421,8 @@ def next_turn(request, campaign_id):
         # Prochain tour
         if 'next' in data:
             next_character = campaign.next_turn(seconds=int(data.get('seconds') or 0))
-            return redirect('fallout:character', next_character.id)
+            if next_character:
+                return redirect('fallout:character', next_character.id)
         # Fin du tour
         if 'cancel' in data:
             campaign.clear_turn()
