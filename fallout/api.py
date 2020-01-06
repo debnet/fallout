@@ -11,7 +11,7 @@ from rest_framework.generics import get_object_or_404
 
 from fallout.enums import BODY_PARTS, DAMAGES_TYPES, LIST_EDITABLE_STATS, ROLL_STATS
 from fallout.models import (
-    MODELS, Campaign, Character, Equipment, CharacterEffect,
+    MODELS, Campaign, Character, CharacterEffect, Equipment, Item,
     Loot, LootTemplate, DamageHistory, FightHistory, RollHistory)
 
 
@@ -308,7 +308,7 @@ def character_damage(request, character_id):
         raise ValidationError(str(exception))
 
 
-class CharacterCopySerializer(BaseCustomSerializer):
+class CharacterCopyInputSerializer(BaseCustomSerializer):
     """
     Serializer d'entrée pour la copie de personnages
     """
@@ -321,7 +321,7 @@ class CharacterCopySerializer(BaseCustomSerializer):
     is_active = serializers.BooleanField(initial=True, required=False, label=_("actif ?"))
 
 
-@api_view_with_serializer(['POST'], input_serializer=CharacterCopySerializer, serializer=SimpleCharacterSerializer)
+@api_view_with_serializer(['POST'], input_serializer=CharacterCopyInputSerializer, serializer=SimpleCharacterSerializer)
 def character_copy(request, character_id):
     """
     API permettant de copier un personnage dans une campagne
@@ -348,6 +348,7 @@ class EquipmentSerializer(CommonModelSerializer):
     Serializer de sortie pour afficher des équipements
     """
     character = SimpleCharacterSerializer(read_only=True, label=_("personnage"))
+    item = create_model_serializer(Item, exclude=('effects', 'ammunitions'))(read_only=True, label=_("objet"))
 
 
 @to_model_serializer(CharacterEffect)
@@ -356,6 +357,7 @@ class CharacterEffectSerializer(CommonModelSerializer):
     Serializer de sortie pour afficher des effets actifs sur un personnage
     """
     character = SimpleCharacterSerializer(read_only=True, label=_("personnage"))
+    effect = create_model_serializer(CharacterEffect)(read_only=True, label=_("effet"))
 
 
 class ActionInputSerializer(BaseCustomSerializer):
@@ -416,7 +418,8 @@ class LootSerializer(CommonModelSerializer):
     """
     Serializer des butins
     """
-    pass
+    campaign = create_model_serializer(Campaign)(read_only=True, label=_("campagne"))
+    item = create_model_serializer(Item)(read_only=True, label=_("objet"))
 
 
 @api_view_with_serializer(['POST'], input_serializer=ActionWithQuantityInputSerializer, serializer=LootSerializer)
@@ -428,6 +431,28 @@ def equipment_drop(request, equipment_id):
     is_authorized(request, equipment.character.campaign)
     try:
         return equipment.drop(**request.validated_data)
+    except Exception as exception:
+        raise ValidationError(str(exception))
+
+
+class ItemGiveInputSerializer(BaseCustomSerializer):
+    """
+    Serializer d'entrée pour donner des objets
+    """
+    character = serializers.PrimaryKeyRelatedField(queryset=Character.objects.order_by('name'), label=_("personnage"))
+    quantity = serializers.IntegerField(initial=1, required=False, label=_("quantité"))
+    condition = serializers.IntegerField(initial=100, required=False, label=_("état"))
+
+
+@api_view_with_serializer(['POST'], input_serializer=ItemGiveInputSerializer, serializer=EquipmentSerializer)
+def item_give(request, item_id):
+    """
+    API permettant de donner un objet à un personnage
+    """
+    item = get_object_or_404(Item, pk=item_id)
+    is_authorized(request, request.validated_data.get('character').campaign)
+    try:
+        return item.give(**request.validated_data)
     except Exception as exception:
         raise ValidationError(str(exception))
 
@@ -503,6 +528,7 @@ urlpatterns = [
     path('equipment/<int:equipment_id>/use/', equipment_use, name='equipment_use'),
     path('equipment/<int:equipment_id>/reload/', equipment_reload, name='equipment_reload'),
     path('equipment/<int:equipment_id>/drop/', equipment_drop, name='equipment_drop'),
+    path('item/<int:item_id>/give/', item_give, name='item_give'),
     path('loot/<int:loot_id>/take/', loot_take, name='loot_take'),
     path('loottemplate/<int:template_id>/open/', loottemplate_open, name='loottemplate_open'),
 ] + router.urls

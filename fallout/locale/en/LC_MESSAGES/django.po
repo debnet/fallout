@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-12-20 03:19+0100\n"
+"POT-Creation-Date: 2020-01-06 16:55+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -262,8 +262,17 @@ msgstr "effects?"
 msgid "actif ?"
 msgstr "active?"
 
+msgid "objet"
+msgstr "item"
+
+msgid "effet"
+msgstr "effect"
+
 msgid "quantité"
 msgstr "quantity"
+
+msgid "état"
+msgstr "condition"
 
 msgid "Fallout RPG"
 msgstr "Fallout RPG"
@@ -1163,9 +1172,6 @@ msgstr "ammunition types"
 msgid "Cet objet doit être préalablement enregistré avant d'être dupliqué."
 msgstr "This item must be saved before to be duplicated."
 
-msgid "objet"
-msgstr "item"
-
 msgid "objets"
 msgstr "items"
 
@@ -1180,9 +1186,6 @@ msgstr "slot"
 
 msgid "munitions"
 msgstr "ammunitions"
-
-msgid "état"
-msgstr "condition"
 
 msgid "secondaire"
 msgstr "secondary"
@@ -1273,9 +1276,6 @@ msgstr "This character must be in a campaign in order to apply an effect on him.
 
 msgid "Cet effet doit être préalablement enregistré avant d'être dupliqué."
 msgstr "This effect must be saved before to be duplicated."
-
-msgid "effet"
-msgstr "effect"
 
 msgid "modificateur d'effet"
 msgstr "effect modifier"
