@@ -115,7 +115,7 @@ class Campaign(CommonModel):
         return self.current_game_date - self.start_game_date
 
     @property
-    def effects(self) -> 'models.QuerySet[CampaignEffect]':
+    def effects(self) -> 'CommonQuerySet[CampaignEffect]':
         """
         Retourne les effets actifs de la campagne
         :return: Effets
@@ -332,7 +332,7 @@ class Stats(Resistance):
             setattr(stats, stats_name, getattr(character, stats_name, 0))
         # Racial modifiers
         race_stats = RACES_STATS.get(character.race, {})
-        stats._change_all_stats(**race_stats)
+        stats._change_all_stats(limit=True, **race_stats)
         for stats_name, (value, mini, maxi) in race_stats.items():
             stats.base[stats_name] = stats.base.get(stats_name, 0) + value
         # Tag skills
@@ -363,7 +363,7 @@ class Stats(Resistance):
         if character.campaign:
             for effect in character.campaign.effects.exclude(effect__modifiers__isnull=True):
                 for modifier in effect.effect.modifiers.all():
-                    stats._change_stats(modifier.stats, modifier.value)
+                    stats._change_stats(modifier.stats, modifier.value, limit=False)
         # Derivated statistics
         for stats_name, formula in COMPUTED_STATS:
             stats._change_stats(stats_name, formula(stats, character))
@@ -380,19 +380,22 @@ class Stats(Resistance):
         ).get('charge') or 0.0
         return stats
 
-    def _change_all_stats(self, **stats: Dict[str, Tuple[int, int, int]]) -> None:
+    def _change_all_stats(self, limit: bool = False, **stats: Dict[str, Tuple[int, int, int]]) -> None:
         assert isinstance(self, Stats), _("Cette fonction ne peut être utilisée que par les statistiques.")
         for name, values in stats.items():
-            self._change_stats(name, *values)
+            self._change_stats(name, *values, limit=limit)
         if isinstance(self, Statistics):
             self.save()
 
-    def _change_stats(self, name: str, value: int = 0, mini: int = None, maxi: int = None) -> None:
+    def _change_stats(self, name: str, value: int = 0, mini: int = None, maxi: int = None, limit: bool = False) -> None:
         assert isinstance(self, Stats), _("Cette fonction ne peut être utilisée que par les statistiques.")
         bonus, race_mini, race_maxi = RACES_STATS.get(self.character.race, {}).get(name, (None, None, None))
         target = self if name in LIST_EDITABLE_STATS else self.character
-        mini = mini if mini is not None else race_mini or float('-inf')
-        maxi = maxi if maxi is not None else race_maxi or float('+inf')
+        if limit:
+            mini = (mini if mini is not None else race_mini) or float('-inf')
+            maxi = (maxi if maxi is not None else race_maxi) or float('+inf')
+        else:
+            mini, maxi = float('-inf'), float('+inf')
         result = min(max(getattr(target, name, 0) + value, mini), maxi)
         setattr(target, name, result)
         if isinstance(self, Statistics):
@@ -508,7 +511,7 @@ class Character(Entity, Stats):
         return self.statistics
 
     @property
-    def inventory(self) -> 'models.QuerySet[Equipment]':
+    def inventory(self) -> 'CommonQuerySet[Equipment]':
         """
         Retourne le contenu de l'inventaire du personnage
         :return: Equipements
@@ -538,7 +541,7 @@ class Character(Entity, Stats):
         return items
 
     @property
-    def effects(self) -> 'models.QuerySet[CharacterEffect]':
+    def effects(self) -> 'CommonQuerySet[CharacterEffect]':
         """
         Retourne les effets actifs du personnage
         :return: Effets
@@ -547,7 +550,8 @@ class Character(Entity, Stats):
             'character__campaign', 'effect__next_effect').prefetch_related('effect__modifiers'))
         return self._effects
 
-    def _get_stats(self, stats: List[Tuple[str, str]], from_stats: bool = True) -> Iterable[Tuple[str, str, Union[int, float]]]:
+    def _get_stats(self, stats: List[Tuple[str, str]], from_stats: bool = True) -> \
+            Iterable[Tuple[str, str, Union[int, float]]]:
         """
         Fonction interne pour retourner les valeurs des statistiques ciblées
         :param stats: Tuple de statistiques (code, libellé)
@@ -631,20 +635,25 @@ class Character(Entity, Stats):
         # Armor classe
         armor, helmet = getattr(armor, 'item', None), getattr(helmet, 'item', None)
         code, label, value = STATS_ARMOR_CLASS, LIST_ALL_STATS.get(STATS_ARMOR_CLASS), self.stats.armor_class
-        armor_v, helmet_v = getattr(armor, code, 0), getattr(helmet, code, 0)
+        armor_v, helmet_v = getattr(armor, code, 0) or 0, getattr(helmet, code, 0) or 0
         title = EQUIP_TITLE.format(armor=armor_v, helmet=helmet_v)
         yield StatInfo(code, label, value, None, 'primary' if armor_v or helmet_v else None, None, None, title)
         # Damage threshold and damage resistance
         for threshold, resistance in zip(self._get_stats(THRESHOLDS), self._get_stats(RESISTANCES)):
             (code_t, label_t, value_t), (code_r, label_r, value_r) = threshold, resistance
+            value_r = min(value_r, MAX_DAMAGE_RESISTANCE)
             armor_t, helmet_t = getattr(armor, code_t, 0), getattr(helmet, code_t, 0)
             armor_r, helmet_r = getattr(armor, code_r, 0), getattr(helmet, code_r, 0)
             css_t, css_r = 'primary' if armor_t or helmet_t else None, 'primary' if armor_r or helmet_r else None
             title_t, title_r = (
-                EQUIP_TITLE.format(armor=armor_t or EMPTY, helmet=helmet_t or EMPTY),
-                EQUIP_TITLE.format(armor=f"{armor_r} %" if armor_r else EMPTY, helmet=f"{helmet_r} %" if helmet_r else EMPTY))
+                EQUIP_TITLE.format(
+                    armor=armor_t or EMPTY,
+                    helmet=helmet_t or EMPTY),
+                EQUIP_TITLE.format(
+                    armor=f"{armor_r} %" if armor_r else EMPTY,
+                    helmet=f"{helmet_r} %" if helmet_r else EMPTY))
             yield StatInfo(code_t, label_t, value_t, None, css_t, None, None, title_t if css_t else None)
-            yield StatInfo(code_r, label_r, min(value_r, 95), None, css_r, None, '%', title_r if css_r else None)
+            yield StatInfo(code_r, label_r, value_r, None, css_r, None, '%', title_r if css_r else None)
 
     @property
     def charge(self) -> float:
@@ -2161,15 +2170,16 @@ class CampaignEffect(ActiveEffect):
         :return: Dégâts potentiels infligés
         """
         damages = {}
-        if not self.campaign or not self.effect.damage_config:
+        if not self.campaign:
             return damages
-        characters = self.campaign.characters.filter(is_active=True).exclude(health__lte=0)
         game_date = self.campaign.current_game_date
-        while self.next_date and self.next_date <= game_date and (not self.end_date or game_date <= self.end_date):
-            for character in characters:
-                damage = character.damage(save=save, **self.effect.damage_config)
-                damages[character] = damages.get(character, []) + [damage]
-            self.next_date += self.effect.interval
+        if self.effect.damage_config:
+            characters = self.campaign.characters.filter(is_active=True).exclude(health__lte=0)
+            while self.next_date and self.next_date <= game_date and (not self.end_date or game_date <= self.end_date):
+                for character in characters:
+                    damage = character.damage(save=save, **self.effect.damage_config)
+                    damages[character] = damages.get(character, []) + [damage]
+                self.next_date += self.effect.interval
         if damages or (self.end_date and self.end_date <= game_date):
             self.save()
         return damages
@@ -2237,14 +2247,16 @@ class CharacterEffect(ActiveEffect):
         """
         damages = []
         character = character or self.character
-        if not character.campaign or not self.effect.damage_config:
+        if not character.campaign:
             return damages
         game_date = character.campaign.current_game_date
-        while self.next_date and self.next_date <= game_date and (not self.end_date or game_date <= self.end_date):
-            damages.append(character.damage(save=save, **self.effect.damage_config))
-            if not self.effect.interval:
-                break
-            self.next_date += self.effect.interval
+        if self.effect.damage_config:
+            while self.next_date and self.next_date <= game_date and (not self.end_date or game_date <= self.end_date):
+                damage = character.damage(save=save, **self.effect.damage_config)
+                damages.append(damage)
+                if not self.effect.interval:
+                    break
+                self.next_date += self.effect.interval
         if damages or (self.end_date and self.end_date <= game_date):
             self.save()
         return damages
