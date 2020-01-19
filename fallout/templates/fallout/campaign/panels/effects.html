@@ -113,7 +113,7 @@
             </div>
         {% endif %}
     </div>
-    {% with effects=campaign.effects %}
+    {% with effects=campaign.effects scope='campaign' %}
         {% include "fallout/campaign/forms/effects.html" %}
     {% endwith %}
 </div>

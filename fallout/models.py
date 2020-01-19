@@ -5,7 +5,7 @@ from random import randint, choice
 from typing import Dict, Iterable, List, Optional, Tuple, Type, Union
 
 from common.fields import JsonField
-from common.models import CommonModel, Entity
+from common.models import CommonModel, CommonQuerySet, Entity
 from common.utils import to_object
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
@@ -18,6 +18,17 @@ from multiselectfield import MultiSelectField
 
 from fallout.constants import *  # noqa
 from fallout.enums import *  # noqa
+
+
+def _assert(condition, message: str = None) -> None:
+    """
+    Assertion
+    :param condition: Condition à vérifier
+    :param message: Message de l'assertion
+    :return: Rien
+    """
+    if not condition:
+        raise AssertionError(message)
 
 
 def get_thumbnails(directory: str = '') -> List[Tuple[str, str]]:
@@ -381,21 +392,21 @@ class Stats(Resistance):
         return stats
 
     def _change_all_stats(self, limit: bool = False, **stats: Dict[str, Tuple[int, int, int]]) -> None:
-        assert isinstance(self, Stats), _("Cette fonction ne peut être utilisée que par les statistiques.")
+        _assert(isinstance(self, Stats), _("Cette fonction ne peut être utilisée que par les statistiques."))
         for name, values in stats.items():
             self._change_stats(name, *values, limit=limit)
         if isinstance(self, Statistics):
             self.save()
 
     def _change_stats(self, name: str, value: int = 0, mini: int = None, maxi: int = None, limit: bool = False) -> None:
-        assert isinstance(self, Stats), _("Cette fonction ne peut être utilisée que par les statistiques.")
+        _assert(isinstance(self, Stats), _("Cette fonction ne peut être utilisée que par les statistiques."))
         bonus, race_mini, race_maxi = RACES_STATS.get(self.character.race, {}).get(name, (None, None, None))
         target = self if name in LIST_EDITABLE_STATS else self.character
         if limit:
             mini = (mini if mini is not None else race_mini) or float('-inf')
             maxi = (maxi if maxi is not None else race_maxi) or float('+inf')
         else:
-            mini, maxi = float('-inf'), float('+inf')
+            mini, maxi = 0 if name in LIST_SPECIALS + LIST_SKILLS else float('-inf'), float('+inf')
         result = min(max(getattr(target, name, 0) + value, mini), maxi)
         setattr(target, name, result)
         if isinstance(self, Statistics):
@@ -499,7 +510,7 @@ class Character(Entity, Stats):
         if not self.has_stats:
             return self
         try:
-            assert not self.statistics.obsolete
+            _assert(not self.statistics.obsolete)
         except:  # noqa
             stats = self._stats.get(self.pk) or Stats.get(self)
             if self.pk:
@@ -930,7 +941,7 @@ class Character(Entity, Stats):
         :param simulation: Fait une simulation du combat ?
         :return: Liste d'historiques de combat
         """
-        assert targets, _("Une attaque en rafale doit cibler au moins un personnage.")
+        _assert(targets, _("Une attaque en rafale doit cibler au moins un personnage."))
         # Fetch characters for optimisation
         query = Character.objects.select_related('statistics')
         targets = [(target if isinstance(target, Character) else query.get(id=target), target_range)
@@ -939,8 +950,8 @@ class Character(Entity, Stats):
         if is_grenade:
             attacker_weapon_equipment = self.get_from_inventory(slot=ITEM_GRENADE)
             attacker_weapon = getattr(attacker_weapon_equipment, 'item', None)
-            assert attacker_weapon and attacker_weapon_equipment.quantity != 0, _(
-                "L'attaquant ne possède pas ou plus de grenade.")
+            _assert(attacker_weapon and attacker_weapon_equipment.quantity != 0, _(
+                "L'attaquant ne possède pas ou plus de grenade."))
             for hit_count, (target, target_range) in enumerate(targets):
                 history = self.fight(
                     target, is_burst=True, is_grenade=True, target_range=int(target_range),
@@ -950,8 +961,8 @@ class Character(Entity, Stats):
         else:
             attacker_weapon_equipment = self.get_from_inventory(slot=ITEM_WEAPON)
             attacker_weapon = getattr(attacker_weapon_equipment, 'item', None)
-            assert attacker_weapon and attacker_weapon.burst_count != 0, _(
-                "L'attaquant ne possède pas d'arme ou celle-ci ne permet pas d'attaque en rafale.")
+            _assert(attacker_weapon and attacker_weapon.burst_count != 0, _(
+                "L'attaquant ne possède pas d'arme ou celle-ci ne permet pas d'attaque en rafale."))
 
             target, target_range, hit_count, dead_targets = None, 0, 0, set()
             for hit_count in range(attacker_weapon.burst_count):
@@ -1029,7 +1040,7 @@ class Character(Entity, Stats):
         if is_grenade:
             attacker_weapon_equipment = weapon_equipment or self.get_from_inventory(slot=ITEM_GRENADE)
             attacker_ammo_equipment = None
-            assert attacker_weapon_equipment, _("L'attaquant ne possède pas ou plus de grenade.")
+            _assert(attacker_weapon_equipment, _("L'attaquant ne possède pas ou plus de grenade."))
         elif no_weapon:
             attacker_weapon_equipment = weapon_equipment or self.get_from_inventory(secondary=True)
             attacker_ammo_equipment = None
@@ -1253,7 +1264,7 @@ class Character(Entity, Stats):
         """
         threshold_rate_modifier = round(threshold_rate_modifier / 100.0, 2)
         damage_type, body_part = damage_type or DAMAGE_NORMAL, body_part or ''
-        assert min_damage <= max_damage, _("Les bornes de dégâts min. et max. ne sont pas correctes.")
+        _assert(min_damage <= max_damage, _("Les bornes de dégâts min. et max. ne sont pas correctes."))
         history = DamageHistory(
             character=self, damage_type=damage_type, raw_damage=raw_damage,
             min_damage=min_damage, max_damage=max_damage, body_part=body_part)
@@ -1349,7 +1360,7 @@ class Character(Entity, Stats):
         :param name: Nouveau nom
         :return: Personnage
         """
-        assert self.pk, _("Ce personnage doit être préalablement enregistré avant d'être dupliqué.")
+        _assert(self.pk, _("Ce personnage doit être préalablement enregistré avant d'être dupliqué."))
         character_id = self.pk
         self.name = name or self.name
         self.campaign_id = getattr(campaign, 'pk', campaign) or self.campaign_id
@@ -1373,9 +1384,9 @@ class Character(Entity, Stats):
         :param save: Sauvegarde le personne ?
         :return: Valeur courante
         """
-        assert stats in LIST_SKILLS, _("Cette compétence ne peut être améliorée.")
-        assert self.skill_points + (value * (2, 1)[stats in self.tag_skills]) >= self.used_skill_points, _(
-            "Ce personnage n'a pas assez de points de compétences.")
+        _assert(stats in LIST_SKILLS, _("Cette compétence ne peut être améliorée."))
+        _assert(self.skill_points + (value * (2, 1)[stats in self.tag_skills]) >= self.used_skill_points, _(
+            "Ce personnage n'a pas assez de points de compétences."))
         self.modify_value(stats, value)
         if save:
             self.save(**kwargs)
@@ -1643,7 +1654,7 @@ class Item(Entity, Resistance, Damage):
         :param name: Nouveau nom
         :return: Objet
         """
-        assert self.pk, _("Cet objet doit être préalablement enregistré avant d'être dupliqué.")
+        _assert(self.pk, _("Cet objet doit être préalablement enregistré avant d'être dupliqué."))
         item_id = self.pk
         effects, ammunitions = self.effects.values_list('id', flat=True), self.ammunitions.values_list('id', flat=True)
         self.name = name or f"* {self.name.replace('* ', '')}"
@@ -1765,10 +1776,10 @@ class Equipment(CommonModel):
         :param is_action: Consommera des points d'action
         :return: Equipement
         """
-        assert self.item.is_equipable, _(
-            "Il n'est pas possible de s'équiper de ce type d'objet.")
-        assert not is_action or self.character.action_points >= AP_COST_EQUIP, _(
-            "Le personnage ne possède plus assez de points d'actions pour s'équiper de cet objet.")
+        _assert(self.item.is_equipable, _(
+            "Il n'est pas possible de s'équiper de ce type d'objet."))
+        _assert(not is_action or self.character.action_points >= AP_COST_EQUIP, _(
+            "Le personnage ne possède plus assez de points d'actions pour s'équiper de cet objet."))
 
         def get_equipment(equipment: 'Equipment', slot: str) -> Optional['Equipment']:
             return Equipment.objects.select_related('item').filter(
@@ -1811,12 +1822,12 @@ class Equipment(CommonModel):
         :param save: Sauvegardera la modification
         :return: Liste des effets
         """
-        assert self.item.is_usable, _(
-            "Il n'est pas possible d'utiliser ce type d'objet.")
-        assert not is_action or self.character.action_points >= AP_COST_USE, _(
-            "Le personnage ne possède plus assez de points d'actions pour utiliser cet objet.")
-        assert self.quantity > 0, _(
-            "Le personnage doit posséder au moins un exemplaire de cet objet pour l'utiliser.")
+        _assert(self.item.is_usable, _(
+            "Il n'est pas possible d'utiliser ce type d'objet."))
+        _assert(not is_action or self.character.action_points >= AP_COST_USE, _(
+            "Le personnage ne possède plus assez de points d'actions pour utiliser cet objet."))
+        _assert(self.quantity > 0, _(
+            "Le personnage doit posséder au moins un exemplaire de cet objet pour l'utiliser."))
         effects = []
         change_character = False
         for effect in self.item.effects.all():
@@ -1841,10 +1852,10 @@ class Equipment(CommonModel):
         :param save: Sauvegardera la modification
         :return: Butin
         """
-        assert self.quantity >= quantity, _(
-            "Le personnage doit posséder la quantité d'objets qu'il souhaite jeter.")
-        assert not is_action or self.character.action_points >= AP_COST_USE, _(
-            "Le personnage ne possède plus assez de points d'actions pour jeter cet objet.")
+        _assert(self.quantity >= quantity, _(
+            "Le personnage doit posséder la quantité d'objets qu'il souhaite jeter."))
+        _assert(not is_action or self.character.action_points >= AP_COST_USE, _(
+            "Le personnage ne possède plus assez de points d'actions pour jeter cet objet."))
         if self.slot and not self.item.is_throwable:
             self.equip(is_action=False)
         loot = Loot.create(
@@ -1865,15 +1876,15 @@ class Equipment(CommonModel):
         :param save: Sauvegardera la modification
         :return: Equipement
         """
-        assert self.slot == ITEM_WEAPON and self.item.clip_size, _(
-            "Cet objet n'est pas une arme équipée ou ne peut être rechargé.")
-        assert not is_action or self.character.action_points >= self.item.ap_cost_reload, _(
-            "Le personnage ne possède plus assez de points d'actions pour recharger cette arme.")
+        _assert(self.slot == ITEM_WEAPON and self.item.clip_size, _(
+            "Cet objet n'est pas une arme équipée ou ne peut être rechargé."))
+        _assert(not is_action or self.character.action_points >= self.item.ap_cost_reload, _(
+            "Le personnage ne possède plus assez de points d'actions pour recharger cette arme."))
         ammo = Equipment.objects.filter(character_id=self.character_id, slot=ITEM_AMMO).first()
-        assert ammo and ammo.quantity > 0, _(
-            "Il n'y a aucun type de munition équipé ou le nombre de munitions disponibles est insuffisant.")
-        assert ammo.item in self.item.ammunitions.all(), _(
-            "Cette arme est incompatible avec le type de munition équipé.")
+        _assert(ammo and ammo.quantity > 0, _(
+            "Il n'y a aucun type de munition équipé ou le nombre de munitions disponibles est insuffisant."))
+        _assert(ammo.item in self.item.ammunitions.all(), _(
+            "Cette arme est incompatible avec le type de munition équipé."))
         if self.item.is_single_charge:
             needed_ammo = 1
             self.clip_count = self.item.clip_size
@@ -1897,9 +1908,9 @@ class Equipment(CommonModel):
         :param save: Sauvegardera la modification
         :return: Equipement
         """
-        assert self.item.is_repairable, _("Cet objet n'est pas réparable.")
-        assert not is_action or self.character.action_points >= AP_COST_REPAIR, _(
-            "Le personnage ne possède plus assez de points d'actions pour réparer cet objet.")
+        _assert(self.item.is_repairable, _("Cet objet n'est pas réparable."))
+        _assert(not is_action or self.character.action_points >= AP_COST_REPAIR, _(
+            "Le personnage ne possède plus assez de points d'actions pour réparer cet objet."))
         self.condition = (value / 100.0) if isinstance(value, int) else float(value)
         if save:
             self.save()
@@ -2048,8 +2059,8 @@ class Effect(Entity, Damage):
             if effect:
                 effect.apply_all()
         elif isinstance(target, Character):
-            assert (self.duration is None and self.interval is None) or target.campaign is not None, _(
-                "Le personnage doit faire partie d'une campagne pour lui appliquer un effet sur la durée.")
+            _assert((self.duration is None and self.interval is None) or target.campaign is not None, _(
+                "Le personnage doit faire partie d'une campagne pour lui appliquer un effet sur la durée."))
             if randint(1, 100) > self.chance:
                 return None
             if self.cancel_effect_id:
@@ -2068,7 +2079,7 @@ class Effect(Entity, Damage):
         :param name: Nouveau nom
         :return: Effet
         """
-        assert self.pk, _("Cet effet doit être préalablement enregistré avant d'être dupliqué.")
+        _assert(self.pk, _("Cet effet doit être préalablement enregistré avant d'être dupliqué."))
         effect_id = self.pk
         self.name = name or f"* {self.name.replace('* ', '')}"
         self.save(force_insert=True)
@@ -2353,10 +2364,10 @@ class Loot(CommonModel):
         """
         if isinstance(character, (int, str)):
             character = Character.objects.select_related('statistics').get(pk=character)
-        assert self.campaign_id == character.campaign_id, _(
-            "Le personnage doit être dans la même campagne.")
-        assert not is_action or character.action_points >= AP_COST_TAKE, _(
-            "Le personnage ne possède plus assez de points d'actions pour s'équiper de cet objet.")
+        _assert(self.campaign_id == character.campaign_id, _(
+            "Le personnage doit être dans la même campagne."))
+        _assert(not is_action or character.action_points >= AP_COST_TAKE, _(
+            "Le personnage ne possède plus assez de points d'actions pour s'équiper de cet objet."))
         quantity = max(0, min(quantity, self.quantity))
         equipment = Equipment.objects.select_related('item').filter(character=character, item=self.item).first()
         if equipment and not equipment.item.is_repairable:
@@ -2384,7 +2395,7 @@ class Loot(CommonModel):
         if isinstance(item, (int, str)):
             item = Item.objects.get(pk=int(item))
         try:
-            assert not item.is_repairable
+            _assert(not item.is_repairable)
             loot = Loot.objects.get(campaign=campaign, item=item)
             loot.quantity += quantity
             loot.save()
@@ -2436,8 +2447,8 @@ class LootTemplate(CommonModel):
             if isinstance(character, (int, str)):
                 character = Character.objects.select_related('statistics').get(pk=character)
             roll_modifier = int(round((5 - character.stats.luck) * LUCK_ROLL_MULT, 0))
-        assert not character or campaign.pk == character.campaign_id, _(
-            "Le personnage concerné doit être dans la même campagne que le butin a créer.")
+        _assert(not character or campaign.pk == character.campaign_id, _(
+            "Le personnage concerné doit être dans la même campagne que le butin a créer."))
         for template in self.items.select_related('item').all():
             if randint(1, 100 - roll_modifier) > template.chance:
                 continue
@@ -2453,7 +2464,7 @@ class LootTemplate(CommonModel):
         :param name: Nouveau nom
         :return: Modèle de butin
         """
-        assert self.pk, _("Ce modèle de butin doit être préalablement enregistré avant d'être dupliqué.")
+        _assert(self.pk, _("Ce modèle de butin doit être préalablement enregistré avant d'être dupliqué."))
         template_id = self.pk
         self.name = name or f"* {self.name.replace('* ', '')}"
         self.save(force_insert=True)

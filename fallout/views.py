@@ -53,7 +53,8 @@ def view_dashboard(request, campaign_id):
         campaigns = campaigns.filter(Q(characters__player=request.user) | Q(game_master=request.user))
     campaign = campaigns.filter(id=campaign_id).first()
     characters = Character.objects.select_related(
-        'player', 'statistics', 'campaign__current_character').filter(campaign=campaign, is_active=True)
+        'player', 'statistics', 'campaign__current_character'
+    ).filter(campaign=campaign, is_active=True)
     if not request.user.is_superuser:
         characters = characters.filter(Q(player=request.user) | Q(campaign__game_master=request.user))
 
@@ -161,6 +162,14 @@ def view_campaign(request, campaign_id):
                 if method == 'add':
                     filter = dict(pk=effect_id) if effect_id else dict(name__icontains=effect_name)
                     Effect.objects.filter(**filter).first().affect(campaign)
+                elif method == 'remove':
+                    scope = data.get('scope')
+                    if scope == 'character':
+                        effect = CharacterEffect.objects.filter(pk=effect_id).first()
+                        effect.delete() if effect else None
+                    elif scope == 'campaign':
+                        effect = CampaignEffect.objects.filter(pk=effect_id).first()
+                        effect.delete() if effect else None
             elif type == 'radiation':
                 if method == 'set':
                     radiation = int(data.get('radiation') or 0)
@@ -232,7 +241,7 @@ def view_character(request, character_id):
     if not request.user.is_superuser:
         campaigns = campaigns.filter(Q(characters__player=request.user) | Q(game_master=request.user))
     characters = Character.objects.select_related(
-        'player', 'statistics', 'campaign__current_character'
+        'player', 'campaign__current_character'  # 'statistics' is not prefetched in order to always have fresh data
     ).filter(is_active=True)
     if not request.user.is_superuser:
         characters = characters.filter(Q(player=request.user) | Q(campaign__game_master=request.user))
@@ -346,11 +355,11 @@ def view_character(request, character_id):
                 elif method == 'remove':
                     scope = data.get('scope')
                     if scope == 'character':
-                        CharacterEffect.objects.filter(pk=effect_id).delete()
-                        Character.reset_stats(character)
+                        effect = CharacterEffect.objects.filter(pk=effect_id).first()
+                        effect.delete() if effect else None
                     elif scope == 'campaign':
-                        CampaignEffect.objects.filter(pk=effect_id).delete()
-                        Character.reset_stats(character)
+                        effect = CampaignEffect.objects.filter(pk=effect_id).first()
+                        effect.delete() if effect else None
             elif authorized and type == 'action':
                 character.health, character.action_points = int(data.get('hp')), int(data.get('ap'))
                 character.experience, character.karma = int(data.get('xp')), int(data.get('karma'))
