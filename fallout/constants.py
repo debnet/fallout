@@ -167,7 +167,7 @@ THIRST_EFFECTS = {
         SPECIAL_AGILITY: (-2, 1, None),
     },
     (1000, None): {
-        STATS_HEALTH: (-9999, None, None),
+        STATS_MAX_HEALTH: (-1000, None, None),
     },
 }
 
@@ -192,7 +192,7 @@ HUNGER_EFFECTS = {
         SPECIAL_CHARISMA: (-2, 1, None),
     },
     (1000, None): {
-        STATS_HEALTH: (-9999, None, None),
+        STATS_MAX_HEALTH: (-1000, None, None),
     },
 }
 
@@ -217,7 +217,7 @@ SLEEP_EFFECTS = {
         SPECIAL_AGILITY: (-3, 1, None),
     },
     (1000, None): {
-        STATS_HEALTH: (-9999, None, None),
+        STATS_MAX_HEALTH: (-1000, None, None),
     },
 }
 
@@ -344,6 +344,7 @@ COMPUTED_STATS = (
     ('survival', lambda s, c: 2 * (s.endurance + s.intelligence)),
     ('knowledge', lambda s, c: 5 * s.intelligence),
 )
+LIST_COMPUTED_STATS = dict(COMPUTED_STATS)
 
 # Computed needs per hour
 COMPUTED_NEEDS = (

@@ -71,9 +71,9 @@ def get_class(value: Union[int, float], maximum: Union[int, float], classes: Tup
     """
     if not maximum:
         return default
-    classes = classes or ('primary', 'success', 'warning', 'danger')
+    classes = classes or ('primary', 'info', 'success', 'warning', 'danger', 'secondary')
     classes = reversed(classes) if reverse else classes
-    values = values or (1.0000, 0.6666, 0.3333, 0.0000)
+    values = values or (1.0, 0.8, 0.6, 0.4, 0.2, 0.0)
     rate = value / maximum
     for _class, _value in zip(classes, values):
         if rate >= _value:
@@ -319,9 +319,11 @@ class Stats(Resistance):
 
     # Added at init
     character = None
-    charge = 0
-    base = {}
-    modifiers = {}
+    charge = 0  # Current equipment weight
+    raw = {}  # Raw modifiers on calculated stats
+    base = {}  # Base statistics
+    modifiers = {}  # Statistics modifiers
+    character_modifiers = {}  # Character modifiers
 
     def __str__(self) -> str:
         return self.character.name
@@ -334,8 +336,10 @@ class Stats(Resistance):
         :return: Statistiques
         """
         stats = Stats()
+        stats.raw = {}
         stats.base = {}
         stats.modifiers = {}
+        stats.character_modifiers = {}
         stats.character = character
         # Get all character's stats
         for stats_name in LIST_EDITABLE_STATS:
@@ -349,7 +353,7 @@ class Stats(Resistance):
         # Tag skills
         for skill in set(character.tag_skills):
             stats.base[skill] = stats.base.get(skill, 0) + TAG_SKILL_BONUS
-            stats._change_stats(skill, TAG_SKILL_BONUS)
+            stats._change_stats(skill, TAG_SKILL_BONUS, raw=False)
         # Base statistics
         base_stats = to_object(stats.base)
         base_stats.level = character.level
@@ -359,7 +363,7 @@ class Stats(Resistance):
         # Survival modifiers
         for stats_name, survival in SURVIVAL_EFFECTS:
             for (mini, maxi), effects in survival.items():
-                if (mini or 0) <= getattr(character, stats_name, 0) <= (maxi or float('+inf')):
+                if (mini or 0) <= getattr(character, stats_name, 0) < (maxi or float('+inf')):
                     stats._change_all_stats(**effects)
                     break
         # Equipment modifiers
@@ -377,9 +381,9 @@ class Stats(Resistance):
                     stats._change_stats(modifier.stats, modifier.value, limit=False)
         # Derivated statistics
         for stats_name, formula in COMPUTED_STATS:
-            stats._change_stats(stats_name, formula(stats, character))
+            stats._change_stats(stats_name, formula(stats, character) + stats.raw.get(stats_name, 0), raw=False)
         # Modifiers
-        for stats_name in LIST_ALL_STATS:
+        for stats_name in LIST_EDITABLE_STATS:
             from_base = stats.base.get(stats_name, 0)
             from_stats = getattr(stats, stats_name, 0)
             if from_base == from_stats:
@@ -395,22 +399,24 @@ class Stats(Resistance):
         _assert(isinstance(self, Stats), _("Cette fonction ne peut être utilisée que par les statistiques."))
         for name, values in stats.items():
             self._change_stats(name, *values, limit=limit)
-        if isinstance(self, Statistics):
-            self.save()
 
-    def _change_stats(self, name: str, value: int = 0, mini: int = None, maxi: int = None, limit: bool = False) -> None:
+    def _change_stats(self, name: str, value: int = 0, mini: int = None, maxi: int = None,
+                      limit: bool = False, raw: bool = True) -> None:
         _assert(isinstance(self, Stats), _("Cette fonction ne peut être utilisée que par les statistiques."))
+        if raw and name in LIST_COMPUTED_STATS:
+            self.raw[name] = self.raw.setdefault(name, 0) + value
+            return
         bonus, race_mini, race_maxi = RACES_STATS.get(self.character.race, {}).get(name, (None, None, None))
         target = self if name in LIST_EDITABLE_STATS else self.character
         if limit:
             mini = (mini if mini is not None else race_mini) or float('-inf')
             maxi = (maxi if maxi is not None else race_maxi) or float('+inf')
         else:
-            mini, maxi = 0 if name in LIST_ROLL_STATS else float('-inf'), float('+inf')
+            mini, maxi = 0, float('+inf')
         result = min(max(getattr(target, name, 0) + value, mini), maxi)
         setattr(target, name, result)
-        if isinstance(self, Statistics):
-            self.save()
+        if isinstance(target, Character):
+            self.character_modifiers[name] = result
 
     class Meta:
         abstract = True
@@ -517,6 +523,11 @@ class Character(Entity, Stats):
                 self._stats[self.pk] = stats
                 self.statistics, created = Statistics.objects.update_or_create(character=self, defaults=dict(
                     obsolete=False, charge=stats.charge, modifiers=stats.modifiers, **stats.to_dict()))
+                # Character modifiers from statistics
+                if stats.character_modifiers:
+                    for key, value in stats.character_modifiers.items():
+                        setattr(self, key, value)
+                    self.save(reset=False)
             else:
                 return stats
         return self.statistics
@@ -617,7 +628,7 @@ class Character(Entity, Stats):
                 rvalue = self.required_experience
             elif code in LIST_NEEDS:
                 rvalue = 1000
-                classes = ('primary', 'success', 'warning', 'danger', 'muted', 'muted')
+                classes = ('primary', 'info', 'success', 'warning', 'danger', 'dark')
                 values = (1.000, 0.800, 0.600, 0.400, 0.200, 0.000)
                 rclass = get_class(lvalue, rvalue, reverse=True, classes=classes, values=values)
                 title = self.get_need_label(code)
@@ -1431,10 +1442,10 @@ class Character(Entity, Stats):
             self.loot(empty=True)
             self.is_active = False
         # Fixing min value for needs
-        self.rads = max(self.rads, 0)
-        self.thirst = max(self.thirst, 0)
-        self.hunger = max(self.hunger, 0)
-        self.sleep = max(self.sleep, 0)
+        self.rads = min(max(self.rads, 0), 1000)
+        self.thirst = min(max(self.thirst, 0), 1000)
+        self.hunger = min(max(self.hunger, 0), 1000)
+        self.sleep = min(max(self.sleep, 0), 1000)
         super().save(*args, **kwargs)
 
     def get_absolute_url(self):
