@@ -304,6 +304,7 @@ ROLL_STATS = (
     (_("S.P.E.C.I.A.L."), SPECIALS),
     (_("Compétences"), SKILLS),
 )
+LIST_ROLL_STATS = dict(sum((stats for label, stats in ROLL_STATS), ()))
 
 # All statistics
 ALL_EDITABLE_STATS = ROLL_STATS + (

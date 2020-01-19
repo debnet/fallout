@@ -406,7 +406,7 @@ class Stats(Resistance):
             mini = (mini if mini is not None else race_mini) or float('-inf')
             maxi = (maxi if maxi is not None else race_maxi) or float('+inf')
         else:
-            mini, maxi = 0 if name in LIST_SPECIALS + LIST_SKILLS else float('-inf'), float('+inf')
+            mini, maxi = 0 if name in LIST_ROLL_STATS else float('-inf'), float('+inf')
         result = min(max(getattr(target, name, 0) + value, mini), maxi)
         setattr(target, name, result)
         if isinstance(self, Statistics):
