@@ -337,7 +337,7 @@ class Migration(migrations.Migration):
                 ('description', models.TextField(blank=True, verbose_name='description')),
                 ('image', models.ImageField(blank=True, null=True, upload_to='items', verbose_name='image')),
                 ('thumbnail', models.CharField(blank=True, max_length=100, choices=[], verbose_name='miniature')),
-                ('type', models.CharField(choices=[('weapon', 'arme'), ('ammo', 'munition'), ('armor', 'armure'), ('helmet', 'casque'), ('grenade', 'grenade'), ('food', 'nourriture'), ('chem', 'drogue'), ('book', 'livre'), ('misc', 'autre')], max_length=10, verbose_name='type')),
+                ('type', models.CharField(choices=[('weapon', 'arme'), ('ammo', 'munition'), ('armor', 'armure'), ('helmet', 'casque'), ('grenade', 'grenade'), ('extra', 'accessoire'), ('food', 'nourriture'), ('chem', 'drogue'), ('book', 'livre'), ('misc', 'autre')], max_length=10, verbose_name='type')),
                 ('value', models.PositiveIntegerField(default=0, verbose_name='valeur')),
                 ('durability', models.PositiveIntegerField(default=0, verbose_name='durabilité')),
                 ('condition_modifier', models.FloatField(default=0.0, verbose_name='modificateur de condition')),

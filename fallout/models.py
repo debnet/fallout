@@ -367,9 +367,10 @@ class Stats(Resistance):
                     stats._change_all_stats(**effects)
                     break
         # Equipment modifiers
-        for equipment in character.inventory.exclude(slot=''):
-            for modifier in equipment.item.modifiers.all():
-                stats._change_stats(modifier.stats, modifier.value)
+        for equipment in character.inventory.filter(~Q(slot='') | Q(item__type=ITEM_EXTRA)):
+            for count in range(equipment.quantity):
+                for modifier in equipment.item.modifiers.all():
+                    stats._change_stats(modifier.stats, modifier.value)
         # Active effects modifiers
         for effect in character.effects.exclude(effect__modifiers__isnull=True):
             for modifier in effect.effect.modifiers.all():

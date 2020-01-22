@@ -336,11 +336,13 @@ SLOT_ITEM_TYPES = (
 )
 LIST_SLOT_ITEM_TYPES = dict(SLOT_ITEM_TYPES)
 
+ITEM_EXTRA = 'extra'
 ITEM_FOOD = 'food'
 ITEM_CHEM = 'chem'
 ITEM_BOOK = 'book'
 ITEM_MISC = 'misc'
 ITEM_TYPES = SLOT_ITEM_TYPES + (
+    (ITEM_EXTRA, _("accessoire")),
     (ITEM_FOOD, _("nourriture")),
     (ITEM_CHEM, _("drogue")),
     (ITEM_BOOK, _("livre")),
