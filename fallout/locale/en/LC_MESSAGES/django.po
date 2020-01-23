@@ -977,7 +977,7 @@ msgid "résistance feu"
 msgstr "fire resistance"
 
 msgid "absorption électricité"
-msgstr "laser threshold"
+msgstr "electicity threshold"
 
 msgid "résistance électricité"
 msgstr "electricity resistance"
@@ -989,7 +989,7 @@ msgid "résistance poison"
 msgstr "poison resistance"
 
 msgid "absorption radiations"
-msgstr "laser threshold"
+msgstr "radiation threshold"
 
 msgid "résistance radiations"
 msgstr "radiation resistance"
