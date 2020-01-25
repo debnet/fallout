@@ -240,7 +240,7 @@ def view_character(request, character_id):
     ).select_related('current_character')
     if not request.user.is_superuser:
         campaigns = campaigns.filter(Q(characters__player=request.user) | Q(game_master=request.user))
-    characters = Character.objects.select_related(
+    characters = Character.objects.prefetch_related('perks').select_related(
         'player', 'campaign__current_character'  # 'statistics' is not prefetched in order to always have fresh data
     ).filter(is_active=True)
     if not request.user.is_superuser:
@@ -410,6 +410,7 @@ def view_character(request, character_id):
         # Effects
         'character_effects': effects,
         'campaign_effects': character.campaign.effects if character.campaign else None,
+        'perks': character.perks.all(),
         # Statistics
         'rollstats': rollstats,
         'fightstats': fightstats,

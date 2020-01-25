@@ -525,25 +525,29 @@ class EffectAdmin(EntityAdmin):
     fieldsets = (
         (_("Informations générales"), dict(
             fields=(
-                'name', 'title', 'description', 'image', 'thumbnail',
+                'name', 'title', 'description', 'image', 'thumbnail', 'character', ),
+            classes=('wide', ),
+        )),
+        (_("Effet"), dict(
+            fields=(
                 'chance', 'duration', 'next_effect', 'cancel_effect', ),
             classes=('wide', ),
         )),
         (_("Dégâts temporels"), dict(
             fields=(
-                'apply', 'body_part', 'damage_type', 'interval', 'damage_chance',
-                'raw_damage', 'min_damage', 'max_damage', ),
+                'apply', 'interval', 'body_part', 'damage_type',
+                'raw_damage', 'min_damage', 'max_damage', 'damage_chance', ),
             classes=('wide', 'collapse', ),
         )),
     )
     inlines = [EffectModifierInline]
     list_display_links = ('name', )
-    list_display = ('name', 'chance', 'duration', 'next_effect', 'cancel_effect', 'has_damage', )
+    list_display = ('name', 'character', 'chance', 'duration', 'next_effect', 'cancel_effect', 'has_damage', )
     list_editable = ()
     list_filter = ()
     search_fields = ('name', 'title', 'description', )
     ordering = ('name', )
-    autocomplete_fields = ('next_effect', 'cancel_effect', )
+    autocomplete_fields = ('character', 'next_effect', 'cancel_effect', )
     actions = EntityAdmin.actions + ['duplicate']
     save_on_top = True
     actions_on_bottom = True

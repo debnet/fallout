@@ -2,7 +2,7 @@
 
 <div class="row">
     {% for effect in effects %}
-        {% with info=effect.effect %}
+        {% with info=effect.effect|default:effect %}
             <div class="col-xl-3 col-lg-4 col-md-6 col-12 mb-3">
                 <div class="card h-100">
                     <div class="card-header">
@@ -67,8 +67,13 @@
                     {% if authorized %}
                         <div class="card-footer collapse-form collapse show">
                             <form class="form-inline" method="post" action="{{ request.path }}">
+                                {% if scope == 'perk' %}
+                                <button class="btn btn-sm btn-success mr-1" type="submit"
+                                    name="method" value="add">{% trans "Ajouter" %}</button>
+                                {% else %}
                                 <button class="btn btn-sm btn-danger mr-1" type="submit"
-                                        name="method" value="remove">{% trans "Supprimer" %}</button>
+                                    name="method" value="remove">{% trans "Supprimer" %}</button>
+                                {% endif %}
                                 <input type="hidden" name="type" value="effect" />
                                 <input type="hidden" name="scope" value="{{ scope }}" />
                                 <input type="hidden" name="effect-id" value="{{ effect.id }}" />

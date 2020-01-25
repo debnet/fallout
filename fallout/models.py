@@ -2018,6 +2018,9 @@ class Effect(Entity, Damage):
     Effet
     """
     # General informations
+    character = models.ForeignKey(
+        'Character', blank=True, null=True, on_delete=models.SET_NULL,
+        related_name='perks', verbose_name=_("personnage"))
     name = models.CharField(max_length=200, verbose_name=_("nom"))
     title = models.CharField(max_length=200, blank=True, verbose_name=_("titre"))
     description = models.TextField(blank=True, verbose_name=_("description"))
@@ -2025,12 +2028,12 @@ class Effect(Entity, Damage):
     thumbnail = models.CharField(
         blank=True, max_length=100, verbose_name=_("miniature"),
         choices=get_thumbnails('effects') + get_thumbnails('items'))
-    chance = models.PositiveSmallIntegerField(default=100, verbose_name=_("chance"))
-    duration = models.DurationField(blank=True, null=True, verbose_name=_("durée"))
-    apply = models.BooleanField(default=True, verbose_name=_("appliquer ?"))
+    chance = models.PositiveSmallIntegerField(default=100, verbose_name=_("chance d'effet"))
+    duration = models.DurationField(blank=True, null=True, verbose_name=_("durée d'effet"))
     # Timed effects
+    apply = models.BooleanField(default=True, verbose_name=_("appliquer ?"))
     interval = models.DurationField(blank=True, null=True, verbose_name=_("intervalle"))
-    damage_chance = models.PositiveSmallIntegerField(default=100, verbose_name=_("chance"))
+    damage_chance = models.PositiveSmallIntegerField(default=100, verbose_name=_("chance de dégâts"))
     # Next effect
     next_effect = models.ForeignKey(
         'Effect', blank=True, null=True, on_delete=models.SET_NULL,

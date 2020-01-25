@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-01-22 19:37+0100\n"
+"POT-Creation-Date: 2020-01-26 00:27+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -108,6 +108,9 @@ msgstr "Duplicate selected objects"
 
 msgid "Etats"
 msgstr "Status"
+
+msgid "Effet"
+msgstr "Effect"
 
 msgid "Dégâts temporels"
 msgstr "Temporal damages"
@@ -1259,14 +1262,20 @@ msgstr "equipment"
 msgid "équipements"
 msgstr "equipments"
 
-msgid "durée"
-msgstr "duration"
+msgid "chance d'effet"
+msgstr "effect chance"
+
+msgid "durée d'effet"
+msgstr "effect duration"
 
 msgid "appliquer ?"
 msgstr "apply?"
 
 msgid "intervalle"
 msgstr "interval"
+
+msgid "chance de dégâts"
+msgstr "damage chance"
 
 msgid "effet suivant"
 msgstr "next effect"
@@ -1637,9 +1646,6 @@ msgstr "non targetted"
 msgid "Infliger"
 msgstr "Damage"
 
-msgid "Effet"
-msgstr "Effect"
-
 msgid "Affecter"
 msgstr "Affect"
 
@@ -1831,6 +1837,9 @@ msgstr "Arm"
 
 msgid "+"
 msgstr "+"
+
+msgid "Talents"
+msgstr "Perks"
 
 msgid "Général"
 msgstr "General"
