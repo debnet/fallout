@@ -2668,7 +2668,7 @@ class DamageHistory(Damage):
         """
         Classe CSS associée
         """
-        return ('success', 'warning')[self.is_heal]
+        return ('danger', 'success')[self.is_heal]
 
     @property
     def message_level(self) -> str:
