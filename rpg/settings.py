@@ -224,10 +224,16 @@ class Base(Configuration):
         messages.ERROR: values.Value('danger error', environ_name='CSS_ERROR'),
     }
     CSS_CLASSES = {
-        (1, 1): values.Value('info', environ_name='CSS_11'),
-        (1, 0): values.Value('success', environ_name='CSS_10'),
-        (0, 0): values.Value('warning', environ_name='CSS_00'),
-        (0, 1): values.Value('danger error', environ_name='CSS_01'),
+        (1, 1): values.Value('info', environ_name='CSS_INFO'),
+        (1, 0): values.Value('success', environ_name='CSS_SUCCESS'),
+        (0, 0): values.Value('warning', environ_name='CSS_WARNING'),
+        (0, 1): values.Value('danger error', environ_name='CSS_ERROR'),
+    }
+    MESSAGE_INFOS = {
+        (1, 1): messages.INFO,
+        (1, 0): messages.SUCCESS,
+        (0, 0): messages.WARNING,
+        (0, 1): messages.ERROR,
     }
 
     # CSS and JS compression

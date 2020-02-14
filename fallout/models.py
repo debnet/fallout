@@ -8,6 +8,7 @@ from common.fields import JsonField
 from common.models import CommonModel, CommonQuerySet, Entity
 from common.utils import to_object
 from django.conf import settings
+from django.contrib import messages
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -2609,7 +2610,7 @@ class RollHistory(CommonModel):
         """
         Niveau de message
         """
-        return {v: k for k, v in settings.MESSAGE_TAGS.items()}.get(self.css_class) or 10  # Debug
+        return settings.MESSAGE_INFOS[self.success, self.critical]
 
     @property
     def label(self) -> str:
@@ -2668,14 +2669,14 @@ class DamageHistory(Damage):
         """
         Classe CSS associée
         """
-        return ('danger', 'success')[self.is_heal]
+        return settings.MESSAGE_TAGS.get(self.message_level)
 
     @property
     def message_level(self) -> str:
         """
         Niveau de message
         """
-        return {v: k for k, v in settings.MESSAGE_TAGS.items()}.get(self.css_class) or 10  # Debug
+        return (messages.ERROR, messages.SUCCESS)[self.is_heal]
 
     @property
     def label(self) -> str:
@@ -2827,7 +2828,7 @@ class FightHistory(CommonModel):
         """
         Niveau de message
         """
-        return {v: k for k, v in settings.MESSAGE_TAGS.items()}.get(self.css_class) or ''
+        return settings.MESSAGE_INFOS[self.success, self.critical]
 
     @property
     def label(self) -> str:
