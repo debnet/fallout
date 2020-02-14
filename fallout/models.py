@@ -73,10 +73,11 @@ def get_class(value: Union[int, float], maximum: Union[int, float], classes: Tup
     if not maximum:
         return default
     classes = classes or ('primary', 'info', 'success', 'warning', 'danger', 'secondary')
-    classes = reversed(classes) if reverse else classes
     values = values or (1.0, 0.8, 0.6, 0.4, 0.2, 0.0)
     rate = value / maximum
-    for _class, _value in zip(classes, values):
+    classes_values = list(zip(classes, values))
+    classes_values = reversed(classes_values) if reverse else classes_values
+    for _class, _value in classes_values:
         if rate >= _value:
             return _class
     return default
@@ -607,6 +608,8 @@ class Character(Entity, Stats):
         Retourne les statistiques générales
         :return: code, label, valeur à gauche, valeur à droite, classe, taux
         """
+        classes = ('primary', 'info', 'success', 'warning', 'danger', 'secondary', 'dark')
+        values = (0.000, 0.001, 0.200, 0.400, 0.600, 0.800, 1.000)
         for code, label in GENERAL_STATS:
             lvalue = getattr(self, code, 0)
             rvalue, rclass, title = None, None, None
@@ -622,16 +625,20 @@ class Character(Entity, Stats):
                 rvalue = lvalue
                 lvalue = self.used_skill_points
             elif code == STATS_EXPERIENCE:
+                # Put carry weight before experience
                 charge, carry_weight = self.stats.charge, self.stats.carry_weight
                 if carry_weight:
+                    classes = ('primary', 'info', 'success', 'warning', 'danger', 'secondary')
+                    values = (0.000, 0.001, 0.250, 0.500, 0.750, 1.000)
                     yield StatInfo(
                         STATS_CARRY_WEIGHT, _("charge"), charge, carry_weight,
-                        get_class(charge, carry_weight, reverse=True), (charge / carry_weight * 100.0), None, None)
-                rvalue = self.required_experience
+                        get_class(charge, carry_weight, reverse=True, classes=classes, values=values),
+                        (charge / carry_weight * 100.0), None, None)
+                lvalue = lvalue - self.previous_required_experience
+                rvalue = self.required_experience - self.previous_required_experience
+                rclass = get_class(lvalue, rvalue)
             elif code in LIST_NEEDS:
                 rvalue = 1000
-                classes = ('primary', 'info', 'success', 'warning', 'danger', 'dark')
-                values = (1.000, 0.800, 0.600, 0.400, 0.200, 0.000)
                 rclass = get_class(lvalue, rvalue, reverse=True, classes=classes, values=values)
                 title = self.get_need_label(code)
             rate = ((lvalue / rvalue) * 100.0) if rvalue else None
@@ -702,7 +709,14 @@ class Character(Entity, Stats):
         """
         Retourne le nombre de points d'expérience nécessaires pour passer au niveau suivant
         """
-        return sum(l * BASE_XP for l in range(1, self.level + 1))
+        return sum(level * BASE_XP for level in range(1, self.level + 1))
+
+    @property
+    def previous_required_experience(self) -> int:
+        """
+        Retourne le nombre de points d'expérience nécessaires pour le niveau précédent
+        """
+        return sum(level * BASE_XP for level in range(1, self.level))
 
     def get_need_label(self, need: str) -> str:
         """
