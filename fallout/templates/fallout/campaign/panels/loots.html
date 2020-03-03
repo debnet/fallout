@@ -5,11 +5,11 @@
         {% if authorized %}
             <form method="post" action="{{ request.path }}" class="form-inline justify-content-center">
                 <div class="form-row align-items-center">
-                    <div class="col-auto input-group">
+                    <div class="col-auto input-group input-group-sm">
                         <div class="input-group-prepend">
                             <label for="loot-character-list" class="input-group-text">{% trans "Personnage" %}</label>
                         </div>
-                        <select name="character" id="loot-character-list" class="form-control custom-select">
+                        <select name="character" id="loot-character-list" class="form-control form-control-sm custom-select custom-select-sm">
                             <option value="">{% trans "Aucun" %}</option>
                             {% for character in characters %}
                                 <option value="{{ character.id }}">{{ character.name }}</option>
@@ -18,14 +18,14 @@
                     </div>
                     <div class="col-auto">
                         <label class="sr-only" for="loot-name">{% trans "Butin" %}</label>
-                        <input type="text" class="form-control" id="loot-name"
+                        <input type="text" class="form-control form-control-sm" id="loot-name"
                                name="loot" data-for="loot-id" placeholder="{% trans "Butin" %}">
                         <input type="hidden" id="loot-id" name="loot-id" />
                     </div>
                     <div class="col-auto">
-                        <button type="submit" class="btn btn-primary"
+                        <button type="submit" class="btn btn-sm btn-primary"
                                 name="method" value="open">{% trans "Ouvrir" %}</button>
-                        <button type="submit" class="btn btn-danger"
+                        <button type="submit" class="btn btn-sm btn-danger"
                                 name="method" value="clear">{% trans "Vider" %}</button>
                         <input type="hidden" name="type" value="loot" />
                         {% csrf_token %}
@@ -34,30 +34,30 @@
             </form>
             <form method="post" action="{{ request.path }}" class="form-inline justify-content-center">
                 <div class="form-row align-items-center pt-3">
-                    <div class="col-auto input-group">
+                    <div class="col-auto input-group input-group-sm">
                         <div class="input-group-prepend">
                             <label for="item-quantity" class="input-group-text">{% trans "Quantité" %}</label>
                         </div>
-                        <input type="number" class="form-control ismall" id="item-quantity"
+                        <input type="number" class="form-control form-control-sm ismall" id="item-quantity"
                                name="quantity" placeholder="{% trans "Qte" %}" value="1" style="width: 80px"
                                aria-valuemin="1" min="1">
                     </div>
-                    <div class="col-auto input-group">
+                    <div class="col-auto input-group input-group-sm">
                         <div class="input-group-prepend">
                             <label for="item-condition" class="input-group-text">{% trans "Condition" %}</label>
                         </div>
-                        <input type="number" class="form-control ismall" id="item-condition"
+                        <input type="number" class="form-control form-control-sm ismall" id="item-condition"
                                name="condition" placeholder="{% trans "Cond" %}" value="100" style="width: 80px"
                                aria-valuemin="1" min="1" aria-valuemax="100" max="100">
                     </div>
                     <div class="col-auto">
                         <label class="sr-only" for="item-name">{% trans "Objet" %}</label>
-                        <input type="text" class="form-control mb-2 mb-sm-0" id="item-name"
+                        <input type="text" class="form-control form-control-sm mb-2 mb-sm-0" id="item-name"
                                name="item-name" data-for="item-id" placeholder="{% trans "Objet" %}">
                         <input type="hidden" id="item-id" name="item-id" />
                     </div>
                     <div class="col-auto">
-                        <button type="submit" class="btn btn-primary"
+                        <button type="submit" class="btn btn-sm btn-primary"
                             name="method" value="add">{% trans "Ajouter" %}</button>
                         <input type="hidden" name="type" value="loot" />
                         {% csrf_token %}

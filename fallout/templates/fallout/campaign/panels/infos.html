@@ -9,7 +9,7 @@
                     <div class="form-row align-items-center">
                         <div class="col-auto">
                             <label class="sr-only" for="gain-group-list">{% trans "Type de personnage" %}</label>
-                            <select name="group" id="gain-group-list" class="form-control custom-select">
+                            <select name="group" id="gain-group-list" class="form-control form-control-sm custom-select custom-select-sm">
                                 <option value="pj">{% trans "PJ" %}</option>
                                 <option value="pnj">{% trans "PNJ" %}</option>
                                 <option value="">{% trans "Tous" %}</option>
@@ -17,11 +17,11 @@
                         </div>
                         <div class="col-auto">
                             <label class="sr-only" for="stats-modifier">{% trans "Expérience" %}</label>
-                            <input type="number" class="form-control ismall" id="experience"
+                            <input type="number" class="form-control form-control-sm ismall" id="experience"
                                    name="experience" placeholder="{% trans "Expérience" %}" value="0">
                         </div>
                         <div class="col-auto">
-                            <button type="submit" class="btn btn-primary"
+                            <button type="submit" class="btn btn-sm btn-primary"
                                     name="method" value="gain">{% trans "Gagner" %}</button>
                             <input type="hidden" name="type" value="gain" />
                             {% csrf_token %}
@@ -35,7 +35,7 @@
                     <div class="form-row align-items-center">
                         <div class="col-auto">
                             <label class="sr-only" for="roll-group-list">{% trans "Type de personnage" %}</label>
-                            <select name="group" id="roll-group-list" class="form-control custom-select">
+                            <select name="group" id="roll-group-list" class="form-control form-control-sm custom-select custom-select-sm">
                                 <option value="pj">{% trans "PJ" %}</option>
                                 <option value="pnj">{% trans "PNJ" %}</option>
                                 <option value="">{% trans "Tous" %}</option>
@@ -43,7 +43,7 @@
                         </div>
                         <div class="col-auto">
                             <label class="sr-only" for="stats-list">{% trans "Statistique" %}</label>
-                            <select name="stats" id="roll-stats-list" class="form-control custom-select">
+                            <select name="stats" id="roll-stats-list" class="form-control form-control-sm custom-select custom-select-sm">
                                 {% for title, substats in stats %}
                                     <optgroup label="{{ title }}">
                                         {% for value, label in substats %}
@@ -55,11 +55,11 @@
                         </div>
                         <div class="col-auto">
                             <label class="sr-only" for="stats-modifier">{% trans "Modificateur" %}</label>
-                            <input type="number" class="form-control ismall" id="stats-modifier"
+                            <input type="number" class="form-control form-control-sm ismall" id="stats-modifier"
                                    name="modifier" placeholder="{% trans "Mod" %}" value="0">
                         </div>
                         <div class="col-auto">
-                            <button type="submit" class="btn btn-primary"
+                            <button type="submit" class="btn btn-sm btn-primary"
                                     name="method" value="roll">{% trans "Lancer" %}</button>
                             <input type="hidden" name="type" value="roll" />
                             {% csrf_token %}
@@ -78,24 +78,24 @@
                     <div class="form-row align-items-center pt-2">
                         <div class="mr-3 font-weight-bold">{% trans "Avancer dans le temps :" %}</div>
                         <div class="form-row align-items-center">
-                            <div class="col-auto input-group">
-                                <input type="number" class="form-control ismall" id="hours" name="hours"
+                            <div class="col-auto input-group input-group-sm">
+                                <input type="number" class="form-control form-control-sm ismall" id="hours" name="hours"
                                        placeholder="{% trans "h" %}" value="0"
                                        aria-valuemin="0" min="0" aria-valuemax="999" max="999">
                                 <div class="input-group-append">
                                     <label for="hours" class="input-group-text">{% trans "h" %}</label>
                                 </div>
                             </div>
-                            <div class="col-auto input-group">
-                                <input type="number" class="form-control ismall" id="minutes" name="minutes"
+                            <div class="col-auto input-group input-group-sm">
+                                <input type="number" class="form-control form-control-sm ismall" id="minutes" name="minutes"
                                        placeholder="{% trans "m" %}" value="0"
                                        aria-valuemin="0" min="0" aria-valuemax="59" max="59">
                                 <div class="input-group-append">
                                     <label for="minutes" class="input-group-text">{% trans "m" %}</label>
                                 </div>
                             </div>
-                            <div class="col-auto input-group">
-                                <button type="submit" class="btn btn-primary"
+                            <div class="col-auto input-group input-group-sm">
+                                <button type="submit" class="btn btn-sm btn-primary"
                                         name="method" value="add">{% trans "Avancer" %}</button>
                                 <input type="hidden" name="type" value="time" />
                                 {% csrf_token %}

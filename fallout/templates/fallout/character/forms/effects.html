@@ -26,7 +26,7 @@
                                         {% for value, date, css in effect.progress %}
                                             {% localize off %}
                                             <div role="progressbar" style="width: {{ value }}%;" aria-valuenow="{{ value }}"
-                                                 aria-valuemin="0" aria-valuemax="100" class="progress-bar bg-{{ css }}"
+                                                 aria-valuemin="0" aria-valuemax="100" class="progress-bar bg-{{ css }} text-light"
                                             {% endlocalize %}
                                                  {% if date < current_date %}title="{% trans "Actif depuis" %} {{ date|timesince:current_date }}"
                                                  {% elif date >= current_date %}title="{% trans "Actif encore" %} {{ date|timeuntil:current_date }}"{% endif %}

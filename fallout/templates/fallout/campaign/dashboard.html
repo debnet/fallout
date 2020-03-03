@@ -26,7 +26,7 @@
                     <span class="card-title"><a href="{% url 'fallout:character' character.id %}">{{ character.name }}</a></span>
                     {% if character.title %}<small class="card-subtitle mb-2 text-muted">{{ character.title }}</small>{% endif %}
                     <div class="float-right">
-                        <small class="badge badge-dark align-middle">{{ character.level }}</small>
+                        <small class="badge badge-dark align-middle">{% trans "Niveau" %} {{ character.level }}</small>
                         {% if character.is_player %}
                             <small class="badge badge-success align-middle">{% trans "PJ" %}</small>
                         {% else %}
@@ -47,7 +47,7 @@
                                 <small class="text-muted">{{ s.lvalue|floatformat:0 }} / {{ s.rvalue|floatformat:0 }}</small>
                                 <div class="progress">
                                     {% localize off %}
-                                    <div class="progress-bar progress-bar-striped bg-{{ s.css }}" role="progressbar"
+                                    <div class="progress-bar progress-bar-striped bg-{{ s.css }} text-light" role="progressbar"
                                          aria-valuenow="{{ s.lvalue }}" aria-valuemin="0" aria-valuemax="{{ s.rvalue }}"
                                          style="width: {{ s.rate }}%" {% if s.title %}title="{{ s.title }}"{% endif %}
                                          data-toggle="tooltip" data-placement="top">

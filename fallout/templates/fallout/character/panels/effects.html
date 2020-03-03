@@ -7,12 +7,12 @@
                 <div class="form-row align-items-center">
                     <div class="col-auto">
                         <label class="sr-only" for="effect-name">{% trans "Effet" %}</label>
-                        <input type="text" class="form-control" id="effect-name"
+                        <input type="text" class="form-control form-control-sm" id="effect-name"
                                name="effect-name" data-for="effect-id" placeholder="{% trans "Effet" %}">
                         <input type="hidden" id="effect-id" name="effect-id" />
                     </div>
                     <div class="col-auto">
-                        <button type="submit" class="btn btn-primary"
+                        <button type="submit" class="btn btn-sm btn-primary"
                                 name="method" value="add" >{% trans "Affecter" %}</button>
                         <input type="hidden" name="type" value="effect" />
                         {% csrf_token %}

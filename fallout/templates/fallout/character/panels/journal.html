@@ -32,22 +32,25 @@
     </form>
     <hr />
     {% for log in logs %}
-        <div {% if log.private %}class="alert-danger text-dark collapse-form collapse show"
-             {% elif log.player != character.player %}class="alert-warning text-dark"{% endif %}>
+        <div {% if log.private %}class="alert-danger collapse-form collapse show"
+             {% elif log.player != character.player %}class="alert-warning"{% endif %}>
             <div class="font-weight-bold">
                 {% if character.campaign and log.game_date %}
                     {% trans "Il y a" %} {{ log.game_date|timesince:character.campaign.current_game_date }},
                     {% trans "le" %} {{ log.game_date }}
-                    <small class="text-muted">({% trans "Le" %} {{ log.date }} {% trans "par" %} {{ log.player }})</small>
+                    <small>({% trans "Le" %} {{ log.date }} {% trans "par" %} {{ log.player }})</small>
                 {% else %}{% trans "Le" %} {{ log.game_date|default:log.date }}{% endif %}
             </div>
             {% if authorized or log.player == character.player %}
                 <div class="collapse-form collapse show">
-                    <a href="?edit={{ log.id }}">{% trans "Modifier" %}</a> &ndash;
+                    <a href="?edit={{ log.id }}">{% trans "Modifier" %}</a>
+                    &ndash;
                     <a href="?delete={{ log.id }}">{% trans "Supprimer" %}</a>
                 </div>
             {% endif %}
-            <div class="markdown">{% markdown 'header-ids' 'tables' 'break-on-newline' %}{{ log.text }}{% endmarkdown %}</div>
+            <div class="markdown">
+                {% markdown 'header-ids' 'tables' 'break-on-newline' %}{{ log.text }}{% endmarkdown %}
+            </div>
             <hr />
         </div>
     {% endfor %}

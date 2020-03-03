@@ -29,7 +29,7 @@
                     <td>
                         {% if s.code in character.extra_data %}
                             <span title="{{ character.extra_data|get:s.code }}"
-                                  data-toggle="tooltip" data-placement="top" class="text-primary">&diams;</span>
+                                  data-toggle="tooltip" data-placement="top" class="text-info">&diams;</span>
                         {% endif %}
                         <span {% if modifier %}title="{% if modifier > 0 %}+{% endif %}{{ modifier|default:"" }}" data-toggle="tooltip" data-placement="right"
                               class="{% if modifier > 0 %}text-success{% elif modifier < 0 %}text-danger{% endif %} pr-1"{% endif %}>
@@ -39,7 +39,7 @@
                     </td>
                     <td class="text-right">
                         {% if view or not authorized %}
-                            <strong class="text-{{ s.css|default:'dark' }}" {% if s.title %}title="{{ s.title }}{% endif %}"
+                            <strong class="text-{{ s.css|default:'light' }}" {% if s.title %}title="{{ s.title }}{% endif %}"
                                     data-html="true" data-toggle="tooltip" data-placement="left">
                                 {{ s.lvalue|floatformat:0 }}{% if s.rvalue is not None %}&nbsp;/&nbsp;{{ s.rvalue|floatformat:0 }}{% endif %}
                                 {% if s.end %}{{ s.end }}{% endif %}
@@ -47,7 +47,7 @@
                         {% elif authorized %}
                             {% if levelup and character.used_skill_points < character.skill_points %}
                                 {% if s.code in character.tag_skills or character.used_skill_points|add:2 <= character.skill_points %}
-                                    <button class="btn btn-sm btn-dark" type="submit" name="levelup" value="{{ s.code }}">
+                                    <button class="btn btn-sm btn-primary" type="submit" name="levelup" value="{{ s.code }}">
                                         <strong>{% trans "+" %}</strong>
                                     </button>
                                 {% endif %}

@@ -59,7 +59,7 @@ def get_thumbnails(directory: str = '') -> List[Tuple[str, str]]:
 
 
 def get_class(value: Union[int, float], maximum: Union[int, float], classes: Tuple[str, ...] = None,
-              values: Tuple[float, ...] = None, reverse: bool = False, default: str = 'dark') -> str:
+              values: Tuple[float, ...] = None, reverse: bool = False, default: str = 'light') -> str:
     """
     Affecte une classe CSS à une valeur donnée
     :param value: Valeur
@@ -72,7 +72,7 @@ def get_class(value: Union[int, float], maximum: Union[int, float], classes: Tup
     """
     if not maximum:
         return default
-    classes = classes or ('primary', 'info', 'success', 'warning', 'danger', 'secondary')
+    classes = classes or ('info', 'info', 'success', 'warning', 'danger', 'secondary')
     values = values or (1.0, 0.8, 0.6, 0.4, 0.2, 0.0)
     rate = value / maximum
     classes_values = list(zip(classes, values))
@@ -608,7 +608,7 @@ class Character(Entity, Stats):
         Retourne les statistiques générales
         :return: code, label, valeur à gauche, valeur à droite, classe, taux
         """
-        classes = ('primary', 'info', 'success', 'warning', 'danger', 'secondary', 'dark')
+        classes = ('info', 'info', 'success', 'warning', 'danger', 'secondary', 'light')
         values = (0.000, 0.001, 0.200, 0.400, 0.600, 0.800, 1.000)
         for code, label in GENERAL_STATS:
             lvalue = getattr(self, code, 0)
@@ -628,7 +628,7 @@ class Character(Entity, Stats):
                 # Put carry weight before experience
                 charge, carry_weight = self.stats.charge, self.stats.carry_weight
                 if carry_weight:
-                    classes = ('primary', 'info', 'success', 'warning', 'danger', 'secondary')
+                    classes = ('info', 'info', 'success', 'warning', 'danger', 'secondary')
                     values = (0.000, 0.001, 0.250, 0.500, 0.750, 1.000)
                     yield StatInfo(
                         STATS_CARRY_WEIGHT, _("charge"), charge, carry_weight,
@@ -668,14 +668,14 @@ class Character(Entity, Stats):
         code, label, value = STATS_ARMOR_CLASS, LIST_ALL_STATS.get(STATS_ARMOR_CLASS), self.stats.armor_class
         armor_v, helmet_v = getattr(armor, code, 0) or 0, getattr(helmet, code, 0) or 0
         title = EQUIP_TITLE.format(armor=armor_v, helmet=helmet_v)
-        yield StatInfo(code, label, value, None, 'primary' if armor_v or helmet_v else None, None, None, title)
+        yield StatInfo(code, label, value, None, 'info' if armor_v or helmet_v else None, None, None, title)
         # Damage threshold and damage resistance
         for threshold, resistance in zip(self._get_stats(THRESHOLDS), self._get_stats(RESISTANCES)):
             (code_t, label_t, value_t), (code_r, label_r, value_r) = threshold, resistance
             value_r = min(value_r, MAX_DAMAGE_RESISTANCE)
             armor_t, helmet_t = getattr(armor, code_t, 0), getattr(helmet, code_t, 0)
             armor_r, helmet_r = getattr(armor, code_r, 0), getattr(helmet, code_r, 0)
-            css_t, css_r = 'primary' if armor_t or helmet_t else None, 'primary' if armor_r or helmet_r else None
+            css_t, css_r = 'info' if armor_t or helmet_t else None, 'info' if armor_r or helmet_r else None
             title_t, title_r = (
                 EQUIP_TITLE.format(
                     armor=armor_t or EMPTY,
@@ -1035,7 +1035,7 @@ class Character(Entity, Stats):
 
     def fight(self, target: Union['Character', int], target_range: int = 1, target_part: BODY_PARTS = None,
               hit_chance_modifier: int = 0, is_burst: bool = False, is_grenade: bool = False, is_action: bool = False,
-              hit_count: int = 0, log: bool = True, no_weapon: bool = False,
+              hit_count: int = 0, log: bool = True, no_weapon: bool = False, fail_target: Union['Character', int] = None,
               force_success: bool = False, force_critical: bool = False, force_raw_damage: bool = False,
               weapon_equipment: Optional['Equipment'] = None, simulation: bool = False, **kwargs) -> 'FightHistory':
         """
@@ -1050,6 +1050,7 @@ class Character(Entity, Stats):
         :param hit_count: Compteur de coups lors d'une attaque en rafale
         :param log: Historise le combat ?
         :param no_weapon: Exécute une attaque sans arme équipée ?
+        :param fail_target: Cible secondaire en cas d'échec critique ?
         :param force_success: Force le succès du coup ?
         :param force_critical: Force un coup critique ?
         :param force_raw_damage: Force les dégâts bruts ?
