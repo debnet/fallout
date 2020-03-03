@@ -372,16 +372,16 @@ class Stats(Resistance):
         for equipment in character.inventory.filter(~Q(slot='') | Q(item__type=ITEM_EXTRA)):
             for count in range(equipment.quantity):
                 for modifier in equipment.item.modifiers.all():
-                    stats._change_stats(modifier.stats, modifier.value)
+                    stats._change_stats(modifier.stats, modifier.calculated_value)
         # Active effects modifiers
         for effect in character.effects.exclude(effect__modifiers__isnull=True):
             for modifier in effect.effect.modifiers.all():
-                stats._change_stats(modifier.stats, modifier.value)
+                stats._change_stats(modifier.stats, modifier.calculated_value)
         # Campaign effects modifiers
         if character.campaign:
             for effect in character.campaign.effects.exclude(effect__modifiers__isnull=True):
                 for modifier in effect.effect.modifiers.all():
-                    stats._change_stats(modifier.stats, modifier.value, limit=False)
+                    stats._change_stats(modifier.stats, modifier.calculated_value, limit=False)
         # Derivated statistics
         for stats_name, formula in COMPUTED_STATS:
             stats._change_stats(stats_name, formula(stats, character) + stats.raw.get(stats_name, 0), raw=False)
@@ -1493,7 +1493,52 @@ class Modifier(CommonModel):
     Modificateur de statistique
     """
     stats = models.CharField(max_length=30, choices=ALL_STATS, verbose_name=_("statistique"))
-    value = models.SmallIntegerField(default=0, verbose_name=_("valeur"))
+    raw_value = models.SmallIntegerField(default=0, verbose_name=_("valeur brute"))
+    min_value = models.SmallIntegerField(default=0, verbose_name=_("valeur min."))
+    max_value = models.SmallIntegerField(default=0, verbose_name=_("valeur max."))
+
+    @property
+    def calculated_value(self) -> int:
+        """
+        Calcul unitaire de la valeur de modificateur
+        :return: Valeur de modificateur
+        """
+        return randint(self.min_value, self.max_value) + self.raw_value
+
+    @property
+    def label_modifier(self) -> str:
+        """
+        Retourne le libellé de la valeur du modificateur
+        :return: Représentation de la valeur du modificateur
+        """
+        value = ''
+        if self.min_value or self.max_value:
+            value = f"{self.min_value}-{self.max_value}"
+        if self.raw_value:
+            raw_value = f"+{self.raw_value}" if self.raw_value >= 0 else str(self.raw_value)
+            value = f"{value} ({raw_value})" if value else raw_value
+        return value
+
+    @property
+    def label(self):
+        """
+        Retourne le libellé du modificateur
+        :return: Représentation du modificateur
+        """
+        return f"{self.label_modifier} {self.get_stats_display()}"
+
+    @property
+    def bonus(self):
+        """
+        Determine si le modificateur est un bonus ou un malus
+        :return: Vrai si bonus, faux si malus
+        """
+        if self.stats in (STATS_RADS, STATS_HUNGER, STATS_THIRST, STATS_SLEEP):
+            return self.calculated_value <= 0
+        return self.calculated_value >= 0
+
+    def __str__(self):
+        return self.label
 
     class Meta:
         abstract = True
@@ -1732,9 +1777,6 @@ class ItemModifier(Modifier):
         'Item', on_delete=models.CASCADE,
         related_name='modifiers', verbose_name=_("objet"))
 
-    def __str__(self) -> str:
-        return f"{self.get_stats_display()} = {self.value}"
-
     class Meta:
         verbose_name = _("modificateur d'objet")
         verbose_name_plural = _("modificateurs d'objets")
@@ -1858,9 +1900,11 @@ class Equipment(CommonModel):
         effects = []
         change_character = False
         for effect in self.item.effects.all():
-            effect.affect(self.character)
+            character_effect = effect.affect(self.character)
+            if character_effect:
+                effects.append(character_effect)
         for modifier in self.item.modifiers.all():
-            self.character.modify_value(modifier.stats, modifier.value)
+            self.character.modify_value(modifier.stats, modifier.calculated_value)
             change_character = True
         self.quantity -= 1
         if save:
@@ -2134,9 +2178,6 @@ class EffectModifier(Modifier):
         'Effect', on_delete=models.CASCADE,
         related_name='modifiers', verbose_name=_("effet"))
 
-    def __str__(self) -> str:
-        return f"{self.get_stats_display()} = {self.value}"
-
     class Meta:
         verbose_name = _("modificateur d'effet")
         verbose_name_plural = _("modificateurs d'effets")
@@ -2179,6 +2220,7 @@ class CampaignEffect(ActiveEffect):
     campaign = models.ForeignKey(
         'Campaign', on_delete=models.CASCADE,
         related_name='active_effects', verbose_name=_("campagne"))
+    damages = {}
 
     @property
     def progress(self):
@@ -2202,6 +2244,7 @@ class CampaignEffect(ActiveEffect):
             self.next_date += self.effect.interval
         if damages or (self.end_date and self.end_date <= game_date):
             self.save()
+        self.damages = damages
         return damages
 
     def apply_all(self, save: bool = True) -> Dict['Character', List['DamageHistory']]:
@@ -2223,6 +2266,7 @@ class CampaignEffect(ActiveEffect):
                 self.next_date += self.effect.interval
         if damages or (self.end_date and self.end_date <= game_date):
             self.save()
+        self.damages = damages
         return damages
 
     def save(self, *args, **kwargs):
@@ -2272,6 +2316,7 @@ class CharacterEffect(ActiveEffect):
     character = models.ForeignKey(
         'Character', on_delete=models.CASCADE,
         related_name='active_effects', verbose_name=_("personnage"))
+    damages = []
 
     @property
     def progress(self):
@@ -2300,6 +2345,7 @@ class CharacterEffect(ActiveEffect):
                 self.next_date += self.effect.interval
         if damages or (self.end_date and self.end_date <= game_date):
             self.save()
+        self.damages = damages
         return damages
 
     def reset_character_stats(self):

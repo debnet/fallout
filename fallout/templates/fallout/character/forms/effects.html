@@ -40,9 +40,8 @@
                         {% endif %}
                         <p class="card-text">
                             {% for modifier in info.modifiers.all %}
-                                <small class="badge {% if modifier.value > 0 %}badge-success{% else %}badge-danger{% endif %} align-middle">
-                                    {% if modifier.value > 0 %}+{% endif %}{{ modifier.value }}
-                                    {{ modifier.get_stats_display }}
+                                <small class="badge {% if modifier.bonus %}badge-success{% else %}badge-danger{% endif %} align-middle">
+                                    {{ modifier.label }}
                                 </small>
                             {% endfor %}
                         </p>
