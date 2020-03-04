@@ -26,17 +26,24 @@
                     <span class="card-title"><a href="{% url 'fallout:character' character.id %}">{{ character.name }}</a></span>
                     {% if character.title %}<small class="card-subtitle mb-2 text-muted">{{ character.title }}</small>{% endif %}
                     <div class="float-right">
-                        <small class="badge badge-dark align-middle">{{ character.level }}</small>
                         {% if character.is_player %}
                             <small class="badge badge-success align-middle">{% trans "PJ" %}</small>
                         {% else %}
                             <small class="badge badge-warning align-middle">{% trans "PNJ" %}</small>
                         {% endif %}
+                        <small class="badge badge-light align-middle">{% trans "Niveau" %} {{ character.level }}</small>
                         {% if character.health == 0 %}
                             <small class="badge badge-danger align-middle">{% trans "KO" %}</small>
                         {% elif campaign.current_character == character %}
                             <small class="badge badge-info align-middle">{% trans "Actif" %}</small>
                         {% endif %}
+                        <form method="post" action="{{ request.path }}" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" name="rest" value="{{ character.id }}"
+                                    class="btn btn-sm badge {% if character.is_resting %}badge-info{% else %}badge-secondary{% endif %}">
+                                {% trans "Repos" %}
+                            </button>
+                        </form>
                     </div>
                 </div>
                 <div class="card-body">
@@ -47,7 +54,7 @@
                                 <small class="text-muted">{{ s.lvalue|floatformat:0 }} / {{ s.rvalue|floatformat:0 }}</small>
                                 <div class="progress">
                                     {% localize off %}
-                                    <div class="progress-bar progress-bar-striped bg-{{ s.css }}" role="progressbar"
+                                    <div class="progress-bar progress-bar-striped bg-{{ s.css }} text-light" role="progressbar"
                                          aria-valuenow="{{ s.lvalue }}" aria-valuemin="0" aria-valuemax="{{ s.rvalue }}"
                                          style="width: {{ s.rate }}%" {% if s.title %}title="{{ s.title }}"{% endif %}
                                          data-toggle="tooltip" data-placement="top">
@@ -95,10 +102,18 @@ $(function() {
 	    let value = show_popover(this);
         $('input[type="hidden"][name="modifier"]').val(value);
         $('.stats').each(function(i, e) {
-            let modifier = parseInt($(e).data('code') === 'special' ? (value / 10) : value);
+            let button = $(e).parent();
+            let special = $(e).data('code') === 'special';
+            let modifier = parseInt(special ? (value / 10) : value);
             let new_value = parseInt($(e).data('value')) + modifier;
-            console.log(modifier, new_value);
+            let rate = new_value / (special ? 10 : 100);
             $(e).text(new_value);
+            button.removeClass('btn-secondary btn-danger btn-warning btn-success btn-info');
+            if (rate < 0.2) button.addClass('btn-secondary');
+            else if (rate < 0.4) button.addClass('btn-danger');
+            else if (rate < 0.6) button.addClass('btn-warning');
+            else if (rate < 0.8) button.addClass('btn-success');
+            else button.addClass('btn-info');
         });
 	}).trigger('input').click();
 });

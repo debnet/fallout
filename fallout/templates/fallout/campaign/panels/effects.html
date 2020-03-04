@@ -29,7 +29,7 @@
                 {% with rads=campaign.radiation %}
                     {% if rads %}
                         {% localize off %}
-                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-{% if rads > 50 %}danger{% elif rads > 20 %}warning{% else %}success{% endif %}"
+                        <div class="progress-bar progress-bar-striped progress-bar-animated text-light bg-{% if rads > 50 %}danger{% elif rads > 20 %}warning{% else %}success{% endif %}"
                              role="progressbar" aria-valuenow="{{ rads }}" aria-valuemin="0" aria-valuemax="{{ rads|max:100 }}"
                              style="width: {{ rads }}%">
                         {% endlocalize %}
@@ -46,7 +46,7 @@
                     <div class="form-row align-items-center">
                         <div class="col-auto">
                             <label class="sr-only" for="damage-group-list">{% trans "Type de personnage" %}</label>
-                            <select name="group" id="damage-group-list" class="form-control custom-select">
+                            <select name="group" id="damage-group-list" class="form-control form-control-sm custom-select custom-select-sm">
                                 <option value="pj">{% trans "PJ" %}</option>
                                 <option value="pnj">{% trans "PNJ" %}</option>
                                 <option value="">{% trans "Tous" %}</option>
@@ -54,7 +54,7 @@
                         </div>
                         <div class="col-auto">
                             <label for="damage-type" class="sr-only">{% trans "Type de dégâts" %}</label>
-                            <select class="form-control custom-select" id="damage-type" name="damage_type">
+                            <select id="damage-type" name="damage_type" class="form-control form-control-sm custom-select custom-select-sm">
                                 {% for group_label, types in damage_types %}
                                     <optgroup label="{{ group_label }}">
                                         {% for code, label in types %}
@@ -66,7 +66,7 @@
                         </div>
                         <div class="col-auto">
                             <label for="body-part" class="sr-only">{% trans "Partie du corps" %}</label>
-                            <select class="form-control custom-select" id="body-part" name="body_part">
+                            <select id="body-part" name="body_part" class="form-control form-control-sm custom-select custom-select-sm">
                                 <option value="">{% trans "non ciblé" %}</option>
                                 {% for code, label in body_parts %}
                                     <option value="{{ code }}">{{ label }}</option>
@@ -74,17 +74,17 @@
                             </select>
                         </div>
                         <div class="col-auto">
-                            <input id="min-damage" class="form-control ismall"
+                            <input id="min-damage" class="form-control form-control-sm ismall"
                                    type="number" name="min_damage" value="0" min="0" />
                             <span class="ml-1 mr-1 font-weight-bold">&minus;</span>
-                            <input id="min-damage" class="form-control ismall"
+                            <input id="min-damage" class="form-control form-control-sm ismall"
                                    type="number" name="max_damage" value="0" min="0" />
                             <span class="ml-1 mr-1 font-weight-bold">&plus;</span>
-                            <input id="min-damage" class="form-control ismall"
+                            <input id="min-damage" class="form-control form-control-sm ismall"
                                    type="number" name="raw_damage" value="0" min="0" />
                         </div>
                         <div class="col-auto">
-                            <button type="submit" class="btn btn-primary"
+                            <button type="submit" class="btn btn-sm btn-primary"
                                     name="method" value="add" >{% trans "Infliger" %}</button>
                             <input type="hidden" name="type" value="damage" />
                             {% csrf_token %}
@@ -96,12 +96,12 @@
                         <div class="form-row align-items-center">
                             <div class="col-auto">
                                 <label class="sr-only" for="effect-name">{% trans "Effet" %}</label>
-                                <input type="text" class="form-control" id="effect-name"
+                                <input type="text" class="form-control form-control-sm" id="effect-name"
                                        name="effect-name" data-for="effect-id" placeholder="{% trans "Effet" %}">
                                 <input type="hidden" id="effect-id" name="effect-id" />
                             </div>
                             <div class="col-auto">
-                                <button type="submit" class="btn btn-primary"
+                                <button type="submit" class="btn btn-sm btn-primary"
                                         name="method" value="add" >{% trans "Affecter" %}</button>
                                 <input type="hidden" name="type" value="effect" />
                                 {% csrf_token %}

@@ -64,6 +64,29 @@
                             </select>
                         </td>
                     </tr>
+                    <tr>
+                        <td><label for="{{ code }}-fail" class="d-inline">{% trans "échec" %}</label></td>
+                        <td class="text-right">
+                            <select class="form-control form-control-sm custom-select custom-select-sm"
+                                    id="{{ code }}-fail" name="fail_target">
+                                <option value=""></option>
+                                <optgroup label="{% trans "Joueurs" %}">
+                                    {% for c in characters %}
+                                        {% if c.is_player and c != character %}
+                                            <option value="{{ c.id }}">{{ c.name }}</option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </optgroup>
+                                <optgroup label="{% trans "Non joueurs" %}">
+                                    {% for c in characters %}
+                                        {% if not c.is_player and c != character %}
+                                            <option value="{{ c.id }}">{{ c.name }}</option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </optgroup>
+                            </select>
+                        </td>
+                    </tr>
                 {% endif %}
                 {% if not burst %}
                     <tr>

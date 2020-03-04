@@ -73,6 +73,8 @@ def view_dashboard(request, campaign_id):
                 messages.add_message(request, result.message_level, _(
                     "<strong>{character}</strong> {label}").format(
                         character=character, label=result.long_label))
+            elif 'rest' in data:
+                characters.filter(id=data.get('rest')).update(is_resting=Q(is_resting=False))
     except ValidationError as error:
         for field, errors in error.message_dict.items():
             for error in (errors if isinstance(errors, list) else [errors]):
@@ -161,7 +163,11 @@ def view_campaign(request, campaign_id):
                 effect_id, effect_name = data.get('effect-id'), data.get('effect-name')
                 if method == 'add':
                     filter = dict(pk=effect_id) if effect_id else dict(name__icontains=effect_name)
-                    Effect.objects.filter(**filter).first().affect(campaign)
+                    for effect in Effect.objects.filter(**filter).first().affect(campaign):
+                        for damage in effect.damages:
+                            messages.add_message(request, damage.message_level, _(
+                                "<strong>{character}</strong> {label}").format(
+                                character=damage.character, label=damage.label))
                 elif method == 'remove':
                     scope = data.get('scope')
                     if scope == 'character':
@@ -283,9 +289,14 @@ def view_character(request, character_id):
                     force_raw_damage=bool(data.get('force_raw_damage', False)),
                     is_grenade=bool(data.get('is_grenade', False)),
                     is_action=bool(data.get('is_action', False)),
-                    no_weapon=bool(data.get('no_weapon', False)))
+                    no_weapon=bool(data.get('no_weapon', False)),
+                    fail_target=data.get('fail_target'))
                 messages.add_message(request, result.message_level, _(
                     "<strong>{attacker} vs {defender}</strong> {label}").format(
+                        attacker=result.attacker, defender=result.defender, label=result.long_label))
+                if result.fail:
+                    messages.add_message(request, result.message_level, _(
+                        "<strong>{attacker} vs {defender}</strong> {label}").format(
                         attacker=result.attacker, defender=result.defender, label=result.long_label))
             elif authorized and type == 'burst' and data.get('targets'):
                 histories = character.burst(
@@ -340,7 +351,11 @@ def view_character(request, character_id):
                     elif method == 'reload':
                         equip.reload(is_action=is_action)
                     elif method == 'use':
-                        equip.use(is_action=is_action)
+                        for effect in equip.use(is_action=is_action):
+                            for damage in effect.damages:
+                                messages.add_message(request, damage.message_level, _(
+                                    "<strong>{character}</strong> {label}").format(
+                                    character=character, label=damage.label))
                     elif method == 'repair':
                         equip.repair(value=int(data.get('condition') or 100), is_action=is_action)
                     elif method == 'drop':
@@ -351,7 +366,11 @@ def view_character(request, character_id):
                 effect_id, effect_name = data.get('effect-id'), data.get('effect-name')
                 if method == 'add':
                     filter = dict(pk=effect_id) if effect_id else dict(name__icontains=effect_name)
-                    Effect.objects.filter(**filter).first().affect(character)
+                    for effect in Effect.objects.filter(**filter).first().affect(character):
+                        for damage in effect.damages:
+                            messages.add_message(request, damage.message_level, _(
+                                "<strong>{character}</strong> {label}").format(
+                                character=character, label=damage.label))
                 elif method == 'remove':
                     scope = data.get('scope')
                     if scope == 'character':
@@ -367,6 +386,7 @@ def view_character(request, character_id):
                 character.thirst = int(data.get('thirst'))
                 character.hunger = int(data.get('hunger'))
                 character.sleep = int(data.get('sleep'))
+                character.is_resting = bool(data.get('is_resting', False))
                 character.save()
             elif type == 'log':
                 log_id, log_text, log_private = int(data.get('log') or 0), data.get('text'), bool(data.get('private'))
@@ -486,7 +506,9 @@ def simulation(request):
                 data = data.dict()
                 data.pop('character')
                 result = attacker.fight(**data, simulation=True)
-                return result.to_dict(extra=('description',))
+                result_data = result.to_dict(extra=('description',))
+                result_data['fail'] = result.fail.to_dict(extra=('description',)) if result.fail else None
+                return result_data
         except Exception as e:  # noqa
             return str(e)
     return ""

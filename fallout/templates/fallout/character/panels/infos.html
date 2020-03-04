@@ -26,7 +26,7 @@
                     {% for value, width, class, label in fight.all %}
                         {% if value %}
                             {% localize off %}
-                            <div class="progress-bar progress-bar-striped bg-{{ class }}" role="progressbar"
+                            <div class="progress-bar progress-bar-striped bg-{{ class }} text-light" role="progressbar"
                                  aria-valuenow="{{ value }}" aria-valuemin="0" aria-valuemax="{{ roll.count }}"
                                  style="width: {{ width }}%" title="{{ label }}" data-toggle="tooltip" data-placement="top">
                             {% endlocalize %}
@@ -58,7 +58,7 @@
                     {% for value, width, class, label in roll.all %}
                         {% if value %}
                             {% localize off %}
-                            <div class="progress-bar progress-bar-striped bg-{{ class }}" role="progressbar"
+                            <div class="progress-bar bg-{{ class }} text-light" role="progressbar"
                                  aria-valuenow="{{ value }}" aria-valuemin="0" aria-valuemax="{{ roll.count }}"
                                  style="width: {{ width }}%" title="{{ label }}" data-toggle="tooltip" data-placement="bottom">
                             {% endlocalize %}

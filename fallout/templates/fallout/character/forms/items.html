@@ -31,7 +31,7 @@
                                 {% endif %}
                             {% endwith %}
                             <p class="card-text">
-                                <small class="badge badge-primary align-middle">
+                                <small class="badge badge-light align-middle">
                                     {{ equip.charge|floatformat:2 }} {% trans "kg" %}
                                 </small>
                                 <small class="badge badge-warning align-middle">
@@ -43,24 +43,16 @@
                                     </small>
                                 {% endif %}
                                 {% for modifier in item.modifiers.all %}
-                                    {% if modifier.stats in 'rads hunger thirst sleep' %}
-                                        <small class="badge {% if modifier.value > 0 %}badge-danger{% else %}badge-success{% endif %} align-middle">
-                                            {% if modifier.value > 0 %}+{% endif %}{{ modifier.value }}
-                                            {{ modifier.get_stats_display }}
-                                        </small>
-                                    {% else %}
-                                        <small class="badge {% if modifier.value > 0 %}badge-success{% else %}badge-danger{% endif %} align-middle">
-                                            {% if modifier.value > 0 %}+{% endif %}{{ modifier.value }}
-                                            {{ modifier.get_stats_display }}
-                                        </small>
-                                    {% endif %}
+                                    <small class="badge {% if modifier.bonus %}badge-success{% else %}badge-danger{% endif %} align-middle">
+                                        {{ modifier.label }}
+                                    </small>
                                 {% endfor %}
                                 {% with condition=equip.current_condition %}
                                     {% if condition %}
                                         <div class="progress">
                                             {% localize off %}
                                             <div role="progressbar" style="width: {{ condition }}%;" aria-valuenow="{{ condition }}"
-                                                 aria-valuemin="0" aria-valuemax="100" class="progress-bar
+                                                 aria-valuemin="0" aria-valuemax="100" class="progress-bar text-light
                                                  bg-{% if condition < 25 %}danger{% elif condition < 50 %}warning{% else %}success{% endif %}">
                                             {% endlocalize %}
                                                 {{ condition|floatformat:0 }}%
@@ -70,7 +62,7 @@
                                         <div class="progress">
                                             <div role="progressbar" style="width: 100%;" aria-valuenow="100"
                                                  aria-valuemin="0" aria-valuemax="100"
-                                                 class="progress-bar progress-bar-striped bg-dark">
+                                                 class="progress-bar progress-bar-striped bg-dark text-light">
                                                 {% trans "incassable" %}
                                             </div>
                                         </div>

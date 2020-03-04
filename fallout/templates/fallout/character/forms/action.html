@@ -94,6 +94,14 @@
                            value="{{ character.karma }}" min="-1000" aria-valuemin="-1000" max="1000" aria-valuemax="1000"/>
                 </td>
             </tr>
+            <tr>
+                <td class="text-right align-middle" colspan="2">
+                    <label class="form-check-label" class="d-inline" title="{% trans "Se repose ?" %}">
+                        <input class="form-check-input" type="checkbox" name="is_resting" {% if character.is_resting %}checked{% endif %}>
+                        {% trans "Se repose ?" %}
+                    </label>
+                </td>
+            </tr>
         </tbody>
         <tfoot class="thead-dark">
             <tr>

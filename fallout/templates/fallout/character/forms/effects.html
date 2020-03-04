@@ -26,7 +26,7 @@
                                         {% for value, date, css in effect.progress %}
                                             {% localize off %}
                                             <div role="progressbar" style="width: {{ value }}%;" aria-valuenow="{{ value }}"
-                                                 aria-valuemin="0" aria-valuemax="100" class="progress-bar bg-{{ css }}"
+                                                 aria-valuemin="0" aria-valuemax="100" class="progress-bar bg-{{ css }} text-light"
                                             {% endlocalize %}
                                                  {% if date < current_date %}title="{% trans "Actif depuis" %} {{ date|timesince:current_date }}"
                                                  {% elif date >= current_date %}title="{% trans "Actif encore" %} {{ date|timeuntil:current_date }}"{% endif %}
@@ -40,9 +40,8 @@
                         {% endif %}
                         <p class="card-text">
                             {% for modifier in info.modifiers.all %}
-                                <small class="badge {% if modifier.value > 0 %}badge-success{% else %}badge-danger{% endif %} align-middle">
-                                    {% if modifier.value > 0 %}+{% endif %}{{ modifier.value }}
-                                    {{ modifier.get_stats_display }}
+                                <small class="badge {% if modifier.bonus %}badge-success{% else %}badge-danger{% endif %} align-middle">
+                                    {{ modifier.label }}
                                 </small>
                             {% endfor %}
                         </p>

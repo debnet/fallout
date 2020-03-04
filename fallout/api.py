@@ -11,8 +11,8 @@ from rest_framework.generics import get_object_or_404
 
 from fallout.enums import BODY_PARTS, DAMAGES_TYPES, LIST_EDITABLE_STATS, ROLL_STATS
 from fallout.models import (
-    MODELS, Campaign, Character, CharacterEffect, Equipment, Item,
-    Loot, LootTemplate, DamageHistory, FightHistory, RollHistory)
+    MODELS, Campaign, CampaignEffect, Character, CharacterEffect, Equipment, Effect,
+    Item, Loot, LootTemplate, DamageHistory, FightHistory, RollHistory)
 
 
 # Serializer sans statistiques pour le personnage
@@ -38,6 +38,15 @@ def is_authorized(request, campaign):
     if not authorized:
         raise PermissionDenied()
     return authorized
+
+
+class RecursiveField(serializers.Serializer):
+    """
+    Serializer permettant d'utiliser le serializer parent en tant que champ
+    """
+    def to_representation(self, value):
+        serializer = self.parent.__class__(value, context=self.context)
+        return serializer.data
 
 
 class NextTurnInputSerializer(BaseCustomSerializer):
@@ -136,6 +145,37 @@ def campaign_roll(request, campaign_id):
         raise ValidationError(str(exception))
 
 
+class EffectAffectInputSerializer(BaseCustomSerializer):
+    """
+    Sérializer d'entrée pour l'affectation d'un effet
+    """
+    effect = serializers.PrimaryKeyRelatedField(queryset=Effect.objects.order_by('name'), label=_("effet"))
+
+
+@to_model_serializer(CampaignEffect)
+class CampaignEffectSerializer(CommonModelSerializer):
+    """
+    Serializer des butins
+    """
+    campaign = create_model_serializer(Campaign)(read_only=True, label=_("campagne"))
+    effect = create_model_serializer(Effect)(read_only=True, label=_("effet"))
+    damages = create_model_serializer(DamageHistory)(read_only=True, many=True, label=_("dégâts"))
+
+
+@api_view_with_serializer(['POST'], input_serializer=EffectAffectInputSerializer, serializer=CampaignEffectSerializer)
+def campaign_effect(request, campaign_id):
+    """
+    API permettant d'affecter un effet à une campagne
+    """
+    campaign = get_object_or_404(Campaign, pk=campaign_id)
+    is_authorized(request, campaign)
+    effect = request.validated_data.get('effect')
+    try:
+        return effect.affect(campaign)
+    except Exception as exception:
+        raise ValidationError(str(exception))
+
+
 @api_view_with_serializer(['POST'], input_serializer=RollInputSerializer, serializer=RollHistorySerializer)
 def character_roll(request, character_id):
     """
@@ -174,6 +214,8 @@ class FightInputSerializer(BaseFightInputSerializer):
     """
     target_part = serializers.ChoiceField(
         choices=BODY_PARTS, allow_blank=True, required=False, label=_("partie du corps"))
+    fail_target = serializers.PrimaryKeyRelatedField(
+        queryset=Character.objects.order_by('name'), label=_("cible d'échec"))
     hit_chance_modifier = serializers.IntegerField(initial=0, required=False, label=_("modificateur"))
     force_success = serializers.BooleanField(initial=False, required=False, label=_("succès ?"))
     force_critical = serializers.BooleanField(initial=False, required=False, label=_("critique ?"))
@@ -206,6 +248,7 @@ class FightHistorySerializer(HistorySerializer):
     attacker = SimpleCharacterSerializer(read_only=True, label=_("attaquant"))
     defender = SimpleCharacterSerializer(read_only=True, label=_("défenseur"))
     damage = create_model_serializer(DamageHistory)(read_only=True, label=_("dégâts"))
+    fail = RecursiveField(read_only=True)
 
 
 @api_view_with_serializer(['POST'], input_serializer=FightInputSerializer, serializer=FightHistorySerializer)
@@ -342,6 +385,30 @@ def character_copy(request, character_id):
         raise ValidationError(str(exception))
 
 
+@to_model_serializer(CharacterEffect)
+class CharacterEffectSerializer(CommonModelSerializer):
+    """
+    Serializer des butins
+    """
+    character = SimpleCharacterSerializer(read_only=True, label=_("personnage"))
+    effect = create_model_serializer(Effect)(read_only=True, label=_("effet"))
+    damages = create_model_serializer(DamageHistory)(read_only=True, many=True, label=_("dégâts"))
+
+
+@api_view_with_serializer(['POST'], input_serializer=EffectAffectInputSerializer, serializer=CharacterEffectSerializer)
+def character_effect(request, character_id):
+    """
+    API permettant d'affecter un effet à un personnage
+    """
+    character = get_object_or_404(Character.objects.select_related('campaign'), pk=character_id)
+    is_authorized(request, character.campaign)
+    effect = request.validated_data.get('effect')
+    try:
+        return effect.affect(character)
+    except Exception as exception:
+        raise ValidationError(str(exception))
+
+
 @to_model_serializer(Equipment)
 class EquipmentSerializer(CommonModelSerializer):
     """
@@ -351,13 +418,27 @@ class EquipmentSerializer(CommonModelSerializer):
     item = create_model_serializer(Item, exclude=('effects', 'ammunitions'))(read_only=True, label=_("objet"))
 
 
-@to_model_serializer(CharacterEffect)
-class CharacterEffectSerializer(CommonModelSerializer):
+class ItemGiveInputSerializer(BaseCustomSerializer):
     """
-    Serializer de sortie pour afficher des effets actifs sur un personnage
+    Serializer d'entrée pour donner des objets
     """
-    character = SimpleCharacterSerializer(read_only=True, label=_("personnage"))
-    effect = create_model_serializer(CharacterEffect)(read_only=True, label=_("effet"))
+    item = serializers.PrimaryKeyRelatedField(queryset=Item.objects.order_by('name'), label=_("objet"))
+    quantity = serializers.IntegerField(initial=1, required=False, label=_("quantité"))
+    condition = serializers.IntegerField(initial=100, required=False, label=_("état"))
+
+
+@api_view_with_serializer(['POST'], input_serializer=ItemGiveInputSerializer, serializer=EquipmentSerializer)
+def character_item(request, character_id):
+    """
+    API permettant de donner un objet à un personnage
+    """
+    character = get_object_or_404(Character.objects.select_related('campaign'), pk=character_id)
+    is_authorized(request, character.campaign)
+    item = request.validated_data.pop('item')
+    try:
+        return item.give(character=character, **request.validated_data)
+    except Exception as exception:
+        raise ValidationError(str(exception))
 
 
 class ActionInputSerializer(BaseCustomSerializer):
@@ -435,28 +516,6 @@ def equipment_drop(request, equipment_id):
         raise ValidationError(str(exception))
 
 
-class ItemGiveInputSerializer(BaseCustomSerializer):
-    """
-    Serializer d'entrée pour donner des objets
-    """
-    character = serializers.PrimaryKeyRelatedField(queryset=Character.objects.order_by('name'), label=_("personnage"))
-    quantity = serializers.IntegerField(initial=1, required=False, label=_("quantité"))
-    condition = serializers.IntegerField(initial=100, required=False, label=_("état"))
-
-
-@api_view_with_serializer(['POST'], input_serializer=ItemGiveInputSerializer, serializer=EquipmentSerializer)
-def item_give(request, item_id):
-    """
-    API permettant de donner un objet à un personnage
-    """
-    item = get_object_or_404(Item, pk=item_id)
-    is_authorized(request, request.validated_data.get('character').campaign)
-    try:
-        return item.give(**request.validated_data)
-    except Exception as exception:
-        raise ValidationError(str(exception))
-
-
 class LootTakeInputSerializer(ActionInputSerializer):
     """
     Serializer d'entrée pour ramasser un butin
@@ -519,16 +578,18 @@ urlpatterns = [
     path('campaign/<int:campaign_id>/clear/', campaign_clear_loot, name='campaign_clear_loot'),
     path('campaign/<int:campaign_id>/roll/', campaign_roll, name='campaign_roll'),
     path('campaign/<int:campaign_id>/damage/', campaign_damage, name='campaign_damage'),
+    path('campaign/<int:campaign_id>/effect/', campaign_effect, name='campaign_effect'),
     path('character/<int:character_id>/roll/', character_roll, name='character_roll'),
     path('character/<int:character_id>/fight/', character_fight, name='character_fight'),
     path('character/<int:character_id>/burst/', character_burst, name='character_burst'),
     path('character/<int:character_id>/damage/', character_damage, name='character_damage'),
     path('character/<int:character_id>/copy/', character_copy, name='character_copy'),
+    path('character/<int:character_id>/effect/', character_effect, name='character_effect'),
+    path('character/<int:character_id>/item/', character_item, name='character_item'),
     path('equipment/<int:equipment_id>/equip/', equipment_equip, name='equipment_equip'),
     path('equipment/<int:equipment_id>/use/', equipment_use, name='equipment_use'),
     path('equipment/<int:equipment_id>/reload/', equipment_reload, name='equipment_reload'),
     path('equipment/<int:equipment_id>/drop/', equipment_drop, name='equipment_drop'),
-    path('item/<int:item_id>/give/', item_give, name='item_give'),
     path('loot/<int:loot_id>/take/', loot_take, name='loot_take'),
     path('loottemplate/<int:template_id>/open/', loottemplate_open, name='loottemplate_open'),
 ] + router.urls

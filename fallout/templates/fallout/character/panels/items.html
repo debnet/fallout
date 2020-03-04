@@ -5,30 +5,30 @@
         {% if authorized %}
             <form method="post" action="{{ request.path }}" class="form-inline justify-content-center">
                 <div class="form-row align-items-center">
-                    <div class="col-auto input-group">
+                    <div class="col-auto input-group input-group-sm">
                         <div class="input-group-prepend">
                             <label for="item-quantity" class="input-group-text">{% trans "Quantité" %}</label>
                         </div>
-                        <input type="number" class="form-control" id="item-quantity"
+                        <input type="number" class="form-control form-control-sm" id="item-quantity"
                                name="quantity" placeholder="{% trans "Qte" %}" value="1" style="width: 80px"
                                aria-valuemin="1" min="1">
                     </div>
-                    <div class="col-auto input-group">
+                    <div class="col-auto input-group input-group-sm">
                         <div class="input-group-prepend">
                             <label for="item-condition" class="input-group-text">{% trans "Condition" %}</label>
                         </div>
-                        <input type="number" class="form-control" id="item-condition"
+                        <input type="number" class="form-control form-control-sm" id="item-condition"
                                name="condition" placeholder="{% trans "Cond" %}" value="100" style="width: 80px"
                                aria-valuemin="1" min="1" aria-valuemax="100" max="100">
                     </div>
                     <div class="col-auto">
                         <label class="sr-only" for="item-name">{% trans "Objet" %}</label>
-                        <input type="text" class="form-control mb-2 mb-sm-0" id="item-name"
+                        <input type="text" class="form-control form-control-sm mb-2 mb-sm-0" id="item-name"
                                name="item-name" data-for="item-id" placeholder="{% trans "Objet" %}">
                         <input type="hidden" id="item-id" name="item-id" />
                     </div>
                     <div class="col-auto">
-                        <button type="submit" class="btn btn-primary"
+                        <button type="submit" class="btn btn-sm btn-primary"
                                 name="method" value="add">{% trans "Ajouter" %}</button>
                         <input type="hidden" name="type" value="item" />
                         {% csrf_token %}
