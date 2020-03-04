@@ -8,12 +8,12 @@
                     <span class="card-title"><a href="{% url 'fallout:character' character.id %}">{{ character.name }}</a></span>
                     {% if character.title %}<small class="card-subtitle mb-2 text-muted">{{ character.title }}</small>{% endif %}
                     <div class="float-right">
-                        <small class="badge badge-dark align-middle">{% trans "Niveau" %} {{ character.level }}</small>
                         {% if character.is_player %}
                             <small class="badge badge-success align-middle">{% trans "PJ" %}</small>
                         {% else %}
                             <small class="badge badge-warning align-middle">{% trans "PNJ" %}</small>
                         {% endif %}
+                        <small class="badge badge-light align-middle">{% trans "Niveau" %} {{ character.level }}</small>
                         {% if character.health == 0 %}
                             <small class="badge badge-danger align-middle">{% trans "KO" %}</small>
                         {% elif campaign.current_character == character %}

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-03-03 14:30+0100\n"
+"POT-Creation-Date: 2020-03-04 01:23+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -187,6 +187,9 @@ msgstr "Non-player characters only"
 msgid "groupe"
 msgstr "group"
 
+msgid "effet"
+msgstr "effect"
+
 msgid "cible"
 msgstr "target"
 
@@ -195,6 +198,9 @@ msgstr "distance"
 
 msgid "partie du corps"
 msgstr "body part"
+
+msgid "cible d'échec"
+msgstr "fail target"
 
 msgid "succès ?"
 msgstr "success?"
@@ -267,9 +273,6 @@ msgstr "active?"
 
 msgid "objet"
 msgstr "item"
-
-msgid "effet"
-msgstr "effect"
 
 msgid "quantité"
 msgstr "quantity"
@@ -370,7 +373,7 @@ msgstr "critical chance"
 msgid "chance de dégâts bruts"
 msgstr "raw damage chance"
 
-msgid "modificateur dégats critiques"
+msgid "modificateur dégâts critiques"
 msgstr "critical damage modifier"
 
 msgid "armes à feu légères"
@@ -1015,9 +1018,6 @@ msgstr "critical chance"
 msgid "chances de dégâts bruts"
 msgstr "raw damage chance"
 
-msgid "modificateur dégâts critiques"
-msgstr "critical damage modifier"
-
 msgid "Cette fonction ne peut être utilisée que par les statistiques."
 msgstr "This functon can only be used by statistics."
 
@@ -1399,7 +1399,7 @@ msgstr "armor threshold"
 msgid "résistance armure"
 msgstr "armor resistance"
 
-msgid "dégats armure"
+msgid "dégâts armure"
 msgstr "armor damage"
 
 msgid "absorption dégâts"
@@ -1464,8 +1464,8 @@ msgid "{label} : {status} - {damage}"
 msgstr "{label}: {status} - {damage}"
 
 #, python-brace-format
-msgid "{real_damage} {damage_type} infligés ({body_part}) sur {raw_damage}"
-msgstr "{real_damage} {damage_type} of {raw_damage} inflicted ({body_part})"
+msgid "{real_damage} {damage_type} infligés ({body_part}) sur {base_damage}"
+msgstr "{real_damage} {damage_type} of {base_damage} inflicted ({body_part})"
 
 #, python-brace-format
 msgid "{weapon} ({skill_name} = {skill}%)"
@@ -1586,6 +1586,9 @@ msgstr "KO"
 msgid "Actif"
 msgstr "Active"
 
+msgid "Repos"
+msgstr "Resting"
+
 msgid "Actif depuis"
 msgstr "Active since"
 
@@ -1688,9 +1691,6 @@ msgstr "m"
 msgid "Avancer"
 msgstr "Pass"
 
-msgid "Repos"
-msgstr "Resting"
-
 msgid "Aucun"
 msgstr "None"
 
@@ -1765,6 +1765,9 @@ msgstr "Logs"
 
 msgid "points de vie"
 msgstr "Health points"
+
+msgid "Se repose ?"
+msgstr "Resting?"
 
 msgid "OK"
 msgstr "OK"

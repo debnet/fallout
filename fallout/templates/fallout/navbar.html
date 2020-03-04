@@ -11,12 +11,12 @@
                     <a class="dropdown-item{% if campaign == current_campaign %} active{% endif %}"
                        href="{% url 'fallout:campaign' campaign.id %}">
                         {% if authorized %}
-                        {% if campaign.pcs %}
-                            <small class="badge badge-success align-middle">{{ campaign.pcs }}</small>
-                        {% endif %}
-                        {% if campaign.npcs %}
-                            <small class="badge badge-warning align-middle">{{ campaign.npcs }}</small>
-                        {% endif %}
+                            {% if campaign.pcs %}
+                                <small class="badge badge-success align-middle">{{ campaign.pcs }}</small>
+                            {% endif %}
+                            {% if campaign.npcs %}
+                                <small class="badge badge-warning align-middle">{{ campaign.npcs }}</small>
+                            {% endif %}
                         {% endif %}
                         {{ campaign.name }}
                         {% if campaign.title %}
@@ -41,10 +41,13 @@
                         {% else %}
                             <small class="badge badge-warning align-middle">{% trans "PNJ" %}</small>
                         {% endif %}
+                        <span class="badge badge-light align-middle">{{ character.level }}</span>
                         {% if character.health == 0 %}
                             <small class="badge badge-danger align-middle">{% trans "KO" %}</small>
                         {% elif character.campaign.current_character == character %}
                             <small class="badge badge-info align-middle">{% trans "Actif" %}</small>
+                        {% elif character.is_resting %}
+                            <small class="badge badge-info align-middle">{% trans "Repos" %}</small>
                         {% endif %}
                         {{ character.name }}
                         {% if character.title %}

@@ -281,7 +281,7 @@ class CharacterAdmin(EntityAdmin):
 
     def damage(self, request, queryset):
         """
-        Action spécifique pour infliger des dégats aux personnages sélectionnés
+        Action spécifique pour infliger des dégâts aux personnages sélectionnés
         """
         if 'damage' in request.POST:
             form = DamageCharacterForm(request.POST)

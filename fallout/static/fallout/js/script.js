@@ -156,6 +156,8 @@ $(document).ready(function($) {
                         messages.push(e.description);
                     });
                     alert(messages.join('\n\n'))
+                } else if (result.fail) {
+                    alert(`${result.description}\n\n${result.fail.description}`)
                 } else alert(`${result.description}`);
             }
         });

@@ -38,12 +38,14 @@
                 {% else %}
                     <span class="badge badge-warning align-middle">{% trans "PNJ" %}</span>
                 {% endif %}
+                <span class="badge badge-light">{% trans "Niveau" %} {{ character.level }}</span>
                 {% if character.health == 0 %}
                     <span class="badge badge-danger align-middle">{% trans "KO" %}</span>
                 {% elif character.campaign.current_character == character %}
                     <span class="badge badge-info align-middle">{% trans "Actif" %}</span>
+                {% elif character.is_resting %}
+                    <span class="badge badge-info align-middle">{% trans "Repos" %}</span>
                 {% endif %}
-                <span class="font-weight-bold">{% trans "Niveau" %} {{ character.level }}</span>
                 {% if character.description %} {{ character.description|safe }}{% endif %}
                 {% if character.background %}
                     <a href="#character-background" data-toggle="collapse" aria-expanded="false"

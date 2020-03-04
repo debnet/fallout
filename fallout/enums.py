@@ -78,7 +78,7 @@ SECONDARY_STATS = (
     (STATS_DAMAGE_MODIFIER, _("modificateur de dégâts")),
     (STATS_CRITICAL_CHANCE, _("chance de critique")),
     (STATS_CRITICAL_RAW_CHANCE, _("chance de dégâts bruts")),
-    (STATS_CRITICAL_DAMAGE, _("modificateur dégats critiques")),
+    (STATS_CRITICAL_DAMAGE, _("modificateur dégâts critiques")),
 )
 LIST_SECONDARY_STATS = dict(SECONDARY_STATS)
 
