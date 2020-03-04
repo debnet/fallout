@@ -40,7 +40,7 @@
                         <form method="post" action="{{ request.path }}" class="d-inline">
                             {% csrf_token %}
                             <button type="submit" name="rest" value="{{ character.id }}"
-                                    class="btn btn-sm badge {% if character.is_resting %}badge-info{% else %}badge-secondary{% endif %}">
+                                    class="btn btn-sm align-middle badge {% if character.is_resting %}badge-info{% else %}badge-secondary{% endif %}">
                                 {% trans "Repos" %}
                             </button>
                         </form>
