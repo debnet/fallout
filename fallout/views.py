@@ -163,11 +163,11 @@ def view_campaign(request, campaign_id):
                 effect_id, effect_name = data.get('effect-id'), data.get('effect-name')
                 if method == 'add':
                     filter = dict(pk=effect_id) if effect_id else dict(name__icontains=effect_name)
-                    for effect in Effect.objects.filter(**filter).first().affect(campaign):
-                        for damage in effect.damages:
-                            messages.add_message(request, damage.message_level, _(
-                                "<strong>{character}</strong> {label}").format(
-                                character=damage.character, label=damage.label))
+                    effect = Effect.objects.filter(**filter).first().affect(campaign)
+                    for damage in effect.damages:
+                        messages.add_message(request, damage.message_level, _(
+                            "<strong>{character}</strong> {label}").format(
+                            character=damage.character, label=damage.label))
                 elif method == 'remove':
                     scope = data.get('scope')
                     if scope == 'character':
@@ -366,11 +366,11 @@ def view_character(request, character_id):
                 effect_id, effect_name = data.get('effect-id'), data.get('effect-name')
                 if method == 'add':
                     filter = dict(pk=effect_id) if effect_id else dict(name__icontains=effect_name)
-                    for effect in Effect.objects.filter(**filter).first().affect(character):
-                        for damage in effect.damages:
-                            messages.add_message(request, damage.message_level, _(
-                                "<strong>{character}</strong> {label}").format(
-                                character=character, label=damage.label))
+                    effect = Effect.objects.filter(**filter).first().affect(character)
+                    for damage in effect.damages:
+                        messages.add_message(request, damage.message_level, _(
+                            "<strong>{character}</strong> {label}").format(
+                            character=character, label=damage.label))
                 elif method == 'remove':
                     scope = data.get('scope')
                     if scope == 'character':

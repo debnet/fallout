@@ -8,7 +8,7 @@
                     <div class="input-group-prepend">
                         <label for="pick-character-list" class="input-group-text">{% trans "Joueur" %}</label>
                     </div>
-                    <select name="character" id="pick-character-list" class="form-control custom-select">
+                    <select name="character" id="pick-character-list" class="form-control form-control-sm custom-select custom-select-sm">
                         {% for character in characters %}
                             <option value="{{ character.id }}">{{ character.name }}</option>
                         {% endfor %}
