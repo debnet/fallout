@@ -46,7 +46,7 @@ msgid "Valeur actuelle : {}."
 msgstr "Current value: {}"
 
 msgid " (Spécialité +{}) "
-msgstr "(Speciality +{}) "
+msgstr " (Speciality +{}) "
 
 msgid "Les personnages sélectionnés ont été dupliqués."
 msgstr "Selected characters were duplicated."
