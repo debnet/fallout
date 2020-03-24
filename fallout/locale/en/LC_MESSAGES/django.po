@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-03-04 01:23+0100\n"
+"POT-Creation-Date: 2020-03-24 22:17+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -154,18 +154,6 @@ msgstr "Fight"
 msgid "dégâts"
 msgstr "damages"
 
-msgid "secondes"
-msgstr "seconds"
-
-msgid "au repos ?"
-msgstr "resting?"
-
-msgid "valider ?"
-msgstr "validate?"
-
-msgid "réinitialiser ?"
-msgstr "reinit?"
-
 msgid "statistique"
 msgstr "statistic"
 
@@ -279,6 +267,18 @@ msgstr "quantity"
 
 msgid "état"
 msgstr "condition"
+
+msgid "secondes"
+msgstr "seconds"
+
+msgid "au repos ?"
+msgstr "resting?"
+
+msgid "valider ?"
+msgstr "validate?"
+
+msgid "réinitialiser ?"
+msgstr "reinit?"
 
 msgid "Fallout RPG"
 msgstr "Fallout RPG"
@@ -1070,6 +1070,9 @@ msgstr "additional data"
 msgid "aucun malus"
 msgstr "no malus"
 
+msgid "environnement radioactif"
+msgstr "radioactive environment"
+
 msgid "Une attaque en rafale doit cibler au moins un personnage."
 msgstr "A burst attack must target at least one character."
 
@@ -1418,6 +1421,9 @@ msgstr "{real_damage} points of {type} ({body_part})"
 #, python-brace-format
 msgid "{real_damage} points de {type}"
 msgstr "{real_damage} points of {type}"
+
+msgid "{label} - source : {source}"
+msgstr "{label} - source: {source}"
 
 msgid "historique de dégâts"
 msgstr "damage history"

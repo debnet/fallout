@@ -49,29 +49,6 @@ class RecursiveField(serializers.Serializer):
         return serializer.data
 
 
-class NextTurnInputSerializer(BaseCustomSerializer):
-    """
-    Serializer d'entrée pour changer le tour des personnages dans une campagne
-    """
-    seconds = serializers.IntegerField(initial=0, required=False, label=_("secondes"))
-    resting = serializers.BooleanField(initial=False, required=False, label=_("au repos ?"))
-    apply = serializers.BooleanField(initial=True, required=False, label=_("valider ?"))
-    reset = serializers.BooleanField(initial=False, required=False, label=_("réinitialiser ?"))
-
-
-@api_view_with_serializer(['POST'], input_serializer=NextTurnInputSerializer, serializer=SimpleCharacterSerializer)
-def campaign_next_turn(request, campaign_id):
-    """
-    API pour changer le tour des personnages
-    """
-    campaign = get_object_or_404(Campaign, pk=campaign_id)
-    is_authorized(request, campaign)
-    try:
-        return campaign.next_turn(**request.validated_data)
-    except Exception as exception:
-        raise ValidationError(str(exception))
-
-
 @api_view_with_serializer(['POST'])
 def campaign_clear_loot(request, campaign_id):
     """
@@ -571,6 +548,38 @@ def loottemplate_open(request, template_id):
         raise ValidationError(str(exception))
 
 
+class NextTurnInputSerializer(BaseCustomSerializer):
+    """
+    Serializer d'entrée pour changer le tour des personnages dans une campagne
+    """
+    seconds = serializers.IntegerField(initial=0, required=False, label=_("secondes"))
+    resting = serializers.BooleanField(initial=False, required=False, label=_("au repos ?"))
+    apply = serializers.BooleanField(initial=True, required=False, label=_("valider ?"))
+    reset = serializers.BooleanField(initial=False, required=False, label=_("réinitialiser ?"))
+
+
+class NextTurnSerializer(BaseCustomSerializer):
+    """
+    Serializer des données de fin de tour
+    """
+    character = SimpleCharacterSerializer(read_only=True, label=_("personnage"))
+    damages = DamageHistorySerializer(read_only=True, many=True, label=_("dégâts"))
+
+
+@api_view_with_serializer(['POST'], input_serializer=NextTurnInputSerializer, serializer=NextTurnSerializer)
+def campaign_next_turn(request, campaign_id):
+    """
+    API pour changer le tour des personnages
+    """
+    campaign = get_object_or_404(Campaign, pk=campaign_id)
+    is_authorized(request, campaign)
+    try:
+        character, damages = campaign.next_turn(**request.validated_data)
+        return dict(character=character, damages=damages)
+    except Exception as exception:
+        raise ValidationError(str(exception))
+
+
 namespace = 'fallout-api'
 app_name = 'fallout'
 urlpatterns = [
@@ -590,7 +599,7 @@ urlpatterns = [
     path('equipment/<int:equipment_id>/use/', equipment_use, name='equipment_use'),
     path('equipment/<int:equipment_id>/reload/', equipment_reload, name='equipment_reload'),
     path('equipment/<int:equipment_id>/drop/', equipment_drop, name='equipment_drop'),
-    path('loot/<int:loot_id>/take/', loot_take, name='loot_take'),
     path('loottemplate/<int:template_id>/open/', loottemplate_open, name='loottemplate_open'),
+    path('loot/<int:loot_id>/take/', loot_take, name='loot_take'),
 ] + router.urls
 urls = (urlpatterns, namespace, app_name)

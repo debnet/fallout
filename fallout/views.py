@@ -185,7 +185,12 @@ def view_campaign(request, campaign_id):
                 if method == 'add':
                     hours, minutes, resting = (
                         int(data.get('hours') or 0), int(data.get('minutes') or 0), 'resting' in data)
-                    campaign.next_turn(seconds=hours * 3600 + minutes * 60, resting=resting, reset=True)
+                    character, damages = campaign.next_turn(
+                        seconds=hours * 3600 + minutes * 60, resting=resting, reset=True)
+                    for damage in damages:
+                        messages.add_message(request, damage.message_level, _(
+                            "<strong>{character}</strong> {label}").format(
+                            character=damage.character, label=damage.label))
             elif type == 'roll':
                 group, stats, modifier, xp = (
                     data.get('group'), data.get('stats'), int(data.get('modifier') or 0), 'xp' in data)
@@ -450,7 +455,11 @@ def next_turn(request, campaign_id):
     if action and campaign and (request.user.is_superuser or campaign.game_master == request.user):
         # Prochain tour
         if 'next' in data:
-            next_character = campaign.next_turn(seconds=int(data.get('seconds') or 0))
+            next_character, damages = campaign.next_turn(seconds=int(data.get('seconds') or 0))
+            for damage in damages:
+                messages.add_message(request, damage.message_level, _(
+                    "<strong>{character}</strong> {label}").format(
+                    character=damage.character, label=damage.label))
             if next_character:
                 return redirect('fallout:character', next_character.id)
         # Fin du tour

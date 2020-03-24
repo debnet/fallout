@@ -10316,7 +10316,7 @@
         "chance": 100,
         "duration": "00:00:01",
         "apply": true,
-        "interval": "00:00:01",
+        "interval": null,
         "damage_chance": 100,
         "next_effect": null,
         "cancel_effect": null
@@ -10343,7 +10343,7 @@
         "thumbnail": "thumbnails/items/chems/chem_super_stimpack_2.png",
         "chance": 100,
         "duration": "00:02:00",
-        "apply": true,
+        "apply": false,
         "interval": "00:01:00",
         "damage_chance": 100,
         "next_effect": null,
