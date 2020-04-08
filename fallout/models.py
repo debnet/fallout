@@ -1034,12 +1034,14 @@ class Character(Entity, Stats):
                 attacker_weapon_equipment.save()
         # Saves characters
         if not simulation:
+            for history in histories:
+                if history.target.reward and history.damage and history.damage.damage_rate:
+                    experience = int(history.target.reward * history.damage.damage_rate)
+                else:
+                    experience = max(history.target.level - self.level, 1) * XP_GAIN_BURST
+                self.add_experience(experience, save=False)
             for target, target_range in targets:
                 target.save()
-                if target.health <= 0 and target.reward:
-                    self.add_experience(target.reward, save=False)
-                else:
-                    self.add_experience(max(target.level - self.level, 1) * XP_GAIN_BURST, save=False)
             self.save()
         return histories
 
@@ -1048,7 +1050,7 @@ class Character(Entity, Stats):
               hit_count: int = 0, log: bool = True, no_weapon: bool = False, simulation: bool = False,
               force_success: bool = False, force_critical: bool = False, force_raw_damage: bool = False,
               attacker_weapon: Optional['Equipment'] = None, attacker_ammo: Optional['Equipment'] = None,
-              fail_target: Union['Character', int] = None, fail: bool = False, **kwargs) -> 'FightHistory':
+              fail_target: Union['Character', int] = None, fail: bool = False, **kwargs) -> Optional['FightHistory']:
         """
         Calcul un round de combat entre deux personnages
         :param target: Personnage ciblé
@@ -1285,10 +1287,11 @@ class Character(Entity, Stats):
             self.action_points -= max(ap_cost, 0)
             if not is_burst and not fail:
                 # Experience only on single shot
-                if target.health <= 0 and target.reward:
-                    self.add_experience(target.reward, save=False)
+                if target.reward and history.damage and history.damage.damage_rate:
+                    experience = int(target.reward * history.damage.damage_rate)
                 else:
-                    self.add_experience(max(target.level - self.level, 1) * XP_GAIN_FIGHT[history.success], save=False)
+                    experience = max(target.level - self.level, 1) * XP_GAIN_FIGHT[history.success]
+                self.add_experience(experience, save=False)
                 self.save()
             if log and not simulation:
                 history.save()
@@ -1383,6 +1386,7 @@ class Character(Entity, Stats):
             elif damage_type in (DAMAGE_SLEEP, HEAL_SLEEP):
                 self.sleep += total_damage
             else:
+                history.damage_rate = min(self.health, abs(total_damage)) / self.stats.max_health
                 self.health -= total_damage
             if save and not simulation:
                 self.save()
@@ -2786,7 +2790,8 @@ class DamageHistory(Damage):
     damage_threshold = models.FloatField(default=0.0, verbose_name=_("absorption dégâts"))
     damage_resistance = models.FloatField(default=0.0, verbose_name=_("résistance dégâts"))
     real_damage = models.SmallIntegerField(default=0, verbose_name=_("dégâts réels"))
-    source = ''
+    damage_rate = models.FloatField(default=0.0, verbose_name=_("taux de dégâts"))
+    source = models.CharField(max_length=200, blank=True, verbose_name=_("source"))
 
     @property
     def css_class(self) -> str:

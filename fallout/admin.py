@@ -728,7 +728,7 @@ class DamageHistoryAdmin(CommonAdmin):
     """
     fieldsets = (
         (_("Informations techniques"), dict(
-            fields=('game_date', 'character', ),
+            fields=('game_date', 'character', 'source', ),
             classes=('wide', ),
         )),
         (_("Dégâts de base"), dict(
@@ -740,7 +740,7 @@ class DamageHistoryAdmin(CommonAdmin):
             classes=('wide', ),
         )),
         (_("Etat du personnage"), dict(
-            fields=('damage_threshold', 'damage_resistance', 'real_damage', ),
+            fields=('damage_threshold', 'damage_resistance', 'real_damage', 'damage_rate', ),
             classes=('wide', ),
         )),
     )

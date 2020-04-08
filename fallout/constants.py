@@ -291,13 +291,13 @@ AP_COST_TAKE = 2  # Take item
 AP_COST_REPAIR = 5  # Repair item
 
 # Experience gains
-XP_GAIN_ROLL_FAIL = 3  # XP gain for roll failure
-XP_GAIN_ROLL_SUCCESS = 2  # XP gain for roll success
+XP_GAIN_ROLL_FAIL = 5  # XP gain for roll failure
+XP_GAIN_ROLL_SUCCESS = 3  # XP gain for roll success
 XP_GAIN_ROLL = (XP_GAIN_ROLL_FAIL, XP_GAIN_ROLL_SUCCESS)
-XP_GAIN_FIGHT_MISS = 3  # XP gain for fight failure (multiplier)
-XP_GAIN_FIGHT_HIT = 2  # XP gain for fight success (multiplier)
+XP_GAIN_FIGHT_MISS = 5  # XP gain for fight failure (multiplier)
+XP_GAIN_FIGHT_HIT = 3  # XP gain for fight success (multiplier)
 XP_GAIN_FIGHT = (XP_GAIN_FIGHT_MISS, XP_GAIN_FIGHT_HIT)
-XP_GAIN_BURST = 3
+XP_GAIN_BURST = 2  # XP gain in burst
 
 # Turn time
 TURN_TIME = 30

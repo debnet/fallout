@@ -325,7 +325,7 @@ class Prod(Base):
 
     CACHE_MIDDLEWARE_ALIAS = 'default'
     CACHE_MIDDLEWARE_SECONDS = 0
-    CACHE_MIDDLEWARE_KEY_PREFIX = 'middleware'
+    CACHE_MIDDLEWARE_KEY_PREFIX = ''
 
     # Cache
     CACHES = {

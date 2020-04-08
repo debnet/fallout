@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-03-24 22:17+0100\n"
+"POT-Creation-Date: 2020-04-08 02:08+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1414,6 +1414,12 @@ msgstr "damage resistance"
 msgid "dégâts réels"
 msgstr "real damage"
 
+msgid "taux de dégâts"
+msgstr "damage rate"
+
+msgid "source"
+msgstr "source"
+
 #, python-brace-format
 msgid "{real_damage} points de {type} ({body_part})"
 msgstr "{real_damage} points of {type} ({body_part})"
@@ -1422,6 +1428,7 @@ msgstr "{real_damage} points of {type} ({body_part})"
 msgid "{real_damage} points de {type}"
 msgstr "{real_damage} points of {type}"
 
+#, python-brace-format
 msgid "{label} - source : {source}"
 msgstr "{label} - source: {source}"
 

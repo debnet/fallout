@@ -511,7 +511,7 @@ def simulation(request):
                 data.pop('character'), data.pop('targets[]'), data.pop('ranges[]')
                 results = attacker.burst(**data, targets=targets, simulation=True)
                 return [result.to_dict(extra=('description',)) for result in results]
-            else:
+            elif data.get('target'):
                 data = data.dict()
                 data.pop('character')
                 result = attacker.fight(**data, simulation=True)
