@@ -192,7 +192,7 @@ class FightInputSerializer(BaseFightInputSerializer):
     target_part = serializers.ChoiceField(
         choices=BODY_PARTS, allow_blank=True, required=False, label=_("partie du corps"))
     fail_target = serializers.PrimaryKeyRelatedField(
-        queryset=Character.objects.order_by('name'), label=_("cible d'échec"))
+        queryset=Character.objects.order_by('name'), required=False, label=_("cible d'échec"))
     hit_chance_modifier = serializers.IntegerField(initial=0, required=False, label=_("modificateur"))
     force_success = serializers.BooleanField(initial=False, required=False, label=_("succès ?"))
     force_critical = serializers.BooleanField(initial=False, required=False, label=_("critique ?"))
