@@ -15,14 +15,26 @@ from fallout.models import (
     Item, Loot, LootTemplate, DamageHistory, FightHistory, RollHistory)
 
 
-# Serializer sans statistiques pour le personnage
-SimpleCharacterSerializer = create_model_serializer(Character, exclude=tuple(LIST_EDITABLE_STATS))
-
 # Désactive les listes déroulantes sur les champs de relations
 disable_relation_fields(*MODELS)
 
 # Création des APIs REST standard pour les modèles de cette application
 router, all_serializers, all_viewsets = create_api(*MODELS)
+
+# Serializer sans statistiques pour le personnage
+BaseCharacterSerializer = create_model_serializer(Character, exclude=tuple(LIST_EDITABLE_STATS))
+
+
+class SimpleCharacterSerializer(BaseCharacterSerializer):
+    """
+    Serializer simplifié pour les personnages
+    """
+    current_charge = serializers.FloatField()
+    used_skill_points = serializers.FloatField()
+    next_required_experience = serializers.IntegerField()
+    previous_required_experience = serializers.IntegerField()
+    required_experience = serializers.IntegerField()
+    labels = serializers.DictField()
 
 
 def is_authorized(request, campaign):
@@ -149,6 +161,27 @@ def campaign_effect(request, campaign_id):
     effect = request.validated_data.get('effect')
     try:
         return effect.affect(campaign)
+    except Exception as exception:
+        raise ValidationError(str(exception))
+
+
+class ExperienceInputSerializer(BaseCustomSerializer):
+    """
+    Serializer pour l'ajout d'expérience à un personnage
+    """
+    amount = serializers.IntegerField(default=0, label=_("quantité"))
+
+
+@api_view_with_serializer(['POST'], input_serializer=ExperienceInputSerializer, serializer=SimpleCharacterSerializer)
+def character_xp(request, character_id):
+    """
+    API pour augmenter l'expérience d'un personnage
+    """
+    character = get_object_or_404(Character.objects.select_related('campaign'), pk=character_id)
+    is_authorized(request, character.campaign)
+    try:
+        character.add_experience(**request.validated_data)
+        return character
     except Exception as exception:
         raise ValidationError(str(exception))
 
@@ -588,6 +621,7 @@ urlpatterns = [
     path('campaign/<int:campaign_id>/roll/', campaign_roll, name='campaign_roll'),
     path('campaign/<int:campaign_id>/damage/', campaign_damage, name='campaign_damage'),
     path('campaign/<int:campaign_id>/effect/', campaign_effect, name='campaign_effect'),
+    path('character/<int:character_id>/xp/', character_xp, name='character_xp'),
     path('character/<int:character_id>/roll/', character_roll, name='character_roll'),
     path('character/<int:character_id>/fight/', character_fight, name='character_fight'),
     path('character/<int:character_id>/burst/', character_burst, name='character_burst'),

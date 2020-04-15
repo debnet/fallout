@@ -640,7 +640,7 @@ class Character(Entity, Stats):
                         get_class(charge, carry_weight, reverse=True, classes=classes, values=values),
                         (charge / carry_weight * 100.0), None, None)
                 lvalue = lvalue - self.previous_required_experience
-                rvalue = self.required_experience - self.previous_required_experience
+                rvalue = self.next_required_experience - self.previous_required_experience
                 rclass = get_class(lvalue, rvalue)
             elif code in LIST_NEEDS:
                 rvalue = 1000
@@ -692,7 +692,7 @@ class Character(Entity, Stats):
             yield StatInfo(code_r, label_r, value_r, None, css_r, None, '%', title_r if css_r else None)
 
     @property
-    def charge(self) -> float:
+    def current_charge(self) -> float:
         """
         Retourne la charge totale de l'équipement du personnage
         """
@@ -710,7 +710,7 @@ class Character(Entity, Stats):
         return sum(getattr(self, skill) * (1 if skill in self.tag_skills else 2) for skill in LIST_SKILLS)
 
     @property
-    def required_experience(self) -> int:
+    def next_required_experience(self) -> int:
         """
         Retourne le nombre de points d'expérience nécessaires pour passer au niveau suivant
         """
@@ -722,6 +722,13 @@ class Character(Entity, Stats):
         Retourne le nombre de points d'expérience nécessaires pour le niveau précédent
         """
         return sum(level * BASE_XP for level in range(1, self.level))
+
+    @property
+    def required_experience(self) -> int:
+        """
+        Retourne le nombre de points d'expérience nécessaires pour passer au niveau suivant
+        """
+        return self.next_required_experience - self.experience
 
     def get_need_label(self, need: str) -> str:
         """
@@ -808,7 +815,7 @@ class Character(Entity, Stats):
             self.experience += amount
             if save:
                 self.save()
-        return self.level, self.required_experience - self.experience
+        return self.level, self.required_experience
 
     def check_level(self) -> Tuple[int, int]:
         """
