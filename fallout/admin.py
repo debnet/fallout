@@ -63,7 +63,7 @@ class CampaignAdmin(CommonAdmin):
     """
     fieldsets = (
         (_("Informations générales"), dict(
-            fields=('name', 'title', 'description', 'image', 'game_master', ),
+            fields=('name', 'title', 'description', 'image', 'game_master', 'view_pc', 'view_npc', 'view_rolls', ),
             classes=('wide', ),
         )),
         (_("Effets"), dict(
@@ -79,7 +79,7 @@ class CampaignAdmin(CommonAdmin):
     list_display_links = ('name', )
     list_display = ('name', 'current_game_date', 'current_character', 'needs', 'radiation', )
     list_editable = ('current_character', 'needs', 'radiation', )
-    list_filter = ('needs', 'game_master', )
+    list_filter = ('needs', 'game_master', 'view_pc', 'view_npc', 'view_rolls', )
     search_fields = ('name', 'title', 'description', )
     ordering = ('name', )
     autocomplete_fields = ('game_master', 'current_character', )
@@ -378,7 +378,7 @@ class CharacterAdmin(EntityAdmin):
                                 quantity=1, condition=randint(mini, maxi) / 100.0)
                             if slot == ITEM_WEAPON:
                                 weapon = equipment
-                        ammo, mini, maxi = data['ammo'], data[f'ammo_min_count'], data[f'ammo_max_count']
+                        ammo, mini, maxi = data['ammo'], data['ammo_min_count'], data['ammo_max_count']
                         if ammo:
                             Equipment.objects.create(
                                 character=character, item=ammo, slot=ITEM_AMMO,

@@ -116,6 +116,9 @@ class Campaign(CommonModel):
         related_name='+', verbose_name=_("personnage actif"))
     radiation = models.PositiveSmallIntegerField(default=0, verbose_name=_("rads par heure"))
     needs = models.BooleanField(default=True, verbose_name=_("besoins activés ?"))
+    view_pc = models.BooleanField(default=False, verbose_name=_("voir les personnages joueurs"))
+    view_npc = models.BooleanField(default=False, verbose_name=_("voir les personnages non-joueurs"))
+    view_rolls = models.BooleanField(default=False, verbose_name=_("voir les jets lancés"))
     damages = []
     # Cache
     _effects = None
@@ -848,7 +851,7 @@ class Character(Entity, Stats):
         # Experience points for the targetted level
         level = level or self.level
         self.level = 1
-        self.experience = sum((l - 1) * BASE_XP for l in range(2, level + 1))
+        self.experience = sum((lvl - 1) * BASE_XP for lvl in range(2, level + 1))
         self.check_level()
         # Randomly distribute a fraction of the skill points on tag skills
         skill_points = self.skill_points - self.used_skill_points
@@ -2747,6 +2750,13 @@ class RollHistory(CommonModel):
         return settings.MESSAGE_INFOS[self.success, self.critical]
 
     @property
+    def pre_label(self) -> str:
+        """
+        Pré-libellé
+        """
+        return _("🎲 {character}").format(character=self.character)
+
+    @property
     def label(self) -> str:
         """
         Libellé du jet
@@ -2770,7 +2780,7 @@ class RollHistory(CommonModel):
             total=self.value + self.modifier)
 
     def __str__(self) -> str:
-        return f"{self.character} - {self.long_label}"
+        return f"{self.pre_label} - {self.long_label}"
 
     class Meta:
         verbose_name = _("historique de jet")
@@ -2815,6 +2825,13 @@ class DamageHistory(Damage):
         return (messages.ERROR, messages.SUCCESS)[self.is_heal]
 
     @property
+    def pre_label(self) -> str:
+        """
+        Pré-libellé
+        """
+        return _("🔥 {character}").format(character=self.character)
+
+    @property
     def label(self) -> str:
         """
         Libellé des dégâts
@@ -2830,8 +2847,12 @@ class DamageHistory(Damage):
                 type=self.get_damage_type_display())
         return _("{label} - source : {source}").format(label=label, source=self.source) if self.source else label
 
+    @property
+    def long_label(self) -> str:
+        return self.label
+
     def __str__(self) -> str:
-        return f"{self.character} - {self.label}"
+        return f"{self.pre_label} - {self.label}"
 
     class Meta:
         verbose_name = _("historique de dégâts")
@@ -2982,6 +3003,13 @@ class FightHistory(CommonModel):
         return settings.MESSAGE_INFOS[self.success, self.critical]
 
     @property
+    def pre_label(self) -> str:
+        """
+        Pré-libellé des acteurs
+        """
+        return _("🗡️️ {attacker} vs. {defender}").format(attacker=self.attacker, defender=self.defender)
+
+    @property
     def label(self) -> str:
         """
         Libellé du combat
@@ -3031,8 +3059,7 @@ class FightHistory(CommonModel):
         return _("{base}\n{damage}").format(base=base_label, damage=self.damage_label)
 
     def __str__(self) -> str:
-        return _("{attacker} vs. {defender} - {long_label}").format(
-            attacker=self.attacker, defender=self.defender, long_label=self.long_label)
+        return f"{self.pre_label} - {self.long_label}"
 
     class Meta:
         verbose_name = _("historique de combat")

@@ -12,8 +12,8 @@ from rest_framework.authtoken.models import Token
 
 from fallout.enums import BODY_PARTS, DAMAGES_TYPES, LIST_SPECIALS, ROLL_STATS
 from fallout.models import (
-    Campaign, Character, CampaignEffect, CharacterEffect, Effect,
-    Equipment, Item, Loot, LootTemplate, RollHistory, FightHistory, Log)
+    Campaign, Character, CampaignEffect, CharacterEffect, Effect, Equipment,
+    Item, Loot, LootTemplate, RollHistory, DamageHistory, FightHistory, Log)
 
 
 @login_required
@@ -56,7 +56,9 @@ def view_dashboard(request, campaign_id):
         'player', 'statistics', 'campaign__current_character'
     ).filter(campaign=campaign, is_active=True)
     if not request.user.is_superuser:
-        characters = characters.filter(Q(player=request.user) | Q(campaign__game_master=request.user))
+        characters = characters.filter(
+            Q(player=request.user) | Q(campaign__game_master=request.user) |
+            Q(is_player=True, campaign__view_pc=True) | Q(is_player=False, campaign__view_npc=True))
 
     authorized = request.user and (request.user.is_superuser or (
         campaign and campaign.game_master_id == request.user.id))
@@ -71,8 +73,8 @@ def view_dashboard(request, campaign_id):
                 character = characters.filter(id=data.get('character')).first()
                 result = character.roll(stats=stats, modifier=modifier)
                 messages.add_message(request, result.message_level, _(
-                    "<strong>{character}</strong> {label}").format(
-                        character=character, label=result.long_label))
+                    "<strong>{pre_label}</strong> {label}").format(
+                        pre_label=result.pre_label, label=result.long_label))
             elif 'rest' in data:
                 characters.filter(id=data.get('rest')).update(is_resting=Q(is_resting=False))
     except ValidationError as error:
@@ -108,7 +110,9 @@ def view_campaign(request, campaign_id):
         'player', 'statistics', 'campaign__current_character'
     ).filter(campaign=campaign, is_active=True)
     if not request.user.is_superuser:
-        characters = characters.filter(Q(player=request.user) | Q(campaign__game_master=request.user))
+        characters = characters.filter(
+            Q(player=request.user) | Q(campaign__game_master=request.user) |
+            Q(is_player=True, campaign__view_pc=True) | Q(is_player=False, campaign__view_npc=True))
     loots = Loot.objects.select_related('item').filter(campaign=campaign).order_by('item__name')
 
     authorized = request.user and (request.user.is_superuser or (
@@ -157,8 +161,8 @@ def view_campaign(request, campaign_id):
                 for character in characters.filter(is_active=True, **filter):
                     result = character.damage(raw_damage, min_damage, max_damage, damage_type, body_part)
                     messages.add_message(request, result.message_level, _(
-                        "<strong>{character}</strong> {label}").format(
-                            character=character, label=result.label))
+                        "<strong>{pre_label}</strong> {label}").format(
+                            pre_label=result.pre_label, label=result.label))
             elif type == 'effect':
                 effect_id, effect_name = data.get('effect-id'), data.get('effect-name')
                 if method == 'add':
@@ -166,8 +170,8 @@ def view_campaign(request, campaign_id):
                     effect = Effect.objects.filter(**filter).first().affect(campaign)
                     for damage in effect.damages:
                         messages.add_message(request, damage.message_level, _(
-                            "<strong>{character}</strong> {label}").format(
-                            character=damage.character, label=damage.label))
+                            "<strong>{pre_label}</strong> {label}").format(
+                            pre_label=damage.pre_label, label=damage.label))
                 elif method == 'remove':
                     scope = data.get('scope')
                     if scope == 'character':
@@ -189,8 +193,8 @@ def view_campaign(request, campaign_id):
                         seconds=hours * 3600 + minutes * 60, resting=resting, reset=True)
                     for damage in damages:
                         messages.add_message(request, damage.message_level, _(
-                            "<strong>{character}</strong> {label}").format(
-                            character=damage.character, label=damage.label))
+                            "<strong>{pre_label}</strong> {label}").format(
+                            pre_label=damage.pre_label, label=damage.label))
             elif type == 'roll':
                 group, stats, modifier, xp = (
                     data.get('group'), data.get('stats'), int(data.get('modifier') or 0), 'xp' in data)
@@ -198,8 +202,8 @@ def view_campaign(request, campaign_id):
                 for character in characters.filter(is_active=True, **filter):
                     result = character.roll(stats=stats, modifier=modifier, xp=xp)
                     messages.add_message(request, result.message_level, _(
-                        "<strong>{character}</strong> {label}").format(
-                            character=character, label=result.long_label))
+                        "<strong>{pre_label}</strong> {label}").format(
+                            pre_label=result.pre_label, label=result.long_label))
             elif type == 'gain':
                 group, experience = (data.get('group'), int(data.get('experience') or 0))
                 filter = dict(is_player=(group == 'pj')) if group else dict()
@@ -255,7 +259,9 @@ def view_character(request, character_id):
         'player', 'campaign__current_character'  # 'statistics' is not prefetched in order to always have fresh data
     ).filter(is_active=True)
     if not request.user.is_superuser:
-        characters = characters.filter(Q(player=request.user) | Q(campaign__game_master=request.user))
+        characters = characters.filter(
+            Q(player=request.user) | Q(campaign__game_master=request.user) |
+            Q(is_player=True, campaign__view_pc=True) | Q(is_player=False, campaign__view_npc=True))
     character = characters.filter(id=character_id).first()
     if not character:
         raise Http404()
@@ -278,8 +284,8 @@ def view_character(request, character_id):
                         stats=data.get('roll'),
                         modifier=int(data.get('modifier') or 0))
                     messages.add_message(request, result.message_level, _(
-                        "<strong>{character}</strong> {label}").format(
-                            character=character, label=result.long_label))
+                        "<strong>{pre_label}</strong> {label}").format(
+                            pre_label=result.pre_label, label=result.long_label))
                 elif 'levelup' in data:
                     stats = data.get('levelup')
                     character.levelup(stats, 1, _ignore_log=True)
@@ -297,14 +303,14 @@ def view_character(request, character_id):
                     no_weapon=bool(data.get('no_weapon', False)),
                     fail_target=data.get('fail_target'))
                 messages.add_message(request, result.message_level, _(
-                    "<strong>{attacker} vs {defender}</strong> {label}").format(
-                        attacker=result.attacker, defender=result.defender, label=result.long_label))
+                    "<strong>{pre_label}</strong> {label}").format(
+                        pre_label=result.pre_label, label=result.long_label))
                 if result.fail:
                     messages.add_message(request, result.message_level, _(
-                        "<strong>{attacker} vs {defender}</strong> {label}").format(
-                        attacker=result.attacker, defender=result.defender, label=result.long_label))
+                        "<strong>{pre_label}</strong> {label}").format(
+                        pre_label=result.pre_label, label=result.long_label))
             elif authorized and type == 'burst' and data.get('targets'):
-                histories = character.burst(
+                results = character.burst(
                     targets=list(zip(data.getlist('targets') or [], data.getlist('ranges') or [])),
                     hit_chance_modifier=int(data.get('hit_chance_modifier') or 0),
                     force_success=bool(data.get('force_success', False)),
@@ -313,17 +319,17 @@ def view_character(request, character_id):
                     is_grenade=bool(data.get('is_grenade', False)),
                     is_action=bool(data.get('is_action', False)))
                 if bool(data.get('is_grenade', False)):
-                    for history in histories:
-                        messages.add_message(request, history.message_level, _(
-                            "<strong>{attacker} vs {defender}</strong> {label}").format(
-                            attacker=history.attacker, defender=history.defender, label=history.long_label))
+                    for result in results:
+                        messages.add_message(request, result.message_level, _(
+                            "<strong>{pre_label}</strong> {label}").format(
+                            pre_label=result.pre_label, label=result.long_label))
                 else:
                     results = {}
-                    for history in histories:
-                        results.setdefault(history.defender, dict(attacker=history.attacker, fail=0, success=0, damage=0))
-                        results[history.defender]['fail'] += int(history.success is False)
-                        results[history.defender]['success'] += int(history.success is True)
-                        results[history.defender]['damage'] += history.damage.real_damage if history.damage else 0
+                    for result in results:
+                        results.setdefault(result.defender, dict(attacker=result.attacker, fail=0, success=0, damage=0))
+                        results[result.defender]['fail'] += int(result.success is False)
+                        results[result.defender]['success'] += int(result.success is True)
+                        results[result.defender]['damage'] += result.damage.real_damage if result.damage else 0
                     for defender, result in results.items():
                         from django.contrib.messages import constants
                         messages.add_message(request, constants.SUCCESS if result['damage'] else constants.ERROR, _(
@@ -337,8 +343,8 @@ def view_character(request, character_id):
                     damage_type=str(data.get('damage_type') or ''),
                     body_part=str(data.get('body_part') or ''))
                 messages.add_message(request, result.message_level, _(
-                    "<strong>{character}</strong> {label}").format(
-                        character=character, label=result.label))
+                    "<strong>{pre_label}</strong> {label}").format(
+                        pre_label=result.pre_label, label=result.label))
             elif authorized and type == 'item':
                 item_id, item_name = data.get('item-id'), data.get('item-name')
                 if method == 'add':
@@ -359,8 +365,8 @@ def view_character(request, character_id):
                         for effect in equip.use(is_action=is_action):
                             for damage in effect.damages:
                                 messages.add_message(request, damage.message_level, _(
-                                    "<strong>{character}</strong> {label}").format(
-                                    character=character, label=damage.label))
+                                    "<strong>{pre_label}</strong> {label}").format(
+                                    pre_label=damage.pre_label, label=damage.label))
                     elif method == 'repair':
                         equip.repair(value=int(data.get('condition') or 100), is_action=is_action)
                     elif method == 'drop':
@@ -374,8 +380,8 @@ def view_character(request, character_id):
                     effect = Effect.objects.filter(**filter).first().affect(character)
                     for damage in effect.damages:
                         messages.add_message(request, damage.message_level, _(
-                            "<strong>{character}</strong> {label}").format(
-                            character=character, label=damage.label))
+                            "<strong>{pre_label}</strong> {label}").format(
+                            pre_label=damage.pre_label, label=damage.label))
                 elif method == 'remove':
                     scope = data.get('scope')
                     if scope == 'character':
@@ -458,8 +464,8 @@ def next_turn(request, campaign_id):
             next_character, damages = campaign.next_turn(seconds=int(data.get('seconds') or 0))
             for damage in damages:
                 messages.add_message(request, damage.message_level, _(
-                    "<strong>{character}</strong> {label}").format(
-                    character=damage.character, label=damage.label))
+                    "<strong>{pre_label}</strong> {label}").format(
+                    pre_label=damage.pre_label, label=damage.label))
             if next_character:
                 return redirect('fallout:character', next_character.id)
         # Fin du tour
@@ -501,6 +507,9 @@ def thumbnails(request):
 @login_required
 @ajax_request
 def simulation(request):
+    """
+    Réalise une simulation de combat
+    """
     if request.method == 'POST':
         try:
             data = request.POST
@@ -521,3 +530,37 @@ def simulation(request):
         except Exception as e:  # noqa
             return str(e)
     return ""
+
+
+@login_required
+@render_to('fallout/campaign/panels/rolls.html')
+def view_campaign_rolls(request, campaign_id):
+    limit = int(request.GET.get('limit') or '10')
+    rolls = RollHistory.objects.select_related('character').filter(
+        Q(character__player=request.user) |
+        Q(character__campaign__game_master=request.user) |
+        Q(character__is_player=True, character__campaign__view_pc=True) |
+        Q(character__is_player=False, character__campaign__view_npc=True),
+        character__campaign_id=campaign_id,
+    ).order_by('-date').only(
+        'character__name', 'value', 'roll', 'modifier', 'stats', 'success', 'critical', 'date')[:limit]
+    damages = DamageHistory.objects.select_related('character').filter(
+        Q(character__player=request.user) |
+        Q(character__campaign__game_master=request.user) |
+        Q(character__is_player=True, character__campaign__view_pc=True) |
+        Q(character__is_player=False, character__campaign__view_npc=True),
+        character__campaign_id=campaign_id,
+        fight__isnull=True,
+    ).order_by('-date').only(
+        'character__name', 'damage_type', 'base_damage', 'real_damage', 'body_part', 'date')[:limit]
+    fights = FightHistory.objects.select_related('attacker', 'defender', 'damage').filter(
+        Q(attacker__player=request.user) |
+        Q(attacker__campaign__game_master=request.user) |
+        Q(attacker__is_player=True, attacker__campaign__view_pc=True) |
+        Q(attacker__is_player=False, attacker__campaign__view_npc=True),
+        attacker__campaign_id=campaign_id,
+    ).order_by('-date').only(
+        'attacker__name', 'defender__name', 'status', 'success', 'critical', 'body_part', 'date',
+        'damage__damage_type', 'damage__base_damage', 'damage__real_damage')[:limit]
+    rolls = sorted(list(rolls) + list(damages) + list(fights), key=lambda r: r.date, reverse=True)[:limit]
+    return {'rolls': rolls}

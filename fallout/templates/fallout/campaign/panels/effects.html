@@ -67,7 +67,7 @@
                         <div class="col-auto">
                             <label for="body-part" class="sr-only">{% trans "Partie du corps" %}</label>
                             <select id="body-part" name="body_part" class="form-control form-control-sm custom-select custom-select-sm">
-                                <option value="">{% trans "non ciblé" %}</option>
+                                <option value="">{% trans "aléatoire" %}</option>
                                 {% for code, label in body_parts %}
                                     <option value="{{ code }}">{{ label }}</option>
                                 {% endfor %}

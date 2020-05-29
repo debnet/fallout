@@ -95,6 +95,9 @@
 <script src="{% static "js/jquery-ui.min.js" %}"></script>
 <script src="{% static "js/popper.min.js" %}"></script>
 <script src="{% static "js/bootstrap.bundle.min.js" %}"></script>
+{% endcompress %}
+<script type="application/javascript" src="{% url 'common:scripts' %}"></script>
+{% compress js %}
 <script src="{% static "fallout/js/diceroll.js" %}"></script>
 <script src="{% static "fallout/js/key.js" %}"></script>
 <script src="{% static "fallout/js/script.js" %}"></script>
