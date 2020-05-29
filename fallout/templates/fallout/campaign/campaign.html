@@ -90,7 +90,7 @@ effets) sont désactivés.
 <script type="application/javascript">
 $(function() {
     let update_rolls = function () {
-        let url = Django.url('fallout:campaign_rolls', {{ campaign.pk }});
+        let url = Django.url('fallout:campaign_rolls', {{ campaign.pk }}) + '?limit={{ request.GET.limit }}';
         $.get(url, function (data) {
             $('#campaign-rolls').html(data);
         });
