@@ -63,7 +63,7 @@ effets) sont désactivés.
                     <a class="nav-link" data-toggle="tab" role="tab"
                        id="campaign-effects-tab" href="#campaign-effects">{% trans "Effets" %}</a>
                 </li>
-                {% if campaign.view_rolls %}
+                {% if authorized or campaign.view_rolls %}
                     <li class="nav-item">
                         <a class="nav-link" data-toggle="tab" role="tab"
                            id="campaign-rolls-tab" href="#campaign-rolls">{% trans "Jets" %}</a>
@@ -73,10 +73,10 @@ effets) sont désactivés.
         </ul>
         <div class="tab-content">
             {% include "fallout/campaign/panels/infos.html" %}
-            {% include "fallout/campaign/panels/effects.html" %}
+            {% include "fallout/campaign/panels/loots.html" %}
             {% if campaign %}
-                {% include "fallout/campaign/panels/loots.html" %}
-                {% if campaign.view_rolls or authorized %}
+                {% include "fallout/campaign/panels/effects.html" %}
+                {% if authorized or campaign.view_rolls %}
                     <div class="tab-pane fade" role="tabpanel" id="campaign-rolls"></div>
                 {% endif %}
             {% endif %}
@@ -86,7 +86,7 @@ effets) sont désactivés.
 
 {% block scripts %}
 {% if campaign %}
-{% if campaign.view_rolls or authorized %}
+{% if authorized or campaign.view_rolls %}
 <script type="application/javascript">
 $(function() {
     let update_rolls = function () {
