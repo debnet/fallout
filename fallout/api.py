@@ -595,6 +595,7 @@ class NextTurnSerializer(BaseCustomSerializer):
     """
     Serializer des données de fin de tour
     """
+    campaign = create_model_serializer(Campaign)(read_only=True, label=_("campagne"))
     character = SimpleCharacterSerializer(read_only=True, label=_("personnage"))
     damages = DamageHistorySerializer(read_only=True, many=True, label=_("dégâts"))
 
@@ -608,7 +609,7 @@ def campaign_next_turn(request, campaign_id):
     is_authorized(request, campaign)
     try:
         character, damages = campaign.next_turn(**request.validated_data)
-        return dict(character=character, damages=damages)
+        return dict(campaign=campaign, character=character, damages=damages)
     except Exception as exception:
         raise ValidationError(str(exception))
 
