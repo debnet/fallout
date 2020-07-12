@@ -62,7 +62,8 @@
                                         <div class="progress">
                                             {% localize off %}
                                             <div role="progressbar" style="width: {{ condition }}%;" aria-valuenow="{{ condition }}"
-                                                 aria-valuemin="0" aria-valuemax="100" class="progress-bar text-light
+                                                 aria-valuemin="0" aria-valuemax="100"
+                                                 class="progress-bar text-light font-weight-bold
                                                  bg-{% if condition < 25 %}danger{% elif condition < 50 %}warning{% else %}success{% endif %}">
                                             {% endlocalize %}
                                                 {{ condition|floatformat:0 }}%
@@ -72,7 +73,7 @@
                                         <div class="progress">
                                             <div role="progressbar" style="width: 100%;" aria-valuenow="100"
                                                  aria-valuemin="0" aria-valuemax="100"
-                                                 class="progress-bar progress-bar-striped bg-dark text-light">
+                                                 class="progress-bar progress-bar-striped text-light bg-dark">
                                                 {% trans "incassable" %}
                                             </div>
                                         </div>
@@ -86,7 +87,29 @@
                             {% endif %}
                             {% if item.label_damage %}
                                 <p class="card-text">
-                                    <small class="font-weight-bold">{{ item.long_label_damage }}</small>
+                                    <small class="badge badge-light">
+                                        {{ item.long_label_damage }}
+                                    </small>
+                                    {% if item.ap_cost_reload %}
+                                        <small class="badge badge-secondary">
+                                            {{ item.ap_cost_reload }} {% trans "PA recharge" %}
+                                        </small>
+                                    {% endif %}
+                                    {% if item.ap_cost_normal %}
+                                        <small class="badge badge-secondary">
+                                            {{ item.ap_cost_normal }} {% trans "PA attaque" %}
+                                        </small>
+                                    {% endif %}
+                                    {% if item.ap_cost_target %}
+                                        <small class="badge badge-secondary">
+                                            {{ item.ap_cost_target }} {% trans "PA ciblé" %}
+                                        </small>
+                                    {% endif %}
+                                    {% if item.ap_cost_burst %}
+                                        <small class="badge badge-secondary">
+                                            {{ item.ap_cost_burst }} {% trans "PA rafale" %}
+                                        </small>
+                                    {% endif %}
                                 </p>
                             {% endif %}
                             {% with resistances=item.resistances %}
