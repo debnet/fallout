@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-07-12 22:19+0200\n"
+"POT-Creation-Date: 2020-09-15 15:16+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1652,6 +1652,18 @@ msgstr "¤"
 msgid "incassable"
 msgstr "unbreakable"
 
+msgid "PA recharge"
+msgstr "AP reload"
+
+msgid "PA attaque"
+msgstr "AP attack"
+
+msgid "PA ciblé"
+msgstr "AP targetted"
+
+msgid "PA rafale"
+msgstr "AP burst"
+
 msgid "CA"
 msgstr "AC"
 
@@ -1676,6 +1688,9 @@ msgstr "rad/h"
 msgid "Modifier"
 msgstr "Edit"
 
+msgid "Infliger des dégâts :"
+msgstr "Damage characters:"
+
 msgid "Type de personnage"
 msgstr "Character type"
 
@@ -1690,6 +1705,9 @@ msgstr "random"
 
 msgid "Infliger"
 msgstr "Damage"
+
+msgid "Affecter un effet :"
+msgstr "Affect an effect:"
 
 msgid "Affecter"
 msgstr "Affect"
@@ -1724,6 +1742,9 @@ msgstr "m"
 msgid "Avancer"
 msgstr "Pass"
 
+msgid "Ouvrir un contenant :"
+msgstr "Open a container:"
+
 msgid "Aucun"
 msgstr "None"
 
@@ -1735,6 +1756,9 @@ msgstr "Open"
 
 msgid "Vider"
 msgstr "Empty"
+
+msgid "Ajouter un butin :"
+msgstr "Add a loot:"
 
 msgid "Qte"
 msgstr "Qty"
@@ -1847,18 +1871,6 @@ msgstr "fixed value"
 msgid "vide"
 msgstr "empty"
 
-msgid "PA recharge"
-msgstr "AP reload"
-
-msgid "PA attaque"
-msgstr "AP attack"
-
-msgid "PA ciblé"
-msgstr "AP targetted"
-
-msgid "PA rafale"
-msgstr "AP burst"
-
 msgid "Retirer"
 msgstr "Unequip"
 
@@ -1924,6 +1936,9 @@ msgstr ""
 
 msgid "(aucun jet)"
 msgstr "(no roll)"
+
+msgid "Ajouter un objet :"
+msgstr "Add an item:"
 
 msgid "Equipé"
 msgstr "Equiped"

@@ -8,13 +8,13 @@
             </div>
             <div class="col-md-1 col-xs-12 text-center">
                 {% if request.GET.edit %}
-                    <button type="submit" class="btn btn-success"
+                    <button type="submit" class="btn btn-sm btn-success w-100"
                             name="method" value="edit" >{% trans "Modifier" %}</button>
                     <br />
-                    <button type="submit" class="btn btn-warning"
+                    <button type="submit" class="btn btn-sm btn-warning w-100"
                             name="method" value="cancel" >{% trans "Annuler" %}</button>
                 {% else %}
-                    <button type="submit" class="btn btn-primary"
+                    <button type="submit" class="btn btn-sm btn-primary w-100"
                             name="method" value="add" >{% trans "Ajouter" %}</button>
                     {% if authorized %}
                         <br />

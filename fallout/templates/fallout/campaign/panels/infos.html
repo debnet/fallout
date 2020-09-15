@@ -1,84 +1,88 @@
 {% load i18n l10n %}
 
 <div class="tab-pane fade" role="tabpanel" id="campaign-infos">
-    <div id="campaign-infos-form" class="collapse-form collapse show">
-        {% if authorized %}
+    {% if authorized %}
+        <div id="campaign-infos-form" class="collapse-form collapse show">
             <form method="post" action="{{ request.path }}" class="form-inline justify-content-center">
                 <div class="form-row align-items-center">
-                    <div class="mr-3 font-weight-bold">{% trans "Gagner de l'expérience :" %}</div>
-                    <div class="form-row align-items-center">
-                        <div class="col-auto">
-                            <label class="sr-only" for="gain-group-list">{% trans "Type de personnage" %}</label>
-                            <select name="group" id="gain-group-list" class="form-control form-control-sm custom-select custom-select-sm">
-                                <option value="pj">{% trans "PJ" %}</option>
-                                <option value="pnj">{% trans "PNJ" %}</option>
-                                <option value="">{% trans "Tous" %}</option>
-                            </select>
-                        </div>
-                        <div class="col-auto">
-                            <label class="sr-only" for="stats-modifier">{% trans "Expérience" %}</label>
-                            <input type="number" class="form-control form-control-sm ismall" id="experience"
-                                   name="experience" placeholder="{% trans "Expérience" %}" value="0">
-                        </div>
-                        <div class="col-auto">
-                            <button type="submit" class="btn btn-sm btn-primary"
-                                    name="method" value="gain">{% trans "Gagner" %}</button>
-                            <input type="hidden" name="type" value="gain" />
-                            {% csrf_token %}
-                        </div>
+                    <div class="col-auto text-nowrap font-weight-bold">
+                        {% trans "Gagner de l'expérience :" %}
+                    </div>
+                    <div class="col-auto">
+                        <label class="sr-only" for="gain-group-list">{% trans "Type de personnage" %}</label>
+                        <select name="group" id="gain-group-list" class="form-control form-control-sm custom-select custom-select-sm">
+                            <option value="pj">{% trans "PJ" %}</option>
+                            <option value="pnj">{% trans "PNJ" %}</option>
+                            <option value="">{% trans "Tous" %}</option>
+                        </select>
+                    </div>
+                    <div class="col-auto">
+                        <label class="sr-only" for="stats-modifier">{% trans "Expérience" %}</label>
+                        <input type="number" class="form-control form-control-sm ismall" id="experience"
+                               name="experience" placeholder="{% trans "Expérience" %}" value="0">
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-sm btn-primary"
+                                name="method" value="gain">{% trans "Gagner" %}</button>
+                        <input type="hidden" name="type" value="gain" />
+                        {% csrf_token %}
                     </div>
                 </div>
             </form>
+            <hr class="my-1" />
             <form method="post" action="{{ request.path }}" class="form-inline justify-content-center">
-                <div class="form-row align-items-center pt-2">
-                    <div class="mr-3 font-weight-bold">{% trans "Faire un lancer :" %}</div>
-                    <div class="form-row align-items-center">
-                        <div class="col-auto">
-                            <label class="sr-only" for="roll-group-list">{% trans "Type de personnage" %}</label>
-                            <select name="group" id="roll-group-list" class="form-control form-control-sm custom-select custom-select-sm">
-                                <option value="pj">{% trans "PJ" %}</option>
-                                <option value="pnj">{% trans "PNJ" %}</option>
-                                <option value="">{% trans "Tous" %}</option>
-                            </select>
-                        </div>
-                        <div class="col-auto">
-                            <label class="sr-only" for="stats-list">{% trans "Statistique" %}</label>
-                            <select name="stats" id="roll-stats-list" class="form-control form-control-sm custom-select custom-select-sm">
-                                {% for title, substats in stats %}
-                                    <optgroup label="{{ title }}">
-                                        {% for value, label in substats %}
-                                            <option value="{{ value }}">{{ label }}</option>
-                                        {% endfor %}
-                                    </optgroup>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="col-auto">
-                            <label class="sr-only" for="stats-modifier">{% trans "Modificateur" %}</label>
-                            <input type="number" class="form-control form-control-sm ismall" id="stats-modifier"
-                                   name="modifier" placeholder="{% trans "Mod" %}" value="0">
-                        </div>
-                        <div class="col-auto">
-                            <button type="submit" class="btn btn-sm btn-primary"
-                                    name="method" value="roll">{% trans "Lancer" %}</button>
-                            <input type="hidden" name="type" value="roll" />
-                            {% csrf_token %}
-                        </div>
-                        <div class="col-auto">
-                            <label class="form-check-label" class="d-inline" title="{% trans "Expérience" %}">
-                                <input class="form-check-input" type="checkbox" name="xp">
-                                {% trans "XP" %}
-                            </label>
-                        </div>
+                <div class="form-row align-items-center">
+                    <div class="col-auto text-nowrap font-weight-bold">
+                        {% trans "Faire un lancer :" %}
+                    </div>
+                    <div class="col-auto">
+                        <label class="sr-only" for="roll-group-list">{% trans "Type de personnage" %}</label>
+                        <select name="group" id="roll-group-list" class="form-control form-control-sm custom-select custom-select-sm">
+                            <option value="pj">{% trans "PJ" %}</option>
+                            <option value="pnj">{% trans "PNJ" %}</option>
+                            <option value="">{% trans "Tous" %}</option>
+                        </select>
+                    </div>
+                    <div class="col-auto">
+                        <label class="sr-only" for="stats-list">{% trans "Statistique" %}</label>
+                        <select name="stats" id="roll-stats-list" class="form-control form-control-sm custom-select custom-select-sm">
+                            {% for title, substats in stats %}
+                                <optgroup label="{{ title }}">
+                                    {% for value, label in substats %}
+                                        <option value="{{ value }}">{{ label }}</option>
+                                    {% endfor %}
+                                </optgroup>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-auto">
+                        <label class="sr-only" for="stats-modifier">{% trans "Modificateur" %}</label>
+                        <input type="number" class="form-control form-control-sm ismall" id="stats-modifier"
+                               name="modifier" placeholder="{% trans "Mod" %}" value="0">
+                    </div>
+                    <div class="col-auto">
+                        <label class="form-check-label" title="{% trans "Expérience" %}">
+                            <input class="form-check-input" type="checkbox" name="xp">
+                            {% trans "XP" %}
+                        </label>
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-sm btn-primary"
+                                name="method" value="roll">{% trans "Lancer" %}</button>
+                        <input type="hidden" name="type" value="roll" />
+                        {% csrf_token %}
                     </div>
                 </div>
             </form>
             {% if campaign %}
+                <hr class="my-1" />
                 <form method="post" action="{{ request.path }}" class="form-inline justify-content-center">
-                    <div class="form-row align-items-center pt-2">
-                        <div class="mr-3 font-weight-bold">{% trans "Avancer dans le temps :" %}</div>
-                        <div class="form-row align-items-center">
-                            <div class="col-auto input-group input-group-sm">
+                    <div class="form-row align-items-center">
+                        <div class="col-auto text-nowrap font-weight-bold">
+                            {% trans "Avancer dans le temps :" %}
+                        </div>
+                        <div class="col-auto">
+                            <div class="input-group input-group-sm">
                                 <input type="number" class="form-control form-control-sm ismall" id="hours" name="hours"
                                        placeholder="{% trans "h" %}" value="0"
                                        aria-valuemin="0" min="0" aria-valuemax="999" max="999">
@@ -86,7 +90,9 @@
                                     <label for="hours" class="input-group-text">{% trans "h" %}</label>
                                 </div>
                             </div>
-                            <div class="col-auto input-group input-group-sm">
+                        </div>
+                        <div class="col-auto">
+                            <div class="input-group input-group-sm">
                                 <input type="number" class="form-control form-control-sm ismall" id="minutes" name="minutes"
                                        placeholder="{% trans "m" %}" value="0"
                                        aria-valuemin="0" min="0" aria-valuemax="59" max="59">
@@ -94,24 +100,24 @@
                                     <label for="minutes" class="input-group-text">{% trans "m" %}</label>
                                 </div>
                             </div>
-                            <div class="col-auto input-group input-group-sm">
-                                <button type="submit" class="btn btn-sm btn-primary"
-                                        name="method" value="add">{% trans "Avancer" %}</button>
-                                <input type="hidden" name="type" value="time" />
-                                {% csrf_token %}
-                            </div>
-                            <div class="col-auto">
-                                <label class="form-check-label" class="d-inline" title="{% trans "Repos" %}">
-                                    <input class="form-check-input" type="checkbox" name="resting">
-                                    {% trans "Repos" %}
-                                </label>
-                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <label class="form-check-label" title="{% trans "Repos" %}">
+                                <input class="form-check-input" type="checkbox" name="resting">
+                                {% trans "Repos" %}
+                            </label>
+                        </div>
+                        <div class="col-auto">
+                            <button type="submit" class="btn btn-sm btn-primary"
+                                    name="method" value="add">{% trans "Avancer" %}</button>
+                            <input type="hidden" name="type" value="time" />
+                            {% csrf_token %}
                         </div>
                     </div>
                 </form>
             {% endif %}
-            <hr />
-        {% endif %}
-    </div>
+        </div>
+        <hr class="mt-1 mb-3" />
+    {% endif %}
     {% include 'fallout/campaign/forms/infos.html' %}
 </div>

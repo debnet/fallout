@@ -2,15 +2,15 @@
 
 <div class="tab-pane fade" role="tabpanel" id="campaign-effects">
     <div id="campaign-effects-form" class="collapse-form collapse show">
-        <div class="col">
-            <h6>
+        <div class="col-auto">
+            <h6 class="text-nowrap">
                 {% trans "Niveau de radioactivité" %}
                 <small class="text-muted">{% trans "(en rad/h)" %}</small>
             </h6>
             {% if authorized %}
                 <form method="post" action="{{ request.path }}" class="form-inline justify-content-center float-right ml-3">
                     <div class="form-row align-items-center">
-                        <div class="input-group input-group-sm">
+                        <div class="col-auto input-group input-group-sm">
                             <input type="number" class="form-control" id="radiation" name="radiation"
                                    placeholder="{% trans "rad/h" %}" value="{{ campaign.radiation }}" style="width: 80px"
                                    aria-valuemin="0" min="0">
@@ -39,11 +39,14 @@
                 {% endwith %}
             </div>
         </div>
-        <hr />
         {% if authorized %}
             <div class="collapse-form collapse show">
+                <hr class="my-1" />
                 <form method="post" action="{{ request.path }}" class="form-inline justify-content-center">
                     <div class="form-row align-items-center">
+                        <div class="col text-nowrap font-weight-bold">
+                            {% trans "Infliger des dégâts :" %}
+                        </div>
                         <div class="col-auto">
                             <label class="sr-only" for="damage-group-list">{% trans "Type de personnage" %}</label>
                             <select name="group" id="damage-group-list" class="form-control form-control-sm custom-select custom-select-sm">
@@ -76,10 +79,18 @@
                         <div class="col-auto">
                             <input id="min-damage" class="form-control form-control-sm ismall"
                                    type="number" name="min_damage" value="0" min="0" />
-                            <span class="ml-1 mr-1 font-weight-bold">&minus;</span>
+                        </div>
+                        <div class="col-auto">
+                            <span class="font-weight-bold">&minus;</span>
+                        </div>
+                        <div class="col-auto">
                             <input id="min-damage" class="form-control form-control-sm ismall"
                                    type="number" name="max_damage" value="0" min="0" />
-                            <span class="ml-1 mr-1 font-weight-bold">&plus;</span>
+                        </div>
+                        <div class="col-auto">
+                            <span class="font-weight-bold">&plus;</span>
+                        </div>
+                        <div class="col-auto">
                             <input id="min-damage" class="form-control form-control-sm ismall"
                                    type="number" name="raw_damage" value="0" min="0" />
                         </div>
@@ -91,27 +102,29 @@
                         </div>
                     </div>
                 </form>
+                <hr class="my-1" />
                 <form method="post" action="{{ request.path }}" class="form-inline justify-content-center">
-                    <div class="form-row align-items-center pt-2">
-                        <div class="form-row align-items-center">
-                            <div class="col-auto">
-                                <label class="sr-only" for="effect-name">{% trans "Effet" %}</label>
-                                <input type="text" class="form-control form-control-sm" id="effect-name"
-                                       name="effect-name" data-for="effect-id" placeholder="{% trans "Effet" %}">
-                                <input type="hidden" id="effect-id" name="effect-id" />
-                            </div>
-                            <div class="col-auto">
-                                <button type="submit" class="btn btn-sm btn-primary"
-                                        name="method" value="add" >{% trans "Affecter" %}</button>
-                                <input type="hidden" name="type" value="effect" />
-                                {% csrf_token %}
-                            </div>
+                    <div class="form-row align-items-center">
+                        <div class="col-auto text-nowrap font-weight-bold">
+                            {% trans "Affecter un effet :" %}
+                        </div>
+                        <div class="col-auto">
+                            <label class="sr-only" for="effect-name">{% trans "Effet" %}</label>
+                            <input type="text" class="form-control form-control-sm" id="effect-name"
+                                   name="effect-name" data-for="effect-id" placeholder="{% trans "Effet" %}">
+                            <input type="hidden" id="effect-id" name="effect-id" />
+                        </div>
+                        <div class="col-auto">
+                            <button type="submit" class="btn btn-sm btn-primary"
+                                    name="method" value="add" >{% trans "Affecter" %}</button>
+                            <input type="hidden" name="type" value="effect" />
+                            {% csrf_token %}
                         </div>
                     </div>
                 </form>
-                <hr />
             </div>
         {% endif %}
+        <hr class="mt-1 mb-3" />
     </div>
     {% with effects=campaign.effects scope='campaign' %}
         {% include "fallout/campaign/forms/effects.html" %}
