@@ -1565,7 +1565,10 @@ class Modifier(CommonModel):
         """
         value = ''
         if self.min_value or self.max_value:
-            value = f"{self.min_value}-{self.max_value}"
+            if self.max_value < 0:
+                value = f"-({abs(self.max_value)}-{abs(self.min_value)})"
+            else:
+                value = f"{self.min_value}-{self.max_value}"
         if self.raw_value:
             raw_value = f"+{self.raw_value}" if self.raw_value >= 0 else str(self.raw_value)
             value = f"{value} ({raw_value})" if value else raw_value
@@ -1630,7 +1633,10 @@ class Damage(CommonModel):
         """
         damage = ''
         if self.min_damage or self.max_damage:
-            damage = f"{self.min_damage}-{self.max_damage}"
+            if self.max_damage < 0:
+                damage = f"-({abs(self.max_damage)}-{abs(self.min_damage)})"
+            else:
+                damage = f"{self.min_damage}-{self.max_damage}"
         if self.raw_damage:
             raw_damage = f"+{self.raw_damage}" if self.raw_damage >= 0 else str(self.raw_damage)
             damage = f"{damage} ({raw_damage})" if damage else raw_damage
