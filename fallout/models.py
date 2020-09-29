@@ -2,7 +2,7 @@
 from collections import OrderedDict as odict, namedtuple
 from datetime import datetime, timedelta
 from random import randint, choice
-from typing import Dict, Iterable, List, Optional, Tuple, Type, Union
+from typing import Dict, Iterable, List, Optional, Tuple, Union
 
 from common.fields import JsonField
 from common.models import CommonModel, CommonQuerySet, Entity
@@ -58,8 +58,8 @@ def get_thumbnails(directory: str = '') -> List[Tuple[str, str]]:
         return sorted(images)
 
 
-def get_class(value: Union[int, float], maximum: Union[int, float], classes: Tuple[str, ...] = None,
-              values: Tuple[float, ...] = None, reverse: bool = False, default: str = 'light') -> str:
+def get_class(value: Union[int, float], maximum: Union[int, float], classes: Iterable[str] = None,
+              values: Iterable[float] = None, reverse: bool = False, default: str = 'light') -> str:
     """
     Affecte une classe CSS à une valeur donnée
     :param value: Valeur
@@ -119,9 +119,9 @@ class Campaign(CommonModel):
     view_pc = models.BooleanField(default=False, verbose_name=_("voir les personnages joueurs"))
     view_npc = models.BooleanField(default=False, verbose_name=_("voir les personnages non-joueurs"))
     view_rolls = models.BooleanField(default=False, verbose_name=_("voir les jets lancés"))
-    damages = []
+    damages: List['DamageHistory'] = []
     # Cache
-    _effects = None
+    _effects: 'CommonQuerySet[ActiveEffect]' = None
 
     @property
     def elapsed_time(self) -> timedelta:
@@ -327,15 +327,17 @@ class Stats(Resistance):
     perk_rate = models.SmallIntegerField(default=0, verbose_name=_("niveaux pour un talent"))
 
     # Added at init
-    character = None
-    charge = 0  # Current equipment weight
-    raw = {}  # Raw modifiers on calculated stats
-    base = {}  # Base statistics
-    modifiers = {}  # Statistics modifiers
-    character_modifiers = {}  # Character modifiers
+    character: Optional['Character'] = None
+    charge: float = 0.0  # Current equipment weight
+    raw: Dict[str, float] = {}  # Raw modifiers on calculated stats
+    base: Dict[str, float] = {}  # Base statistics
+    modifiers: Dict[str, float] = {}  # Statistics modifiers
+    character_modifiers: Dict[str, float] = {}  # Character modifiers
 
     def __str__(self) -> str:
-        return self.character.name
+        if self.character:
+            return self.character.name
+        return ''
 
     @staticmethod
     def get(character: 'Character') -> 'Stats':
@@ -358,10 +360,10 @@ class Stats(Resistance):
         race_stats = RACES_STATS.get(character.race, {})
         stats._change_all_stats(limit=True, **race_stats)
         for stats_name, (value, mini, maxi) in race_stats.items():
-            stats.base[stats_name] = stats.base.get(stats_name, 0) + value
+            stats.base[stats_name] = (stats.base.get(stats_name) or 0) + (value or 0)
         # Tag skills
         for skill in set(character.tag_skills):
-            stats.base[skill] = stats.base.get(skill, 0) + TAG_SKILL_BONUS
+            stats.base[skill] = (stats.base.get(skill) or 0) + TAG_SKILL_BONUS
             stats._change_stats(skill, TAG_SKILL_BONUS, raw=False)
         # Base statistics
         base_stats = to_object(stats.base)
@@ -405,24 +407,26 @@ class Stats(Resistance):
         ).get('charge') or 0.0
         return stats
 
-    def _change_all_stats(self, limit: bool = False, **stats: Dict[str, Tuple[int, int, int]]) -> None:
+    def _change_all_stats(self, limit: bool = False, **stats: Tuple[int, Optional[int], Optional[int]]) -> None:
         _assert(isinstance(self, Stats), _("Cette fonction ne peut être utilisée que par les statistiques."))
         for name, values in stats.items():
             self._change_stats(name, *values, limit=limit)
 
-    def _change_stats(self, name: str, value: int = 0, mini: int = None, maxi: int = None,
+    def _change_stats(self, name: str, value: int = 0, mini: Optional[int] = None, maxi: Optional[int] = None,
                       limit: bool = False, raw: bool = True) -> None:
         _assert(isinstance(self, Stats), _("Cette fonction ne peut être utilisée que par les statistiques."))
         if raw and name in LIST_COMPUTED_STATS:
             self.raw[name] = self.raw.setdefault(name, 0) + value
             return
+        if not self.character:
+            return
         bonus, race_mini, race_maxi = RACES_STATS.get(self.character.race, {}).get(name, (None, None, None))
         target = self if name in LIST_EDITABLE_STATS else self.character
         if limit:
-            mini = (mini if mini is not None else race_mini) or float('-inf')
-            maxi = (maxi if maxi is not None else race_maxi) or float('+inf')
+            mini = (mini if mini is not None else race_mini) or float('-inf')  # type: ignore
+            maxi = (maxi if maxi is not None else race_maxi) or float('+inf')  # type: ignore
         else:
-            mini, maxi = 0, float('+inf')
+            mini, maxi = 0, float('+inf')  # type: ignore
         result = min(max(getattr(target, name, 0) + value, mini), maxi)
         setattr(target, name, result)
         if isinstance(target, Character):
@@ -502,19 +506,19 @@ class Character(Entity, Stats):
     # Extra data
     extra_data = JsonField(blank=True, null=True, verbose_name=_("données complémentaires"))
     # Cache
-    _stats = {}
+    _stats: Dict[str, float] = {}
     _inventory = _equipment = _effects = None
 
     @staticmethod
-    def reset_stats(character: Union['Character', Type[int]]):
+    def reset_stats(character: Union['Character', int]):
         """
         Réinitialise le calcul des statistiques pour un personnage
         """
         if isinstance(character, Character):
-            character.statistics = None
+            character.statistics = None  # type: ignore
             character = character.pk
         if character:
-            Character._stats.pop(character, None)
+            Character._stats.pop(character, None)  # type: ignore
             Statistics.objects.filter(character_id=character).update(obsolete=True)
 
     @property
@@ -528,7 +532,7 @@ class Character(Entity, Stats):
         try:
             _assert(not self.statistics.obsolete)
         except:  # noqa
-            stats = self._stats.get(self.pk) or Stats.get(self)
+            stats: Union[Statistics, Stats] = self._stats.get(self.pk) or Stats.get(self)  # type: ignore
             if self.pk:
                 self._stats[self.pk] = stats
                 self.statistics, created = Statistics.objects.update_or_create(character=self, defaults=dict(
@@ -554,7 +558,7 @@ class Character(Entity, Stats):
             ).order_by('item__name'))
         return self._inventory
 
-    def get_from_inventory(self, many: bool = False, **criterias) -> Union['Equipment', List['Equipment']]:
+    def get_from_inventory(self, many: bool = False, **criterias) -> Optional[Union['Equipment', List['Equipment']]]:
         """
         Retourne un objet depuis l'inventaire correspondant aux critères
         (optimisé si l'inventaire est déjà chargé)
@@ -562,7 +566,7 @@ class Character(Entity, Stats):
         :param criterias: Critères exacts de recherche
         :return: Un ou plusieurs objets
         """
-        items = [] if many else None
+        items: Optional[Union['Equipment', List['Equipment']]] = [] if many else None
         for item in self.inventory:
             found = True
             for key, value in criterias.items():
@@ -570,7 +574,7 @@ class Character(Entity, Stats):
             if found:
                 if not many:
                     return item
-                items.append(item)
+                items.append(item)  # type: ignore
         return items
 
     @property
@@ -583,7 +587,7 @@ class Character(Entity, Stats):
             'character__campaign', 'effect__next_effect').prefetch_related('effect__modifiers'))
         return self._effects
 
-    def _get_stats(self, stats: List[Tuple[str, str]], from_stats: bool = True) -> \
+    def _get_stats(self, stats: Iterable[Tuple[str, str]], from_stats: bool = True) -> \
             Iterable[Tuple[str, str, Union[int, float]]]:
         """
         Fonction interne pour retourner les valeurs des statistiques ciblées
@@ -616,8 +620,8 @@ class Character(Entity, Stats):
         Retourne les statistiques générales
         :return: code, label, valeur à gauche, valeur à droite, classe, taux
         """
-        classes = ('info', 'info', 'success', 'warning', 'danger', 'secondary', 'light')
-        values = (0.000, 0.001, 0.200, 0.400, 0.600, 0.800, 1.000)
+        classes: Iterable[str] = ('info', 'info', 'success', 'warning', 'danger', 'secondary', 'light')
+        values: Iterable[float] = (0.000, 0.001, 0.200, 0.400, 0.600, 0.800, 1.000)
         for code, label in GENERAL_STATS:
             lvalue = getattr(self, code, 0)
             rvalue, rclass, title = None, None, None
@@ -914,7 +918,7 @@ class Character(Entity, Stats):
         damages = []
         if needs and self.has_needs:
             for stats_name, formula in COMPUTED_NEEDS:
-                rate = -2 if stats_name == STATS_SLEEP and (resting or self.is_resting) else 1
+                rate = -2.0 if stats_name == STATS_SLEEP and (resting or self.is_resting) else 1.0
                 rate *= NEEDS_RESTING_RATE if resting or self.is_resting else NEEDS_NORMAL_RATE
                 self.modify_value(stats_name, formula(self.stats, self) * hours * rate)
         if radiation:
@@ -1045,10 +1049,10 @@ class Character(Entity, Stats):
         # Saves characters
         if not simulation:
             for history in histories:
-                if history.target.reward and history.damage and history.damage.damage_rate:
-                    experience = int(history.target.reward * history.damage.damage_rate)
+                if history.defender.reward and history.damage and history.damage.damage_rate:
+                    experience = int(history.defender.reward * history.damage.damage_rate)
                 else:
-                    experience = max(history.target.level - self.level, 1) * XP_GAIN_BURST
+                    experience = max(history.defender.level - self.level, 1) * XP_GAIN_BURST
                 self.add_experience(experience, save=False)
             for target, target_range in targets:
                 target.save()

@@ -4,7 +4,7 @@ from django.contrib.admin import site
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
-from model_mommy import mommy
+from model_bakery import baker
 
 from fallout.models import MODELS, Player
 
@@ -34,7 +34,7 @@ def create_admin_tests():
                         cls.user = User.objects.get(username='admin')
                     except User.DoesNotExist:
                         cls.user = User.objects.create_superuser('admin', '', '')
-                    cls.instance = mommy.make(cls.model)
+                    cls.instance = baker.make(cls.model)
 
                 def get(self, url=url, pk_required=pk_required):
                     self.client.logout()
