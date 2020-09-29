@@ -12282,7 +12282,7 @@
         "armor_class": 0,
         "effects": [],
         "ammunitions": [
-            127
+            126
         ]
     }
 },
@@ -14229,7 +14229,7 @@
         "image": "",
         "thumbnail": "thumbnails/items/chems/chem_bloodpack.png",
         "type": "chem",
-        "value": 20,
+        "value": 50,
         "durability": 0,
         "condition_modifier": 0.0,
         "weight": 0.03,
@@ -20231,7 +20231,7 @@
     "model": "fallout.loottemplate",
     "pk": 1,
     "fields": {
-        "name": "Petite caisse de munitions",
+        "name": "Munitions légères",
         "title": "",
         "description": "",
         "image": "",
@@ -20242,7 +20242,7 @@
     "model": "fallout.loottemplate",
     "pk": 2,
     "fields": {
-        "name": "Grande caisse de munitions",
+        "name": "Munitions lourdes",
         "title": "",
         "description": "",
         "image": "",
@@ -20253,7 +20253,7 @@
     "model": "fallout.loottemplate",
     "pk": 3,
     "fields": {
-        "name": "Caisse de grenades",
+        "name": "Grenades",
         "title": "",
         "description": "",
         "image": "",
@@ -20264,7 +20264,51 @@
     "model": "fallout.loottemplate",
     "pk": 4,
     "fields": {
-        "name": "Armoire à pharmacie",
+        "name": "Médicaments",
+        "title": "",
+        "description": "",
+        "image": "",
+        "thumbnail": ""
+    }
+},
+{
+    "model": "fallout.loottemplate",
+    "pk": 5,
+    "fields": {
+        "name": "Carburants",
+        "title": "",
+        "description": "",
+        "image": "",
+        "thumbnail": ""
+    }
+},
+{
+    "model": "fallout.loottemplate",
+    "pk": 6,
+    "fields": {
+        "name": "Drogues",
+        "title": "",
+        "description": "",
+        "image": "",
+        "thumbnail": ""
+    }
+},
+{
+    "model": "fallout.loottemplate",
+    "pk": 7,
+    "fields": {
+        "name": "Boissons",
+        "title": "",
+        "description": "",
+        "image": "",
+        "thumbnail": ""
+    }
+},
+{
+    "model": "fallout.loottemplate",
+    "pk": 8,
+    "fields": {
+        "name": "Nourritures",
         "title": "",
         "description": "",
         "image": "",
@@ -20277,9 +20321,9 @@
     "fields": {
         "template": 1,
         "item": 2,
-        "chance": 80,
-        "min_quantity": 10,
-        "max_quantity": 20,
+        "chance": 15,
+        "min_quantity": 1,
+        "max_quantity": 5,
         "min_condition": 100,
         "max_condition": 100
     }
@@ -20290,9 +20334,9 @@
     "fields": {
         "template": 1,
         "item": 3,
-        "chance": 80,
-        "min_quantity": 10,
-        "max_quantity": 20,
+        "chance": 15,
+        "min_quantity": 1,
+        "max_quantity": 5,
         "min_condition": 100,
         "max_condition": 100
     }
@@ -20303,9 +20347,9 @@
     "fields": {
         "template": 1,
         "item": 4,
-        "chance": 70,
-        "min_quantity": 10,
-        "max_quantity": 20,
+        "chance": 10,
+        "min_quantity": 1,
+        "max_quantity": 10,
         "min_condition": 100,
         "max_condition": 100
     }
@@ -20316,9 +20360,9 @@
     "fields": {
         "template": 1,
         "item": 11,
-        "chance": 60,
-        "min_quantity": 10,
-        "max_quantity": 20,
+        "chance": 10,
+        "min_quantity": 1,
+        "max_quantity": 5,
         "min_condition": 100,
         "max_condition": 100
     }
@@ -20329,9 +20373,9 @@
     "fields": {
         "template": 1,
         "item": 12,
-        "chance": 60,
-        "min_quantity": 10,
-        "max_quantity": 20,
+        "chance": 10,
+        "min_quantity": 1,
+        "max_quantity": 5,
         "min_condition": 100,
         "max_condition": 100
     }
@@ -20342,9 +20386,9 @@
     "fields": {
         "template": 1,
         "item": 10,
-        "chance": 50,
-        "min_quantity": 10,
-        "max_quantity": 20,
+        "chance": 10,
+        "min_quantity": 1,
+        "max_quantity": 10,
         "min_condition": 100,
         "max_condition": 100
     }
@@ -20355,9 +20399,9 @@
     "fields": {
         "template": 1,
         "item": 13,
-        "chance": 40,
-        "min_quantity": 10,
-        "max_quantity": 20,
+        "chance": 10,
+        "min_quantity": 1,
+        "max_quantity": 5,
         "min_condition": 100,
         "max_condition": 100
     }
@@ -20368,9 +20412,9 @@
     "fields": {
         "template": 1,
         "item": 14,
-        "chance": 40,
-        "min_quantity": 10,
-        "max_quantity": 20,
+        "chance": 10,
+        "min_quantity": 1,
+        "max_quantity": 5,
         "min_condition": 100,
         "max_condition": 100
     }
@@ -20381,9 +20425,9 @@
     "fields": {
         "template": 2,
         "item": 7,
-        "chance": 80,
-        "min_quantity": 20,
-        "max_quantity": 50,
+        "chance": 10,
+        "min_quantity": 10,
+        "max_quantity": 20,
         "min_condition": 100,
         "max_condition": 100
     }
@@ -20394,9 +20438,9 @@
     "fields": {
         "template": 2,
         "item": 8,
-        "chance": 80,
-        "min_quantity": 20,
-        "max_quantity": 50,
+        "chance": 10,
+        "min_quantity": 10,
+        "max_quantity": 20,
         "min_condition": 100,
         "max_condition": 100
     }
@@ -20407,9 +20451,9 @@
     "fields": {
         "template": 2,
         "item": 9,
-        "chance": 70,
-        "min_quantity": 20,
-        "max_quantity": 50,
+        "chance": 10,
+        "min_quantity": 1,
+        "max_quantity": 10,
         "min_condition": 100,
         "max_condition": 100
     }
@@ -20420,9 +20464,9 @@
     "fields": {
         "template": 2,
         "item": 1,
-        "chance": 60,
-        "min_quantity": 10,
-        "max_quantity": 20,
+        "chance": 10,
+        "min_quantity": 1,
+        "max_quantity": 10,
         "min_condition": 100,
         "max_condition": 100
     }
@@ -20433,9 +20477,9 @@
     "fields": {
         "template": 2,
         "item": 16,
-        "chance": 50,
-        "min_quantity": 10,
-        "max_quantity": 20,
+        "chance": 20,
+        "min_quantity": 1,
+        "max_quantity": 10,
         "min_condition": 100,
         "max_condition": 100
     }
@@ -20446,9 +20490,9 @@
     "fields": {
         "template": 2,
         "item": 5,
-        "chance": 40,
-        "min_quantity": 10,
-        "max_quantity": 20,
+        "chance": 5,
+        "min_quantity": 1,
+        "max_quantity": 10,
         "min_condition": 100,
         "max_condition": 100
     }
@@ -20459,9 +20503,9 @@
     "fields": {
         "template": 3,
         "item": 88,
-        "chance": 80,
+        "chance": 15,
         "min_quantity": 1,
-        "max_quantity": 3,
+        "max_quantity": 2,
         "min_condition": 100,
         "max_condition": 100
     }
@@ -20472,9 +20516,9 @@
     "fields": {
         "template": 3,
         "item": 91,
-        "chance": 50,
+        "chance": 10,
         "min_quantity": 1,
-        "max_quantity": 3,
+        "max_quantity": 2,
         "min_condition": 100,
         "max_condition": 100
     }
@@ -20485,9 +20529,9 @@
     "fields": {
         "template": 3,
         "item": 89,
-        "chance": 20,
+        "chance": 5,
         "min_quantity": 1,
-        "max_quantity": 3,
+        "max_quantity": 2,
         "min_condition": 100,
         "max_condition": 100
     }
@@ -20498,9 +20542,9 @@
     "fields": {
         "template": 4,
         "item": 120,
-        "chance": 60,
+        "chance": 20,
         "min_quantity": 1,
-        "max_quantity": 5,
+        "max_quantity": 3,
         "min_condition": 100,
         "max_condition": 100
     }
@@ -20511,9 +20555,9 @@
     "fields": {
         "template": 4,
         "item": 114,
-        "chance": 40,
+        "chance": 15,
         "min_quantity": 1,
-        "max_quantity": 3,
+        "max_quantity": 2,
         "min_condition": 100,
         "max_condition": 100
     }
@@ -20524,9 +20568,9 @@
     "fields": {
         "template": 4,
         "item": 116,
-        "chance": 40,
+        "chance": 15,
         "min_quantity": 1,
-        "max_quantity": 3,
+        "max_quantity": 2,
         "min_condition": 100,
         "max_condition": 100
     }
@@ -20537,9 +20581,9 @@
     "fields": {
         "template": 4,
         "item": 119,
-        "chance": 20,
+        "chance": 10,
         "min_quantity": 1,
-        "max_quantity": 3,
+        "max_quantity": 2,
         "min_condition": 100,
         "max_condition": 100
     }
@@ -20550,9 +20594,9 @@
     "fields": {
         "template": 4,
         "item": 118,
-        "chance": 20,
+        "chance": 10,
         "min_quantity": 1,
-        "max_quantity": 3,
+        "max_quantity": 2,
         "min_condition": 100,
         "max_condition": 100
     }
@@ -20563,9 +20607,490 @@
     "fields": {
         "template": 4,
         "item": 122,
+        "chance": 5,
+        "min_quantity": 1,
+        "max_quantity": 2,
+        "min_condition": 100,
+        "max_condition": 100
+    }
+},
+{
+    "model": "fallout.loottemplateitem",
+    "pk": 24,
+    "fields": {
+        "template": 1,
+        "item": 124,
+        "chance": 20,
+        "min_quantity": 1,
+        "max_quantity": 10,
+        "min_condition": 100,
+        "max_condition": 100
+    }
+},
+{
+    "model": "fallout.loottemplateitem",
+    "pk": 25,
+    "fields": {
+        "template": 1,
+        "item": 125,
+        "chance": 20,
+        "min_quantity": 1,
+        "max_quantity": 10,
+        "min_condition": 100,
+        "max_condition": 100
+    }
+},
+{
+    "model": "fallout.loottemplateitem",
+    "pk": 26,
+    "fields": {
+        "template": 2,
+        "item": 127,
+        "chance": 20,
+        "min_quantity": 10,
+        "max_quantity": 20,
+        "min_condition": 100,
+        "max_condition": 100
+    }
+},
+{
+    "model": "fallout.loottemplateitem",
+    "pk": 27,
+    "fields": {
+        "template": 2,
+        "item": 6,
+        "chance": 10,
+        "min_quantity": 10,
+        "max_quantity": 20,
+        "min_condition": 100,
+        "max_condition": 100
+    }
+},
+{
+    "model": "fallout.loottemplateitem",
+    "pk": 28,
+    "fields": {
+        "template": 2,
+        "item": 126,
+        "chance": 10,
+        "min_quantity": 10,
+        "max_quantity": 20,
+        "min_condition": 100,
+        "max_condition": 100
+    }
+},
+{
+    "model": "fallout.loottemplateitem",
+    "pk": 29,
+    "fields": {
+        "template": 3,
+        "item": 175,
+        "chance": 20,
+        "min_quantity": 1,
+        "max_quantity": 2,
+        "min_condition": 100,
+        "max_condition": 100
+    }
+},
+{
+    "model": "fallout.loottemplateitem",
+    "pk": 30,
+    "fields": {
+        "template": 5,
+        "item": 21,
+        "chance": 5,
+        "min_quantity": 1,
+        "max_quantity": 2,
+        "min_condition": 100,
+        "max_condition": 100
+    }
+},
+{
+    "model": "fallout.loottemplateitem",
+    "pk": 31,
+    "fields": {
+        "template": 5,
+        "item": 22,
         "chance": 10,
         "min_quantity": 1,
+        "max_quantity": 2,
+        "min_condition": 100,
+        "max_condition": 100
+    }
+},
+{
+    "model": "fallout.loottemplateitem",
+    "pk": 32,
+    "fields": {
+        "template": 5,
+        "item": 20,
+        "chance": 5,
+        "min_quantity": 1,
+        "max_quantity": 2,
+        "min_condition": 100,
+        "max_condition": 100
+    }
+},
+{
+    "model": "fallout.loottemplateitem",
+    "pk": 33,
+    "fields": {
+        "template": 5,
+        "item": 19,
+        "chance": 10,
+        "min_quantity": 1,
+        "max_quantity": 2,
+        "min_condition": 100,
+        "max_condition": 100
+    }
+},
+{
+    "model": "fallout.loottemplateitem",
+    "pk": 34,
+    "fields": {
+        "template": 4,
+        "item": 180,
+        "chance": 25,
+        "min_quantity": 1,
         "max_quantity": 3,
+        "min_condition": 100,
+        "max_condition": 100
+    }
+},
+{
+    "model": "fallout.loottemplateitem",
+    "pk": 35,
+    "fields": {
+        "template": 4,
+        "item": 200,
+        "chance": 10,
+        "min_quantity": 1,
+        "max_quantity": 2,
+        "min_condition": 100,
+        "max_condition": 100
+    }
+},
+{
+    "model": "fallout.loottemplateitem",
+    "pk": 36,
+    "fields": {
+        "template": 6,
+        "item": 115,
+        "chance": 20,
+        "min_quantity": 1,
+        "max_quantity": 3,
+        "min_condition": 100,
+        "max_condition": 100
+    }
+},
+{
+    "model": "fallout.loottemplateitem",
+    "pk": 37,
+    "fields": {
+        "template": 6,
+        "item": 201,
+        "chance": 15,
+        "min_quantity": 1,
+        "max_quantity": 2,
+        "min_condition": 100,
+        "max_condition": 100
+    }
+},
+{
+    "model": "fallout.loottemplateitem",
+    "pk": 38,
+    "fields": {
+        "template": 6,
+        "item": 117,
+        "chance": 10,
+        "min_quantity": 1,
+        "max_quantity": 2,
+        "min_condition": 100,
+        "max_condition": 100
+    }
+},
+{
+    "model": "fallout.loottemplateitem",
+    "pk": 39,
+    "fields": {
+        "template": 6,
+        "item": 203,
+        "chance": 5,
+        "min_quantity": 1,
+        "max_quantity": 2,
+        "min_condition": 100,
+        "max_condition": 100
+    }
+},
+{
+    "model": "fallout.loottemplateitem",
+    "pk": 40,
+    "fields": {
+        "template": 6,
+        "item": 211,
+        "chance": 5,
+        "min_quantity": 1,
+        "max_quantity": 1,
+        "min_condition": 100,
+        "max_condition": 100
+    }
+},
+{
+    "model": "fallout.loottemplateitem",
+    "pk": 41,
+    "fields": {
+        "template": 4,
+        "item": 212,
+        "chance": 5,
+        "min_quantity": 1,
+        "max_quantity": 1,
+        "min_condition": 100,
+        "max_condition": 100
+    }
+},
+{
+    "model": "fallout.loottemplateitem",
+    "pk": 42,
+    "fields": {
+        "template": 4,
+        "item": 213,
+        "chance": 5,
+        "min_quantity": 1,
+        "max_quantity": 1,
+        "min_condition": 100,
+        "max_condition": 100
+    }
+},
+{
+    "model": "fallout.loottemplateitem",
+    "pk": 43,
+    "fields": {
+        "template": 7,
+        "item": 199,
+        "chance": 20,
+        "min_quantity": 1,
+        "max_quantity": 1,
+        "min_condition": 100,
+        "max_condition": 100
+    }
+},
+{
+    "model": "fallout.loottemplateitem",
+    "pk": 44,
+    "fields": {
+        "template": 7,
+        "item": 196,
+        "chance": 20,
+        "min_quantity": 1,
+        "max_quantity": 1,
+        "min_condition": 100,
+        "max_condition": 100
+    }
+},
+{
+    "model": "fallout.loottemplateitem",
+    "pk": 45,
+    "fields": {
+        "template": 7,
+        "item": 194,
+        "chance": 20,
+        "min_quantity": 1,
+        "max_quantity": 1,
+        "min_condition": 100,
+        "max_condition": 100
+    }
+},
+{
+    "model": "fallout.loottemplateitem",
+    "pk": 46,
+    "fields": {
+        "template": 7,
+        "item": 197,
+        "chance": 15,
+        "min_quantity": 1,
+        "max_quantity": 1,
+        "min_condition": 100,
+        "max_condition": 100
+    }
+},
+{
+    "model": "fallout.loottemplateitem",
+    "pk": 47,
+    "fields": {
+        "template": 7,
+        "item": 193,
+        "chance": 15,
+        "min_quantity": 1,
+        "max_quantity": 1,
+        "min_condition": 100,
+        "max_condition": 100
+    }
+},
+{
+    "model": "fallout.loottemplateitem",
+    "pk": 48,
+    "fields": {
+        "template": 7,
+        "item": 198,
+        "chance": 10,
+        "min_quantity": 1,
+        "max_quantity": 1,
+        "min_condition": 100,
+        "max_condition": 100
+    }
+},
+{
+    "model": "fallout.loottemplateitem",
+    "pk": 49,
+    "fields": {
+        "template": 7,
+        "item": 216,
+        "chance": 20,
+        "min_quantity": 1,
+        "max_quantity": 1,
+        "min_condition": 100,
+        "max_condition": 100
+    }
+},
+{
+    "model": "fallout.loottemplateitem",
+    "pk": 50,
+    "fields": {
+        "template": 7,
+        "item": 217,
+        "chance": 5,
+        "min_quantity": 1,
+        "max_quantity": 1,
+        "min_condition": 100,
+        "max_condition": 100
+    }
+},
+{
+    "model": "fallout.loottemplateitem",
+    "pk": 51,
+    "fields": {
+        "template": 8,
+        "item": 192,
+        "chance": 10,
+        "min_quantity": 1,
+        "max_quantity": 2,
+        "min_condition": 100,
+        "max_condition": 100
+    }
+},
+{
+    "model": "fallout.loottemplateitem",
+    "pk": 52,
+    "fields": {
+        "template": 8,
+        "item": 191,
+        "chance": 15,
+        "min_quantity": 1,
+        "max_quantity": 2,
+        "min_condition": 100,
+        "max_condition": 100
+    }
+},
+{
+    "model": "fallout.loottemplateitem",
+    "pk": 53,
+    "fields": {
+        "template": 8,
+        "item": 190,
+        "chance": 20,
+        "min_quantity": 1,
+        "max_quantity": 2,
+        "min_condition": 100,
+        "max_condition": 100
+    }
+},
+{
+    "model": "fallout.loottemplateitem",
+    "pk": 54,
+    "fields": {
+        "template": 8,
+        "item": 189,
+        "chance": 5,
+        "min_quantity": 1,
+        "max_quantity": 2,
+        "min_condition": 100,
+        "max_condition": 100
+    }
+},
+{
+    "model": "fallout.loottemplateitem",
+    "pk": 55,
+    "fields": {
+        "template": 8,
+        "item": 187,
+        "chance": 10,
+        "min_quantity": 1,
+        "max_quantity": 2,
+        "min_condition": 100,
+        "max_condition": 100
+    }
+},
+{
+    "model": "fallout.loottemplateitem",
+    "pk": 56,
+    "fields": {
+        "template": 8,
+        "item": 186,
+        "chance": 10,
+        "min_quantity": 1,
+        "max_quantity": 2,
+        "min_condition": 100,
+        "max_condition": 100
+    }
+},
+{
+    "model": "fallout.loottemplateitem",
+    "pk": 57,
+    "fields": {
+        "template": 8,
+        "item": 185,
+        "chance": 15,
+        "min_quantity": 1,
+        "max_quantity": 2,
+        "min_condition": 100,
+        "max_condition": 100
+    }
+},
+{
+    "model": "fallout.loottemplateitem",
+    "pk": 58,
+    "fields": {
+        "template": 8,
+        "item": 184,
+        "chance": 20,
+        "min_quantity": 1,
+        "max_quantity": 2,
+        "min_condition": 100,
+        "max_condition": 100
+    }
+},
+{
+    "model": "fallout.loottemplateitem",
+    "pk": 59,
+    "fields": {
+        "template": 8,
+        "item": 183,
+        "chance": 15,
+        "min_quantity": 1,
+        "max_quantity": 2,
+        "min_condition": 100,
+        "max_condition": 100
+    }
+},
+{
+    "model": "fallout.loottemplateitem",
+    "pk": 60,
+    "fields": {
+        "template": 8,
+        "item": 182,
+        "chance": 5,
+        "min_quantity": 1,
+        "max_quantity": 2,
         "min_condition": 100,
         "max_condition": 100
     }
