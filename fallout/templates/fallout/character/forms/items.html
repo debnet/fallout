@@ -8,16 +8,16 @@
                     <div class="card h-100">
                         <div class="card-header">
                             {% if equip.quantity > 0 and not item.is_repairable %}
-                                <span class="badge badge-dark align-middle">{{ equip.quantity }}</span>
+                                <span class="badge badge-dark">{{ equip.quantity }}</span>
                             {% elif not equip.quantity %}
-                                <span class="badge badge-danger align-middle">{% trans "vide" %}</span>
+                                <span class="badge badge-danger">{% trans "vide" %}</span>
                             {% endif %}
                             <span class="card-title">{{ item.name }}</span>
                             {% if item.title %}
                                 <small class="card-subtitle mb-2 text-muted">{{ item.title }}</small>
                             {% endif %}
                             {% if equip.secondary %}
-                                <span class="badge badge-secondary align-middle float-right">{% trans "Arme" %}</span>
+                                <span class="badge badge-secondary float-right">{% trans "Arme" %}</span>
                             {% endif %}
                         </div>
                         <div class="card-body">
@@ -31,19 +31,19 @@
                                 {% endif %}
                             {% endwith %}
                             <p class="card-text">
-                                <small class="badge badge-light align-middle">
+                                <small class="badge badge-light">
                                     {{ equip.charge|floatformat:2 }} {% trans "kg" %}
                                 </small>
-                                <small class="badge badge-warning align-middle">
+                                <small class="badge badge-warning">
                                     {{ equip.value|floatformat:2 }} {% trans "¤" %}
                                 </small>
                                 {% if item.clip_size %}
-                                    <small class="badge badge-danger align-middle">
+                                    <small class="badge badge-danger">
                                         {{ equip.clip_count }} / {{ item.clip_size }}
                                     </small>
                                 {% endif %}
                                 {% for modifier in item.modifiers.all %}
-                                    <small class="badge {% if modifier.bonus %}badge-success{% else %}badge-danger{% endif %} align-middle">
+                                    <small class="badge {% if modifier.bonus %}badge-success{% else %}badge-danger{% endif %}">
                                         {{ modifier.label }}
                                     </small>
                                 {% endfor %}

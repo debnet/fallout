@@ -27,20 +27,20 @@
                     {% if character.title %}<small class="card-subtitle mb-2 text-muted">{{ character.title }}</small>{% endif %}
                     <div class="float-right">
                         {% if character.is_player %}
-                            <small class="badge badge-success align-middle">{% trans "PJ" %}</small>
+                            <small class="badge badge-success">{% trans "PJ" %}</small>
                         {% else %}
-                            <small class="badge badge-warning align-middle">{% trans "PNJ" %}</small>
+                            <small class="badge badge-warning">{% trans "PNJ" %}</small>
                         {% endif %}
-                        <small class="badge badge-light align-middle">{% trans "Niveau" %} {{ character.level }}</small>
+                        <small class="badge badge-light">{% trans "Niveau" %} {{ character.level }}</small>
                         {% if character.health == 0 %}
-                            <small class="badge badge-danger align-middle">{% trans "KO" %}</small>
+                            <small class="badge badge-danger">{% trans "KO" %}</small>
                         {% elif campaign.current_character == character %}
-                            <small class="badge badge-info align-middle">{% trans "Actif" %}</small>
+                            <small class="badge badge-info">{% trans "Actif" %}</small>
                         {% endif %}
                         <form method="post" action="{{ request.path }}" class="d-inline">
                             {% csrf_token %}
                             <button type="submit" name="rest" value="{{ character.id }}"
-                                    class="btn btn-sm align-middle badge {% if character.is_resting %}badge-info{% else %}badge-secondary{% endif %}">
+                                    class="btn btn-sm badge {% if character.is_resting %}badge-info{% else %}badge-secondary{% endif %}">
                                 {% trans "Repos" %}
                             </button>
                         </form>
