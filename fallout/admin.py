@@ -673,7 +673,7 @@ class LootTemplateAdmin(CommonAdmin):
     )
     inlines = [LootTemplateItemInline]
     list_display_links = ('name', )
-    list_display = ('name', )
+    list_display = ('name', 'count', )
     list_editable = ()
     list_filter = ()
     ordering = ('name', )
@@ -690,6 +690,17 @@ class LootTemplateAdmin(CommonAdmin):
             element.duplicate()
         self.message_user(request, message=_("Les modèles de butins sélectionnés ont été dupliqués."))
     duplicate.short_description = _("Dupliquer les butins sélectionnés")
+
+    def count(self, obj):
+        """
+        Nombre d'objets dans le butin
+        """
+        return obj.count
+    count.short_description = _("nombre")
+    count.admin_order_field = 'count'
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).annotate(count=Count('items'))
 
 
 @admin.register(RollHistory)
