@@ -1,5 +1,5 @@
 {% extends "fallout/base.html" %}
-{% load i18n %}
+{% load static i18n %}
 
 {% block navbar %}
     <ul class="navbar-nav mr-auto"></ul>
@@ -40,7 +40,7 @@
                     {% if not directory %}
                         <div class="card-body">
                             <div class="thumbnail rounded">
-                                <img alt="{{ name }}" class="img-fluid mx-auto d-block" src="{{ MEDIA_URL }}{{ url }}">
+                                <img alt="{{ name }}" class="img-fluid d-block m-auto" src="{% static "fallout/img/" %}{{ url }}">
                             </div>
                         </div>
                     {% endif %}

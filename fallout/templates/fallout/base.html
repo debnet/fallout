@@ -34,6 +34,7 @@
                        aria-haspopup="true" aria-expanded="false">{% trans "Actions" %}</a>
                     <div class="dropdown-menu" aria-labelledby="actions-navbar">
                         <a class="dropdown-item text-danger" href="{% url 'admin:index' %}">{% trans "Administration" %}</a>
+                        <a class="dropdown-item text-warning" href="{% url 'fallout:thumbnails' %}">{% trans "Miniatures" %}</a>
                         {% block actions %}{% endblock %}
                     </div>
                 </li>

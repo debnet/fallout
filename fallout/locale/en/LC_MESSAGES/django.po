@@ -8,9 +8,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-09-15 15:16+0200\n"
+"POT-Creation-Date: 2020-10-01 03:00+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Last-Translator: Marc Debureaux <marc@debnet.fr>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
 "MIME-Version: 1.0\n"
@@ -129,6 +129,9 @@ msgstr "Selected loot templates were duplicated."
 
 msgid "Dupliquer les butins sélectionnés"
 msgstr "Duplicate selected loots"
+
+msgid "nombre"
+msgstr "count"
 
 msgid "Jet"
 msgstr "Roll"
@@ -249,9 +252,6 @@ msgstr "characters"
 
 msgid "nom"
 msgstr "name"
-
-msgid "nombre"
-msgstr "count"
 
 msgid "équipements ?"
 msgstr "equipments?"
@@ -1560,6 +1560,9 @@ msgstr "Actions"
 
 msgid "Administration"
 msgstr "Administration"
+
+msgid "Miniatures"
+msgstr "Thumbnails"
 
 msgid "Fermer"
 msgstr "Close"

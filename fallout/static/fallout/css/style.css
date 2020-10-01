@@ -37,8 +37,11 @@ body {
 /* Thumbnail images */
 .thumbnail {
     background-color: black;
-    height: 200px;
+    height: 150px;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
 }
 .thumbnail > img {
-    height: 200px;
+    max-height: 150px;
 }

@@ -1,4 +1,4 @@
-{% load i18n l10n humanize %}
+{% load static i18n l10n humanize %}
 
 <div class="row">
     {% for effect in effects %}
@@ -13,10 +13,10 @@
                         {% with image=info.image thumbnail=info.thumbnail %}
                             {% if thumbnail %}
                                 <div class="thumbnail rounded mb-2">
-                                    <img class="img-fluid mx-auto d-block rounded" src="{{ MEDIA_URL }}{{ thumbnail }}">
+                                    <img class="img-fluid d-block m-auto" src="{% static "fallout/img/" %}{{ thumbnail }}">
                                 </div>
                             {% elif image %}
-                                <img class="img-fluid mx-auto d-block rounded mb-2" src="{{ image.url }}">
+                                <img class="img-fluid m-auto mb-2" src="{{ image.url }}">
                             {% endif %}
                         {% endwith %}
                         {% if effect.progress %}

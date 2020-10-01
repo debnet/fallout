@@ -1,5 +1,5 @@
 {% extends "fallout/base.html" %}
-{% load i18n %}
+{% load static i18n %}
 {% get_current_language as LANGUAGE_CODE %}
 
 {% block navbar %}
@@ -23,7 +23,7 @@
         <div class="content">
             {% with image=campaign.image thumbnail=campaign.thumbnail %}
                 {% if thumbnail %}
-                    <img class="float-left rounded mr-2" height="120" width="120" src="{{ MEDIA_URL }}{{ thumbnail }}">
+                    <img class="float-left rounded mr-2" height="120" width="120" src="{% static "fallout/img/" %}{{ thumbnail }}">
                 {% elif image %}
                     <img class="float-left rounded mr-2" height="120" width="120" src="{{ image.url }}">
                 {% endif %}

@@ -1,4 +1,4 @@
-{% load i18n l10n custom %}
+{% load static i18n l10n custom %}
 
 <div class="row">
     {% for equip in items %}
@@ -24,10 +24,10 @@
                             {% with image=item.image thumbnail=item.thumbnail %}
                                 {% if thumbnail %}
                                     <div class="thumbnail rounded mb-2">
-                                        <img class="img-fluid mx-auto d-block rounded" src="{{ MEDIA_URL }}{{ thumbnail }}">
+                                        <img class="img-fluid d-block m-auto" src="{% static "fallout/img/" %}{{ thumbnail }}">
                                     </div>
                                 {% elif image %}
-                                    <img class="img-fluid mx-auto d-block rounded mb-2" src="{{ image.url }}">
+                                    <img class="img-fluid m-auto mb-2" src="{{ image.url }}">
                                 {% endif %}
                             {% endwith %}
                             <p class="card-text">
