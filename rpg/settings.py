@@ -27,6 +27,8 @@ class Base(Configuration):
 
     # Application definition
     INSTALLED_APPS = [
+        # Translation
+        'modeltranslation',
         # Default
         'django.contrib.admin',
         'django.contrib.auth',
@@ -304,6 +306,17 @@ class Base(Configuration):
             },
         }
     }
+
+    # ModelTranslation
+    MODELTRANSLATION_DEFAULT_LANGUAGE = values.Value('fr')
+    MODELTRANSLATION_LANGUAGES = values.TupleValue(
+        ('fr', 'en'))
+    MODELTRANSLATION_FALLBACK_LANGUAGES = values.DictValue({
+        'default': ('fr', 'en'),
+        'en': ('fr', ),
+        'fr': ('en', ),
+    })
+    MODELTRANSLATION_ENABLE_FALLBACKS = values.BooleanValue(True)
 
 
 class Prod(Base):

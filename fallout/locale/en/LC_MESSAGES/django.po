@@ -631,6 +631,9 @@ msgstr "grenade"
 msgid "accessoire"
 msgstr "accessory"
 
+msgid "outil"
+msgstr "tool"
+
 msgid "nourriture"
 msgstr "food"
 

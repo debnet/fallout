@@ -380,7 +380,7 @@ class Stats(Resistance):
                     stats._change_all_stats(**effects)
                     break
         # Equipment modifiers
-        for equipment in character.inventory.filter(~Q(slot='') | Q(item__type=ITEM_EXTRA)):
+        for equipment in character.inventory.filter(~Q(slot='') | Q(item__type__in=(ITEM_EXTRA, ITEM_TOOL))):
             for count in range(equipment.quantity):
                 for modifier in equipment.item.modifiers.all():
                     stats._change_stats(modifier.stats, modifier.calculated_value)
@@ -1739,7 +1739,7 @@ class Item(Entity, Resistance, Damage):
         """
         Objet utilisable ?
         """
-        return self.type in (ITEM_FOOD, ITEM_CHEM, ITEM_BOOK)
+        return self.type in (ITEM_FOOD, ITEM_CHEM, ITEM_BOOK, ITEM_TOOL)
 
     @property
     def is_repairable(self) -> bool:
@@ -1967,12 +1967,13 @@ class Equipment(CommonModel):
             character_effect = effect.affect(self.character)
             if character_effect:
                 effects.append(character_effect)
-        for modifier in self.item.modifiers.all():
-            self.character.modify_value(modifier.stats, modifier.calculated_value)
-            change_character = True
-        self.quantity -= 1
-        if save:
-            self.save()
+        if self.item.type != ITEM_TOOL:
+            for modifier in self.item.modifiers.all():
+                self.character.modify_value(modifier.stats, modifier.calculated_value)
+                change_character = True
+            self.quantity -= 1
+            if save:
+                self.save()
         if is_action:
             self.character.action_points -= AP_COST_USE
         if change_character or is_action:
