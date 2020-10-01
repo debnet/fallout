@@ -44,7 +44,7 @@ def get_thumbnails(directory: str = '') -> List[Tuple[str, str]]:
         return []
     images = []
     try:
-        dirname = os.path.join(settings.STATIC_ROOT, 'img/thumbnails', directory)
+        dirname = os.path.join(settings.STATIC_ROOT, 'fallout/img/thumbnails', directory)
         if not os.path.exists(dirname) and settings.DEBUG:
             dirname = os.path.join(settings.BASE_DIR, 'fallout/static/fallout/img/thumbnails', directory)
         for filename in os.listdir(dirname):

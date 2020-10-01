@@ -487,7 +487,7 @@ def thumbnails(request):
     if '..' in directory:
         raise Http404()
     directories = directory.split(os.sep)
-    dirname = os.path.join(settings.STATIC_ROOT, 'img/thumbnails', directory)
+    dirname = os.path.join(settings.STATIC_ROOT, 'fallout/img/thumbnails', directory)
     if not os.path.exists(dirname) and settings.DEBUG:
         dirname = os.path.join(settings.BASE_DIR, 'fallout/static/fallout/img/thumbnails', directory)
     images = []
