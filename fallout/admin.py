@@ -87,11 +87,11 @@ class CampaignAdmin(CommonAdmin):
     )
     inlines = [LootInline, CampaignEffectInlineAdmin]
     list_display_links = ('name', )
-    list_display = ('name', 'current_game_date', 'current_character', 'needs', 'radiation', )
+    list_display = ('name', 'title', 'current_game_date', 'current_character', 'needs', 'radiation', )
     list_editable = ('current_character', 'needs', 'radiation', )
     list_filter = ('needs', 'game_master', 'view_pc', 'view_npc', 'view_rolls', )
     search_fields = ('name', 'title', 'description', )
-    ordering = ('name', )
+    ordering = ('name', 'title', )
     autocomplete_fields = ('game_master', 'current_character', )
     save_on_top = True
     actions_on_bottom = True
@@ -203,12 +203,12 @@ class CharacterAdmin(EntityAdmin):
     inlines = [EquipmentInlineAdmin, CharacterEffectInlineAdmin]
     list_display_links = ('name', )
     list_display = (
-        'name', 'race', 'level', 'is_player', 'is_active',
+        'name', 'title', 'race', 'level', 'is_player', 'is_active',
         'health', 'current_max_health', 'action_points', 'current_max_action_points', 'experience', 'karma')
     list_editable = ('health', 'action_points', 'experience', 'karma', 'is_active',)
     list_filter = ('campaign', 'is_player', 'is_active', 'has_stats', 'has_needs', 'race', 'player', )
     search_fields = ('name', 'title', 'description', 'background', )
-    ordering = ('name', )
+    ordering = ('name', 'title', )
     actions = EntityAdmin.actions + [
         'duplicate', 'heal', 'damage', 'roll', 'fight', 'generate_stats', 'randomize', 'move', 'equip', 'loot']
     autocomplete_fields = ('campaign', 'player', )
@@ -474,11 +474,11 @@ class ItemAdmin(EntityAdmin):
     )
     inlines = [ItemModifierInline]
     list_display_links = ('name', )
-    list_display = ('name', 'type', 'value', 'weight', 'is_quest', )
+    list_display = ('name', 'title', 'type', 'value', 'weight', 'is_quest', )
     list_editable = ()
     list_filter = ('type', 'hands', 'attack_mode', 'skill', 'is_quest', 'is_droppable', )
     search_fields = ('name', 'title', 'description', )
-    ordering = ('name', )
+    ordering = ('name', 'title', )
     actions = EntityAdmin.actions + ['duplicate']
     autocomplete_fields = ('effects', 'ammunitions', )
     save_on_top = True
@@ -564,11 +564,11 @@ class EffectAdmin(EntityAdmin):
     )
     inlines = [EffectModifierInline]
     list_display_links = ('name', )
-    list_display = ('name', 'character', 'chance', 'duration', 'next_effect', 'cancel_effect', 'has_damage', )
+    list_display = ('name', 'title', 'character', 'chance', 'duration', 'next_effect', 'cancel_effect', 'has_damage', )
     list_editable = ()
     list_filter = ()
     search_fields = ('name', 'title', 'description', )
-    ordering = ('name', )
+    ordering = ('name', 'title', )
     autocomplete_fields = ('character', 'next_effect', 'cancel_effect', )
     actions = EntityAdmin.actions + ['duplicate']
     save_on_top = True
@@ -699,10 +699,10 @@ class LootTemplateAdmin(CommonAdmin):
     )
     inlines = [LootTemplateItemInline]
     list_display_links = ('name', )
-    list_display = ('name', 'count', )
+    list_display = ('name', 'title', 'count', )
     list_editable = ()
     list_filter = ()
-    ordering = ('name', )
+    ordering = ('name', 'title', )
     search_fields = ('name', 'title', 'description', )
     actions = CommonAdmin.actions + ['duplicate']
     save_on_top = True
