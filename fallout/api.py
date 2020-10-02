@@ -9,10 +9,8 @@ from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.generics import get_object_or_404
 
-from fallout.enums import BODY_PARTS, DAMAGES_TYPES, LIST_EDITABLE_STATS, ROLL_STATS
-from fallout.models import (
-    MODELS, Campaign, CampaignEffect, Character, CharacterEffect, Equipment, Effect,
-    Item, Loot, LootTemplate, DamageHistory, FightHistory, RollHistory)
+from fallout.enums import *  # noqa
+from fallout.models import *  # noqa
 
 
 # Désactive les listes déroulantes sur les champs de relations

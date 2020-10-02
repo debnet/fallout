@@ -1,11 +1,17 @@
 # coding: utf-8
+from random import randint
+
 from common.admin import CommonAdmin, EntityAdmin, EntityTabularInline
 from django.contrib import admin, messages
+from django.contrib.admin.helpers import ACTION_CHECKBOX_NAME
 from django.contrib.auth.admin import UserAdmin
+from django.db.models import Count, Q
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.utils.translation import gettext_lazy as _
 
+from fallout.constants import *  # noqa
+from fallout.enums import *  # noqa
 from fallout.forms import *  # noqa
 from fallout.models import *  # noqa
 
@@ -204,7 +210,7 @@ class CharacterAdmin(EntityAdmin):
     search_fields = ('name', 'title', 'description', 'background', )
     ordering = ('name', )
     actions = EntityAdmin.actions + [
-        'duplicate', 'heal', 'damage', 'roll', 'fight', 'randomize', 'generate_stats', 'move', 'equip', 'loot']
+        'duplicate', 'heal', 'damage', 'roll', 'fight', 'generate_stats', 'randomize', 'move', 'equip', 'loot']
     autocomplete_fields = ('campaign', 'player', )
     save_on_top = True
     actions_on_bottom = True
@@ -247,7 +253,7 @@ class CharacterAdmin(EntityAdmin):
         else:
             form = DuplicateCharacterForm()
         return render(request, 'fallout/character/admin/duplicate.html', {
-            'form': form, 'characters': queryset, 'targets': request.POST.getlist(admin.ACTION_CHECKBOX_NAME)})
+            'form': form, 'characters': queryset, 'targets': request.POST.getlist(ACTION_CHECKBOX_NAME)})
     duplicate.short_description = _("Dupliquer les personnages sélectionnés")
 
     def randomize(self, request, queryset):
@@ -267,7 +273,7 @@ class CharacterAdmin(EntityAdmin):
         else:
             form = RandomizeCharacterForm()
         return render(request, 'fallout/character/admin/randomize.html', {
-            'form': form, 'characters': queryset, 'targets': request.POST.getlist(admin.ACTION_CHECKBOX_NAME)})
+            'form': form, 'characters': queryset, 'targets': request.POST.getlist(ACTION_CHECKBOX_NAME)})
     randomize.short_description = _("Générer aléatoirement les compétences")
 
     def roll(self, request, queryset):
@@ -284,7 +290,7 @@ class CharacterAdmin(EntityAdmin):
         else:
             form = RollCharacterForm()
         return render(request, 'fallout/character/admin/roll.html', {
-            'form': form, 'characters': queryset, 'targets': request.POST.getlist(admin.ACTION_CHECKBOX_NAME)})
+            'form': form, 'characters': queryset, 'targets': request.POST.getlist(ACTION_CHECKBOX_NAME)})
     roll.short_description = _("Faire un jet de compétence")
 
     def damage(self, request, queryset):
@@ -301,7 +307,7 @@ class CharacterAdmin(EntityAdmin):
         else:
             form = DamageCharacterForm()
         return render(request, 'fallout/character/admin/damage.html', {
-            'form': form, 'characters': queryset, 'targets': request.POST.getlist(admin.ACTION_CHECKBOX_NAME)})
+            'form': form, 'characters': queryset, 'targets': request.POST.getlist(ACTION_CHECKBOX_NAME)})
     damage.short_description = _("Infliger des dégâts aux personnages sélectionnés")
 
     def fight(self, request, queryset):
@@ -323,7 +329,7 @@ class CharacterAdmin(EntityAdmin):
         else:
             form = FightCharacterForm()
         return render(request, 'fallout/character/admin/fight.html', {
-            'form': form, 'characters': queryset, 'targets': request.POST.getlist(admin.ACTION_CHECKBOX_NAME)})
+            'form': form, 'characters': queryset, 'targets': request.POST.getlist(ACTION_CHECKBOX_NAME)})
     fight.short_description = _("Attaquer un autre personnage")
 
     def move(self, request, queryset):
@@ -338,7 +344,7 @@ class CharacterAdmin(EntityAdmin):
         else:
             form = CampaignForm()
         return render(request, 'fallout/character/admin/move.html', {
-            'form': form, 'characters': queryset, 'targets': request.POST.getlist(admin.ACTION_CHECKBOX_NAME)})
+            'form': form, 'characters': queryset, 'targets': request.POST.getlist(ACTION_CHECKBOX_NAME)})
     move.short_description = _("Déplacer les personnages sélectionnés")
 
     def loot(self, request, queryset):
@@ -401,7 +407,7 @@ class CharacterAdmin(EntityAdmin):
         else:
             form = EquipCharacterForm()
         return render(request, 'fallout/character/admin/equip.html', {
-            'form': form, 'characters': queryset, 'targets': request.POST.getlist(admin.ACTION_CHECKBOX_NAME)})
+            'form': form, 'characters': queryset, 'targets': request.POST.getlist(ACTION_CHECKBOX_NAME)})
     equip.short_description = _("Equiper les personnages sélectionnés")
 
     def get_queryset(self, request):

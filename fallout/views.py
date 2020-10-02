@@ -10,10 +10,8 @@ from django.shortcuts import redirect
 from django.utils.translation import gettext as _
 from rest_framework.authtoken.models import Token
 
-from fallout.enums import BODY_PARTS, DAMAGES_TYPES, LIST_SPECIALS, ROLL_STATS
-from fallout.models import (
-    Campaign, Character, CampaignEffect, CharacterEffect, Effect, Equipment,
-    Item, Loot, LootTemplate, RollHistory, DamageHistory, FightHistory, Log)
+from fallout.enums import *  # noqa
+from fallout.models import *  # noqa
 
 
 @login_required

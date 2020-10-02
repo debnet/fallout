@@ -863,9 +863,10 @@ class Character(Entity, Stats):
         self.check_level()
         # Randomly distribute a fraction of the skill points on tag skills
         skill_points = self.skill_points - self.used_skill_points
-        for i in range(int(skill_points * rate)):
-            self.modify_value(choice(self.tag_skills), 1)
-            skill_points -= 1
+        if self.tag_skills:
+            for i in range(int(skill_points * rate)):
+                self.modify_value(choice(self.tag_skills), 1)
+                skill_points -= 1
         # Randomly distribute remaining skill points on other skills
         other_skills = list(set(LIST_SKILLS) - set(self.tag_skills)) if rate else list(LIST_SKILLS)
         while skill_points > 0:
@@ -3137,3 +3138,8 @@ MODELS = (
     FightHistory,
     Log,
 )
+
+__all__ = (
+    'Player', 'Campaign', 'Resistance', 'Stats', 'Statistics', 'Character', 'Modifier', 'Damage', 'Item',
+    'ItemModifier', 'Equipment', 'Effect', 'EffectModifier', 'ActiveEffect', 'CampaignEffect', 'CharacterEffect',
+    'Loot', 'LootTemplate', 'LootTemplateItem', 'RollHistory', 'DamageHistory', 'FightHistory', 'Log', 'MODELS')

@@ -3,7 +3,7 @@ from django import forms
 from django.utils.translation import gettext_lazy as _
 
 from fallout.models import *  # noqa
-from fallout.enums import ROLL_STATS, BODY_PARTS
+from fallout.enums import *  # noqa
 
 
 class CampaignForm(forms.Form):
@@ -93,3 +93,8 @@ class EquipCharacterForm(forms.Form):
         min_value=0, initial=10, label=_("Nombre min. de munitions"))
     ammo_max_count = forms.IntegerField(
         min_value=0, initial=20, label=_("Nombre max. de munitions"))
+
+
+__all__ = (
+    'CampaignForm', 'DuplicateCharacterForm', 'RandomizeCharacterForm', 'RollCharacterForm', 'FightCharacterForm',
+    'DamageCharacterForm', 'EquipCharacterForm')
