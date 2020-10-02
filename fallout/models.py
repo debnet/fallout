@@ -225,6 +225,8 @@ class Campaign(CommonModel):
         return reverse('fallout:campaign', args=[str(self.pk)])
 
     def __str__(self) -> str:
+        if self.title:
+            return f"{self.name} ({self.title})"
         return self.name
 
     class Meta:
@@ -338,7 +340,7 @@ class Stats(Resistance):
 
     def __str__(self) -> str:
         if self.character:
-            return self.character.name
+            return str(self.character)
         return ''
 
     @staticmethod
@@ -1530,6 +1532,8 @@ class Character(Entity, Stats):
         return reverse('fallout:character', args=[str(self.pk)])
 
     def __str__(self) -> str:
+        if self.title:
+            return f"{self.name} ({self.title})"
         return self.name
 
     class Meta:
@@ -1826,6 +1830,8 @@ class Item(Entity, Resistance, Damage):
             return equipment
 
     def __str__(self) -> str:
+        if self.title:
+            return f"{self.name} ({self.title})"
         return self.name
 
     class Meta:
@@ -2130,7 +2136,7 @@ class Equipment(CommonModel):
         return super().delete(*args, **kwargs)
 
     def __str__(self) -> str:
-        return f"({self.character}) {self.item}"
+        return f"({self.character.name}) {self.item}"
 
     class Meta:
         verbose_name = _("équipement")
@@ -2228,6 +2234,8 @@ class Effect(Entity, Damage):
         return self
 
     def __str__(self) -> str:
+        if self.title:
+            return f"{self.name} ({self.title})"
         return self.name
 
     class Meta:
@@ -2386,7 +2394,7 @@ class CampaignEffect(ActiveEffect):
             return super().delete(*args, **kwargs)
 
     def __str__(self) -> str:
-        return f"({self.campaign}) {self.effect}"
+        return f"({self.campaign.name}) {self.effect}"
 
     class Meta:
         verbose_name = _("effet de campagne")
@@ -2477,7 +2485,7 @@ class CharacterEffect(ActiveEffect):
             return super().delete(*args, **kwargs)
 
     def __str__(self) -> str:
-        return f"({self.character}) {self.effect}"
+        return f"({self.character.name}) {self.effect}"
 
     class Meta:
         verbose_name = _("effet de personnage")
@@ -2581,7 +2589,7 @@ class Loot(CommonModel):
         super().save(*args, **kwargs)
 
     def __str__(self) -> str:
-        return f"({self.campaign}) {self.item}"
+        return f"({self.campaign.name}) {self.item}"
 
     class Meta:
         verbose_name = _("butin")
@@ -2640,6 +2648,8 @@ class LootTemplate(CommonModel):
         return self
 
     def __str__(self) -> str:
+        if self.title:
+            return f"{self.name} ({self.title})"
         return self.name
 
     class Meta:
@@ -2664,7 +2674,7 @@ class LootTemplateItem(CommonModel):
     max_condition = models.PositiveSmallIntegerField(default=100, verbose_name=_("état max."))
 
     def __str__(self) -> str:
-        return f"({self.template}) {self.item}"
+        return f"({self.template.name}) {self.item}"
 
     class Meta:
         verbose_name = _("objet de butin")
@@ -3099,7 +3109,7 @@ class Log(CommonModel):
         return str(self.pk or 0)
 
     def __str__(self):
-        return _("{character} ({date})").format(character=self.character, date=self.game_date or self.date)
+        return _("{character} ({date})").format(character=self.character.name, date=self.game_date or self.date)
 
     class Meta:
         verbose_name = _("journal")

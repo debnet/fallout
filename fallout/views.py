@@ -86,8 +86,8 @@ def view_dashboard(request, campaign_id):
         'dashboard': True,
         'authorized': authorized,
         # Lists
-        'campaigns': campaigns.distinct().order_by('name'),
-        'characters': characters.order_by('-is_player', 'name'),
+        'campaigns': campaigns.distinct().order_by('name', 'title'),
+        'characters': characters.order_by('-is_player', 'name', 'title'),
         # Campaign
         'campaign': campaign,
     }
@@ -231,8 +231,8 @@ def view_campaign(request, campaign_id):
     return {
         'authorized': authorized,
         # Lists
-        'campaigns': campaigns.distinct().order_by('name'),
-        'characters': characters.order_by('-is_player', 'name'),
+        'campaigns': campaigns.distinct().order_by('name', 'title'),
+        'characters': characters.order_by('-is_player', 'name', 'title'),
         # Campaign
         'campaign': campaign,
         'loots': loots,
@@ -432,8 +432,8 @@ def view_character(request, character_id):
     return {
         'authorized': authorized,
         # Lists
-        'campaigns': campaigns.distinct().order_by('name'),
-        'characters': characters.order_by('-is_player', 'name'),
+        'campaigns': campaigns.distinct().order_by('name', 'title'),
+        'characters': characters.order_by('-is_player', 'name', 'title'),
         'logs': logs.order_by(*('game_date', 'date') if 'sort' in request.GET else ('-game_date', '-date')),
         # Character
         'character': character,

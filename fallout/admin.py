@@ -234,7 +234,7 @@ class CharacterAdmin(EntityAdmin):
                 name = form.cleaned_data['name']
                 count = form.cleaned_data['count']
                 campaign = form.cleaned_data['campaign']
-                for character in queryset.order_by('name'):
+                for character in queryset.order_by('name', 'title'):
                     character_name = character.name
                     for nb in range(count):
                         new_name = f"{name or character_name} {nb + 1}" if count > 1 else name
@@ -257,7 +257,7 @@ class CharacterAdmin(EntityAdmin):
         if 'randomize' in request.POST:
             form = RandomizeCharacterForm(request.POST)
             if form.is_valid():
-                for character in queryset.order_by('name'):
+                for character in queryset.order_by('name', 'title'):
                     character.randomize(**form.cleaned_data)
                 self.message_user(
                     request,
@@ -277,7 +277,7 @@ class CharacterAdmin(EntityAdmin):
         if 'roll' in request.POST:
             form = RollCharacterForm(request.POST)
             if form.is_valid():
-                for character in queryset.order_by('name'):
+                for character in queryset.order_by('name', 'title'):
                     result = character.roll(**form.cleaned_data)
                     self.message_user(request, str(result), level=result.message_level)
                 return HttpResponseRedirect(request.get_full_path())
@@ -294,7 +294,7 @@ class CharacterAdmin(EntityAdmin):
         if 'damage' in request.POST:
             form = DamageCharacterForm(request.POST)
             if form.is_valid():
-                for character in queryset.order_by('name'):
+                for character in queryset.order_by('name', 'title'):
                     result = character.damage(**form.cleaned_data)
                     self.message_user(request, str(result), level=result.message_level)
                 return HttpResponseRedirect(request.get_full_path())
@@ -311,7 +311,7 @@ class CharacterAdmin(EntityAdmin):
         if 'fight' in request.POST:
             form = FightCharacterForm(request.POST)
             if form.is_valid():
-                for character in queryset.order_by('name'):
+                for character in queryset.order_by('name', 'title'):
                     try:
                         result = character.fight(**form.cleaned_data)
                         self.message_user(request, str(result), level=result.message_level)
@@ -374,7 +374,7 @@ class CharacterAdmin(EntityAdmin):
             if form.is_valid():
                 data = form.cleaned_data
                 Equipment.objects.filter(character__in=queryset).exclude(slot='').delete()
-                for character in queryset.order_by('name'):
+                for character in queryset.order_by('name', 'title'):
                     try:
                         weapon = None
                         for slot in (ITEM_ARMOR, ITEM_HELMET, ITEM_WEAPON):

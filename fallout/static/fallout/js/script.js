@@ -35,7 +35,7 @@ $(document).ready(function($) {
         let result = [];
         data['results'].forEach(function (e) {
             result.push({
-                value: e[label] + (other ? ' (' + e[other] + ')' : ''),
+                value: e[label] + (other && e[other] ? ' (' + e[other] + ')' : ''),
                 id: e[value]
             })
         });
@@ -48,7 +48,7 @@ $(document).ready(function($) {
             $.ajax({
                 url: "/api/item/",
                 data: {
-                    name__icontains: request.term,
+                    name__icontains: encodeURI(request.term),
                     fields: 'id,name,type',
                     order_by: 'name',
                     display: '1'
@@ -72,12 +72,12 @@ $(document).ready(function($) {
             $.ajax({
                 url: "/api/effect/",
                 data: {
-                    name__icontains: request.term,
-                    fields: 'id,name',
+                    name__icontains: encodeURI(request.term),
+                    fields: 'id,name,title',
                     order_by: 'name'
                 },
                 success: function (data) {
-                    response(transformData(data));
+                    response(transformData(data, 'name', 'id', 'title'));
                 }
             });
         },
@@ -95,12 +95,12 @@ $(document).ready(function($) {
             $.ajax({
                 url: "/api/loottemplate/",
                 data: {
-                    name__icontains: request.term,
-                    fields: 'id,name',
+                    name__icontains: encodeURI(request.term),
+                    fields: 'id,name,title',
                     order_by: 'name'
                 },
                 success: function (data) {
-                    response(transformData(data));
+                    response(transformData(data, 'name', 'id', 'title'));
                 }
             });
         },
