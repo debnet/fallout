@@ -66,12 +66,16 @@ class CampaignAdmin(CommonAdmin):
             fields=('name', 'title', 'description', 'image', 'game_master', 'view_pc', 'view_npc', 'view_rolls', ),
             classes=('wide', ),
         )),
+        (_("Informations techniques"), dict(
+            fields=('start_game_date', 'current_game_date', 'current_character',),
+            classes=('wide',),
+        )),
+        (_("Traductions"), dict(
+            fields=(('name_fr', 'name_en'), ('title_fr', 'title_en'), ('description_fr', 'description_en')),
+            classes=('wide', 'collapse', ),
+        )),
         (_("Effets"), dict(
             fields=('needs', 'radiation', ),
-            classes=('wide', ),
-        )),
-        (_("Informations techniques"), dict(
-            fields=('start_game_date', 'current_game_date', 'current_character', ),
             classes=('wide', ),
         )),
     )
@@ -176,6 +180,10 @@ class CharacterAdmin(EntityAdmin):
         (_("Informations techniques"), dict(
             fields=('player', 'campaign', 'extra_data', ),
             classes=('wide', ),
+        )),
+        (_("Traductions"), dict(
+            fields=(('name_fr', 'name_en'), ('title_fr', 'title_en'), ('description_fr', 'description_en')),
+            classes=('wide', 'collapse',),
         )),
         (_("Spécialités"), dict(
             fields=('tag_skills', ),
@@ -427,6 +435,10 @@ class ItemAdmin(EntityAdmin):
             ),
             classes=('wide', ),
         )),
+        (_("Traductions"), dict(
+            fields=(('name_fr', 'name_en'), ('title_fr', 'title_en'), ('description_fr', 'description_en')),
+            classes=('wide', 'collapse',),
+        )),
         (_("Armes uniquement"), dict(
             fields=(
                 'attack_mode', 'skill', 'min_skill', 'min_strength', 'hands',
@@ -527,6 +539,10 @@ class EffectAdmin(EntityAdmin):
             fields=(
                 'name', 'title', 'description', 'image', 'thumbnail', 'character', ),
             classes=('wide', ),
+        )),
+        (_("Traductions"), dict(
+            fields=(('name_fr', 'name_en'), ('title_fr', 'title_en'), ('description_fr', 'description_en')),
+            classes=('wide', 'collapse',),
         )),
         (_("Effet"), dict(
             fields=(
@@ -669,6 +685,10 @@ class LootTemplateAdmin(CommonAdmin):
         (_("Informations générales"), dict(
             fields=('name', 'title', 'description', 'image', 'thumbnail', ),
             classes=('wide', ),
+        )),
+        (_("Traductions"), dict(
+            fields=(('name_fr', 'name_en'), ('title_fr', 'title_en'), ('description_fr', 'description_en')),
+            classes=('wide', 'collapse',),
         )),
     )
     inlines = [LootTemplateItemInline]

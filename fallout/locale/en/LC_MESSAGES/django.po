@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-10-01 03:00+0200\n"
+"POT-Creation-Date: 2020-10-01 10:00+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Marc Debureaux <marc@debnet.fr>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -24,11 +24,14 @@ msgstr "Fallout"
 msgid "Informations générales"
 msgstr "General informations"
 
-msgid "Effets"
-msgstr "Effects"
-
 msgid "Informations techniques"
 msgstr "Technical informations"
+
+msgid "Traductions"
+msgstr "Translations"
+
+msgid "Effets"
+msgstr "Effects"
 
 msgid "Autres"
 msgstr "Others"
