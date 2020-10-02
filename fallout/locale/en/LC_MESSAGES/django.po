@@ -983,7 +983,7 @@ msgid "absorption plasma"
 msgstr "plasma threshold"
 
 msgid "résistance plasma"
-msgstr "plasme resistance"
+msgstr "plasma resistance"
 
 msgid "absorption explosifs"
 msgstr "explosive threshold"
