@@ -1277,7 +1277,9 @@ class Character(Entity, Stats):
                     if not item:
                         continue
                     for effect in item.effects.all():
-                        damages.extend(effect.affect(target))
+                        character_effect = effect.affect(target)
+                        if character_effect:
+                            damages.extend(character_effect)
                 damages.extend(target.apply_effects())  # Apply effects immediatly
         # If critical fail and secondary target defined
         if not history.success and history.critical and fail_target:
@@ -1751,7 +1753,7 @@ class Item(Entity, Resistance, Damage):
         """
         Objet réparable ?
         """
-        return self.type in (ITEM_ARMOR, ITEM_HELMET, ITEM_WEAPON) and not self.is_throwable
+        return self.type in (ITEM_ARMOR, ITEM_HELMET, ITEM_WEAPON, ITEM_TOOL) and not self.is_throwable
 
     @property
     def is_ranged(self) -> bool:
@@ -1981,6 +1983,10 @@ class Equipment(CommonModel):
             self.quantity -= 1
             if save:
                 self.save()
+        elif self.item.durability > 0:
+            self.condition -= (1.0 / self.item.durability)
+            if save:
+                self.save()
         if is_action:
             self.character.action_points -= AP_COST_USE
         if change_character or is_action:
@@ -2121,11 +2127,12 @@ class Equipment(CommonModel):
         Sauvegarde de l'objet
         """
         self.reset_character_stats()
-        if not self.slot and self.quantity <= 0:
+        if (not self.slot and self.quantity <= 0) or (self.condition is not None and self.condition <= 0):
             kwargs = {k: v for k, v in kwargs.items() if k.startswith('_')}
             return self.delete(**kwargs)
         self.quantity = max(0, self.quantity) if self.quantity else 0
-        self.condition = max(0.0, min(1.0, self.condition or 0.0)) if self.item.is_repairable else None
+        self.condition = max(0.0, min(1.0, self.condition or 0.0)) if (
+            self.item.is_repairable and self.item.durability > 0) else None
         self.clip_count = max(0, self.clip_count or 0) if self.item.clip_size else None
         return super().save(*args, **kwargs)
 
@@ -2186,16 +2193,17 @@ class Effect(Entity, Damage):
             damage_type=self.damage_type, body_part=self.body_part)
 
     def affect(self, target: Union['Campaign', 'Character'],
-               date: datetime = None) -> Optional[Union['CampaignEffect', 'CharacterEffect']]:
+               date: datetime = None, force: bool = False) -> Optional[Union['CampaignEffect', 'CharacterEffect']]:
         """
-        Applique l'effet à un personnag ou une campagne
+        Applique l'effet à un personnage ou une campagne
         :param target: Personnage ou campagne
         :param date: Date de début de l'effet
+        :param force: Force l'application de l'effet
         :return: Effect actif ou rien si l'effet ne s'applique pas
         """
         effect = None
         if isinstance(target, Campaign):
-            if randint(1, 100) > self.chance:
+            if not force and randint(1, 100) > self.chance:
                 return None
             if self.cancel_effect_id:
                 CampaignEffect.objects.filter(campaign=target, effect_id=self.cancel_effect_id).delete()
@@ -2207,7 +2215,7 @@ class Effect(Entity, Damage):
         elif isinstance(target, Character):
             _assert((self.duration is None and self.interval is None) or target.campaign is not None, _(
                 "Le personnage doit faire partie d'une campagne pour lui appliquer un effet sur la durée."))
-            if randint(1, 100) > self.chance:
+            if not force and randint(1, 100) > self.chance:
                 return None
             if self.cancel_effect_id:
                 CharacterEffect.objects.filter(character=target, effect_id=self.cancel_effect_id).delete()
@@ -2379,8 +2387,9 @@ class CampaignEffect(ActiveEffect):
         if self.end_date and self.end_date <= self.campaign.current_game_date:
             if self.effect.next_effect:
                 effect = self.effect.next_effect.affect(self.campaign, self.end_date)
-                self.next_effects.append(effect)
-                self.damages.extend(effect.damages)
+                if effect:
+                    self.next_effects.append(effect)
+                    self.damages.extend(effect.damages)
             kwargs = {k: v for k, v in kwargs.items() if k.startswith('_')}
             return self.delete(**kwargs)
         super().save(*args, **kwargs)
@@ -2471,8 +2480,9 @@ class CharacterEffect(ActiveEffect):
             if self.end_date and self.end_date <= self.character.campaign.current_game_date:
                 if self.effect.next_effect:
                     effect = self.effect.next_effect.affect(self.character, self.end_date)
-                    self.next_effects.append(effect)
-                    self.damages.extend(effect.damages)
+                    if effect:
+                        self.next_effects.append(effect)
+                        self.damages.extend(effect.damages)
                 kwargs = {k: v for k, v in kwargs.items() if k.startswith('_')}
                 return self.delete(**kwargs)
         super().save(*args, **kwargs)

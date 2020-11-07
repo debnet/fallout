@@ -165,8 +165,8 @@ def view_campaign(request, campaign_id):
                 effect_id, effect_name = data.get('effect-id'), data.get('effect-name')
                 if method == 'add':
                     filter = dict(pk=effect_id) if effect_id else dict(name__icontains=effect_name)
-                    effect = Effect.objects.filter(**filter).first().affect(campaign)
-                    for damage in effect.damages:
+                    effect = Effect.objects.filter(**filter).first().affect(campaign, force=True)
+                    for damage in getattr(effect, 'damages', []):
                         messages.add_message(request, damage.message_level, _(
                             "<strong>{pre_label}</strong> {label}").format(
                             pre_label=damage.pre_label, label=damage.label))
@@ -375,8 +375,8 @@ def view_character(request, character_id):
                 effect_id, effect_name = data.get('effect-id'), data.get('effect-name')
                 if method == 'add':
                     filter = dict(pk=effect_id) if effect_id else dict(name__icontains=effect_name)
-                    effect = Effect.objects.filter(**filter).first().affect(character)
-                    for damage in effect.damages:
+                    effect = Effect.objects.filter(**filter).first().affect(character, force=True)
+                    for damage in getattr(effect, 'damages', []):
                         messages.add_message(request, damage.message_level, _(
                             "<strong>{pre_label}</strong> {label}").format(
                             pre_label=damage.pre_label, label=damage.label))
@@ -421,6 +421,7 @@ def view_character(request, character_id):
             for error in (errors if isinstance(errors, list) else [errors]):
                 messages.error(request, _("<strong>Erreur</strong> {error}").format(error=error))
     except Exception as error:
+        raise
         messages.error(request, _("<strong>Erreur</strong> {error}").format(error=error))
 
     inventory, effects = character.inventory, character.effects

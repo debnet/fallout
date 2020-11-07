@@ -18797,7 +18797,7 @@
         "thumbnail": "thumbnails/items/misc/item_bedroll.png",
         "type": "tool",
         "value": 100,
-        "durability": 0,
+        "durability": 10,
         "condition_modifier": 0.0,
         "weight": 3.0,
         "is_quest": false,
@@ -18879,9 +18879,9 @@
         "description_en": "",
         "image": "",
         "thumbnail": "thumbnails/items/misc/item_bobby_pin.png",
-        "type": "extra",
+        "type": "tool",
         "value": 1,
-        "durability": 0,
+        "durability": 10,
         "condition_modifier": 0.0,
         "weight": 0.01,
         "is_quest": false,
@@ -18913,7 +18913,9 @@
         "critical_damage": 0,
         "critical_damage_modifier": 0,
         "armor_class": 0,
-        "effects": [],
+        "effects": [
+            77
+        ],
         "ammunitions": []
     }
 },
@@ -18965,7 +18967,7 @@
         "thumbnail": "thumbnails/items/misc/item_rope.png",
         "type": "tool",
         "value": 50,
-        "durability": 0,
+        "durability": 10,
         "condition_modifier": 0.0,
         "weight": 2.0,
         "is_quest": false,
@@ -19049,7 +19051,7 @@
         "thumbnail": "thumbnails/items/misc/item_lamp.png",
         "type": "tool",
         "value": 100,
-        "durability": 0,
+        "durability": 10,
         "condition_modifier": 0.0,
         "weight": 2.0,
         "is_quest": false,
@@ -21486,17 +21488,6 @@
     }
 },
 {
-    "model": "fallout.itemmodifier",
-    "pk": 64,
-    "fields": {
-        "stats": "sneak",
-        "raw_value": 5,
-        "min_value": 0,
-        "max_value": 0,
-        "item": 222
-    }
-},
-{
     "model": "fallout.effect",
     "pk": 1,
     "fields": {
@@ -23324,7 +23315,7 @@
         "image": "",
         "thumbnail": "thumbnails/items/misc/item_bedroll.png",
         "chance": 100,
-        "duration": null,
+        "duration": "08:00:00",
         "apply": false,
         "interval": "01:00:00",
         "damage_chance": 100,
@@ -23358,7 +23349,7 @@
         "image": "",
         "thumbnail": "thumbnails/items/misc/item_rope.png",
         "chance": 100,
-        "duration": null,
+        "duration": "01:00:00",
         "apply": false,
         "interval": null,
         "damage_chance": 100,
@@ -23392,7 +23383,7 @@
         "image": "",
         "thumbnail": "thumbnails/items/misc/item_lamp.png",
         "chance": 100,
-        "duration": null,
+        "duration": "01:00:00",
         "apply": false,
         "interval": null,
         "damage_chance": 100,
@@ -24037,6 +24028,40 @@
         "description_en": "",
         "image": "",
         "thumbnail": "thumbnails/items/book/book_wasteland_guide.png",
+        "chance": 100,
+        "duration": "00:01:00",
+        "apply": false,
+        "interval": null,
+        "damage_chance": 100,
+        "next_effect": null,
+        "cancel_effect": null
+    }
+},
+{
+    "model": "fallout.effect",
+    "pk": 77,
+    "fields": {
+        "uuid": "aef3b79a-f81a-4eb2-810e-93bdc46f6d11",
+        "creation_date": "2077-10-23T08:00:00Z",
+        "modification_date": "2077-10-23T08:00:00Z",
+        "current_user": null,
+        "damage_type": "",
+        "min_damage": 0,
+        "max_damage": 0,
+        "raw_damage": 0,
+        "body_part": "",
+        "character": null,
+        "name": "Epingle à cheveux",
+        "name_fr": "Epingle à cheveux",
+        "name_en": "Bobby pin",
+        "title": "",
+        "title_fr": "",
+        "title_en": "",
+        "description": "",
+        "description_fr": "",
+        "description_en": "",
+        "image": "",
+        "thumbnail": "thumbnails/items/misc/item_bobby_pin.png",
         "chance": 100,
         "duration": "00:01:00",
         "apply": false,
@@ -25210,6 +25235,17 @@
         "min_value": 0,
         "max_value": 0,
         "effect": 76
+    }
+},
+{
+    "model": "fallout.effectmodifier",
+    "pk": 109,
+    "fields": {
+        "stats": "lockpick",
+        "raw_value": 10,
+        "min_value": 0,
+        "max_value": 0,
+        "effect": 77
     }
 },
 {
