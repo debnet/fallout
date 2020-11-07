@@ -421,7 +421,6 @@ def view_character(request, character_id):
             for error in (errors if isinstance(errors, list) else [errors]):
                 messages.error(request, _("<strong>Erreur</strong> {error}").format(error=error))
     except Exception as error:
-        raise
         messages.error(request, _("<strong>Erreur</strong> {error}").format(error=error))
 
     inventory, effects = character.inventory, character.effects
