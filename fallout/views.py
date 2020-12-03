@@ -81,7 +81,7 @@ def view_dashboard(request, campaign_id):
                 messages.error(request, _("<strong>Erreur</strong> {error}").format(error=error))
 
     return {
-        'dashboard': True,
+        'page': 'dashboard',
         'authorized': authorized,
         # Lists
         'campaigns': campaigns.distinct().order_by('name', 'title'),
@@ -227,6 +227,7 @@ def view_campaign(request, campaign_id):
         messages.error(request, _("<strong>Erreur</strong> {error}").format(error=error))
 
     return {
+        'page': 'campaign',
         'authorized': authorized,
         # Lists
         'campaigns': campaigns.distinct().order_by('name', 'title'),
@@ -428,6 +429,7 @@ def view_character(request, character_id):
     fightstats = FightHistory.get_stats(character)
 
     return {
+        'page': 'character',
         'authorized': authorized,
         # Lists
         'campaigns': campaigns.distinct().order_by('name', 'title'),
@@ -499,6 +501,7 @@ def thumbnails(request):
             url = os.path.join('thumbnails', filename).replace('\\', '/')
             images.append((title, False, url))
     return {
+        'page': 'thumbnails',
         'directories': directories,
         'images': sorted(images, key=lambda e: e[0]),
     }

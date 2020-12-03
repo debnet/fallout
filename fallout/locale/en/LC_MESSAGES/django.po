@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-10-01 10:00+0200\n"
+"POT-Creation-Date: 2020-12-03 22:32+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Marc Debureaux <marc@debnet.fr>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -397,14 +397,20 @@ msgstr "melee weapons"
 msgid "armes de lancer"
 msgstr "throwing weapons"
 
+msgid "athlétisme"
+msgstr "athletics"
+
+msgid "détection"
+msgstr "detection"
+
 msgid "premiers secours"
 msgstr "first aid"
 
 msgid "médecine"
 msgstr "medicine"
 
-msgid "chimie"
-msgstr "chimistry"
+msgid "pharmacologie"
+msgstr "chems"
 
 msgid "discrétion"
 msgstr "sneak"
@@ -424,11 +430,20 @@ msgstr "explosives"
 msgid "science"
 msgstr "science"
 
-msgid "réparation"
-msgstr "repair"
+msgid "mécanique"
+msgstr "mechanics"
 
-msgid "discours"
-msgstr "speech"
+msgid "informatique"
+msgstr "computers"
+
+msgid "électronique"
+msgstr "electronics"
+
+msgid "persuasion"
+msgstr "persuasion"
+
+msgid "tromperie"
+msgstr "deception"
 
 msgid "marchandage"
 msgstr "barter"

@@ -30,8 +30,10 @@
         {% if authorized %}
             <ul class="nav navbar-nav">
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" id="actions-navbar" href="#" data-toggle="dropdown"
-                       aria-haspopup="true" aria-expanded="false">{% trans "Actions" %}</a>
+                    <a class="nav-link dropdown-toggle{% if page == 'thumbnails' %} active{% endif %}"
+                       id="actions-navbar" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        {% trans "Actions" %}
+                    </a>
                     <div class="dropdown-menu" aria-labelledby="actions-navbar">
                         <a class="dropdown-item text-danger" href="{% url 'admin:index' %}">{% trans "Administration" %}</a>
                         <a class="dropdown-item text-warning" href="{% url 'fallout:thumbnails' %}">{% trans "Miniatures" %}</a>

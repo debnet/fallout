@@ -2,8 +2,10 @@
 
 <ul class="navbar-nav mr-auto">
     <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" id="campaign-navbar" href="#" data-toggle="dropdown"
-           aria-haspopup="true" aria-expanded="false">{{ campaign.name|default:_("Aucune campagne") }}</a>
+        <a class="nav-link dropdown-toggle{% if page in 'campaign,dashboard' %} active{% endif %}"
+           id="campaign-navbar" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            {{ campaign.name|default:_("Aucune campagne") }}
+        </a>
         <div class="dropdown-menu" style="max-height: 90vh; overflow-y: auto" aria-labelledby="campaign-navbar">
             <a class="dropdown-item text-secondary" href="{% url 'fallout:index' %}">{% trans "Aucune campagne" %}</a>
             {% with current_campaign=campaign %}
@@ -28,9 +30,10 @@
         </div>
     </li>
     <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle{% if not characters %} disabled{% endif %}"
-           id="campaign-navbar" href="#" data-toggle="dropdown"
-           aria-haspopup="true" aria-expanded="false">{{ character.name|default:_("Personnages") }}</a>
+        <a class="nav-link dropdown-toggle{% if not characters %} disabled{% endif %}{% if page == 'character' %} active{% endif %}"
+           id="campaign-navbar" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            {{ character.name|default:_("Personnages") }}
+        </a>
         <div class="dropdown-menu" style="max-height: 90vh; overflow-y: auto" aria-labelledby="campaign-navbar">
             {% with current_character=character %}
                 {% for character in characters %}
@@ -59,13 +62,18 @@
         </div>
     </li>
     {% if campaign %}
-        {% if character or dashboard %}
         <li class="nav-item">
-            <a class="nav-link" href="{% url 'fallout:campaign' campaign.id %}">{% trans "Campagne courante" %}</a>
+            <a class="nav-link{% if page == 'campaign' %} active{% endif %}"
+               href="{% url 'fallout:campaign' campaign.id %}">
+                {% trans "Campagne courante" %}
+            </a>
         </li>
-        {% elif authorized %}
+        {% if authorized %}
         <li class="nav-item">
-            <a class="nav-link" href="{% url 'fallout:dashboard' campaign.id %}">{% trans "Tableau de bord" %}</a>
+            <a class="nav-link{% if page == 'dashboard' %} active{% endif %}"
+               href="{% url 'fallout:dashboard' campaign.id %}">
+                {% trans "Tableau de bord" %}
+            </a>
         </li>
         {% endif %}
     {% endif %}

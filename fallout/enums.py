@@ -89,6 +89,8 @@ SKILL_ENERGY_WEAPONS = 'energy_weapons'
 SKILL_UNARMED = 'unarmed'
 SKILL_MELEE_WEAPONS = 'melee_weapons'
 SKILL_THROWING = 'throwing'
+SKILL_ATHLETICS = 'athletics'
+SKILL_DETECTION = 'detection'
 SKILL_FIRST_AID = 'first_aid'
 SKILL_DOCTOR = 'doctor'
 SKILL_CHEMS = 'chems'
@@ -98,8 +100,11 @@ SKILL_STEAL = 'steal'
 SKILL_TRAPS = 'traps'
 SKILL_EXPLOSIVES = 'explosives'
 SKILL_SCIENCE = 'science'
+SKILL_COMPUTERS = 'computers'
+SKILL_ELECTRONICS = 'electronics'
 SKILL_REPAIR = 'repair'
 SKILL_SPEECH = 'speech'
+SKILL_DECEPTION = 'deception'
 SKILL_BARTER = 'barter'
 SKILL_SURVIVAL = 'survival'
 SKILL_KNOWLEDGE = 'knowledge'
@@ -110,17 +115,22 @@ SKILLS = (
     (SKILL_UNARMED, _("à mains nues")),
     (SKILL_MELEE_WEAPONS, _("armes de mêlée")),
     (SKILL_THROWING, _("armes de lancer")),
+    (SKILL_ATHLETICS, _("athlétisme")),
+    (SKILL_DETECTION, _("détection")),
     (SKILL_FIRST_AID, _("premiers secours")),
     (SKILL_DOCTOR, _("médecine")),
-    (SKILL_CHEMS, _("chimie")),
+    (SKILL_CHEMS, _("pharmacologie")),
     (SKILL_SNEAK, _("discrétion")),
     (SKILL_LOCKPICK, _("crochetage")),
     (SKILL_STEAL, _("pickpocket")),
     (SKILL_TRAPS, _("pièges")),
     (SKILL_EXPLOSIVES, _("explosifs")),
     (SKILL_SCIENCE, _("science")),
-    (SKILL_REPAIR, _("réparation")),
-    (SKILL_SPEECH, _("discours")),
+    (SKILL_REPAIR, _("mécanique")),
+    (SKILL_COMPUTERS, _("informatique")),
+    (SKILL_ELECTRONICS, _("électronique")),
+    (SKILL_SPEECH, _("persuasion")),
+    (SKILL_DECEPTION, _("tromperie")),
     (SKILL_BARTER, _("marchandage")),
     (SKILL_SURVIVAL, _("survie")),
     (SKILL_KNOWLEDGE, _("connaissance")),
