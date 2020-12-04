@@ -345,7 +345,7 @@ COMPUTED_STATS: Iterable[Tuple[str, Callable]] = (
     ('computers', lambda s, c: 10 + s.intelligence),
     ('electronics', lambda s, c: 10 + s.intelligence),
     ('speech', lambda s, c: 5 * s.charisma),
-    ('deception', lambda s, c: 10 + (2 * s.charisma)),
+    ('deception', lambda s, c: 10 + (3 * s.charisma)),
     ('barter', lambda s, c: 4 * s.charisma),
     ('survival', lambda s, c: 2 * (s.endurance + s.intelligence)),
     ('knowledge', lambda s, c: 5 * s.intelligence),
