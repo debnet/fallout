@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-12-03 22:32+0100\n"
+"POT-Creation-Date: 2020-12-05 20:00+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Marc Debureaux <marc@debnet.fr>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -57,12 +57,6 @@ msgstr "Selected characters were duplicated."
 msgid "Dupliquer les personnages sélectionnés"
 msgstr "Duplicate selected characters"
 
-msgid "Les compétences des personnages sélectionnés ont été générées avec succès."
-msgstr "Skills of selected characters were generated successfully."
-
-msgid "Générer aléatoirement les compétences"
-msgstr "Randomly generate skills"
-
 msgid "Faire un jet de compétence"
 msgstr "Make a skill role"
 
@@ -76,11 +70,26 @@ msgstr "{character}: {error}"
 msgid "Attaquer un autre personnage"
 msgstr "Attack another character"
 
-msgid "Déplacer les personnages sélectionnés"
-msgstr "Move selected characters"
+msgid "Les personnages sélectionnés ont été générés aléatoirement avec succès."
+msgstr "Selected characters were randomly generated successfully."
 
-msgid "Lâcher tous les équipements"
-msgstr "Drop all equipments"
+msgid "Générer complètement les personnages"
+msgstr "Randomly generate characters"
+
+msgid "Le S.P.E.C.I.A.L. des personnages sélectionnés ont été générées avec succès."
+msgstr "S.P.E.C.I.A.L. of selected characters were successfully generated."
+
+msgid "Générer aléatoirement le S.P.E.C.I.A.L."
+msgstr "Randomly generate S.P.E.C.I.A.L."
+
+msgid "Les compétences des personnages sélectionnés ont été générées avec succès."
+msgstr "Skills of selected characters were successfully generated."
+
+msgid "Générer aléatoirement les compétences"
+msgstr "Randomly generate skills"
+
+msgid "Equiper les personnages sélectionnés"
+msgstr "Equip selected characters"
 
 msgid "Générer les statistiques secondaires"
 msgstr "Generate secondary stats"
@@ -88,8 +97,11 @@ msgstr "Generate secondary stats"
 msgid "Soigner les personnages sélectionnés"
 msgstr "Heal selected characters"
 
-msgid "Equiper les personnages sélectionnés"
-msgstr "Equip selected characters"
+msgid "Lâcher tous les équipements"
+msgstr "Drop all equipments"
+
+msgid "Déplacer les personnages sélectionnés"
+msgstr "Move selected characters"
 
 msgid "Armes uniquement"
 msgstr "Weapons only"
@@ -838,12 +850,6 @@ msgstr "Name"
 msgid "Actif ?"
 msgstr "Active?"
 
-msgid "Niveau"
-msgstr "Level"
-
-msgid "Ratio"
-msgstr "Ratio"
-
 msgid "Statistique"
 msgstr "Statistic"
 
@@ -903,6 +909,15 @@ msgstr "Min. ammo count"
 
 msgid "Nombre max. de munitions"
 msgstr "Max. ammo count"
+
+msgid "Points"
+msgstr "Points"
+
+msgid "Niveau"
+msgstr "Level"
+
+msgid "Ratio"
+msgstr "Ratio"
 
 msgid "Importe des créatures"
 msgstr "Import creatures"
@@ -1828,6 +1843,9 @@ msgstr "Move characters"
 
 msgid "Les personnages suivants seront déplacés :"
 msgstr "The following characters will be moved:"
+
+msgid "Générer aléatoirement les personnages"
+msgstr "Randomly generate characters"
 
 msgid "Les personnages suivants seront affectés :"
 msgstr "The following characters will be affected:"

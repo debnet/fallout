@@ -210,7 +210,8 @@ class CharacterAdmin(EntityAdmin):
     search_fields = ('name', 'title', 'description', 'background', )
     ordering = ('name', 'title', )
     actions = EntityAdmin.actions + [
-        'duplicate', 'heal', 'damage', 'roll', 'fight', 'generate_stats', 'randomize', 'move', 'equip', 'loot']
+        'duplicate', 'heal', 'damage', 'roll', 'fight', 'equip', 'loot', 'move',
+        'randomize', 'randomize_special', 'randomize_stats', 'generate_stats', ]
     autocomplete_fields = ('campaign', 'player', )
     save_on_top = True
     actions_on_bottom = True
@@ -255,26 +256,6 @@ class CharacterAdmin(EntityAdmin):
         return render(request, 'fallout/character/admin/duplicate.html', {
             'form': form, 'characters': queryset, 'targets': request.POST.getlist(ACTION_CHECKBOX_NAME)})
     duplicate.short_description = _("Dupliquer les personnages sélectionnés")
-
-    def randomize(self, request, queryset):
-        """
-        Action spécifique pour randomiser les compétences des personnages sélectionnés
-        """
-        if 'randomize' in request.POST:
-            form = RandomizeCharacterForm(request.POST)
-            if form.is_valid():
-                for character in queryset.order_by('name', 'title'):
-                    character.randomize(**form.cleaned_data)
-                self.message_user(
-                    request,
-                    message=_("Les compétences des personnages sélectionnés ont été générées avec succès."),
-                    level=messages.SUCCESS)
-                return HttpResponseRedirect(request.get_full_path())
-        else:
-            form = RandomizeCharacterForm()
-        return render(request, 'fallout/character/admin/randomize.html', {
-            'form': form, 'characters': queryset, 'targets': request.POST.getlist(ACTION_CHECKBOX_NAME)})
-    randomize.short_description = _("Générer aléatoirement les compétences")
 
     def roll(self, request, queryset):
         """
@@ -332,28 +313,94 @@ class CharacterAdmin(EntityAdmin):
             'form': form, 'characters': queryset, 'targets': request.POST.getlist(ACTION_CHECKBOX_NAME)})
     fight.short_description = _("Attaquer un autre personnage")
 
-    def move(self, request, queryset):
+    def randomize(self, request, queryset):
         """
-        Action spécifique pour déplacer les personnages sélectionnés
+        Action spécifique pour générer complètement et aléatoirement les personnages sélectionnés
         """
-        if 'move' in request.POST:
-            form = CampaignForm(request.POST)
+        if 'randomize' in request.POST:
+            form = RandomizeCharacterForm(request.POST)
             if form.is_valid():
-                queryset.update(**form.cleaned_data)
+                Equipment.objects.filter(character__in=queryset).exclude(slot='').delete()
+                for character in queryset.order_by('name', 'title'):
+                    character.randomize_special(**form.cleaned_data, save=False)
+                    if not character.has_stats:
+                        character.generate_stats(save=False)
+                    character.randomize_stats(**form.cleaned_data, save=False)
+                    Character.reset_stats(character)
+                    character.heal(save=True)
+                    character.equip(**form.cleaned_data)
+                self.message_user(
+                    request,
+                    message=_("Les personnages sélectionnés ont été générés aléatoirement avec succès."),
+                    level=messages.SUCCESS)
                 return HttpResponseRedirect(request.get_full_path())
         else:
-            form = CampaignForm()
-        return render(request, 'fallout/character/admin/move.html', {
+            form = RandomizeCharacterForm()
+        return render(request, 'fallout/character/admin/randomize.html', {
             'form': form, 'characters': queryset, 'targets': request.POST.getlist(ACTION_CHECKBOX_NAME)})
-    move.short_description = _("Déplacer les personnages sélectionnés")
+    randomize.short_description = _("Générer complètement les personnages")
 
-    def loot(self, request, queryset):
+    def randomize_special(self, request, queryset):
         """
-        Action spécifique pour looter les personnages sélectionnés
+        Action spécifique pour randomiser le SPECIAL des personnages sélectionnés
         """
-        for character in queryset:
-            character.loot(empty=True)
-    loot.short_description = _("Lâcher tous les équipements")
+        if 'randomize_special' in request.POST:
+            form = RandomizeCharacterSpecialForm(request.POST)
+            if form.is_valid():
+                for character in queryset.order_by('name', 'title'):
+                    character.randomize_special(**form.cleaned_data)
+                self.message_user(
+                    request,
+                    message=_("Le S.P.E.C.I.A.L. des personnages sélectionnés ont été générées avec succès."),
+                    level=messages.SUCCESS)
+                return HttpResponseRedirect(request.get_full_path())
+        else:
+            form = RandomizeCharacterSpecialForm()
+        return render(request, 'fallout/character/admin/randomize_special.html', {
+            'form': form, 'characters': queryset, 'targets': request.POST.getlist(ACTION_CHECKBOX_NAME)})
+    randomize_special.short_description = _("Générer aléatoirement le S.P.E.C.I.A.L.")
+
+    def randomize_stats(self, request, queryset):
+        """
+        Action spécifique pour randomiser les compétences des personnages sélectionnés
+        """
+        if 'randomize_stats' in request.POST:
+            form = RandomizeCharacterStatsForm(request.POST)
+            if form.is_valid():
+                for character in queryset.order_by('name', 'title'):
+                    character.randomize_stats(**form.cleaned_data)
+                self.message_user(
+                    request,
+                    message=_("Les compétences des personnages sélectionnés ont été générées avec succès."),
+                    level=messages.SUCCESS)
+                return HttpResponseRedirect(request.get_full_path())
+        else:
+            form = RandomizeCharacterStatsForm()
+        return render(request, 'fallout/character/admin/randomize_stats.html', {
+            'form': form, 'characters': queryset, 'targets': request.POST.getlist(ACTION_CHECKBOX_NAME)})
+    randomize_stats.short_description = _("Générer aléatoirement les compétences")
+
+    def equip(self, request, queryset):
+        """
+        Action spécifique pour équiper aléatoirement les personnages sélectionnés
+        """
+        if 'randomize_equipment' in request.POST:
+            form = EquipCharacterForm(request.POST)
+            if form.is_valid():
+                Equipment.objects.filter(character__in=queryset).exclude(slot='').delete()
+                for character in queryset.order_by('name', 'title'):
+                    try:
+                        character.equip(**form.cleaned_data)
+                    except Exception as error:
+                        self.message_user(
+                            request, _("{character} : {error}").format(character=character, error=str(error)),
+                            level=messages.ERROR)
+                return HttpResponseRedirect(request.get_full_path())
+        else:
+            form = EquipCharacterForm()
+        return render(request, 'fallout/character/admin/equip.html', {
+            'form': form, 'characters': queryset, 'targets': request.POST.getlist(ACTION_CHECKBOX_NAME)})
+    equip.short_description = _("Equiper les personnages sélectionnés")
 
     def generate_stats(self, request, queryset):
         """
@@ -371,44 +418,28 @@ class CharacterAdmin(EntityAdmin):
             character.heal()
     heal.short_description = _("Soigner les personnages sélectionnés")
 
-    def equip(self, request, queryset):
+    def loot(self, request, queryset):
         """
-        Action spécifique pour équiper les personnages sélectionnés
+        Action spécifique pour looter les personnages sélectionnés
         """
-        if 'equip' in request.POST:
-            form = EquipCharacterForm(request.POST)
+        for character in queryset:
+            character.loot(empty=True)
+    loot.short_description = _("Lâcher tous les équipements")
+
+    def move(self, request, queryset):
+        """
+        Action spécifique pour déplacer les personnages sélectionnés
+        """
+        if 'move' in request.POST:
+            form = CampaignForm(request.POST)
             if form.is_valid():
-                data = form.cleaned_data
-                Equipment.objects.filter(character__in=queryset).exclude(slot='').delete()
-                for character in queryset.order_by('name', 'title'):
-                    try:
-                        weapon = None
-                        for slot in (ITEM_ARMOR, ITEM_HELMET, ITEM_WEAPON):
-                            item, mini, maxi = data[slot], data[f'{slot}_min_condition'], data[f'{slot}_max_condition']
-                            if not item:
-                                continue
-                            equipment = Equipment.objects.create(
-                                character=character, item=item, slot=slot,
-                                quantity=1, condition=randint(mini, maxi) / 100.0)
-                            if slot == ITEM_WEAPON:
-                                weapon = equipment
-                        ammo, mini, maxi = data['ammo'], data['ammo_min_count'], data['ammo_max_count']
-                        if ammo:
-                            Equipment.objects.create(
-                                character=character, item=ammo, slot=ITEM_AMMO,
-                                quantity=randint(mini, maxi), condition=None)
-                        if weapon and ammo:
-                            weapon.reload(is_action=False)
-                    except Exception as error:
-                        self.message_user(
-                            request, _("{character} : {error}").format(character=character, error=str(error)),
-                            level=messages.ERROR)
+                queryset.update(**form.cleaned_data)
                 return HttpResponseRedirect(request.get_full_path())
         else:
-            form = EquipCharacterForm()
-        return render(request, 'fallout/character/admin/equip.html', {
+            form = CampaignForm()
+        return render(request, 'fallout/character/admin/move.html', {
             'form': form, 'characters': queryset, 'targets': request.POST.getlist(ACTION_CHECKBOX_NAME)})
-    equip.short_description = _("Equiper les personnages sélectionnés")
+    move.short_description = _("Déplacer les personnages sélectionnés")
 
     def get_queryset(self, request):
         queryset = super().get_queryset(request).select_related('statistics')

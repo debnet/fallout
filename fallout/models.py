@@ -1,7 +1,7 @@
 # coding: utf-8
 from collections import OrderedDict as odict, namedtuple
 from datetime import datetime, timedelta
-from random import randint, choice
+from random import choice, randint, shuffle
 from typing import Dict, Iterable, List, Optional, Tuple, Union
 
 from common.fields import JsonField
@@ -854,13 +854,51 @@ class Character(Entity, Stats):
             self.health += self.stats.hit_points_per_level
         return level, needed_xp
 
-    def randomize(self, level: int = None, rate: float = 0.0) -> None:
+    def randomize_special(self, points: int = 40, save: bool = True, **kwargs) -> None:
+        """
+        Randomise le S.P.E.C.I.A.L. du personnage
+        :param points: Nombre de points à répartir
+        :param save: Sauvegarde le personnage ?
+        :return: Rien
+        """
+        race = RACES_STATS.get(self.race)
+        points_min = points_max = 0
+        for stat in LIST_SPECIALS:
+            bonus, mini, maxi = race.get(stat, (0, 1, 10))
+            points_min += mini
+            points_max += maxi
+        points = max(min(points, points_max), points_min)
+        special = {}
+        for idx, stat in enumerate(LIST_SPECIALS):
+            bonus, mini, maxi = race.get(stat, (0, 1, 10))
+            special[stat] = randint(mini, maxi)
+        left = points - sum(special.values())
+        while left:
+            shift = -1 if left < 0 else 1
+            for stat, value in sorted(special.items(), key=lambda e: e[1] * shift):
+                bonus, mini, maxi = race.get(stat, (0, 1, 10))
+                special[stat] = max(min(value + shift, maxi), mini)
+                left = points - sum(special.values())
+                if not left:
+                    break
+        for key, value in special.items():
+            setattr(self, key, value)
+        if save:
+            self.save()
+
+    def randomize_stats(self, level: int = None, rate: float = 0.0, save: bool = True, **kwargs) -> None:
         """
         Randomise les statistiques d'un personnage jusqu'à un certain niveau
         :param level: Niveau du personnage à forcer
         :param rate: Pourcentage des points à répartir sur les spécialités
+        :param save: Sauvegarde le personnage ?
         :return: Rien
         """
+        # Reset stats
+        if self.has_stats:
+            self.skill_points = self.perk_points = self.max_health = 0
+            for skill in LIST_SKILLS:
+                setattr(self, skill, 0)
         # Experience points for the targetted level
         level = level or self.level
         self.level = 1
@@ -879,7 +917,52 @@ class Character(Entity, Stats):
             self.modify_value(skill, 1)
             skill_points -= 1 if skill in self.tag_skills else 2
         # Reset health and action points to their maximum
-        self.heal()
+        self.heal(save=save)
+
+    def equip(
+            self, armor: 'Item' = None, armor_min_condition: int = 100, armor_max_condition: int = 100,
+            helmet: 'Item' = None, helmet_min_condition: int = 100, helmet_max_condition: int = 100,
+            weapon: 'Item' = None, weapon_min_condition: int = 100, weapon_max_condition: int = 100,
+            ammo: 'Item' = None, ammo_min_count: int = 10, ammo_max_count: int = 20, **kwargs) -> None:
+        """
+        Permet d'équiper rapidement un personnage avec une armure, un casque, une arme et des munitions
+        :param armor: Armure
+        :param armor_min_condition: Condition minimale de l'armure
+        :param armor_max_condition: Condition maximale de l'armure
+        :param helmet: Casque
+        :param helmet_min_condition: Condition minimale du casque
+        :param helmet_max_condition: Condition maximale du casque
+        :param weapon: Arme
+        :param weapon_min_condition: Condition minimale de l'arme
+        :param weapon_max_condition: Condition maximale de l'arme
+        :param ammo: Munition
+        :param ammo_min_count: Nombre minimal de munitions
+        :param ammo_max_count: Nombre maximal de munitions
+        :return: Rien
+        """
+        equiped_weapon = None
+        items = (
+            (ITEM_ARMOR, armor, armor_min_condition, armor_max_condition),
+            (ITEM_HELMET, helmet, helmet_min_condition, helmet_max_condition),
+            (ITEM_WEAPON, weapon, weapon_min_condition, weapon_max_condition))
+        for slot, item, mini, maxi in items:
+            if not item:
+                continue
+            if isinstance(item, (int, str)):
+                item = Item.objects.get(id=item)
+            equipment = Equipment.objects.create(
+                character=self, item=item, slot=slot,
+                quantity=1, condition=randint(mini, maxi) / 100.0)
+            if slot == ITEM_WEAPON:
+                equiped_weapon = equipment
+        if ammo:
+            if isinstance(ammo, (int, str)):
+                ammo = Item.objects.get(id=ammo)
+            Equipment.objects.create(
+                character=self, item=ammo, slot=ITEM_AMMO,
+                quantity=randint(ammo_min_count, ammo_max_count), condition=None)
+        if equiped_weapon and ammo:
+            equiped_weapon.reload(is_action=False)
 
     def generate_stats(self, save=True) -> None:
         """
@@ -888,6 +971,7 @@ class Character(Entity, Stats):
         :return: Rien
         """
         stats = Stats.get(self)
+        self.skill_points = 0
         for field in Stats._meta.fields:
             value = getattr(stats, field.name, 0)
             if field.name in LIST_SKILLS:

@@ -2,7 +2,7 @@
 {% load i18n %}
 
 {% block content %}
-    <h1>{% trans "Générer aléatoirement les personnages" %}</h1>
+    <h1>{% trans "Générer aléatoirement les compétences" %}</h1>
     <p>{% trans "Les personnages suivants seront affectés :" %}</p>
     <ul>
         {% for character in characters %}
@@ -15,7 +15,7 @@
         {% for target in targets %}
             <input type="hidden" name="_selected_action" value="{{ target }}" />
         {% endfor %}
-        <input type="hidden" name="action" value="randomize" />
-        <button type="submit" name="randomize">{% trans "Valider" %}</button>
+        <input type="hidden" name="action" value="randomize_stats" />
+        <button type="submit" name="randomize_stats">{% trans "Valider" %}</button>
     </form>
 {% endblock %}

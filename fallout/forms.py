@@ -17,17 +17,9 @@ class DuplicateCharacterForm(CampaignForm):
     """
     Formulaire pour dupliquer un ou plusieurs personnages
     """
-    count = forms.IntegerField(min_value=0, initial=1, label=_("Nombre"))
+    count = forms.IntegerField(min_value=1, initial=1, label=_("Nombre"))
     name = forms.CharField(required=False, label=_("Nom"))
     is_active = forms.BooleanField(required=False, initial=True, label=_("Actif ?"))
-
-
-class RandomizeCharacterForm(forms.Form):
-    """
-    Formulaire pour randomiser les compétences d'un personnage
-    """
-    level = forms.IntegerField(min_value=0, initial=0, label=_("Niveau"))
-    rate = forms.FloatField(min_value=0.0, max_value=1.0, initial=1.0, label=_("Ratio"))
 
 
 class RollCharacterForm(forms.Form):
@@ -95,6 +87,27 @@ class EquipCharacterForm(forms.Form):
         min_value=0, initial=20, label=_("Nombre max. de munitions"))
 
 
+class RandomizeCharacterSpecialForm(forms.Form):
+    """
+    Formulaire pour randomiser le SPECIAL d'un personnage
+    """
+    points = forms.IntegerField(min_value=1, initial=40, label=_("Points"))
+
+
+class RandomizeCharacterStatsForm(forms.Form):
+    """
+    Formulaire pour randomiser les compétences d'un personnage
+    """
+    level = forms.IntegerField(min_value=0, initial=0, label=_("Niveau"))
+    rate = forms.FloatField(min_value=0.0, max_value=1.0, initial=1.0, label=_("Ratio"))
+
+
+class RandomizeCharacterForm(EquipCharacterForm, RandomizeCharacterStatsForm, RandomizeCharacterSpecialForm):
+    """
+    Formulaire pour générer aléatoirement un nouveau personnage et son équipement
+    """
+
+
 __all__ = (
-    'CampaignForm', 'DuplicateCharacterForm', 'RandomizeCharacterForm', 'RollCharacterForm', 'FightCharacterForm',
-    'DamageCharacterForm', 'EquipCharacterForm')
+    'CampaignForm', 'DuplicateCharacterForm', 'RollCharacterForm', 'FightCharacterForm', 'DamageCharacterForm',
+    'EquipCharacterForm', 'RandomizeCharacterSpecialForm', 'RandomizeCharacterStatsForm', 'RandomizeCharacterForm', )
