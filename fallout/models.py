@@ -1269,7 +1269,7 @@ class Character(Entity, Stats):
             weapon_range_modifier = RANGE_MODIFIERS.get(attacker_weapon.attack_mode)
             attacker_hit_chance += (self.stats.perception - 2) * weapon_range_modifier
             attacker_hit_chance -= max(attacker_min_range - target_range, 0) * RANGED_CLOSE_MALUS_MULT
-            attacker_hit_chance -= target_range * RANGED_MALUS_MULT
+            attacker_hit_chance -= max(target_range - attacker_min_range, 0) * RANGED_MALUS_MULT
         # Increase hit chance of weapons
         elif not is_melee:
             attacker_range_stats = SPECIAL_STRENGTH if attacker_weapon.is_throwable else SPECIAL_PERCEPTION
@@ -3169,9 +3169,10 @@ class FightHistory(CommonModel):
             skill_name=self.attacker_weapon.get_skill_display(),
             skill=getattr(self.attacker.stats, self.attacker_weapon.skill)
         ) if self.attacker_weapon else _("Combat à mains nues"))
-        hit_label = _("{status} - {label} : {hit_roll} pour {hit_chance} (+{hit_modifier})").format(
+        hit_label = _("{status} - {label} : {hit_roll} pour {hit_chance} ({hit_modifier})").format(
             status=self.get_status_display().capitalize(), label=self.label.capitalize(),
-            hit_roll=self.hit_roll, hit_chance=self.hit_chance, hit_modifier=self.hit_modifier)
+            hit_roll=self.hit_roll, hit_chance=self.hit_chance,
+            hit_modifier=f'+{self.hit_modifier}' if self.hit_modifier >= 0 else self.hit_modifier)
         base_label = _("{attacker} vs. {defender}\n{weapon_label}\n{hit_label}").format(
             attacker=self.attacker, defender=self.defender,
             weapon_label=weapon_label, hit_label=hit_label)
