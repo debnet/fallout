@@ -1183,11 +1183,11 @@ class Character(Entity, Stats):
         """
         if not target:
             return
-        target_range = int(target_range)
+        target_range, is_burst = int(target_range), bool(is_burst)
         if isinstance(target, (int, str)):
             target = Character.objects.select_related('statistics').get(pk=target)
         history = FightHistory(
-            attacker=self, defender=target, range=int(target_range), burst=bool(is_burst), hit_count=hit_count + 1)
+            attacker=self, defender=target, range=target_range, burst=is_burst, hit_count=hit_count + 1)
         history.game_date = self.campaign and self.campaign.current_game_date
         # Equipment
         if is_grenade:
@@ -1263,21 +1263,18 @@ class Character(Entity, Stats):
             getattr(attacker_ammo, attacker_range_type.format('min'), 0), 0)
         attacker_max_range = 1 if not attacker_weapon else max(
             getattr(attacker_weapon, attacker_range_type.format('max'), 0) +
-            getattr(attacker_ammo, attacker_range_type.format('max'), 0), 0)
+            getattr(attacker_ammo, attacker_range_type.format('max'), 0), 1)
         # Ranged weapon accuracy modifiers
         if attacker_weapon and attacker_weapon.attack_mode in RANGE_MODIFIERS:
             weapon_range_modifier = RANGE_MODIFIERS.get(attacker_weapon.attack_mode)
-            weapon_accuracy_modifier = -target_range
-            if target_range < attacker_min_range:
-                weapon_accuracy_modifier -= attacker_min_range  # Malus at close range
-            else:
-                weapon_accuracy_modifier += self.stats.perception * weapon_range_modifier
-            attacker_hit_chance += self.stats.perception * RANGED_PERCEPTION_MULT
-            attacker_hit_chance -= max(target_range - weapon_accuracy_modifier, 0) * RANGED_MALUS_MULT
+            attacker_hit_chance += (self.stats.perception - 2) * weapon_range_modifier
+            attacker_hit_chance -= max(attacker_min_range - target_range, 0) * RANGED_CLOSE_MALUS_MULT
+            attacker_hit_chance -= target_range * RANGED_MALUS_MULT
         # Increase hit chance of weapons
         elif not is_melee:
             attacker_range_stats = SPECIAL_STRENGTH if attacker_weapon.is_throwable else SPECIAL_PERCEPTION
-            attacker_hit_chance += RANGED_BONUS_MULT * getattr(self.stats, attacker_range_stats, 0)
+            attacker_hit_chance += RANGED_NORMAL_MULT * getattr(self.stats, attacker_range_stats, 0)
+            attacker_hit_chance -= target_range * RANGED_MALUS_MULT
         # Targetted hit chance modifier
         if target_part:  # Hit chance malus are only for targetted shot
             attacker_hit_chance += melee_hit_modifier if is_melee else ranged_hit_modifier
@@ -1294,7 +1291,7 @@ class Character(Entity, Stats):
         attacker_hit_chance += int(hit_chance_modifier)  # Other modifiers
         attacker_hit_chance = max(min(attacker_hit_chance, MAX_HIT_CHANCE), 0)
         # Force hit chance to null if target is farther than weapon range
-        if int(target_range) - attacker_max_range > 0:
+        if target_range > attacker_max_range:
             attacker_hit_chance = 0
         # Hit roll and history
         history.hit_modifier = int(hit_chance_modifier)
@@ -1455,8 +1452,9 @@ class Character(Entity, Stats):
             if armor and armor_equipment:
                 armor_threshold = (armor.get_threshold(damage_type) * armor_equipment.condition) + threshold_modifier
                 armor_threshold = round(armor_threshold * max(1.0 + threshold_rate_modifier, 0.0), 2)
-                armor_resistance = (armor.get_resistance(damage_type) * armor_equipment.condition) + resistance_modifier
-                armor_resistance = min(armor_resistance, MAX_DAMAGE_RESISTANCE)
+                armor_resistance = (armor.get_resistance(damage_type) * armor_equipment.condition)
+                armor_resistance *= 1.0 + (resistance_modifier / 100.0)
+                armor_resistance = round(min(max(0, armor_resistance), MAX_DAMAGE_RESISTANCE), 2)
                 total_damage = max(total_damage - max(armor_threshold, 0), 0)
                 total_damage *= max(1.0 - min(round(armor_resistance / 100.0, 2), 1.0), 0.0)
                 armor_damage = 0
@@ -1479,8 +1477,8 @@ class Character(Entity, Stats):
                 damage_resistance += self.stats.damage_resistance
             damage_threshold += threshold_modifier
             damage_threshold = round(damage_threshold * threshold_rate_modifier, 2)
-            damage_resistance += resistance_modifier
-            damage_resistance = min(damage_resistance, MAX_DAMAGE_RESISTANCE)
+            damage_resistance *= 1.0 + (resistance_modifier / 100.0)
+            damage_resistance = round(min(max(0, damage_resistance), MAX_DAMAGE_RESISTANCE), 2)
         total_damage = max(total_damage - max(damage_threshold, 0), 0)
         total_damage *= max(1.0 - round(damage_resistance / 100.0, 2), 0.0)
         total_damage *= (-1.0 if damage_type in LIST_HEALS else 1.0)
