@@ -708,6 +708,17 @@ class Character(Entity, Stats):
             yield StatInfo(code_r, label_r, value_r, None, css_r, None, '%', title_r if css_r else None)
 
     @property
+    def all_stats(self) -> Iterable[Stats]:
+        """
+        Retourne toutes les statistiques du personnage
+        """
+        yield from self.special
+        yield from self.skills
+        yield from self.general_stats
+        yield from self.secondary_stats
+        yield from self.resistances
+
+    @property
     def current_charge(self) -> float:
         """
         Retourne la charge totale de l'équipement du personnage
@@ -1648,6 +1659,7 @@ class Modifier(CommonModel):
     raw_value = models.SmallIntegerField(default=0, verbose_name=_("valeur brute"))
     min_value = models.SmallIntegerField(default=0, verbose_name=_("valeur min."))
     max_value = models.SmallIntegerField(default=0, verbose_name=_("valeur max."))
+    current_value = None
 
     @property
     def calculated_value(self) -> int:
@@ -1664,18 +1676,21 @@ class Modifier(CommonModel):
         :return: Représentation de la valeur du modificateur
         """
         value = ''
-        if self.min_value or self.max_value:
-            if self.max_value < 0:
-                value = f"-({abs(self.max_value)}-{abs(self.min_value)})"
-            else:
-                value = f"{self.min_value}-{self.max_value}"
-        if self.raw_value:
-            raw_value = f"+{self.raw_value}" if self.raw_value >= 0 else str(self.raw_value)
-            value = f"{value} ({raw_value})" if value else raw_value
+        if self.current_value is not None:
+            value = f"+{self.current_value}" if self.current_value > 0 else str(self.current_value)
+        else:
+            if self.min_value or self.max_value:
+                if self.max_value < 0:
+                    value = f"-({abs(self.max_value)}-{abs(self.min_value)})"
+                else:
+                    value = f"{self.min_value}-{self.max_value}"
+            if self.raw_value:
+                raw_value = f"+{self.raw_value}" if self.raw_value >= 0 else str(self.raw_value)
+                value = f"{value} ({raw_value})" if value else raw_value
         return value
 
     @property
-    def label(self):
+    def label(self) -> str:
         """
         Retourne le libellé du modificateur
         :return: Représentation du modificateur
@@ -1683,7 +1698,14 @@ class Modifier(CommonModel):
         return f"{self.label_modifier} {self.get_stats_display()}"
 
     @property
-    def bonus(self):
+    def message_level(self) -> str:
+        """
+        Niveau de message
+        """
+        return (messages.ERROR, messages.SUCCESS)[self.is_bonus]
+
+    @property
+    def is_bonus(self) -> bool:
         """
         Determine si le modificateur est un bonus ou un malus
         :return: Vrai si bonus, faux si malus
@@ -1692,7 +1714,18 @@ class Modifier(CommonModel):
             return self.calculated_value <= 0
         return self.calculated_value >= 0
 
-    def __str__(self):
+    def get_calculated_value(self, fixed: bool = False) -> int:
+        """
+        Calcule la valeur du modificateur
+        :param fixed: Fixe la valeur en mémoire
+        :return: Valeur de modificateur
+        """
+        calculated_value = self.calculated_value
+        if fixed:
+            self.current_value = calculated_value
+        return calculated_value
+
+    def __str__(self) -> str:
         return self.label
 
     class Meta:
@@ -1710,7 +1743,7 @@ class Damage(CommonModel):
     body_part = models.CharField(max_length=10, blank=True, choices=BODY_PARTS, verbose_name=_("partie du corps"))
 
     @property
-    def is_heal(self):
+    def is_heal(self) -> bool:
         """
         Retourne si le type de dégâts est curatif ou non
         :return: Vrai si curatif, faux sinon
@@ -2057,7 +2090,7 @@ class Equipment(CommonModel):
             "Le personnage ne possède plus assez de points d'actions pour utiliser cet objet."))
         _assert(self.quantity > 0, _(
             "Le personnage doit posséder au moins un exemplaire de cet objet pour l'utiliser."))
-        effects = []
+        effects, modifiers = [], []
         change_character = False
         for effect in self.item.effects.all():
             character_effect = effect.affect(self.character)
@@ -2065,7 +2098,9 @@ class Equipment(CommonModel):
                 effects.append(character_effect)
         if self.item.type != ITEM_TOOL:
             for modifier in self.item.modifiers.all():
-                self.character.modify_value(modifier.stats, modifier.calculated_value)
+                calculated_value = modifier.get_calculated_value(fixed=True)
+                self.character.modify_value(modifier.stats, calculated_value)
+                modifiers.append(modifier)
                 change_character = True
             self.quantity -= 1
             if save:
@@ -2078,7 +2113,7 @@ class Equipment(CommonModel):
             self.character.action_points -= AP_COST_USE
         if change_character or is_action:
             self.character.save()
-        return effects
+        return effects, modifiers
 
     def drop(self, quantity: int = 1, is_action: bool = False, save: bool = True) -> 'Loot':
         """

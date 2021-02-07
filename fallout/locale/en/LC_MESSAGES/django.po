@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-12-05 20:00+0100\n"
+"POT-Creation-Date: 2021-02-07 15:19+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Marc Debureaux <marc@debnet.fr>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -283,6 +283,15 @@ msgstr "item"
 msgid "état"
 msgstr "condition"
 
+msgid "valeur"
+msgstr "value"
+
+msgid "effets"
+msgstr "effects"
+
+msgid "modificateurs"
+msgstr "modifiers"
+
 msgid "secondes"
 msgstr "seconds"
 
@@ -294,6 +303,27 @@ msgstr "validate?"
 
 msgid "réinitialiser ?"
 msgstr "reinit?"
+
+msgid "code"
+msgstr "code"
+
+msgid "libellé"
+msgstr "label"
+
+msgid "maximum"
+msgstr "maximum"
+
+msgid "CSS"
+msgstr "CSS"
+
+msgid "taux"
+msgstr "rate"
+
+msgid "suffixe"
+msgstr "suffix"
+
+msgid "titre"
+msgstr "title"
 
 msgid "Fallout RPG"
 msgstr "Fallout RPG"
@@ -955,9 +985,6 @@ msgstr "player"
 msgid "joueurs"
 msgstr "players"
 
-msgid "titre"
-msgstr "title"
-
 msgid "description"
 msgstr "description"
 
@@ -1069,9 +1096,6 @@ msgstr "This functon can only be used by statistics."
 msgid "charge"
 msgstr "weight"
 
-msgid "modificateurs"
-msgstr "modifiers"
-
 msgid "obsolète"
 msgstr "obsolete"
 
@@ -1151,9 +1175,6 @@ msgstr "max. value"
 msgid "type"
 msgstr "type"
 
-msgid "valeur"
-msgstr "value"
-
 msgid "durabilité"
 msgstr "durability"
 
@@ -1225,9 +1246,6 @@ msgstr "burst AP cost"
 
 msgid "dégâts critiques"
 msgstr "critical damage"
-
-msgid "effets"
-msgstr "effects"
 
 msgid "types de munitions"
 msgstr "ammunition types"
@@ -1545,8 +1563,8 @@ msgid "Combat à mains nues"
 msgstr "Fighting with bare hands"
 
 #, python-brace-format
-msgid "{status} - {label} : {hit_roll} pour {hit_chance} (+{hit_modifier})"
-msgstr "{status} - {label}: {hit_roll} for {hit_chance} (+{hit_modifier})"
+msgid "{status} - {label} : {hit_roll} pour {hit_chance} ({hit_modifier})"
+msgstr "{status} - {label}: {hit_roll} for {hit_chance} ({hit_modifier})"
 
 #, python-brace-format
 msgid ""

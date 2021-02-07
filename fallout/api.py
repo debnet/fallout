@@ -175,7 +175,7 @@ def character_xp(request, character_id):
     """
     API pour augmenter l'expérience d'un personnage
     """
-    character = get_object_or_404(Character.objects.select_related('campaign'), pk=character_id)
+    character = get_object_or_404(Character.objects.select_related('campaign', 'statistics'), pk=character_id)
     is_authorized(request, character.campaign)
     try:
         character.add_experience(**request.validated_data)
@@ -189,7 +189,7 @@ def character_roll(request, character_id):
     """
     API pour effectuer un jet de compétence sur un personnage
     """
-    character = get_object_or_404(Character.objects.select_related('campaign'), pk=character_id)
+    character = get_object_or_404(Character.objects.select_related('campaign', 'statistics'), pk=character_id)
     is_authorized(request, character.campaign)
     try:
         return character.roll(**request.validated_data)
@@ -264,7 +264,7 @@ def character_fight(request, character_id):
     """
     API permettant d'attaquer un autre personnage
     """
-    attacker = get_object_or_404(Character.objects.select_related('campaign'), pk=character_id)
+    attacker = get_object_or_404(Character.objects.select_related('campaign', 'statistics'), pk=character_id)
     is_authorized(request, attacker.campaign)
     try:
         return attacker.fight(**request.validated_data)
@@ -277,7 +277,7 @@ def character_burst(request, character_id):
     """
     API permettant d'effectuer une attaque en rafale sur un ou plusieurs personnages
     """
-    attacker = get_object_or_404(Character.objects.select_related('campaign'), pk=character_id)
+    attacker = get_object_or_404(Character.objects.select_related('campaign', 'statistics'), pk=character_id)
     is_authorized(request, attacker.campaign)
     targets = [(t.get('target'), t.get('target_range')) for t in request.validated_data.pop('targets', {})]
     try:
@@ -337,7 +337,7 @@ def campaign_damage(request, campaign_id):
     """
     API permettant d'infliger des dégâts à plusieurs personnages de la campagne
     """
-    characters = Character.objects.select_related('statistics').filter(
+    characters = Character.objects.select_related('campaign', 'statistics').filter(
         pk__in=request.validated_data.pop('characters', []))
     any(is_authorized(request, character.campaign) for character in characters)
     try:
@@ -351,7 +351,7 @@ def character_damage(request, character_id):
     """
     API permettant d'infliger des dégâts à un seul personnage
     """
-    character = get_object_or_404(Character.objects.select_related('campaign'), pk=character_id)
+    character = get_object_or_404(Character.objects.select_related('campaign', 'statistics'), pk=character_id)
     is_authorized(request, character.campaign)
     try:
         return character.damage(**request.validated_data)
@@ -408,7 +408,7 @@ def character_effect(request, character_id):
     """
     API permettant d'affecter un effet à un personnage
     """
-    character = get_object_or_404(Character.objects.select_related('campaign'), pk=character_id)
+    character = get_object_or_404(Character.objects.select_related('campaign', 'statistics'), pk=character_id)
     is_authorized(request, character.campaign)
     effect = request.validated_data.get('effect')
     try:
@@ -440,7 +440,7 @@ def character_item(request, character_id):
     """
     API permettant de donner un objet à un personnage
     """
-    character = get_object_or_404(Character.objects.select_related('campaign'), pk=character_id)
+    character = get_object_or_404(Character.objects.select_related('campaign', 'statistics'), pk=character_id)
     is_authorized(request, character.campaign)
     item = request.validated_data.pop('item')
     try:
@@ -469,7 +469,23 @@ def equipment_equip(request, equipment_id):
         raise ValidationError(str(exception))
 
 
-@api_view_with_serializer(['POST'], input_serializer=ActionInputSerializer, serializer=CharacterEffectSerializer)
+@to_model_serializer(ItemModifier)
+class ItemModifierSerializer(CommonModelSerializer):
+    """
+    Serialiser des modificateurs
+    """
+    current_value = serializers.IntegerField(read_only=True, label=_("valeur"))
+
+
+class EquipmentUseSerializer(BaseCustomSerializer):
+    """
+    Serializer pour l'utilisation d'objets
+    """
+    effects = CharacterEffectSerializer(read_only=True, many=True, label=_("effets"))
+    modifiers = ItemModifierSerializer(read_only=True, many=True, label=_("modificateurs"))
+
+
+@api_view_with_serializer(['POST'], input_serializer=ActionInputSerializer, serializer=EquipmentUseSerializer)
 def equipment_use(request, equipment_id):
     """
     API permettant d'utiliser un objet (si applicable)
@@ -477,7 +493,8 @@ def equipment_use(request, equipment_id):
     equipment = get_object_or_404(Equipment.objects.select_related('character__campaign'), pk=equipment_id)
     is_authorized(request, equipment.character.campaign)
     try:
-        return equipment.use(**request.validated_data)
+        effects, modifiers = equipment.use(**request.validated_data)
+        return dict(effects=effects, modifiers=modifiers)
     except Exception as exception:
         raise ValidationError(str(exception))
 
@@ -612,6 +629,27 @@ def campaign_next_turn(request, campaign_id):
         raise ValidationError(str(exception))
 
 
+class StatInfoSerializer(BaseCustomSerializer):
+    code = serializers.CharField(label=_("code"))
+    label = serializers.CharField(label=_("libellé"))
+    value = serializers.IntegerField(source='lvalue', label=_("valeur"))
+    max = serializers.IntegerField(source='rvalue', label=_("maximum"))
+    css = serializers.CharField(label=_("CSS"))
+    rate = serializers.FloatField(label=_("taux"))
+    end = serializers.CharField(label=_("suffixe"))
+    title = serializers.CharField(label=_("titre"))
+
+
+@api_view_with_serializer(['GET'], serializer=StatInfoSerializer)
+def character_stats(request, character_id):
+    character = get_object_or_404(Character.objects.select_related('campaign', 'statistics'), pk=character_id)
+    is_authorized(request, character.campaign)
+    try:
+        return [stats._asdict() for stats in character.all_stats]
+    except Exception as exception:
+        raise ValidationError(str(exception))
+
+
 namespace = 'fallout-api'
 app_name = 'fallout'
 urlpatterns = [
@@ -628,6 +666,7 @@ urlpatterns = [
     path('character/<int:character_id>/copy/', character_copy, name='character_copy'),
     path('character/<int:character_id>/effect/', character_effect, name='character_effect'),
     path('character/<int:character_id>/item/', character_item, name='character_item'),
+    path('character/<int:character_id>/stats/', character_stats, name='character_stats'),
     path('equipment/<int:equipment_id>/equip/', equipment_equip, name='equipment_equip'),
     path('equipment/<int:equipment_id>/use/', equipment_use, name='equipment_use'),
     path('equipment/<int:equipment_id>/reload/', equipment_reload, name='equipment_reload'),

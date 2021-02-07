@@ -53,7 +53,7 @@
                                     {{ loot.value|floatformat:2 }} {% trans "¤" %}
                                 </small>
                                 {% for modifier in item.modifiers.all %}
-                                    <small class="badge {% if modifier.bonus %}badge-success{% else %}badge-danger{% endif %}">
+                                    <small class="badge {% if modifier.is_bonus %}badge-success{% else %}badge-danger{% endif %}">
                                         {{ modifier.label }}
                                     </small>
                                 {% endfor %}

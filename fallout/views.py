@@ -361,11 +361,16 @@ def view_character(request, character_id):
                     elif method == 'reload':
                         equip.reload(is_action=is_action)
                     elif method == 'use':
-                        for effect in equip.use(is_action=is_action):
+                        effects, modifiers = equip.use(is_action=is_action)
+                        for effect in effects:
                             for damage in effect.damages:
                                 messages.add_message(request, damage.message_level, _(
                                     "<strong>{pre_label}</strong> {label}").format(
                                     pre_label=damage.pre_label, label=damage.label))
+                        for modifier in modifiers:
+                            messages.add_message(request, modifier.message_level, _(
+                                "<strong>{pre_label}</strong> {label}").format(
+                                pre_label=character, label=modifier.label))
                     elif method == 'repair':
                         equip.repair(value=int(data.get('condition') or 100), is_action=is_action)
                     elif method == 'drop':
