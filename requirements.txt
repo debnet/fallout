@@ -1,8 +1,8 @@
-Django==3.1.5
+Django==3.1.6
 Pillow==8.1.0
 celery[redis]==5.0.5
 coreapi==2.3.3
-common-framework==2020.9.22
+common-framework==2021.2.1
 dj-database-url==0.5.0
 django-compressor==2.4
 django-configurations==2.2
@@ -16,7 +16,7 @@ djangorestframework==3.12.2
 djangorestframework-xml==2.0.0
 djangorestframework-simplejwt==4.6.0
 flake8==3.8.4
-ipython==7.19.0
+ipython==7.20.0
 markdown2==2.4.0
 mypy==0.800
 psycopg2-binary==2.8.6
@@ -25,8 +25,8 @@ pytest-cov==2.11.1
 pytest-django==4.1.0
 pytest-env==0.6.2
 python-dateutil==2.8.1
-pytz==2020.5
+pytz==2021.1
 redis==3.5.3
 requests==2.25.1
-setuptools==52.0.0
+setuptools==53.0.0
 wheel==0.36.2
