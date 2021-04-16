@@ -23183,8 +23183,8 @@
         "apply": false,
         "interval": null,
         "damage_chance": 100,
-        "next_effect": 47,
-        "cancel_effect": 47
+        "next_effect": 49,
+        "cancel_effect": 49
     }
 },
 {
