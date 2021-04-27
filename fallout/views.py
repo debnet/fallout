@@ -446,7 +446,7 @@ def view_character(request, character_id):
         # Effects
         'character_effects': effects,
         'campaign_effects': character.campaign.effects if character.campaign else None,
-        'perks': character.perks.all(),
+        'perks': character.perks.prefetch_related('modifiers').all(),
         # Statistics
         'rollstats': rollstats,
         'fightstats': fightstats,

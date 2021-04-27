@@ -1,7 +1,8 @@
 # coding: utf-8
 from collections import OrderedDict as odict, namedtuple
+from dataclasses import asdict, dataclass, field
 from datetime import datetime, timedelta
-from random import choice, randint, shuffle
+from random import choice, randint
 from typing import Dict, Iterable, List, Optional, Tuple, Union
 
 from common.fields import JsonField
@@ -85,6 +86,186 @@ def get_class(value: Union[int, float], maximum: Union[int, float], classes: Ite
     return default
 
 
+@dataclass
+class Stats:
+    """
+    Statistiques actuelles du personnage
+    """
+    # S.P.E.C.I.A.L.
+    strength: int = 5
+    perception: int = 5
+    endurance: int = 5
+    charisma: int = 5
+    intelligence: int = 5
+    agility: int = 5
+    luck: int = 5
+    # Secondary statistics
+    max_health: int = 0
+    max_action_points: int = 0
+    armor_class: int = 0
+    carry_weight: int = 0
+    melee_damage: int = 0
+    sequence: int = 0
+    healing_rate: int = 0
+    ap_cost_modifier: int = 0
+    one_hand_accuracy: int = 0
+    two_hands_accuracy: int = 0
+    damage_modifier: int = 0
+    critical_chance: int = 0
+    critical_raw_chance: int = 0
+    critical_damage: int = 0
+    # Skills
+    small_guns: int = 0
+    big_guns: int = 0
+    energy_weapons: int = 0
+    unarmed: int = 0
+    melee_weapons: int = 0
+    throwing: int = 0
+    athletics: int = 0
+    detection: int = 0
+    first_aid: int = 0
+    doctor: int = 0
+    chems: int = 0
+    sneak: int = 0
+    lockpick: int = 0
+    steal: int = 0
+    traps: int = 0
+    explosives: int = 0
+    science: int = 0
+    repair: int = 0
+    computers: int = 0
+    electronics: int = 0
+    speech: int = 0
+    deception: int = 0
+    barter: int = 0
+    survival: int = 0
+    knowledge: int = 0
+    # Leveled stats
+    hit_points_per_level: int = 0
+    skill_points_per_level: int = 0
+    perk_rate: int = 0
+    # Resistances
+    damage_threshold: int = 0
+    damage_resistance: int = 0
+    normal_threshold: int = 0
+    normal_resistance: int = 0
+    laser_threshold: int = 0
+    laser_resistance: int = 0
+    plasma_threshold: int = 0
+    plasma_resistance: int = 0
+    explosive_threshold: int = 0
+    explosive_resistance: int = 0
+    fire_threshold: int = 0
+    fire_resistance: int = 0
+    electricity_threshold: int = 0
+    electricity_resistance: int = 0
+    poison_threshold: int = 0
+    poison_resistance: int = 0
+    radiation_threshold: int = 0
+    radiation_resistance: int = 0
+    gas_contact_threshold: int = 0
+    gas_contact_resistance: int = 0
+    gas_inhaled_threshold: int = 0
+    gas_inhaled_resistance: int = 0
+    # Modifiers
+    charge: float = 0.0
+    modifiers: dict = field(init=False)
+
+    def __post_init__(self):
+        self.raw = {}
+        self.base = {}
+        self.modifiers = {}
+        self.character_modifiers = {}
+        self.character = None
+
+    @staticmethod
+    def get(character: 'Character') -> 'Stats':
+        """
+        Récupère toutes les statistiques à jour d'un personnage
+        :param character: Personnage
+        :return: Statistiques
+        """
+        stats = Stats()
+        stats.character = character
+        # Get all character's stats
+        for stats_name in LIST_EDITABLE_STATS:
+            stats.base[stats_name] = getattr(character, stats_name, 0)
+            setattr(stats, stats_name, getattr(character, stats_name, 0))
+        # Racial modifiers
+        race_stats = RACES_STATS.get(character.race, {})
+        stats.change_all_stats(limit=True, **race_stats)
+        for stats_name, (value, mini, maxi) in race_stats.items():
+            stats.base[stats_name] = (stats.base.get(stats_name) or 0) + (value or 0)
+        # Tag skills
+        for skill in set(character.tag_skills):
+            stats.base[skill] = (stats.base.get(skill) or 0) + TAG_SKILL_BONUS
+            stats.change_stats(skill, TAG_SKILL_BONUS, raw=False)
+        # Base statistics
+        base_stats = to_object(stats.base)
+        base_stats.level = character.level
+        for stats_name, formula in COMPUTED_STATS:
+            result = stats.base[stats_name] = stats.base.get(stats_name, 0) + formula(base_stats, base_stats)
+            setattr(base_stats, stats_name, result)
+        # Survival modifiers
+        for stats_name, survival in SURVIVAL_EFFECTS:
+            for (mini, maxi), effects in survival.items():
+                if (mini or 0) <= getattr(character, stats_name, 0) < (maxi or float('+inf')):
+                    stats.change_all_stats(**effects)
+                    break
+        # Equipment modifiers
+        for equipment in character.inventory.filter(~Q(slot='') | Q(item__type__in=(ITEM_EXTRA, ITEM_TOOL))):
+            for count in range(equipment.quantity):
+                for modifier in equipment.item.modifiers.all():
+                    stats.change_stats(modifier.stats, modifier.calculated_value)
+        # Active effects modifiers
+        for effect in character.effects.exclude(effect__modifiers__isnull=True):
+            for modifier in effect.effect.modifiers.all():
+                stats.change_stats(modifier.stats, modifier.calculated_value)
+        # Campaign effects modifiers
+        if character.campaign:
+            for effect in character.campaign.effects.exclude(effect__modifiers__isnull=True):
+                for modifier in effect.effect.modifiers.all():
+                    stats.change_stats(modifier.stats, modifier.calculated_value, limit=False)
+        # Derivated statistics
+        for stats_name, formula in COMPUTED_STATS:
+            stats.change_stats(stats_name, formula(stats, character) + stats.raw.get(stats_name, 0), raw=False)
+        # Modifiers
+        for stats_name in LIST_EDITABLE_STATS:
+            from_base = stats.base.get(stats_name, 0)
+            from_stats = getattr(stats, stats_name, 0)
+            if from_base == from_stats:
+                continue
+            stats.modifiers[stats_name] = from_stats - from_base
+        # Charge
+        stats.charge = character.equipments.aggregate(
+            charge=Sum(F('quantity') * F('item__weight'), output_field=models.FloatField())
+        ).get('charge') or 0.0
+        return stats
+
+    def change_all_stats(self, limit: bool = False, **stats: Tuple[int, Optional[int], Optional[int]]) -> None:
+        for name, values in stats.items():
+            self.change_stats(name, *values, limit=limit)
+
+    def change_stats(self, name: str, value: int = 0, mini: Optional[int] = None, maxi: Optional[int] = None,
+                     limit: bool = False, raw: bool = True) -> None:
+        if raw and name in LIST_COMPUTED_STATS:
+            self.raw[name] = self.raw.setdefault(name, 0) + value
+            return
+        if not self.character:
+            return
+        bonus, race_mini, race_maxi = RACES_STATS.get(self.character.race, {}).get(name, (None, None, None))
+        target = self if name in LIST_EDITABLE_STATS else self.character
+        if limit:
+            mini = (mini if mini is not None else race_mini) or float('-inf')  # type: ignore
+            maxi = (maxi if maxi is not None else race_maxi) or float('+inf')  # type: ignore
+        else:
+            mini, maxi = 0, float('+inf')  # type: ignore
+        result = min(max(getattr(target, name, 0) + value, mini), maxi)
+        setattr(target, name, result)
+        if isinstance(target, Character):
+            self.character_modifiers[name] = result
+
+
 class Player(AbstractUser):
     """
     Joueur
@@ -107,7 +288,8 @@ class Campaign(CommonModel):
     title = models.CharField(max_length=200, blank=True, verbose_name=_("titre"))
     description = models.TextField(blank=True, verbose_name=_("description"))
     image = models.ImageField(blank=True, null=True, upload_to='campaigns', verbose_name=_("image"))
-    thumbnail = models.CharField(blank=True, max_length=100, choices=get_thumbnails('campaigns'), verbose_name=_("miniature"))
+    thumbnail = models.CharField(
+        blank=True, max_length=100, choices=get_thumbnails('campaigns'), verbose_name=_("miniature"))
     game_master = models.ForeignKey(
         'Player', blank=True, null=True, on_delete=models.SET_NULL,
         related_name='+', verbose_name=_("maître du jeu"))
@@ -277,9 +459,9 @@ class Resistance(CommonModel):
         abstract = True
 
 
-class Stats(Resistance):
+class BaseStatistics(Resistance):
     """
-    Statistiques actuelles du personnage
+    Statistiques de base
     """
     # S.P.E.C.I.A.L.
     strength = models.PositiveSmallIntegerField(default=5, verbose_name=_("force"))
@@ -335,128 +517,28 @@ class Stats(Resistance):
     skill_points_per_level = models.SmallIntegerField(default=0, verbose_name=_("compétences par niveau"))
     perk_rate = models.SmallIntegerField(default=0, verbose_name=_("niveaux pour un talent"))
 
-    # Added at init
-    character: Optional['Character'] = None
-    charge: float = 0.0  # Current equipment weight
-    raw: Dict[str, float] = {}  # Raw modifiers on calculated stats
-    base: Dict[str, float] = {}  # Base statistics
-    modifiers: Dict[str, float] = {}  # Statistics modifiers
-    character_modifiers: Dict[str, float] = {}  # Character modifiers
-
-    def __str__(self) -> str:
-        if self.character:
-            return str(self.character)
-        return ''
-
-    @staticmethod
-    def get(character: 'Character') -> 'Stats':
-        """
-        Récupère toutes les statistiques à jour d'un personnage
-        :param character: Personnage
-        :return: Statistiques
-        """
-        stats = Stats()
-        stats.raw = {}
-        stats.base = {}
-        stats.modifiers = {}
-        stats.character_modifiers = {}
-        stats.character = character
-        # Get all character's stats
-        for stats_name in LIST_EDITABLE_STATS:
-            stats.base[stats_name] = getattr(character, stats_name, 0)
-            setattr(stats, stats_name, getattr(character, stats_name, 0))
-        # Racial modifiers
-        race_stats = RACES_STATS.get(character.race, {})
-        stats._change_all_stats(limit=True, **race_stats)
-        for stats_name, (value, mini, maxi) in race_stats.items():
-            stats.base[stats_name] = (stats.base.get(stats_name) or 0) + (value or 0)
-        # Tag skills
-        for skill in set(character.tag_skills):
-            stats.base[skill] = (stats.base.get(skill) or 0) + TAG_SKILL_BONUS
-            stats._change_stats(skill, TAG_SKILL_BONUS, raw=False)
-        # Base statistics
-        base_stats = to_object(stats.base)
-        base_stats.level = character.level
-        for stats_name, formula in COMPUTED_STATS:
-            result = stats.base[stats_name] = stats.base.get(stats_name, 0) + formula(base_stats, base_stats)
-            setattr(base_stats, stats_name, result)
-        # Survival modifiers
-        for stats_name, survival in SURVIVAL_EFFECTS:
-            for (mini, maxi), effects in survival.items():
-                if (mini or 0) <= getattr(character, stats_name, 0) < (maxi or float('+inf')):
-                    stats._change_all_stats(**effects)
-                    break
-        # Equipment modifiers
-        for equipment in character.inventory.filter(~Q(slot='') | Q(item__type__in=(ITEM_EXTRA, ITEM_TOOL))):
-            for count in range(equipment.quantity):
-                for modifier in equipment.item.modifiers.all():
-                    stats._change_stats(modifier.stats, modifier.calculated_value)
-        # Active effects modifiers
-        for effect in character.effects.exclude(effect__modifiers__isnull=True):
-            for modifier in effect.effect.modifiers.all():
-                stats._change_stats(modifier.stats, modifier.calculated_value)
-        # Campaign effects modifiers
-        if character.campaign:
-            for effect in character.campaign.effects.exclude(effect__modifiers__isnull=True):
-                for modifier in effect.effect.modifiers.all():
-                    stats._change_stats(modifier.stats, modifier.calculated_value, limit=False)
-        # Derivated statistics
-        for stats_name, formula in COMPUTED_STATS:
-            stats._change_stats(stats_name, formula(stats, character) + stats.raw.get(stats_name, 0), raw=False)
-        # Modifiers
-        for stats_name in LIST_EDITABLE_STATS:
-            from_base = stats.base.get(stats_name, 0)
-            from_stats = getattr(stats, stats_name, 0)
-            if from_base == from_stats:
-                continue
-            stats.modifiers[stats_name] = from_stats - from_base
-        # Charge
-        stats.charge = character.equipments.aggregate(
-            charge=Sum(F('quantity') * F('item__weight'), output_field=models.FloatField())
-        ).get('charge') or 0.0
-        return stats
-
-    def _change_all_stats(self, limit: bool = False, **stats: Tuple[int, Optional[int], Optional[int]]) -> None:
-        _assert(isinstance(self, Stats), _("Cette fonction ne peut être utilisée que par les statistiques."))
-        for name, values in stats.items():
-            self._change_stats(name, *values, limit=limit)
-
-    def _change_stats(self, name: str, value: int = 0, mini: Optional[int] = None, maxi: Optional[int] = None,
-                      limit: bool = False, raw: bool = True) -> None:
-        _assert(isinstance(self, Stats), _("Cette fonction ne peut être utilisée que par les statistiques."))
-        if raw and name in LIST_COMPUTED_STATS:
-            self.raw[name] = self.raw.setdefault(name, 0) + value
-            return
-        if not self.character:
-            return
-        bonus, race_mini, race_maxi = RACES_STATS.get(self.character.race, {}).get(name, (None, None, None))
-        target = self if name in LIST_EDITABLE_STATS else self.character
-        if limit:
-            mini = (mini if mini is not None else race_mini) or float('-inf')  # type: ignore
-            maxi = (maxi if maxi is not None else race_maxi) or float('+inf')  # type: ignore
-        else:
-            mini, maxi = 0, float('+inf')  # type: ignore
-        result = min(max(getattr(target, name, 0) + value, mini), maxi)
-        setattr(target, name, result)
-        if isinstance(target, Character):
-            self.character_modifiers[name] = result
-
     class Meta:
         abstract = True
 
 
-class Statistics(Stats):
+class Statistics(BaseStatistics):
     """
     Statistiques de personnage
     """
     character = models.OneToOneField(
         'Character', primary_key=True, on_delete=models.CASCADE,
         related_name='statistics', verbose_name=_('personnage'))
+    # Others
     charge = models.FloatField(default=0.0, verbose_name=_("charge"))
     modifiers = JsonField(blank=True, null=True, verbose_name=_("modificateurs"))
     obsolete = models.BooleanField(default=False, editable=False, verbose_name=_("obsolète"))
     date = models.DateTimeField(auto_now=True, editable=False, verbose_name=_("date"))
     _code_field = 'character'
+
+    def __str__(self) -> str:
+        if self.character:
+            return str(self.character)
+        return ''
 
     class Meta:
         verbose_name = _("statistiques")
@@ -471,7 +553,7 @@ EQUIP_TITLE = _("Armure : <strong>{armor}</strong><br>Casque : <strong>{helmet}<
 EMPTY = _("absent")
 
 
-class Character(Entity, Stats):
+class Character(Entity, BaseStatistics):
     """
     Personnage
     """
@@ -544,8 +626,8 @@ class Character(Entity, Stats):
             stats: Union[Statistics, Stats] = self._stats.get(self.pk) or Stats.get(self)  # type: ignore
             if self.pk:
                 self._stats[self.pk] = stats
-                self.statistics, created = Statistics.objects.update_or_create(character=self, defaults=dict(
-                    obsolete=False, charge=stats.charge, modifiers=stats.modifiers, **stats.to_dict()))
+                self.statistics, created = Statistics.objects.update_or_create(
+                    character=self, defaults=dict(obsolete=False, **asdict(stats)))
                 # Character modifiers from statistics
                 if stats.character_modifiers:
                     for key, value in stats.character_modifiers.items():
@@ -3273,6 +3355,7 @@ MODELS = (
 )
 
 __all__ = (
-    'Player', 'Campaign', 'Resistance', 'Stats', 'Statistics', 'Character', 'Modifier', 'Damage', 'Item',
-    'ItemModifier', 'Equipment', 'Effect', 'EffectModifier', 'ActiveEffect', 'CampaignEffect', 'CharacterEffect',
-    'Loot', 'LootTemplate', 'LootTemplateItem', 'RollHistory', 'DamageHistory', 'FightHistory', 'Log', 'MODELS')
+    'Stats', 'Player', 'Campaign', 'Resistance', 'BaseStatistics', 'Statistics', 'Character', 'Modifier', 'Damage',
+    'Item', 'ItemModifier', 'Equipment', 'Effect', 'EffectModifier', 'ActiveEffect', 'CampaignEffect',
+    'CharacterEffect', 'Loot', 'LootTemplate', 'LootTemplateItem', 'RollHistory', 'DamageHistory', 'FightHistory',
+    'Log', 'MODELS')
