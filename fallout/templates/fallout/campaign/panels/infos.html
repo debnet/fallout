@@ -29,51 +29,6 @@
                     </div>
                 </div>
             </form>
-            <hr class="my-1" />
-            <form method="post" action="{{ request.path }}" class="form-inline justify-content-center">
-                <div class="form-row align-items-center">
-                    <div class="col-auto text-nowrap font-weight-bold">
-                        {% trans "Faire un lancer :" %}
-                    </div>
-                    <div class="col-auto">
-                        <label class="sr-only" for="roll-group-list">{% trans "Type de personnage" %}</label>
-                        <select name="group" id="roll-group-list" class="form-control form-control-sm custom-select custom-select-sm">
-                            <option value="pj">{% trans "PJ" %}</option>
-                            <option value="pnj">{% trans "PNJ" %}</option>
-                            <option value="">{% trans "Tous" %}</option>
-                        </select>
-                    </div>
-                    <div class="col-auto">
-                        <label class="sr-only" for="stats-list">{% trans "Statistique" %}</label>
-                        <select name="stats" id="roll-stats-list" class="form-control form-control-sm custom-select custom-select-sm">
-                            {% for title, substats in stats %}
-                                <optgroup label="{{ title }}">
-                                    {% for value, label in substats %}
-                                        <option value="{{ value }}">{{ label }}</option>
-                                    {% endfor %}
-                                </optgroup>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="col-auto">
-                        <label class="sr-only" for="stats-modifier">{% trans "Modificateur" %}</label>
-                        <input type="number" class="form-control form-control-sm ismall" id="stats-modifier"
-                               name="modifier" placeholder="{% trans "Mod" %}" value="0">
-                    </div>
-                    <div class="col-auto">
-                        <label class="form-check-label" title="{% trans "Expérience" %}">
-                            <input class="form-check-input" type="checkbox" name="xp">
-                            {% trans "XP" %}
-                        </label>
-                    </div>
-                    <div class="col-auto">
-                        <button type="submit" class="btn btn-sm btn-primary"
-                                name="method" value="roll">{% trans "Lancer" %}</button>
-                        <input type="hidden" name="type" value="roll" />
-                        {% csrf_token %}
-                    </div>
-                </div>
-            </form>
             {% if campaign %}
                 <hr class="my-1" />
                 <form method="post" action="{{ request.path }}" class="form-inline justify-content-center">
@@ -115,6 +70,50 @@
                         </div>
                     </div>
                 </form>
+                {% if all_npcs %}
+                <hr class="my-1" />
+                <form method="post" action="{{ request.path }}" class="form-inline justify-content-center">
+                    <div class="form-row align-items-center">
+                        <div class="col-auto text-nowrap font-weight-bold">
+                            {% trans "Ajouter un PNJ :" %}
+                        </div>
+                        <div class="col-auto">
+                            <label class="sr-only" for="npc-id">{% trans "PNJ" %}</label>
+                            <select id="character-id" name="character-id" class="form-control form-control-sm select2"
+                                    data-placeholder="{% trans "PNJs" %}">
+                                <option></option>
+                                {% for npc in all_npcs %}
+                                    <option value="{{ npc.id }}">
+                                        {{ npc.name }} ({% if npc.title %}{{ npc.title }}, {% endif %}{% trans "nv." %} {{ npc.level }})
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-auto">
+                            <div class="input-group input-group-sm">
+                                <div class="input-group-prepend">
+                                    <label for="item-quantity" class="input-group-text">{% trans "Nombre" %}</label>
+                                </div>
+                                <input type="number" class="form-control form-control-sm ismall" id="character-number"
+                                       name="number" placeholder="{% trans "Nb" %}" value="1"
+                                       aria-valuemin="1" min="1">
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <label class="sr-only" for="character-name">{% trans "Nom du PNJ" %}</label>
+                            <input class="form-control form-control-sm" id="character-name" name="name"
+                                   placeholder="{% trans "Nom du PNJ" %}" value="">
+                        </div>
+                        <div class="col-auto">
+                            <button type="submit" class="btn btn-sm btn-primary"
+                                    name="method" value="add">{% trans "Ajouter" %}</button>
+                            <input type="hidden" name="type" value="npc" />
+                            <input type="hidden" name="campaign-id" value="{{ campaign.id }}" />
+                            {% csrf_token %}
+                        </div>
+                    </div>
+                </form>
+                {% endif %}
             {% endif %}
         </div>
         <hr class="mt-1 mb-3" />

@@ -16,7 +16,8 @@
 
 {% block content %}
     <div>
-        <input type="range" class="range custom-range" min="-100" max="100" step="10" value="{{ request.POST.modifier|default:0 }}" id="modifier">
+        <input type="range" class="range custom-range" min="-100" max="100" step="10"
+               value="{{ request.POST.modifier|default:0 }}" id="modifier">
     </div>
     <div class="card-deck">
         {% for character in characters %}

@@ -1,0 +1,12 @@
+{% load i18n %}
+
+{% for roll in rolls %}
+    <div class="alert alert-{{ roll.css_class }} alert-dismissible fade show" role="alert">
+        <button type="button" class="close" data-dismiss="alert" aria-label="{% trans "Fermer" %}">
+            <span aria-hidden="true">&times;</span>
+        </button>
+        <strong>{{ roll.pre_label }}</strong> -
+        {{ roll.long_label|safe }}
+        <small class="float-right">{{ roll.date|timesince }}</small>
+    </div>
+{% endfor %}

@@ -219,12 +219,36 @@ def view_campaign(request, campaign_id):
                             "<strong>{character}</strong> a encore besoin de <strong>{experience}</strong> "
                             "points d'expérience pour passer au niveau suivant.").format(
                                 character=character, experience=required_experience))
+            elif type == 'npc':
+                name, number, character_id, campaign_id = (
+                    data.get("name"),
+                    int(data.get("number") or 1),
+                    int(data.get("character-id") or 0),
+                    int(data.get("campaign-id")))
+                character = Character.objects.filter(pk=character_id).first()
+                for i in range(number):
+                    if not character:
+                        if not name:
+                            continue
+                        character = Character(name=name, has_stats=False, has_needs=False)
+                        character.randomize_special(save=False)
+                        character.generate_stats(save=False)
+                    character.duplicate(campaign=campaign, name=name if number == 1 else f"{name} {i+1}")
+                    if number > 1:
+                        character = Character.objects.filter(pk=character_id).first()
     except ValidationError as error:
         for field, errors in error.message_dict.items():
             for error in (errors if isinstance(errors, list) else [errors]):
                 messages.error(request, _("<strong>Erreur</strong> {error}").format(error=error))
     except Exception as error:
         messages.error(request, _("<strong>Erreur</strong> {error}").format(error=error))
+
+    all_items = Item.objects.order_by('type', 'name').only('id', 'name', 'type', 'title').to_dict(display=True)
+    all_effects = Effect.objects.filter(character__isnull=True).order_by('name').only('id', 'name', 'title').to_dict()
+    all_loots = LootTemplate.objects.order_by('name').only('id', 'name', 'title').to_dict()
+    all_npcs = Character.objects.filter(
+        campaign__isnull=True, is_player=False
+    ).order_by('name').only('id', 'name', 'title', 'level').to_dict()
 
     return {
         'page': 'campaign',
@@ -239,6 +263,11 @@ def view_campaign(request, campaign_id):
         'stats': ROLL_STATS,
         'body_parts': BODY_PARTS,
         'damage_types': DAMAGES_TYPES,
+        # Lists
+        'all_items': all_items,
+        'all_effects': all_effects,
+        'all_loots': all_loots,
+        'all_npcs': all_npcs,
     }
 
 
@@ -276,7 +305,7 @@ def view_character(request, character_id):
     try:
         if request.method == 'POST' and character:
             data = request.POST
-            type, method = data.get('type'), data.get('method')
+            type, subtype, method = data.get('type'), data.get('subtype'), data.get('method')
             if authorized and type == 'stats':
                 if 'roll' in data:
                     result = character.roll(
@@ -288,6 +317,20 @@ def view_character(request, character_id):
                 elif 'levelup' in data:
                     stats = data.get('levelup')
                     character.levelup(stats, 1, _ignore_log=True)
+                elif method == 'randomize':
+                    if subtype == 'special':
+                        character.randomize_special(points=int(data.get('points') or 1), save=False)
+                        if bool(data.get('stats', False)):
+                            character.generate_stats(reset=True, save=False)
+                        character.save()
+                    elif subtype == 'skill':
+                        character.tag_skills = data.getlist('skills')
+                        if not character.has_stats:
+                            character.generate_stats(reset=True, save=False)
+                        character.randomize_stats(
+                            level=int(data.get('level') or 1),
+                            rate=int(data.get('rate') or 0) / 100.0,
+                            save=True)
             elif authorized and type == 'fight' and data.get('target'):
                 result = character.fight(
                     target=data.get('target'),
@@ -297,9 +340,8 @@ def view_character(request, character_id):
                     force_success=bool(data.get('force_success', False)),
                     force_critical=bool(data.get('force_critical', False)),
                     force_raw_damage=bool(data.get('force_raw_damage', False)),
-                    is_grenade=bool(data.get('is_grenade', False)),
                     is_action=bool(data.get('is_action', False)),
-                    no_weapon=bool(data.get('no_weapon', False)),
+                    weapon_type=data.get('weapon_type'),
                     fail_target=data.get('fail_target'))
                 messages.add_message(request, result.message_level, _(
                     "<strong>{pre_label}</strong> {label}").format(
@@ -315,9 +357,9 @@ def view_character(request, character_id):
                     force_success=bool(data.get('force_success', False)),
                     force_critical=bool(data.get('force_critical', False)),
                     force_raw_damage=bool(data.get('force_raw_damage', False)),
-                    is_grenade=bool(data.get('is_grenade', False)),
-                    is_action=bool(data.get('is_action', False)))
-                if bool(data.get('is_grenade', False)):
+                    is_action=bool(data.get('is_action', False)),
+                    weapon_type=data.get('weapon_type'))
+                if data.get('weapon_type') == 'grenade':
                     for result in results:
                         messages.add_message(request, result.message_level, _(
                             "<strong>{pre_label}</strong> {label}").format(
@@ -427,11 +469,15 @@ def view_character(request, character_id):
             for error in (errors if isinstance(errors, list) else [errors]):
                 messages.error(request, _("<strong>Erreur</strong> {error}").format(error=error))
     except Exception as error:
+        raise
         messages.error(request, _("<strong>Erreur</strong> {error}").format(error=error))
 
     inventory, effects = character.inventory, character.effects
     rollstats = RollHistory.get_stats(character)
     fightstats = FightHistory.get_stats(character)
+
+    all_items = Item.objects.order_by('type', 'name').only('id', 'name', 'type', 'title').to_dict(display=True)
+    all_effects = Effect.objects.filter(character__isnull=True).order_by('name').only('id', 'name', 'title').to_dict()
 
     return {
         'page': 'character',
@@ -453,6 +499,9 @@ def view_character(request, character_id):
         # Enums
         'body_parts': BODY_PARTS,
         'damage_types': DAMAGES_TYPES,
+        # Lists
+        'all_items': all_items,
+        'all_effects': all_effects,
     }
 
 
@@ -523,9 +572,9 @@ def simulation(request):
             data = request.POST
             attacker = Character.objects.select_related('statistics').get(pk=data.get('character'))
             if data.get('type') == 'burst':
-                targets = list(zip(data.getlist('targets[]') or [], data.getlist('ranges[]') or []))
+                targets = list(zip(data.getlist('targets') or [], data.getlist('ranges') or []))
                 data = data.dict()
-                data.pop('character'), data.pop('targets[]'), data.pop('ranges[]')
+                data.pop('character'), data.pop('targets'), data.pop('ranges')
                 results = attacker.burst(**data, targets=targets, simulation=True)
                 return [result.to_dict(extra=('description',)) for result in results]
             elif data.get('target'):
@@ -535,13 +584,13 @@ def simulation(request):
                 result_data = result.to_dict(extra=('description',))
                 result_data['fail'] = result.fail.to_dict(extra=('description',)) if result.fail else None
                 return result_data
-        except Exception as e:  # noqa
-            return str(e)
+        except Exception as error:  # noqa
+            return _("Erreur : {error}").format(error=error)
     return ""
 
 
 @login_required
-@render_to('fallout/campaign/panels/rolls.html')
+@render_to('fallout/campaign/includes/rolls.html')
 def view_campaign_rolls(request, campaign_id):
     limit = int(request.GET.get('limit') or '10')
     rolls = RollHistory.objects.select_related('character').filter(

@@ -1,12 +1,54 @@
-{% load i18n %}
+{% load i18n l10n %}
 
-{% for roll in rolls %}
-    <div class="alert alert-{{ roll.css_class }} alert-dismissible fade show" role="alert">
-        <button type="button" class="close" data-dismiss="alert" aria-label="{% trans "Fermer" %}">
-            <span aria-hidden="true">&times;</span>
-        </button>
-        <strong>{{ roll.pre_label }}</strong> -
-        {{ roll.long_label|safe }}
-        <small class="float-right">{{ roll.date|timesince }}</small>
-    </div>
-{% endfor %}
+<div class="tab-pane fade" role="tabpanel" id="campaign-rolls">
+    {% if authorized %}
+        <div id="campaign-infos-form" class="collapse-form collapse show">
+            <form method="post" action="{{ request.path }}" class="form-inline justify-content-center">
+                <div class="form-row align-items-center">
+                    <div class="col-auto text-nowrap font-weight-bold">
+                        {% trans "Faire un lancer :" %}
+                    </div>
+                    <div class="col-auto">
+                        <label class="sr-only" for="roll-group-list">{% trans "Type de personnage" %}</label>
+                        <select name="group" id="roll-group-list" class="form-control form-control-sm custom-select custom-select-sm">
+                            <option value="pj">{% trans "PJ" %}</option>
+                            <option value="pnj">{% trans "PNJ" %}</option>
+                            <option value="">{% trans "Tous" %}</option>
+                        </select>
+                    </div>
+                    <div class="col-auto">
+                        <label class="sr-only" for="stats-list">{% trans "Statistique" %}</label>
+                        <select name="stats" id="roll-stats-list" class="form-control form-control-sm custom-select custom-select-sm">
+                            {% for title, substats in stats %}
+                                <optgroup label="{{ title }}">
+                                    {% for value, label in substats %}
+                                        <option value="{{ value }}">{{ label }}</option>
+                                    {% endfor %}
+                                </optgroup>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-auto">
+                        <label class="sr-only" for="stats-modifier">{% trans "Modificateur" %}</label>
+                        <input type="number" class="form-control form-control-sm ismall" id="stats-modifier"
+                               name="modifier" placeholder="{% trans "Mod" %}" value="0">
+                    </div>
+                    <div class="col-auto">
+                        <label class="form-check-label" title="{% trans "Expérience" %}">
+                            <input class="form-check-input" type="checkbox" name="xp">
+                            {% trans "XP" %}
+                        </label>
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-sm btn-primary"
+                                name="method" value="roll">{% trans "Lancer" %}</button>
+                        <input type="hidden" name="type" value="roll" />
+                        {% csrf_token %}
+                    </div>
+                </div>
+            </form>
+        </div>
+        <hr class="mt-1 mb-3" />
+    {% endif %}
+    <div id="rolls"></div>
+</div>

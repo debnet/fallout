@@ -228,9 +228,9 @@ class FightInputSerializer(BaseFightInputSerializer):
     force_success = serializers.BooleanField(initial=False, required=False, label=_("succès ?"))
     force_critical = serializers.BooleanField(initial=False, required=False, label=_("critique ?"))
     force_raw_damage = serializers.BooleanField(initial=False, required=False, label=_("dégâts bruts ?"))
-    is_grenade = serializers.BooleanField(initial=False, required=False, label=_("grenade ?"))
     is_action = serializers.BooleanField(initial=False, required=False, label=_("action ?"))
-    no_weapon = serializers.BooleanField(initial=False, required=False, label=_("aucun arme ?"))
+    weapon_type = serializers.ChoiceField(
+        initial="primary", choices=WEAPON_TYPES, required=False, label=_("type d'arme"))
     simulation = serializers.BooleanField(initial=False, required=False, label=_("simulation ?"))
 
 
@@ -243,8 +243,9 @@ class BurstInputSerializer(BaseCustomSerializer):
     force_success = serializers.BooleanField(initial=False, required=False, label=_("succès ?"))
     force_critical = serializers.BooleanField(initial=False, required=False, label=_("critique ?"))
     force_raw_damage = serializers.BooleanField(initial=False, required=False, label=_("dégâts bruts ?"))
-    is_grenade = serializers.BooleanField(initial=False, required=False, label=_("grenade ?"))
     is_action = serializers.BooleanField(initial=False, required=False, label=_("action ?"))
+    weapon_type = serializers.ChoiceField(
+        initial="primary", choices=WEAPON_TYPES, required=False, label=_("type d'arme"))
     simulation = serializers.BooleanField(initial=False, required=False, label=_("simulation ?"))
 
 
@@ -389,6 +390,52 @@ def character_copy(request, character_id):
             if count > 1:  # Recharge le personnage d'origine
                 character = Character.objects.get(pk=character_id)
         return characters
+    except Exception as exception:
+        raise ValidationError(str(exception))
+
+
+class CharacterRandomizeSpecialSerializer(BaseCustomSerializer):
+    """
+    Serializer d'entrée pour la génération aléatoire du S.P.E.C.I.A.L.
+    """
+    points = serializers.IntegerField(initial=40, min_value=1, label=_("points"))
+
+
+@api_view_with_serializer(
+    ['POST'], input_serializer=CharacterRandomizeSpecialSerializer, serializer=SimpleCharacterSerializer)
+def character_randomize_special(request, character_id):
+    """
+    API permettant de générer aléatoirement le S.P.E.C.I.A.L. d'un personnage
+    """
+    character = get_object_or_404(Character.objects.select_related('campaign', 'statistics'), pk=character_id)
+    is_authorized(request, character.campaign)
+    try:
+        character.randomize_special(**request.validated_data)
+        return character
+    except Exception as exception:
+        raise ValidationError(str(exception))
+
+
+class CharacterRandomizeStatsSerializer(BaseCustomSerializer):
+    """
+    Serializer d'entrée pour la génération aléatoire des statistiques
+    """
+    level = serializers.IntegerField(initial=1, min_value=1, label=_("niveau"))
+    rate = serializers.FloatField(initial=0, min_value=0, max_value=1, label=_("taux"))
+    reset = serializers.BooleanField(initial=False, required=False, label=_("reset ?"))
+
+
+@api_view_with_serializer(
+    ['POST'], input_serializer=CharacterRandomizeStatsSerializer, serializer=SimpleCharacterSerializer)
+def character_randomize_stats(request, character_id):
+    """
+    API permettant de générer aléatoirement les statistiques d'un personnage
+    """
+    character = get_object_or_404(Character.objects.select_related('campaign', 'statistics'), pk=character_id)
+    is_authorized(request, character.campaign)
+    try:
+        character.randomize_stats(**request.validated_data)
+        return character
     except Exception as exception:
         raise ValidationError(str(exception))
 
@@ -664,6 +711,8 @@ urlpatterns = [
     path('character/<int:character_id>/burst/', character_burst, name='character_burst'),
     path('character/<int:character_id>/damage/', character_damage, name='character_damage'),
     path('character/<int:character_id>/copy/', character_copy, name='character_copy'),
+    path('character/<int:character_id>/random_special/', character_randomize_special, name='character_randomize_special'),
+    path('character/<int:character_id>/random_stats/', character_randomize_stats, name='character_randomize_stats'),
     path('character/<int:character_id>/effect/', character_effect, name='character_effect'),
     path('character/<int:character_id>/item/', character_item, name='character_item'),
     path('character/<int:character_id>/stats/', character_stats, name='character_stats'),

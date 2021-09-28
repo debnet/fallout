@@ -27,6 +27,14 @@
                 {% with title=character.labels|get:s.code|default:"" modifier=character.stats.modifiers|get:s.code %}
                 <tr>
                     <td>
+                        {% if authorized and not view and not character.is_player and code == 'skill' %}
+                        <div class="form-check form-check-inline">
+                            <label class="form-check-label" class="d-inline" title="{{ s.label }}">
+                                <input class="form-check-input" type="checkbox" name="skills"
+                                       value="{{ s.code }}"{% if s.code in character.tag_skills %} checked{% endif %}>
+                            </label>
+                        </div>
+                        {% endif %}
                         {% if s.code in character.extra_data %}
                             <span title="{{ character.extra_data|get:s.code }}"
                                   data-toggle="tooltip" data-placement="top" class="text-info">&diams;</span>
@@ -61,9 +69,63 @@
                 {% endwith %}
             {% endfor %}
         </tbody>
+        {% if authorized and not view and not character.is_player and code in "special,skills" %}
+        <tfoot>
+            <tr>
+                <th colspan="2">
+                    <div class="text-right">
+                        {% if code == 'special' %}
+                        <div class="d-inline-flex">
+                            <div class="input-group input-group-sm mr-1">
+                                <div class="input-group-prepend">
+                                    <label for="{{ code }}-level" class="input-group-text">{% trans "Points" %}</label>
+                                </div>
+                                <input type="number" class="form-control form-control-sm ismall" id="{{ code }}-points"
+                                       name="points" placeholder="{% trans "Points" %}" value="40"
+                                       aria-valuemin="1" min="1">
+                            </div>
+                        </div>
+                        {% if not character.has_stats %}
+                        <div class="form-check form-check-inline">
+                            <label class="form-check-label" class="d-inline" title="{% trans "Stats" %}">
+                                <input class="form-check-input" type="checkbox" name="stats" checked>
+                                {% trans "Stats" %}
+                            </label>
+                        </div>
+                        {% endif %}
+                        {% elif code == 'skill' %}
+                        <div class="d-inline-flex">
+                            <div class="input-group input-group-sm mr-1">
+                                <div class="input-group-prepend">
+                                    <label for="{{ code }}-level" class="input-group-text">{% trans "Nv." %}</label>
+                                </div>
+                                <input type="number" class="form-control form-control-sm ismall" id="{{ code }}-level"
+                                       name="level" placeholder="{% trans "Nv." %}" value="{{ character.level }}"
+                                       aria-valuemin="1" min="1">
+                            </div>
+                        </div>
+                        <div class="d-inline-flex">
+                            <div class="input-group input-group-sm mr-1">
+                                <input type="number" class="form-control form-control-sm ismall" id="{{ code }}-rate"
+                                       name="rate" placeholder="{% trans "Taux" %}" value="50"
+                                       aria-valuemin="1" min="1">
+                                <div class="input-group-append">
+                                    <label for="{{ code }}-rate" class="input-group-text">{% trans "%" %}</label>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        <button type="submit" class="btn btn-sm btn-primary"
+                                name="method" value="randomize">{% trans "Générer" %}</button>
+                    </div>
+                </th>
+            </tr>
+        </tfoot>
+        {% endif %}
     </table>
     {% if not view %}
         <input type="hidden" name="type" value="stats" />
+        <input type="hidden" name="subtype" value="{{ code }}" />
         <input type="hidden" name="character" value="{{ character.id }}" />
         {% csrf_token %}
     {% endif %}

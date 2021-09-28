@@ -45,3 +45,13 @@ body {
 .thumbnail > img {
     max-height: 150px;
 }
+
+/* Select2 */
+.select2-results__option  {
+    font-size: 0.82rem;
+    padding: 3px;
+}
+
+.select2-selection__rendered {
+    font-size: 0.82rem;
+}

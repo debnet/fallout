@@ -3,6 +3,7 @@
 <div class="tab-pane fade" role="tabpanel" id="character-items">
     <div id="character-items-form" class="collapse-form collapse show">
         {% if authorized %}
+            {% if all_items %}
             <form method="post" action="{{ request.path }}" class="form-inline justify-content-center">
                 <div class="form-row align-items-center">
                     <div class="col-auto text-nowrap font-weight-bold">
@@ -14,25 +15,36 @@
                                 <label for="item-quantity" class="input-group-text">{% trans "Quantité" %}</label>
                             </div>
                             <input type="number" class="form-control form-control-sm" id="item-quantity"
-                                   name="quantity" placeholder="{% trans "Qte" %}" value="1" style="width: 80px"
+                                   name="quantity" placeholder="{% trans "Qte" %}" value="1"
                                    aria-valuemin="1" min="1">
                         </div>
                     </div>
                     <div class="col-auto">
                         <div class="input-group input-group-sm">
                             <div class="input-group-prepend">
-                                <label for="item-condition" class="input-group-text">{% trans "Condition" %}</label>
+                                <label for="item-condition" class="input-group-text">{% trans "État" %}</label>
                             </div>
                             <input type="number" class="form-control form-control-sm" id="item-condition"
-                                   name="condition" placeholder="{% trans "Cond" %}" value="100" style="width: 80px"
+                                   name="condition" placeholder="{% trans "État" %}" value="100"
                                    aria-valuemin="1" min="1" aria-valuemax="100" max="100">
                         </div>
                     </div>
                     <div class="col-auto">
-                        <label class="sr-only" for="item-name">{% trans "Objet" %}</label>
-                        <input type="text" class="form-control form-control-sm" id="item-name"
-                               name="item-name" data-for="item-id" placeholder="{% trans "Objet" %}">
-                        <input type="hidden" id="item-id" name="item-id" />
+                        <label class="sr-only" for="item-id">{% trans "Objet" %}</label>
+                        <select id="item-id" name="item-id" class="form-control form-control-sm select2"
+                                data-placeholder="{% trans "Objets" %}">
+                            <option></option>
+                            {% regroup all_items|dictsort:"type_display" by type_display as all_items_groups %}
+                            {% for type, list_items in all_items_groups %}
+                                <optgroup label="{{ type|title }}">
+                                {% for item in list_items %}
+                                    <option value="{{ item.id }}">
+                                        {{ item.name }}{% if item.title %} ({{ item.title }}){% endif %}
+                                    </option>
+                                {% endfor %}
+                                </optgroup>
+                            {% endfor %}
+                        </select>
                     </div>
                     <div class="col-auto">
                         <button type="submit" class="btn btn-sm btn-primary"
@@ -42,7 +54,8 @@
                     </div>
                 </div>
             </form>
-            <hr />
+            <hr class="mt-1 mb-3" />
+            {% endif %}
         {% endif %}
     </div>
     <h4 class="text-center mb-3">{% trans "Equipé" %}</h4>

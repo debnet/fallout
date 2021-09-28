@@ -155,38 +155,32 @@
                                                     name="method" value="reload">{% trans "Recharger" %}</button>
                                         {% endif %}
                                         {% if equip.current_condition < 100 %}
-                                            <label class="sr-only" for="condition-{{ loot.id }}">{% trans "Etat" %}</label>
-                                            <select name="condition" id="condition-{{ loot.id }}"
-                                                    class="form-control form-control-sm custom-select custom-select-sm ismall mr-1">
-                                                {% for i in 100|range:equip.current_condition %}
-                                                    <option value="{{ i }}">{{ i }}</option>
-                                                {% endfor %}
-                                            </select>
+                                            <label class="sr-only" for="condition-{{ equip.id }}">{% trans "Etat" %}</label>
+                                            <input name="condition" id="condition-{{ equip.id }}" type="number"
+                                                   min="0" max="100" aria-valuemin="0" aria-valuemax="100"
+                                                   class="form-control form-control-sm ismall mr-1"
+                                                   value="{{ equip.current_condition }}">
                                             <button class="btn btn-sm btn-info mr-1" type="submit"
                                                 name="method" value="repair">{% trans "Réparer" %}</button>
                                         {% endif %}
                                     {% else %}
                                         {% if equip.quantity > 1 %}
-                                            <label class="sr-only" for="quantity-{{ loot.id }}">{% trans "Quantité" %}</label>
-                                            <select name="quantity" id="quantity-{{ loot.id }}"
-                                                    class="form-control form-control-sm custom-select custom-select-sm ismall mr-1">
-                                                {% for i in 0|range:equip.quantity %}
-                                                    <option value="{{ i }}">{{ i }}</option>
-                                                {% endfor %}
-                                            </select>
+                                            <label class="sr-only" for="quantity-{{ equip.id }}">{% trans "Quantité" %}</label>
+                                            <input name="quantity" id="quantity-{{ equip.id }}" type="number"
+                                                   min="0" max="{{ equip.quantity }}" aria-valuemin="0" aria-valuemax="{{ equip.quantity }}"
+                                                   class="form-control form-control-sm ismall mr-1"
+                                                   value="{{ equip.quantity }}">
                                         {% else %}
-                                            <input type="hidden" name="quantity" value="{{ loot.quantity }}" />
+                                            <input type="hidden" name="quantity" value="{{ equip.quantity }}" />
                                         {% endif %}
                                         <button class="btn btn-sm btn-warning mr-1" type="submit"
                                                 name="method" value="drop">{% trans "Lâcher" %}</button>
-                                        {% if equip.current_condition < 100 %}
-                                            <label class="sr-only" for="condition-{{ loot.id }}">{% trans "Condition" %}</label>
-                                            <select name="condition" id="condition-{{ loot.id }}"
-                                                    class="form-control form-control-sm custom-select custom-select-sm ismall mr-1">
-                                                {% for i in 100|range:equip.current_condition %}
-                                                    <option value="{{ i }}">{{ i }}</option>
-                                                {% endfor %}
-                                            </select>
+                                        {% if item.is_repairable %}
+                                            <label class="sr-only" for="condition-{{ equip.id }}">{% trans "Etat" %}</label>
+                                            <input name="condition" id="condition-{{ equip.id }}" type="number"
+                                                   min="0" max="100" aria-valuemin="0" aria-valuemax="100"
+                                                   class="form-control form-control-sm ismall mr-1"
+                                                   value="{{ equip.current_condition }}">
                                             <button class="btn btn-sm btn-info mr-1" type="submit"
                                                 name="method" value="repair">{% trans "Réparer" %}</button>
                                         {% endif %}

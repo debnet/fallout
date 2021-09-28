@@ -1,6 +1,4 @@
 # coding: utf-8
-from random import randint
-
 from common.admin import CommonAdmin, EntityAdmin, EntityTabularInline
 from django.contrib import admin, messages
 from django.contrib.admin.helpers import ACTION_CHECKBOX_NAME
