@@ -359,7 +359,7 @@ def view_character(request, character_id):
                     force_raw_damage=bool(data.get('force_raw_damage', False)),
                     is_action=bool(data.get('is_action', False)),
                     weapon_type=data.get('weapon_type'))
-                if data.get('weapon_type') == 'grenade':
+                if data.get('weapon_type') == WEAPON_TYPE_GRENADE:
                     for result in results:
                         messages.add_message(request, result.message_level, _(
                             "<strong>{pre_label}</strong> {label}").format(

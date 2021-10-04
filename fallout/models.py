@@ -1191,7 +1191,7 @@ class Character(Entity, BaseStatistics):
         targets = [(target if isinstance(target, Character) else query.get(id=target), target_range)
                    for target, target_range in targets]
         histories = []
-        if weapon_type == 'grenade':
+        if weapon_type == WEAPON_TYPE_GRENADE:
             attacker_weapon_equipment = self.get_from_inventory(slot=ITEM_GRENADE)
             attacker_weapon = getattr(attacker_weapon_equipment, 'item', None)
             _assert(attacker_weapon and attacker_weapon_equipment.quantity != 0, _(
