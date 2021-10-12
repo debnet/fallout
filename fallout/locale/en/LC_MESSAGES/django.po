@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-09-28 17:41+0200\n"
+"POT-Creation-Date: 2021-10-12 18:31+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Marc Debureaux <marc@debnet.fr>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1508,6 +1508,12 @@ msgstr "damage history"
 
 msgid "historiques des dégâts"
 msgstr "damage histories"
+
+msgid "niveau de l'attaquant"
+msgstr "attacker level"
+
+msgid "niveau du défenseur"
+msgstr "defender level"
 
 msgid "arme de l'attaquant"
 msgstr "attacker weapon"

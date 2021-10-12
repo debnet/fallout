@@ -1134,7 +1134,7 @@ class Character(Entity, BaseStatistics):
         :param log: Historise le jet ?
         :return: Historique de jet
         """
-        history = RollHistory(character=self, stats=stats, modifier=modifier)
+        history = RollHistory(character=self, level=self.level, stats=stats, modifier=modifier)
         history.game_date = self.campaign and self.campaign.current_game_date
         history.value = getattr(self.stats, stats, 0)
         if stats in LIST_SPECIALS:
@@ -1285,7 +1285,8 @@ class Character(Entity, BaseStatistics):
         if isinstance(target, (int, str)):
             target = Character.objects.select_related('statistics').get(pk=target)
         history = FightHistory(
-            attacker=self, defender=target, range=target_range, burst=is_burst, hit_count=hit_count + 1)
+            attacker=self, attacker_level=self.level, defender=target, defender_level=target.level,
+            range=target_range, burst=is_burst, hit_count=hit_count + 1)
         history.game_date = self.campaign and self.campaign.current_game_date
         # Equipment
         is_grenade = False
@@ -1534,7 +1535,7 @@ class Character(Entity, BaseStatistics):
                 if randint(1, 100 + roll_modifier) <= chance:
                     break
         history = DamageHistory(
-            character=self, damage_type=damage_type, body_part=body_part,
+            character=self, level=self.level, damage_type=damage_type, body_part=body_part,
             raw_damage=raw_damage, min_damage=min_damage, max_damage=max_damage)
         history.game_date = self.campaign and self.campaign.current_game_date
         # Base damage
@@ -2922,6 +2923,7 @@ class RollHistory(CommonModel):
     character = models.ForeignKey(
         'Character', on_delete=models.CASCADE,
         related_name='roll_history', verbose_name=_("personnage"))
+    level = models.SmallIntegerField(default=0, verbose_name=_("niveau"))
     stats = models.CharField(max_length=20, blank=True, choices=ROLL_STATS, verbose_name=_("statistique"))
     value = models.PositiveSmallIntegerField(default=0, verbose_name=_("valeur"))
     modifier = models.SmallIntegerField(default=0, verbose_name=_("modificateur"))
@@ -3051,6 +3053,7 @@ class DamageHistory(Damage):
     character = models.ForeignKey(
         'Character', on_delete=models.CASCADE,
         related_name='damage_history', verbose_name=_("personnage"))
+    level = models.SmallIntegerField(default=0, verbose_name=_("niveau"))
     base_damage = models.SmallIntegerField(default=0, verbose_name=_("dégâts de base"))
     armor = models.ForeignKey(
         'Item', blank=True, null=True, on_delete=models.CASCADE,
@@ -3123,9 +3126,11 @@ class FightHistory(CommonModel):
     attacker = models.ForeignKey(
         'Character', on_delete=models.CASCADE,
         related_name='+', verbose_name=_("attaquant"))
+    attacker_level = models.SmallIntegerField(default=0, verbose_name=_("niveau de l'attaquant"))
     defender = models.ForeignKey(
         'Character', on_delete=models.CASCADE,
         related_name='+', verbose_name=_("défenseur"))
+    defender_level = models.SmallIntegerField(default=0, verbose_name=_("niveau du défenseur"))
     attacker_weapon = models.ForeignKey(
         'Item', blank=True, null=True, on_delete=models.CASCADE,
         limit_choices_to={'type__in': (ITEM_WEAPON, ITEM_GRENADE)},
