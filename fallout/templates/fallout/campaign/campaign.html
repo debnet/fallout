@@ -77,7 +77,7 @@ effets) sont désactivés.
             {% if campaign %}
                 {% include "fallout/campaign/panels/effects.html" %}
                 {% if authorized or campaign.view_rolls %}
-                    <div class="tab-pane fade" role="tabpanel" id="campaign-rolls"></div>
+                    {% include "fallout/campaign/panels/rolls.html" %}
                 {% endif %}
             {% endif %}
         </div>
@@ -92,7 +92,7 @@ $(function() {
     let update_rolls = function () {
         let url = Django.url('fallout:campaign_rolls', {{ campaign.pk }}) + '?limit={{ request.GET.limit }}';
         $.get(url, function (data) {
-            $('#campaign-rolls').html(data);
+            $('#rolls').html(data);
         });
     };
     update_rolls();

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-02-07 15:19+0100\n"
+"POT-Creation-Date: 2021-10-12 18:31+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Marc Debureaux <marc@debnet.fr>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -220,14 +220,11 @@ msgstr "critical?"
 msgid "dégâts bruts ?"
 msgstr "raw damage?"
 
-msgid "grenade ?"
-msgstr "grenade?"
-
 msgid "action ?"
 msgstr "action?"
 
-msgid "aucun arme ?"
-msgstr "no weapon?"
+msgid "type d'arme"
+msgstr "weapon type"
 
 msgid "simulation ?"
 msgstr "simulation?"
@@ -277,6 +274,18 @@ msgstr "effects?"
 msgid "actif ?"
 msgstr "active?"
 
+msgid "points"
+msgstr "points"
+
+msgid "niveau"
+msgstr "level"
+
+msgid "taux"
+msgstr "rate"
+
+msgid "reset ?"
+msgstr ""
+
 msgid "objet"
 msgstr "item"
 
@@ -315,9 +324,6 @@ msgstr "maximum"
 
 msgid "CSS"
 msgstr "CSS"
-
-msgid "taux"
-msgstr "rate"
 
 msgid "suffixe"
 msgstr "suffix"
@@ -562,6 +568,15 @@ msgstr "contact gas threshold"
 msgid "absorption du gaz (inhalé)"
 msgstr "inhaled gas threshold"
 
+msgid "arme principale"
+msgstr "primary weapon"
+
+msgid "arme secondaire"
+msgstr "secondary weapon"
+
+msgid "grenade"
+msgstr "grenade"
+
 msgid "dégâts normaux"
 msgstr "normal damage"
 
@@ -684,9 +699,6 @@ msgstr "armor"
 
 msgid "casque"
 msgstr "helmet"
-
-msgid "grenade"
-msgstr "grenade"
 
 msgid "accessoire"
 msgstr "accessory"
@@ -895,9 +907,6 @@ msgstr "Distance"
 msgid "Partie du corps"
 msgstr "Body part"
 
-msgid "Grenade ?"
-msgstr "Grenade?"
-
 msgid "Action ?"
 msgstr "Action?"
 
@@ -1090,9 +1099,6 @@ msgstr "critical chance"
 msgid "chances de dégâts bruts"
 msgstr "raw damage chance"
 
-msgid "Cette fonction ne peut être utilisée que par les statistiques."
-msgstr "This functon can only be used by statistics."
-
 msgid "charge"
 msgstr "weight"
 
@@ -1117,9 +1123,6 @@ msgstr "background"
 
 msgid "race"
 msgstr "race"
-
-msgid "niveau"
-msgstr "level"
 
 msgid "joueur ?"
 msgstr "player?"
@@ -1153,9 +1156,6 @@ msgstr "The attacker don't have any weapon or it cannot burst attack."
 
 msgid "Les bornes de dégâts min. et max. ne sont pas correctes."
 msgstr "Min. and max. bounds are not correct."
-
-msgid "Ce personnage doit être préalablement enregistré avant d'être dupliqué."
-msgstr "This character must be saved before to be duplicated."
 
 msgid "Cette compétence ne peut être améliorée."
 msgstr "This skill can not be improved."
@@ -1509,6 +1509,12 @@ msgstr "damage history"
 msgid "historiques des dégâts"
 msgstr "damage histories"
 
+msgid "niveau de l'attaquant"
+msgstr "attacker level"
+
+msgid "niveau du défenseur"
+msgstr "defender level"
+
 msgid "arme de l'attaquant"
 msgstr "attacker weapon"
 
@@ -1555,12 +1561,12 @@ msgstr "{label}: {status} - {damage}"
 msgid "{real_damage} {damage_type} infligés ({body_part}) sur {base_damage}"
 msgstr "{real_damage} {damage_type} of {base_damage} inflicted ({body_part})"
 
+msgid "Combat à mains nues"
+msgstr "Fighting with bare hands"
+
 #, python-brace-format
 msgid "{weapon} ({skill_name} = {skill}%)"
 msgstr "{weapon} ({skill_name} = {skill}%)"
-
-msgid "Combat à mains nues"
-msgstr "Fighting with bare hands"
 
 #, python-brace-format
 msgid "{status} - {label} : {hit_roll} pour {hit_chance} ({hit_modifier})"
@@ -1778,15 +1784,6 @@ msgstr "Experience"
 msgid "Gagner"
 msgstr "Gain"
 
-msgid "Faire un lancer :"
-msgstr "Make a roll:"
-
-msgid "Mod"
-msgstr "Mod"
-
-msgid "XP"
-msgstr "XP"
-
 msgid "Avancer dans le temps :"
 msgstr "Forward in time:"
 
@@ -1798,6 +1795,24 @@ msgstr "m"
 
 msgid "Avancer"
 msgstr "Pass"
+
+msgid "Ajouter un PNJ :"
+msgstr "Add a NPC:"
+
+msgid "PNJs"
+msgstr "NPCs"
+
+msgid "nv."
+msgstr "lvl."
+
+msgid "Nb"
+msgstr "Nb"
+
+msgid "Nom du PNJ"
+msgstr "NPC's name: "
+
+msgid "Ajouter"
+msgstr "Add"
 
 msgid "Ouvrir un contenant :"
 msgstr "Open a container:"
@@ -1820,17 +1835,23 @@ msgstr "Add a loot:"
 msgid "Qte"
 msgstr "Qty"
 
-msgid "Condition"
+msgid "État"
 msgstr "Condition"
-
-msgid "Cond"
-msgstr "Cond"
 
 msgid "Objet"
 msgstr "Item"
 
-msgid "Ajouter"
-msgstr "Add"
+msgid "Objets"
+msgstr "Items"
+
+msgid "Faire un lancer :"
+msgstr "Make a roll:"
+
+msgid "Mod"
+msgstr "Mod"
+
+msgid "XP"
+msgstr "XP"
 
 msgid "Infliger des dégâts à des personnages"
 msgstr "Damage characters"
@@ -1904,6 +1925,21 @@ msgstr "Non players"
 msgid "dst."
 msgstr "dst."
 
+msgid "Arme secondaire"
+msgstr "Secondary weapon"
+
+msgid "Arme principale"
+msgstr "Primary weapon"
+
+msgid "Grenade"
+msgstr "Grenade"
+
+msgid "À mains nues"
+msgstr "Unarmed"
+
+msgid "Attaque à mains nues"
+msgstr "Fight with bare hands"
+
 msgid "Succès"
 msgstr "Success"
 
@@ -1912,12 +1948,6 @@ msgstr "Critical"
 
 msgid "Dégâts bruts"
 msgstr "Raw damage"
-
-msgid "Sans arme"
-msgstr "No weapon"
-
-msgid "Grenade"
-msgstr "Grenade"
 
 msgid "Action"
 msgstr "Action"
@@ -1960,6 +1990,22 @@ msgstr "Arm"
 
 msgid "+"
 msgstr "+"
+
+msgid "Stats"
+msgstr "Stats"
+
+msgid "Nv."
+msgstr "Lvl."
+
+msgid "Taux"
+msgstr "Rate"
+
+#, python-format
+msgid "%%"
+msgstr "%%"
+
+msgid "Générer"
+msgstr "Generate"
 
 msgid "Talents"
 msgstr "Perks"
@@ -2100,3 +2146,7 @@ msgstr "<strong>{character}</strong> still needs <strong>{experience}</strong> e
 #, python-brace-format
 msgid "<strong>{attacker} vs {defender}</strong> {fail} coups ratés et {success} coups au but pour {damage} dégâts"
 msgstr "<strong>{attacker} vs {defender}</strong> {fail} failed hits and {success} succeded hits for {damage} damages"
+
+#, python-brace-format
+msgid "Erreur : {error}"
+msgstr "Error: {error}"

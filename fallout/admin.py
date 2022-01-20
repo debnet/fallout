@@ -1,6 +1,4 @@
 # coding: utf-8
-from random import randint
-
 from common.admin import CommonAdmin, EntityAdmin, EntityTabularInline
 from django.contrib import admin, messages
 from django.contrib.admin.helpers import ACTION_CHECKBOX_NAME
@@ -767,7 +765,7 @@ class RollHistoryAdmin(CommonAdmin):
     """
     fieldsets = (
         (_("Informations techniques"), dict(
-            fields=('game_date', 'character', ),
+            fields=('game_date', 'character', 'level', ),
             classes=('wide', ),
         )),
         (_("Jet"), dict(
@@ -796,7 +794,7 @@ class DamageHistoryAdmin(CommonAdmin):
     """
     fieldsets = (
         (_("Informations techniques"), dict(
-            fields=('game_date', 'character', 'source', ),
+            fields=('game_date', 'character', 'level', 'source', ),
             classes=('wide', ),
         )),
         (_("Dégâts de base"), dict(
@@ -838,11 +836,11 @@ class FightHistoryAdmin(CommonAdmin):
             classes=('wide', ),
         )),
         (_("Attaquant"), dict(
-            fields=('attacker', 'attacker_weapon', 'attacker_ammo', ),
+            fields=('attacker', 'attacker_level', 'attacker_weapon', 'attacker_ammo', ),
             classes=('wide', ),
         )),
         (_("Défenseur"), dict(
-            fields=('defender', 'defender_armor', 'range', 'body_part', ),
+            fields=('defender', 'defender_level', 'defender_armor', 'range', 'body_part', ),
             classes=('wide', ),
         )),
         (_("Combat"), dict(

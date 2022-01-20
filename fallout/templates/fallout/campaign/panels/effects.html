@@ -12,7 +12,7 @@
                     <div class="form-row align-items-center">
                         <div class="col-auto input-group input-group-sm">
                             <input type="number" class="form-control" id="radiation" name="radiation"
-                                   placeholder="{% trans "rad/h" %}" value="{{ campaign.radiation }}" style="width: 80px"
+                                   placeholder="{% trans "rad/h" %}" value="{{ campaign.radiation }}"
                                    aria-valuemin="0" min="0">
                         </div>
                         <div class="col-auto">
@@ -102,6 +102,7 @@
                         </div>
                     </div>
                 </form>
+                {% if all_effects %}
                 <hr class="my-1" />
                 <form method="post" action="{{ request.path }}" class="form-inline justify-content-center">
                     <div class="form-row align-items-center">
@@ -109,10 +110,16 @@
                             {% trans "Affecter un effet :" %}
                         </div>
                         <div class="col-auto">
-                            <label class="sr-only" for="effect-name">{% trans "Effet" %}</label>
-                            <input type="text" class="form-control form-control-sm" id="effect-name"
-                                   name="effect-name" data-for="effect-id" placeholder="{% trans "Effet" %}">
-                            <input type="hidden" id="effect-id" name="effect-id" />
+                            <label class="sr-only" for="effect-id">{% trans "Effet" %}</label>
+                            <select id="effect-id" name="effect-id" class="form-control form-control-sm select2"
+                                    data-placeholder="{% trans "Effets" %}">
+                                <option></option>
+                                {% for effect in all_effects %}
+                                    <option value="{{ effect.id }}">
+                                        {{ effect.name }}{% if effect.title %} ({{ effect.title }}){% endif %}
+                                    </option>
+                                {% endfor %}
+                            </select>
                         </div>
                         <div class="col-auto">
                             <button type="submit" class="btn btn-sm btn-primary"
@@ -122,6 +129,7 @@
                         </div>
                     </div>
                 </form>
+                {% endif %}
             </div>
         {% endif %}
         <hr class="mt-1 mb-3" />

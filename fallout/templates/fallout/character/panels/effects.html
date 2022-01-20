@@ -3,16 +3,23 @@
 <div class="tab-pane fade" role="tabpanel" id="character-effects">
     <div id="character-effects-form" class="collapse-form collapse show">
         {% if authorized %}
+            {% if all_effects %}
             <form method="post" action="{{ request.path }}" class="form-inline justify-content-center">
                 <div class="form-row align-items-center">
                     <div class="col-auto text-nowrap font-weight-bold">
                         {% trans "Affecter un effet :" %}
                     </div>
                     <div class="col-auto">
-                        <label class="sr-only" for="effect-name">{% trans "Effet" %}</label>
-                        <input type="text" class="form-control form-control-sm" id="effect-name"
-                               name="effect-name" data-for="effect-id" placeholder="{% trans "Effet" %}">
-                        <input type="hidden" id="effect-id" name="effect-id" />
+                        <label class="sr-only" for="effect-id">{% trans "Effet" %}</label>
+                        <select id="effect-id" name="effect-id" class="form-control form-control-sm select2"
+                                data-placeholder="{% trans "Effets" %}">
+                            <option></option>
+                            {% for effect in all_effects %}
+                                <option value="{{ effect.id }}">
+                                    {{ effect.name }}{% if effect.title %} ({{ effect.title }}){% endif %}
+                                </option>
+                            {% endfor %}
+                        </select>
                     </div>
                     <div class="col-auto">
                         <button type="submit" class="btn btn-sm btn-primary"
@@ -22,7 +29,8 @@
                     </div>
                 </div>
             </form>
-            <hr />
+            <hr class="mt-1 mb-3" />
+            {% endif %}
         {% endif %}
     </div>
     {% if authorized and perks %}
