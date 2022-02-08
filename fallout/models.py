@@ -586,6 +586,7 @@ class Character(Entity, BaseStatistics):
     experience = models.PositiveIntegerField(default=0, verbose_name=_("expérience"))
     karma = models.SmallIntegerField(default=0, verbose_name=_("karma"))
     reward = models.PositiveSmallIntegerField(default=0, verbose_name=_("récompense"))
+    money = models.PositiveSmallIntegerField(default=0, verbose_name=_("argent"))
     # Needs
     rads = models.FloatField(default=0.0, verbose_name=_("rads"))
     thirst = models.FloatField(default=0.0, verbose_name=_("soif"))
@@ -1529,11 +1530,12 @@ class Character(Entity, BaseStatistics):
         threshold_rate_modifier = round(threshold_rate_modifier / 100.0, 2)
         damage_type, body_part = damage_type or DAMAGE_NORMAL, body_part or ''
         _assert(min_damage <= max_damage, _("Les bornes de dégâts min. et max. ne sont pas correctes."))
-        if not body_part:
+        if not body_part and damage_type in LIST_NON_DAMAGE:
             roll_modifier = int(round((5 - self.stats.luck) * LUCK_ROLL_MULT, 0))
             for body_part, chance in BODY_PARTS_RANDOM_CHANCES:
                 if randint(1, 100 + roll_modifier) <= chance:
                     break
+        body_part = '' if damage_type in LIST_NON_DAMAGE else body_part
         history = DamageHistory(
             character=self, level=self.level, damage_type=damage_type, body_part=body_part,
             raw_damage=raw_damage, min_damage=min_damage, max_damage=max_damage)
@@ -1584,7 +1586,7 @@ class Character(Entity, BaseStatistics):
             damage_resistance = round(min(max(0, damage_resistance), MAX_DAMAGE_RESISTANCE), 2)
         total_damage = max(total_damage - max(damage_threshold, 0), 0)
         total_damage *= max(1.0 - round(damage_resistance / 100.0, 2), 0.0)
-        total_damage *= (-1.0 if damage_type in LIST_HEALS else 1.0)
+        total_damage *= (1.0, -1.0)[history.is_heal]
         total_damage = int(round(total_damage))
         # Apply damage on self
         if total_damage:
@@ -1596,6 +1598,8 @@ class Character(Entity, BaseStatistics):
                 self.hunger += total_damage
             elif damage_type in (DAMAGE_SLEEP, HEAL_SLEEP):
                 self.sleep += total_damage
+            elif damage_type in (ADD_MONEY, REMOVE_MONEY):
+                self.money -= total_damage
             else:
                 history.damage_rate = min(self.health, abs(total_damage)) / self.stats.max_health
                 self.health -= total_damage
@@ -1716,6 +1720,7 @@ class Character(Entity, BaseStatistics):
         self.thirst = min(max(self.thirst, 0), 1000)
         self.hunger = min(max(self.hunger, 0), 1000)
         self.sleep = min(max(self.sleep, 0), 1000)
+        self.money = max(self.money, 0)
         super().save(*args, **kwargs)
 
     def get_absolute_url(self):
@@ -1841,7 +1846,7 @@ class Damage(CommonModel):
         Retourne si le type de dégâts est curatif ou non
         :return: Vrai si curatif, faux sinon
         """
-        return self.damage_type in LIST_HEALS
+        return self.damage_type in LIST_HEALS + (ADD_MONEY, )
 
     @property
     def calculated_damage(self) -> int:
@@ -3083,11 +3088,18 @@ class DamageHistory(Damage):
         return (messages.ERROR, messages.SUCCESS)[self.is_heal]
 
     @property
+    def icon(self) -> str:
+        """
+        Icône des dégâts
+        """
+        return DAMAGE_ICONS.get(self.damage_type, "⚠️")
+
+    @property
     def pre_label(self) -> str:
         """
         Pré-libellé
         """
-        return _("🔥 {character}").format(character=self.character)
+        return _("{icon} {character}").format(icon=self.icon, character=self.character)
 
     @property
     def label(self) -> str:

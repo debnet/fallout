@@ -331,6 +331,7 @@ class DamageHistorySerializer(HistorySerializer):
     Serializer de sortie des historiques de dégâts
     """
     character = SimpleCharacterSerializer(read_only=True, label=_("personnage"))
+    icon = serializers.ReadOnlyField()
 
 
 @api_view_with_serializer(['POST'], input_serializer=MultiDamageInputSerializer, serializer=DamageHistorySerializer)

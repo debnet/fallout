@@ -439,6 +439,7 @@ def view_character(request, character_id):
             elif authorized and type == 'action':
                 character.health, character.action_points = int(data.get('hp')), int(data.get('ap'))
                 character.experience, character.karma = int(data.get('xp')), int(data.get('karma'))
+                character.money = int(data.get('money'))
                 character.rads = int(data.get('rads'))
                 character.thirst = int(data.get('thirst'))
                 character.hunger = int(data.get('hunger'))
@@ -469,7 +470,6 @@ def view_character(request, character_id):
             for error in (errors if isinstance(errors, list) else [errors]):
                 messages.error(request, _("<strong>Erreur</strong> {error}").format(error=error))
     except Exception as error:
-        raise
         messages.error(request, _("<strong>Erreur</strong> {error}").format(error=error))
 
     inventory, effects = character.inventory, character.effects

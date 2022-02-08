@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-10-12 18:31+0200\n"
+"POT-Creation-Date: 2022-02-08 21:43+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Marc Debureaux <marc@debnet.fr>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -361,6 +361,9 @@ msgstr "talent points"
 msgid "karma"
 msgstr "karma"
 
+msgid "argent"
+msgstr "money"
+
 msgid "récompense"
 msgstr "reward"
 
@@ -633,6 +636,12 @@ msgstr "hunger decrease"
 
 msgid "diminution du sommeil"
 msgstr "sleep decrease"
+
+msgid "gain d'argent"
+msgstr "money gain"
+
+msgid "perte d'argent"
+msgstr "money loss"
 
 msgid "soins"
 msgstr "heals"
@@ -1488,8 +1497,8 @@ msgid "source"
 msgstr "source"
 
 #, python-brace-format
-msgid "🔥 {character}"
-msgstr "🔥 {character}"
+msgid "{icon} {character}"
+msgstr "{icon} {character}"
 
 #, python-brace-format
 msgid "{real_damage} points de {type} ({body_part})"

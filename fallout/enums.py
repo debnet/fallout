@@ -13,6 +13,7 @@ STATS_EXPERIENCE = 'experience'
 STATS_SKILL_POINTS = 'skill_points'
 STATS_PERK_POINTS = 'perk_points'
 STATS_KARMA = 'karma'
+STATS_MONEY = 'money'
 STATS_REWARD = 'reward'
 GENERAL_STATS = (
     (STATS_HEALTH, _("santé")),
@@ -25,6 +26,7 @@ GENERAL_STATS = (
     (STATS_SKILL_POINTS, _("points de compétence")),
     (STATS_PERK_POINTS, _("points de talent")),
     (STATS_KARMA, _("karma")),
+    (STATS_MONEY, _("argent")),
     (STATS_REWARD, _("récompense")),
 )
 LIST_GENERAL_STATS = dict(GENERAL_STATS)
@@ -230,11 +232,13 @@ DAMAGE_RAW = 'raw'
 DAMAGE_THIRST = 'thirst'
 DAMAGE_HUNGER = 'hunger'
 DAMAGE_SLEEP = 'sleep'
+HEAL_HEALTH = 'heal'
 HEAL_THIRST = 'heal_thirst'
 HEAL_HUNGER = 'heal_hunger'
 HEAL_SLEEP = 'heal_sleep'
-HEAL_HEALTH = 'heal'
 HEAL_RADIATION = 'heal_rad'
+ADD_MONEY = 'add_money'
+REMOVE_MONEY = 'remove_money'
 
 DAMAGES = (
     (DAMAGE_NORMAL, _("dégâts normaux")),
@@ -259,14 +263,20 @@ HEALS = (
     (HEAL_HUNGER, _("diminution de la faim")),
     (HEAL_SLEEP, _("diminution du sommeil")),
 )
+MONEY = (
+    (ADD_MONEY, _("gain d'argent")),
+    (REMOVE_MONEY, _("perte d'argent")),
+)
 DAMAGES_TYPES = (
     (_("dégâts"), DAMAGES),
     (_("soins"), HEALS),
+    (_("argent"), MONEY),
 )
-LIST_DAMAGES_TYPES = dict(DAMAGES + HEALS)
+LIST_DAMAGES_TYPES = dict(DAMAGES + HEALS + MONEY)
 LIST_PHYSICAL_DAMAGE = (DAMAGE_NORMAL, DAMAGE_LASER, DAMAGE_PLASMA, DAMAGE_EXPLOSIVE, DAMAGE_FIRE)
 LIST_HEALS = (HEAL_HEALTH, HEAL_RADIATION, HEAL_THIRST, HEAL_HUNGER, HEAL_SLEEP)
-LIST_NON_DAMAGE = (DAMAGE_RAW, DAMAGE_THIRST, DAMAGE_HUNGER, DAMAGE_SLEEP) + HEALS
+LIST_MONEY = (ADD_MONEY, REMOVE_MONEY)
+LIST_NON_DAMAGE = (DAMAGE_RAW, DAMAGE_THIRST, DAMAGE_HUNGER, DAMAGE_SLEEP) + LIST_HEALS + LIST_MONEY
 
 # Damage / resistance
 DAMAGE_RESISTANCE = {
@@ -309,6 +319,31 @@ DAMAGE_SHORTS = (
     (DAMAGE_GAZ_CONTACT, _("GC")),
     (DAMAGE_GAZ_INHALED, _("GI")),
 )
+
+# Damage icons
+DAMAGE_ICONS = {
+    DAMAGE_NORMAL: "💪",
+    DAMAGE_LASER: "☀️",
+    DAMAGE_PLASMA: "✨",
+    DAMAGE_EXPLOSIVE: "💥",
+    DAMAGE_FIRE: "🔥",
+    DAMAGE_ELECTRICITY: "⚡",
+    DAMAGE_POISON: "☣️",
+    DAMAGE_RADIATION: "☢️",
+    DAMAGE_GAZ_CONTACT: "☁️",
+    DAMAGE_GAZ_INHALED: "☁️",
+    DAMAGE_RAW: "💀",
+    DAMAGE_THIRST: "💧🔻",
+    DAMAGE_HUNGER: "🍖🔻",
+    DAMAGE_SLEEP: "💤🔻",
+    HEAL_HEALTH: "❤️",
+    HEAL_RADIATION: "💉",
+    HEAL_THIRST: "💧🔺",
+    HEAL_HUNGER: "🍖🔺",
+    HEAL_SLEEP: "💤🔺",
+    ADD_MONEY: "💰",
+    REMOVE_MONEY: "💸",
+}
 
 # Leveled stats
 HIT_POINTS_PER_LEVEL = 'hit_points_per_level'
@@ -503,6 +538,7 @@ def get_label(success, critical):
 
 
 __all__ = (
+    'ADD_MONEY',
     'ALL_EDITABLE_STATS',
     'ALL_RESISTANCES',
     'ALL_STATS',
@@ -515,6 +551,7 @@ __all__ = (
     'DAMAGE_GAZ_CONTACT',
     'DAMAGE_GAZ_INHALED',
     'DAMAGE_HUNGER',
+    'DAMAGE_ICONS',
     'DAMAGE_LASER',
     'DAMAGE_NORMAL',
     'DAMAGE_PLASMA',
@@ -564,6 +601,7 @@ __all__ = (
     'LIST_HEALS',
     'LIST_ITEM_TYPES',
     'LIST_LEVELED_STATS',
+    'LIST_MONEY',
     'LIST_NEEDS',
     'LIST_NON_DAMAGE',
     'LIST_NON_SPECIAL_STATS',
@@ -598,6 +636,7 @@ __all__ = (
     'RACE_ROBOT',
     'RACE_SUPER_MUTANT',
     'RADS_LABELS',
+    'REMOVE_MONEY',
     'RESISTANCES',
     'RESISTANCE_DAMAGE',
     'RESISTANCE_ELECTRICITY',
@@ -659,6 +698,7 @@ __all__ = (
     'STATS_KARMA',
     'STATS_MAX_ACTION_POINTS',
     'STATS_MAX_HEALTH',
+    'STATS_MONEY',
     'STATS_MELEE_DAMAGE',
     'STATS_ONE_HAND_ACCURACY',
     'STATS_PERK_POINTS',

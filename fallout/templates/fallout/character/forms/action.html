@@ -81,7 +81,7 @@
                     <label for="{{ code }}-xp" class="d-inline">{% trans "expérience" %}</label>
                 </td>
                 <td class="text-right">
-                    <input type="number" class="form-control form-control-sm imedium" id="{{ code }}-ex" name="xp"
+                    <input type="number" class="form-control form-control-sm imedium" id="{{ code }}-xp" name="xp"
                            value="{{ character.experience }}" min="0" aria-valuemin="0"/>
                 </td>
             </tr>
@@ -92,6 +92,15 @@
                 <td class="text-right">
                     <input type="number" class="form-control form-control-sm imedium" id="{{ code }}-karma" name="karma"
                            value="{{ character.karma }}" min="-1000" aria-valuemin="-1000" max="1000" aria-valuemax="1000"/>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for="{{ code }}-money" class="d-inline">{% trans "argent" %}</label>
+                </td>
+                <td class="text-right">
+                    <input type="number" class="form-control form-control-sm imedium" id="{{ code }}-money" name="money"
+                           value="{{ character.money }}" min="0" aria-valuemin="0"/>
                 </td>
             </tr>
             <tr>
