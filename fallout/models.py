@@ -585,8 +585,8 @@ class Character(Entity, BaseStatistics):
     perk_points = models.PositiveSmallIntegerField(default=0, verbose_name=_("points de talent"))
     experience = models.PositiveIntegerField(default=0, verbose_name=_("expérience"))
     karma = models.SmallIntegerField(default=0, verbose_name=_("karma"))
+    money = models.PositiveIntegerField(default=0, verbose_name=_("argent"))
     reward = models.PositiveSmallIntegerField(default=0, verbose_name=_("récompense"))
-    money = models.PositiveSmallIntegerField(default=0, verbose_name=_("argent"))
     # Needs
     rads = models.FloatField(default=0.0, verbose_name=_("rads"))
     thirst = models.FloatField(default=0.0, verbose_name=_("soif"))
