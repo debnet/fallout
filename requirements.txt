@@ -1,4 +1,4 @@
-Django==4.0.5
+Django==4.0.6
 Pillow==9.1.1
 celery[redis]==5.2.7
 coreapi==2.3.3
