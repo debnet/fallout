@@ -6,23 +6,128 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('fallout', '0005_rename_user_player'),
+        ("fallout", "0005_rename_user_player"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='damagehistory',
-            name='damage_type',
-            field=models.CharField(blank=True, choices=[('dégâts', (('normal', 'dégâts normaux'), ('laser', 'dégâts de laser'), ('plasma', 'dégâts de plasma'), ('explosive', 'dégâts explosifs'), ('fire', 'dégâts de feu'), ('electricity', "dégâts d'électricité"), ('poison', 'dégâts de poison'), ('radiation', 'dégâts de radiations'), ('gas_contact', 'dégâts de gaz (contact)'), ('gas_inhaled', 'dégâts de gaz (inhalé)'), ('raw', 'dégâts directs'), ('thirst', 'augmentation de la soif'), ('hunger', 'augmentation de la faim'), ('sleep', 'augmentation du sommeil'))), ('soins', (('heal', 'soins de santé'), ('heal_rad', 'soins de radiations'), ('heal_thirst', 'diminution de la soif'), ('heal_hunger', 'diminution de la faim'), ('heal_sleep', 'diminution du sommeil')))], max_length=20, verbose_name='type de dégâts'),
+            model_name="damagehistory",
+            name="damage_type",
+            field=models.CharField(
+                blank=True,
+                choices=[
+                    (
+                        "dégâts",
+                        (
+                            ("normal", "dégâts normaux"),
+                            ("laser", "dégâts de laser"),
+                            ("plasma", "dégâts de plasma"),
+                            ("explosive", "dégâts explosifs"),
+                            ("fire", "dégâts de feu"),
+                            ("electricity", "dégâts d'électricité"),
+                            ("poison", "dégâts de poison"),
+                            ("radiation", "dégâts de radiations"),
+                            ("gas_contact", "dégâts de gaz (contact)"),
+                            ("gas_inhaled", "dégâts de gaz (inhalé)"),
+                            ("raw", "dégâts directs"),
+                            ("thirst", "augmentation de la soif"),
+                            ("hunger", "augmentation de la faim"),
+                            ("sleep", "augmentation du sommeil"),
+                        ),
+                    ),
+                    (
+                        "soins",
+                        (
+                            ("heal", "soins de santé"),
+                            ("heal_rad", "soins de radiations"),
+                            ("heal_thirst", "diminution de la soif"),
+                            ("heal_hunger", "diminution de la faim"),
+                            ("heal_sleep", "diminution du sommeil"),
+                        ),
+                    ),
+                ],
+                max_length=20,
+                verbose_name="type de dégâts",
+            ),
         ),
         migrations.AlterField(
-            model_name='effect',
-            name='damage_type',
-            field=models.CharField(blank=True, choices=[('dégâts', (('normal', 'dégâts normaux'), ('laser', 'dégâts de laser'), ('plasma', 'dégâts de plasma'), ('explosive', 'dégâts explosifs'), ('fire', 'dégâts de feu'), ('electricity', "dégâts d'électricité"), ('poison', 'dégâts de poison'), ('radiation', 'dégâts de radiations'), ('gas_contact', 'dégâts de gaz (contact)'), ('gas_inhaled', 'dégâts de gaz (inhalé)'), ('raw', 'dégâts directs'), ('thirst', 'augmentation de la soif'), ('hunger', 'augmentation de la faim'), ('sleep', 'augmentation du sommeil'))), ('soins', (('heal', 'soins de santé'), ('heal_rad', 'soins de radiations'), ('heal_thirst', 'diminution de la soif'), ('heal_hunger', 'diminution de la faim'), ('heal_sleep', 'diminution du sommeil')))], max_length=20, verbose_name='type de dégâts'),
+            model_name="effect",
+            name="damage_type",
+            field=models.CharField(
+                blank=True,
+                choices=[
+                    (
+                        "dégâts",
+                        (
+                            ("normal", "dégâts normaux"),
+                            ("laser", "dégâts de laser"),
+                            ("plasma", "dégâts de plasma"),
+                            ("explosive", "dégâts explosifs"),
+                            ("fire", "dégâts de feu"),
+                            ("electricity", "dégâts d'électricité"),
+                            ("poison", "dégâts de poison"),
+                            ("radiation", "dégâts de radiations"),
+                            ("gas_contact", "dégâts de gaz (contact)"),
+                            ("gas_inhaled", "dégâts de gaz (inhalé)"),
+                            ("raw", "dégâts directs"),
+                            ("thirst", "augmentation de la soif"),
+                            ("hunger", "augmentation de la faim"),
+                            ("sleep", "augmentation du sommeil"),
+                        ),
+                    ),
+                    (
+                        "soins",
+                        (
+                            ("heal", "soins de santé"),
+                            ("heal_rad", "soins de radiations"),
+                            ("heal_thirst", "diminution de la soif"),
+                            ("heal_hunger", "diminution de la faim"),
+                            ("heal_sleep", "diminution du sommeil"),
+                        ),
+                    ),
+                ],
+                max_length=20,
+                verbose_name="type de dégâts",
+            ),
         ),
         migrations.AlterField(
-            model_name='item',
-            name='damage_type',
-            field=models.CharField(blank=True, choices=[('dégâts', (('normal', 'dégâts normaux'), ('laser', 'dégâts de laser'), ('plasma', 'dégâts de plasma'), ('explosive', 'dégâts explosifs'), ('fire', 'dégâts de feu'), ('electricity', "dégâts d'électricité"), ('poison', 'dégâts de poison'), ('radiation', 'dégâts de radiations'), ('gas_contact', 'dégâts de gaz (contact)'), ('gas_inhaled', 'dégâts de gaz (inhalé)'), ('raw', 'dégâts directs'), ('thirst', 'augmentation de la soif'), ('hunger', 'augmentation de la faim'), ('sleep', 'augmentation du sommeil'))), ('soins', (('heal', 'soins de santé'), ('heal_rad', 'soins de radiations'), ('heal_thirst', 'diminution de la soif'), ('heal_hunger', 'diminution de la faim'), ('heal_sleep', 'diminution du sommeil')))], max_length=20, verbose_name='type de dégâts'),
+            model_name="item",
+            name="damage_type",
+            field=models.CharField(
+                blank=True,
+                choices=[
+                    (
+                        "dégâts",
+                        (
+                            ("normal", "dégâts normaux"),
+                            ("laser", "dégâts de laser"),
+                            ("plasma", "dégâts de plasma"),
+                            ("explosive", "dégâts explosifs"),
+                            ("fire", "dégâts de feu"),
+                            ("electricity", "dégâts d'électricité"),
+                            ("poison", "dégâts de poison"),
+                            ("radiation", "dégâts de radiations"),
+                            ("gas_contact", "dégâts de gaz (contact)"),
+                            ("gas_inhaled", "dégâts de gaz (inhalé)"),
+                            ("raw", "dégâts directs"),
+                            ("thirst", "augmentation de la soif"),
+                            ("hunger", "augmentation de la faim"),
+                            ("sleep", "augmentation du sommeil"),
+                        ),
+                    ),
+                    (
+                        "soins",
+                        (
+                            ("heal", "soins de santé"),
+                            ("heal_rad", "soins de radiations"),
+                            ("heal_thirst", "diminution de la soif"),
+                            ("heal_hunger", "diminution de la faim"),
+                            ("heal_sleep", "diminution du sommeil"),
+                        ),
+                    ),
+                ],
+                max_length=20,
+                verbose_name="type de dégâts",
+            ),
         ),
     ]

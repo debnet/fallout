@@ -1,20 +1,19 @@
 # encoding: utf-8
 from django.utils.translation import gettext_lazy as _
 
-
 # General statistics
-STATS_HEALTH = 'health'
-STATS_ACTION_POINTS = 'action_points'
-STATS_THIRST = 'thirst'
-STATS_HUNGER = 'hunger'
-STATS_SLEEP = 'sleep'
-STATS_RADS = 'rads'
-STATS_EXPERIENCE = 'experience'
-STATS_SKILL_POINTS = 'skill_points'
-STATS_PERK_POINTS = 'perk_points'
-STATS_KARMA = 'karma'
-STATS_MONEY = 'money'
-STATS_REWARD = 'reward'
+STATS_HEALTH = "health"
+STATS_ACTION_POINTS = "action_points"
+STATS_THIRST = "thirst"
+STATS_HUNGER = "hunger"
+STATS_SLEEP = "sleep"
+STATS_RADS = "rads"
+STATS_EXPERIENCE = "experience"
+STATS_SKILL_POINTS = "skill_points"
+STATS_PERK_POINTS = "perk_points"
+STATS_KARMA = "karma"
+STATS_MONEY = "money"
+STATS_REWARD = "reward"
 GENERAL_STATS = (
     (STATS_HEALTH, _("santé")),
     (STATS_ACTION_POINTS, _("points d'action")),
@@ -33,13 +32,13 @@ LIST_GENERAL_STATS = dict(GENERAL_STATS)
 LIST_NEEDS = [STATS_RADS, STATS_THIRST, STATS_HUNGER, STATS_SLEEP]
 
 # S.P.E.C.I.A.L.
-SPECIAL_STRENGTH = 'strength'
-SPECIAL_PERCEPTION = 'perception'
-SPECIAL_ENDURANCE = 'endurance'
-SPECIAL_CHARISMA = 'charisma'
-SPECIAL_INTELLIGENCE = 'intelligence'
-SPECIAL_AGILITY = 'agility'
-SPECIAL_LUCK = 'luck'
+SPECIAL_STRENGTH = "strength"
+SPECIAL_PERCEPTION = "perception"
+SPECIAL_ENDURANCE = "endurance"
+SPECIAL_CHARISMA = "charisma"
+SPECIAL_INTELLIGENCE = "intelligence"
+SPECIAL_AGILITY = "agility"
+SPECIAL_LUCK = "luck"
 SPECIALS = (
     (SPECIAL_STRENGTH, _("force")),
     (SPECIAL_PERCEPTION, _("perception")),
@@ -52,20 +51,20 @@ SPECIALS = (
 LIST_SPECIALS = dict(SPECIALS)
 
 # Secondary statistics
-STATS_MAX_HEALTH = 'max_health'
-STATS_MAX_ACTION_POINTS = 'max_action_points'
-STATS_CARRY_WEIGHT = 'carry_weight'
-STATS_ARMOR_CLASS = 'armor_class'
-STATS_MELEE_DAMAGE = 'melee_damage'
-STATS_SEQUENCE = 'sequence'
-STATS_HEALING_RATE = 'healing_rate'
-STATS_AP_COST_MODIFIER = 'ap_cost_modifier'
-STATS_ONE_HAND_ACCURACY = 'one_hand_accuracy'
-STATS_TWO_HANDS_ACCURACY = 'two_hands_accuracy'
-STATS_DAMAGE_MODIFIER = 'damage_modifier'
-STATS_CRITICAL_CHANCE = 'critical_chance'
-STATS_CRITICAL_RAW_CHANCE = 'critical_raw_chance'
-STATS_CRITICAL_DAMAGE = 'critical_damage'
+STATS_MAX_HEALTH = "max_health"
+STATS_MAX_ACTION_POINTS = "max_action_points"
+STATS_CARRY_WEIGHT = "carry_weight"
+STATS_ARMOR_CLASS = "armor_class"
+STATS_MELEE_DAMAGE = "melee_damage"
+STATS_SEQUENCE = "sequence"
+STATS_HEALING_RATE = "healing_rate"
+STATS_AP_COST_MODIFIER = "ap_cost_modifier"
+STATS_ONE_HAND_ACCURACY = "one_hand_accuracy"
+STATS_TWO_HANDS_ACCURACY = "two_hands_accuracy"
+STATS_DAMAGE_MODIFIER = "damage_modifier"
+STATS_CRITICAL_CHANCE = "critical_chance"
+STATS_CRITICAL_RAW_CHANCE = "critical_raw_chance"
+STATS_CRITICAL_DAMAGE = "critical_damage"
 SECONDARY_STATS = (
     (STATS_MAX_HEALTH, _("santé maximale")),
     (STATS_MAX_ACTION_POINTS, _("points d'action max.")),
@@ -85,31 +84,31 @@ SECONDARY_STATS = (
 LIST_SECONDARY_STATS = dict(SECONDARY_STATS)
 
 # Skills
-SKILL_SMALL_GUNS = 'small_guns'
-SKILL_BIG_GUNS = 'big_guns'
-SKILL_ENERGY_WEAPONS = 'energy_weapons'
-SKILL_UNARMED = 'unarmed'
-SKILL_MELEE_WEAPONS = 'melee_weapons'
-SKILL_THROWING = 'throwing'
-SKILL_ATHLETICS = 'athletics'
-SKILL_DETECTION = 'detection'
-SKILL_FIRST_AID = 'first_aid'
-SKILL_DOCTOR = 'doctor'
-SKILL_CHEMS = 'chems'
-SKILL_SNEAK = 'sneak'
-SKILL_LOCKPICK = 'lockpick'
-SKILL_STEAL = 'steal'
-SKILL_TRAPS = 'traps'
-SKILL_EXPLOSIVES = 'explosives'
-SKILL_SCIENCE = 'science'
-SKILL_COMPUTERS = 'computers'
-SKILL_ELECTRONICS = 'electronics'
-SKILL_REPAIR = 'repair'
-SKILL_SPEECH = 'speech'
-SKILL_DECEPTION = 'deception'
-SKILL_BARTER = 'barter'
-SKILL_SURVIVAL = 'survival'
-SKILL_KNOWLEDGE = 'knowledge'
+SKILL_SMALL_GUNS = "small_guns"
+SKILL_BIG_GUNS = "big_guns"
+SKILL_ENERGY_WEAPONS = "energy_weapons"
+SKILL_UNARMED = "unarmed"
+SKILL_MELEE_WEAPONS = "melee_weapons"
+SKILL_THROWING = "throwing"
+SKILL_ATHLETICS = "athletics"
+SKILL_DETECTION = "detection"
+SKILL_FIRST_AID = "first_aid"
+SKILL_DOCTOR = "doctor"
+SKILL_CHEMS = "chems"
+SKILL_SNEAK = "sneak"
+SKILL_LOCKPICK = "lockpick"
+SKILL_STEAL = "steal"
+SKILL_TRAPS = "traps"
+SKILL_EXPLOSIVES = "explosives"
+SKILL_SCIENCE = "science"
+SKILL_COMPUTERS = "computers"
+SKILL_ELECTRONICS = "electronics"
+SKILL_REPAIR = "repair"
+SKILL_SPEECH = "speech"
+SKILL_DECEPTION = "deception"
+SKILL_BARTER = "barter"
+SKILL_SURVIVAL = "survival"
+SKILL_KNOWLEDGE = "knowledge"
 SKILLS = (
     (SKILL_SMALL_GUNS, _("armes à feu légères")),
     (SKILL_BIG_GUNS, _("armes à feu lourdes")),
@@ -140,17 +139,17 @@ SKILLS = (
 LIST_SKILLS = dict(SKILLS)
 
 # Resistances
-RESISTANCE_DAMAGE = 'damage_resistance'
-RESISTANCE_NORMAL = 'normal_resistance'
-RESISTANCE_LASER = 'laser_resistance'
-RESISTANCE_PLASMA = 'plasma_resistance'
-RESISTANCE_EXPLOSIVE = 'explosive_resistance'
-RESISTANCE_FIRE = 'fire_resistance'
-RESISTANCE_ELECTRICITY = 'electricity_resistance'
-RESISTANCE_POISON = 'poison_resistance'
-RESISTANCE_RADIATION = 'radiation_resistance'
-RESISTANCE_GAZ_CONTACT = 'gas_contact_resistance'
-RESISTANCE_GAZ_INHALED = 'gas_inhaled_resistance'
+RESISTANCE_DAMAGE = "damage_resistance"
+RESISTANCE_NORMAL = "normal_resistance"
+RESISTANCE_LASER = "laser_resistance"
+RESISTANCE_PLASMA = "plasma_resistance"
+RESISTANCE_EXPLOSIVE = "explosive_resistance"
+RESISTANCE_FIRE = "fire_resistance"
+RESISTANCE_ELECTRICITY = "electricity_resistance"
+RESISTANCE_POISON = "poison_resistance"
+RESISTANCE_RADIATION = "radiation_resistance"
+RESISTANCE_GAZ_CONTACT = "gas_contact_resistance"
+RESISTANCE_GAZ_INHALED = "gas_inhaled_resistance"
 RESISTANCES = (
     (RESISTANCE_DAMAGE, _("résistance aux dégâts")),
     (RESISTANCE_NORMAL, _("résistance physique")),
@@ -167,17 +166,17 @@ RESISTANCES = (
 LIST_RESISTANCES = dict(RESISTANCES)
 
 # Thresholds
-THRESHOLD_DAMAGE = 'damage_threshold'
-THRESHOLD_NORMAL = 'normal_threshold'
-THRESHOLD_LASER = 'laser_threshold'
-THRESHOLD_PLASMA = 'plasma_threshold'
-THRESHOLD_EXPLOSIVE = 'explosive_threshold'
-THRESHOLD_FIRE = 'fire_threshold'
-THRESHOLD_ELECTRICITY = 'electricity_threshold'
-THRESHOLD_POISON = 'poison_threshold'
-THRESHOLD_RADIATION = 'radiation_threshold'
-THRESHOLD_GAZ_CONTACT = 'gas_contact_threshold'
-THRESHOLD_GAZ_INHALED = 'gas_inhaled_threshold'
+THRESHOLD_DAMAGE = "damage_threshold"
+THRESHOLD_NORMAL = "normal_threshold"
+THRESHOLD_LASER = "laser_threshold"
+THRESHOLD_PLASMA = "plasma_threshold"
+THRESHOLD_EXPLOSIVE = "explosive_threshold"
+THRESHOLD_FIRE = "fire_threshold"
+THRESHOLD_ELECTRICITY = "electricity_threshold"
+THRESHOLD_POISON = "poison_threshold"
+THRESHOLD_RADIATION = "radiation_threshold"
+THRESHOLD_GAZ_CONTACT = "gas_contact_threshold"
+THRESHOLD_GAZ_INHALED = "gas_inhaled_threshold"
 THRESHOLDS = (
     (THRESHOLD_DAMAGE, _("absorption de dégâts")),
     (THRESHOLD_NORMAL, _("absorption physique")),
@@ -194,10 +193,10 @@ THRESHOLDS = (
 LIST_THRESHOLDS = dict(THRESHOLDS)
 
 # Weapon types
-WEAPON_TYPE_PRIMARY = 'primary'
-WEAPON_TYPE_SECONDARY = 'secondary'
-WEAPON_TYPE_GRENADE = 'grenade'
-WEAPON_TYPE_UNARMED = 'unarmed'
+WEAPON_TYPE_PRIMARY = "primary"
+WEAPON_TYPE_SECONDARY = "secondary"
+WEAPON_TYPE_GRENADE = "grenade"
+WEAPON_TYPE_UNARMED = "unarmed"
 WEAPON_TYPES = (
     (WEAPON_TYPE_PRIMARY, _("arme principale")),
     (WEAPON_TYPE_SECONDARY, _("arme secondaire")),
@@ -218,27 +217,27 @@ ALL_RESISTANCES = tuple(mix_resistances())
 LIST_ALL_RESISTANCES = dict(ALL_RESISTANCES)
 
 # Damage
-DAMAGE_NORMAL = 'normal'
-DAMAGE_LASER = 'laser'
-DAMAGE_PLASMA = 'plasma'
-DAMAGE_EXPLOSIVE = 'explosive'
-DAMAGE_FIRE = 'fire'
-DAMAGE_ELECTRICITY = 'electricity'
-DAMAGE_POISON = 'poison'
-DAMAGE_RADIATION = 'radiation'
-DAMAGE_GAZ_CONTACT = 'gas_contact'
-DAMAGE_GAZ_INHALED = 'gas_inhaled'
-DAMAGE_RAW = 'raw'
-DAMAGE_THIRST = 'thirst'
-DAMAGE_HUNGER = 'hunger'
-DAMAGE_SLEEP = 'sleep'
-HEAL_HEALTH = 'heal'
-HEAL_THIRST = 'heal_thirst'
-HEAL_HUNGER = 'heal_hunger'
-HEAL_SLEEP = 'heal_sleep'
-HEAL_RADIATION = 'heal_rad'
-ADD_MONEY = 'add_money'
-REMOVE_MONEY = 'remove_money'
+DAMAGE_NORMAL = "normal"
+DAMAGE_LASER = "laser"
+DAMAGE_PLASMA = "plasma"
+DAMAGE_EXPLOSIVE = "explosive"
+DAMAGE_FIRE = "fire"
+DAMAGE_ELECTRICITY = "electricity"
+DAMAGE_POISON = "poison"
+DAMAGE_RADIATION = "radiation"
+DAMAGE_GAZ_CONTACT = "gas_contact"
+DAMAGE_GAZ_INHALED = "gas_inhaled"
+DAMAGE_RAW = "raw"
+DAMAGE_THIRST = "thirst"
+DAMAGE_HUNGER = "hunger"
+DAMAGE_SLEEP = "sleep"
+HEAL_HEALTH = "heal"
+HEAL_THIRST = "heal_thirst"
+HEAL_HUNGER = "heal_hunger"
+HEAL_SLEEP = "heal_sleep"
+HEAL_RADIATION = "heal_rad"
+ADD_MONEY = "add_money"
+REMOVE_MONEY = "remove_money"
 
 DAMAGES = (
     (DAMAGE_NORMAL, _("dégâts normaux")),
@@ -346,9 +345,9 @@ DAMAGE_ICONS = {
 }
 
 # Leveled stats
-HIT_POINTS_PER_LEVEL = 'hit_points_per_level'
-SKILL_POINTS_PER_LEVEL = 'skill_points_per_level'
-PERK_RATE = 'perk_rate'
+HIT_POINTS_PER_LEVEL = "hit_points_per_level"
+SKILL_POINTS_PER_LEVEL = "skill_points_per_level"
+PERK_RATE = "perk_rate"
 LEVELED_STATS = (
     (HIT_POINTS_PER_LEVEL, _("santé par niveau")),
     (SKILL_POINTS_PER_LEVEL, _("compétences par niveau")),
@@ -369,9 +368,7 @@ ALL_EDITABLE_STATS = ROLL_STATS + (
     (_("Statistiques de niveau"), LEVELED_STATS),
     (_("Résistances"), ALL_RESISTANCES),
 )
-ALL_STATS = ALL_EDITABLE_STATS + (
-    (_("Etat général"), GENERAL_STATS),
-)
+ALL_STATS = ALL_EDITABLE_STATS + ((_("Etat général"), GENERAL_STATS),)
 
 # Lists of statistics
 NON_SPECIAL_STATS = SKILLS + SECONDARY_STATS + RESISTANCES + THRESHOLDS + LEVELED_STATS
@@ -381,11 +378,11 @@ LIST_EDITABLE_STATS = dict(EDITABLE_STATS)
 LIST_ALL_STATS = dict(sum((stats for _, stats in ALL_STATS), ()))
 
 # Item type
-ITEM_WEAPON = 'weapon'
-ITEM_AMMO = 'ammo'
-ITEM_ARMOR = 'armor'
-ITEM_HELMET = 'helmet'
-ITEM_GRENADE = 'grenade'
+ITEM_WEAPON = "weapon"
+ITEM_AMMO = "ammo"
+ITEM_ARMOR = "armor"
+ITEM_HELMET = "helmet"
+ITEM_GRENADE = "grenade"
 SLOT_ITEM_TYPES = (
     (ITEM_WEAPON, _("arme")),
     (ITEM_AMMO, _("munition")),
@@ -395,12 +392,12 @@ SLOT_ITEM_TYPES = (
 )
 LIST_SLOT_ITEM_TYPES = dict(SLOT_ITEM_TYPES)
 
-ITEM_EXTRA = 'extra'
-ITEM_TOOL = 'tool'
-ITEM_FOOD = 'food'
-ITEM_CHEM = 'chem'
-ITEM_BOOK = 'book'
-ITEM_MISC = 'misc'
+ITEM_EXTRA = "extra"
+ITEM_TOOL = "tool"
+ITEM_FOOD = "food"
+ITEM_CHEM = "chem"
+ITEM_BOOK = "book"
+ITEM_MISC = "misc"
 ITEM_TYPES = SLOT_ITEM_TYPES + (
     (ITEM_EXTRA, _("accessoire")),
     (ITEM_TOOL, _("outil")),
@@ -412,11 +409,11 @@ ITEM_TYPES = SLOT_ITEM_TYPES + (
 LIST_ITEM_TYPES = dict(ITEM_TYPES)
 
 # Weapon modes
-MODE_RANGED = 'ranged'
-MODE_LONG = 'long'
-MODE_SCOPED = 'scoped'
-MODE_MELEE = 'melee'
-MODE_THROW = 'throw'
+MODE_RANGED = "ranged"
+MODE_LONG = "long"
+MODE_SCOPED = "scoped"
+MODE_MELEE = "melee"
+MODE_THROW = "throw"
 MODES = (
     (MODE_RANGED, _("attaque à distance")),
     (MODE_LONG, _("attaque à longue distance")),
@@ -433,13 +430,13 @@ HANDS = (
 )
 
 # Races
-RACE_HUMAN = 'human'
-RACE_GHOUL = 'ghoul'
-RACE_SUPER_MUTANT = 'super_mutant'
-RACE_DEATHCLAW = 'deathclaw'
-RACE_ROBOT = 'robot'
-RACE_ANIMAL = 'animal'
-RACE_CREATURE = 'creature'
+RACE_HUMAN = "human"
+RACE_GHOUL = "ghoul"
+RACE_SUPER_MUTANT = "super_mutant"
+RACE_DEATHCLAW = "deathclaw"
+RACE_ROBOT = "robot"
+RACE_ANIMAL = "animal"
+RACE_CREATURE = "creature"
 RACES = (
     (RACE_HUMAN, _("humain")),
     (RACE_GHOUL, _("ghoule")),
@@ -452,11 +449,11 @@ RACES = (
 LIST_RACES = dict(RACES)
 
 # Body parts
-PART_TORSO = 'torso'
-PART_LEGS = 'legs'
-PART_ARMS = 'arms'
-PART_HEAD = 'head'
-PART_EYES = 'eyes'
+PART_TORSO = "torso"
+PART_LEGS = "legs"
+PART_ARMS = "arms"
+PART_HEAD = "head"
+PART_EYES = "eyes"
 BODY_PARTS = (
     (PART_TORSO, _("torse")),
     (PART_LEGS, _("jambes")),
@@ -467,13 +464,13 @@ BODY_PARTS = (
 LIST_BODY_PARTS = dict(BODY_PARTS)
 
 # Fight status
-STATUS_HIT_SUCCEED = 'hit_succeed'
-STATUS_HIT_FAILED = 'hit_failed'
-STATUS_NOT_ENOUGH_AP = 'not_enough_ap'
-STATUS_NO_MORE_AMMO = 'no_more_ammo'
-STATUS_TARGET_DEAD = 'target_dead'
-STATUS_TARGET_KILLED = 'target_killed'
-STATUS_WEAPON_BROKEN = 'weapon_broken'
+STATUS_HIT_SUCCEED = "hit_succeed"
+STATUS_HIT_FAILED = "hit_failed"
+STATUS_NOT_ENOUGH_AP = "not_enough_ap"
+STATUS_NO_MORE_AMMO = "no_more_ammo"
+STATUS_TARGET_DEAD = "target_dead"
+STATUS_TARGET_KILLED = "target_killed"
+STATUS_WEAPON_BROKEN = "weapon_broken"
 FIGHT_STATUS = (
     (STATUS_HIT_SUCCEED, _("cible touchée")),
     (STATUS_HIT_FAILED, _("cible manquée")),
@@ -532,207 +529,205 @@ LABEL_CRITICAL = _("critique")
 
 
 def get_label(success, critical):
-    return ' '.join((
-        str([LABEL_FAIL, LABEL_SUCCESS][success]),
-        str(['', LABEL_CRITICAL][critical]))).strip()
+    return " ".join((str([LABEL_FAIL, LABEL_SUCCESS][success]), str(["", LABEL_CRITICAL][critical]))).strip()
 
 
 __all__ = (
-    'ADD_MONEY',
-    'ALL_EDITABLE_STATS',
-    'ALL_RESISTANCES',
-    'ALL_STATS',
-    'BODY_PARTS',
-    'DAMAGES',
-    'DAMAGES_TYPES',
-    'DAMAGE_ELECTRICITY',
-    'DAMAGE_EXPLOSIVE',
-    'DAMAGE_FIRE',
-    'DAMAGE_GAZ_CONTACT',
-    'DAMAGE_GAZ_INHALED',
-    'DAMAGE_HUNGER',
-    'DAMAGE_ICONS',
-    'DAMAGE_LASER',
-    'DAMAGE_NORMAL',
-    'DAMAGE_PLASMA',
-    'DAMAGE_POISON',
-    'DAMAGE_RADIATION',
-    'DAMAGE_RAW',
-    'DAMAGE_RESISTANCE',
-    'DAMAGE_SHORTS',
-    'DAMAGE_SLEEP',
-    'DAMAGE_THIRST',
-    'DAMAGE_THRESHOLD',
-    'EDITABLE_STATS',
-    'FIGHT_STATUS',
-    'GENERAL_STATS',
-    'HANDS',
-    'HEALS',
-    'HEAL_HEALTH',
-    'HEAL_HUNGER',
-    'HEAL_RADIATION',
-    'HEAL_SLEEP',
-    'HEAL_THIRST',
-    'HIT_POINTS_PER_LEVEL',
-    'HUNGER_LABELS',
-    'ITEM_AMMO',
-    'ITEM_ARMOR',
-    'ITEM_BOOK',
-    'ITEM_CHEM',
-    'ITEM_EXTRA',
-    'ITEM_FOOD',
-    'ITEM_GRENADE',
-    'ITEM_HELMET',
-    'ITEM_MISC',
-    'ITEM_TOOL',
-    'ITEM_TYPES',
-    'ITEM_WEAPON',
-    'LABEL_CRITICAL',
-    'LABEL_FAIL',
-    'LABEL_SUCCESS',
-    'LEVELED_STATS',
-    'LIST_ALL_RESISTANCES',
-    'LIST_ALL_STATS',
-    'LIST_BODY_PARTS',
-    'LIST_DAMAGES_TYPES',
-    'LIST_EDITABLE_STATS',
-    'LIST_FIGHT_STATUS',
-    'LIST_GENERAL_STATS',
-    'LIST_HEALS',
-    'LIST_ITEM_TYPES',
-    'LIST_LEVELED_STATS',
-    'LIST_MONEY',
-    'LIST_NEEDS',
-    'LIST_NON_DAMAGE',
-    'LIST_NON_SPECIAL_STATS',
-    'LIST_PHYSICAL_DAMAGE',
-    'LIST_RACES',
-    'LIST_RESISTANCES',
-    'LIST_ROLL_STATS',
-    'LIST_SECONDARY_STATS',
-    'LIST_SKILLS',
-    'LIST_SLOT_ITEM_TYPES',
-    'LIST_SPECIALS',
-    'LIST_THRESHOLDS',
-    'MODES',
-    'MODE_LONG',
-    'MODE_MELEE',
-    'MODE_RANGED',
-    'MODE_SCOPED',
-    'MODE_THROW',
-    'NON_SPECIAL_STATS',
-    'PART_ARMS',
-    'PART_EYES',
-    'PART_HEAD',
-    'PART_LEGS',
-    'PART_TORSO',
-    'PERK_RATE',
-    'RACES',
-    'RACE_ANIMAL',
-    'RACE_CREATURE',
-    'RACE_DEATHCLAW',
-    'RACE_GHOUL',
-    'RACE_HUMAN',
-    'RACE_ROBOT',
-    'RACE_SUPER_MUTANT',
-    'RADS_LABELS',
-    'REMOVE_MONEY',
-    'RESISTANCES',
-    'RESISTANCE_DAMAGE',
-    'RESISTANCE_ELECTRICITY',
-    'RESISTANCE_EXPLOSIVE',
-    'RESISTANCE_FIRE',
-    'RESISTANCE_GAZ_CONTACT',
-    'RESISTANCE_GAZ_INHALED',
-    'RESISTANCE_LASER',
-    'RESISTANCE_NORMAL',
-    'RESISTANCE_PLASMA',
-    'RESISTANCE_POISON',
-    'RESISTANCE_RADIATION',
-    'ROLL_STATS',
-    'SECONDARY_STATS',
-    'SKILLS',
-    'SKILL_BARTER',
-    'SKILL_BIG_GUNS',
-    'SKILL_CHEMS',
-    'SKILL_DOCTOR',
-    'SKILL_ENERGY_WEAPONS',
-    'SKILL_EXPLOSIVES',
-    'SKILL_FIRST_AID',
-    'SKILL_KNOWLEDGE',
-    'SKILL_LOCKPICK',
-    'SKILL_MELEE_WEAPONS',
-    'SKILL_POINTS_PER_LEVEL',
-    'SKILL_REPAIR',
-    'SKILL_SCIENCE',
-    'SKILL_SMALL_GUNS',
-    'SKILL_SNEAK',
-    'SKILL_SPEECH',
-    'SKILL_STEAL',
-    'SKILL_SURVIVAL',
-    'SKILL_THROWING',
-    'SKILL_TRAPS',
-    'SKILL_UNARMED',
-    'SLEEP_LABELS',
-    'SLOT_ITEM_TYPES',
-    'SPECIALS',
-    'SPECIAL_AGILITY',
-    'SPECIAL_CHARISMA',
-    'SPECIAL_ENDURANCE',
-    'SPECIAL_INTELLIGENCE',
-    'SPECIAL_LUCK',
-    'SPECIAL_PERCEPTION',
-    'SPECIAL_STRENGTH',
-    'STATS_ACTION_POINTS',
-    'STATS_AP_COST_MODIFIER',
-    'STATS_ARMOR_CLASS',
-    'STATS_CARRY_WEIGHT',
-    'STATS_CRITICAL_CHANCE',
-    'STATS_CRITICAL_DAMAGE',
-    'STATS_CRITICAL_RAW_CHANCE',
-    'STATS_DAMAGE_MODIFIER',
-    'STATS_EXPERIENCE',
-    'STATS_HEALING_RATE',
-    'STATS_HEALTH',
-    'STATS_HUNGER',
-    'STATS_KARMA',
-    'STATS_MAX_ACTION_POINTS',
-    'STATS_MAX_HEALTH',
-    'STATS_MONEY',
-    'STATS_MELEE_DAMAGE',
-    'STATS_ONE_HAND_ACCURACY',
-    'STATS_PERK_POINTS',
-    'STATS_RADS',
-    'STATS_REWARD',
-    'STATS_SEQUENCE',
-    'STATS_SKILL_POINTS',
-    'STATS_SLEEP',
-    'STATS_THIRST',
-    'STATS_TWO_HANDS_ACCURACY',
-    'STATUS_HIT_FAILED',
-    'STATUS_HIT_SUCCEED',
-    'STATUS_NOT_ENOUGH_AP',
-    'STATUS_NO_MORE_AMMO',
-    'STATUS_TARGET_DEAD',
-    'STATUS_TARGET_KILLED',
-    'STATUS_WEAPON_BROKEN',
-    'THIRST_LABELS',
-    'THRESHOLDS',
-    'THRESHOLD_DAMAGE',
-    'THRESHOLD_ELECTRICITY',
-    'THRESHOLD_EXPLOSIVE',
-    'THRESHOLD_FIRE',
-    'THRESHOLD_GAZ_CONTACT',
-    'THRESHOLD_GAZ_INHALED',
-    'THRESHOLD_LASER',
-    'THRESHOLD_NORMAL',
-    'THRESHOLD_PLASMA',
-    'THRESHOLD_POISON',
-    'THRESHOLD_RADIATION',
-    'WEAPON_TYPE_GRENADE',
-    'WEAPON_TYPE_PRIMARY',
-    'WEAPON_TYPE_SECONDARY',
-    'WEAPON_TYPE_UNARMED',
-    'WEAPON_TYPES',
-    'get_label',
+    "ADD_MONEY",
+    "ALL_EDITABLE_STATS",
+    "ALL_RESISTANCES",
+    "ALL_STATS",
+    "BODY_PARTS",
+    "DAMAGES",
+    "DAMAGES_TYPES",
+    "DAMAGE_ELECTRICITY",
+    "DAMAGE_EXPLOSIVE",
+    "DAMAGE_FIRE",
+    "DAMAGE_GAZ_CONTACT",
+    "DAMAGE_GAZ_INHALED",
+    "DAMAGE_HUNGER",
+    "DAMAGE_ICONS",
+    "DAMAGE_LASER",
+    "DAMAGE_NORMAL",
+    "DAMAGE_PLASMA",
+    "DAMAGE_POISON",
+    "DAMAGE_RADIATION",
+    "DAMAGE_RAW",
+    "DAMAGE_RESISTANCE",
+    "DAMAGE_SHORTS",
+    "DAMAGE_SLEEP",
+    "DAMAGE_THIRST",
+    "DAMAGE_THRESHOLD",
+    "EDITABLE_STATS",
+    "FIGHT_STATUS",
+    "GENERAL_STATS",
+    "HANDS",
+    "HEALS",
+    "HEAL_HEALTH",
+    "HEAL_HUNGER",
+    "HEAL_RADIATION",
+    "HEAL_SLEEP",
+    "HEAL_THIRST",
+    "HIT_POINTS_PER_LEVEL",
+    "HUNGER_LABELS",
+    "ITEM_AMMO",
+    "ITEM_ARMOR",
+    "ITEM_BOOK",
+    "ITEM_CHEM",
+    "ITEM_EXTRA",
+    "ITEM_FOOD",
+    "ITEM_GRENADE",
+    "ITEM_HELMET",
+    "ITEM_MISC",
+    "ITEM_TOOL",
+    "ITEM_TYPES",
+    "ITEM_WEAPON",
+    "LABEL_CRITICAL",
+    "LABEL_FAIL",
+    "LABEL_SUCCESS",
+    "LEVELED_STATS",
+    "LIST_ALL_RESISTANCES",
+    "LIST_ALL_STATS",
+    "LIST_BODY_PARTS",
+    "LIST_DAMAGES_TYPES",
+    "LIST_EDITABLE_STATS",
+    "LIST_FIGHT_STATUS",
+    "LIST_GENERAL_STATS",
+    "LIST_HEALS",
+    "LIST_ITEM_TYPES",
+    "LIST_LEVELED_STATS",
+    "LIST_MONEY",
+    "LIST_NEEDS",
+    "LIST_NON_DAMAGE",
+    "LIST_NON_SPECIAL_STATS",
+    "LIST_PHYSICAL_DAMAGE",
+    "LIST_RACES",
+    "LIST_RESISTANCES",
+    "LIST_ROLL_STATS",
+    "LIST_SECONDARY_STATS",
+    "LIST_SKILLS",
+    "LIST_SLOT_ITEM_TYPES",
+    "LIST_SPECIALS",
+    "LIST_THRESHOLDS",
+    "MODES",
+    "MODE_LONG",
+    "MODE_MELEE",
+    "MODE_RANGED",
+    "MODE_SCOPED",
+    "MODE_THROW",
+    "NON_SPECIAL_STATS",
+    "PART_ARMS",
+    "PART_EYES",
+    "PART_HEAD",
+    "PART_LEGS",
+    "PART_TORSO",
+    "PERK_RATE",
+    "RACES",
+    "RACE_ANIMAL",
+    "RACE_CREATURE",
+    "RACE_DEATHCLAW",
+    "RACE_GHOUL",
+    "RACE_HUMAN",
+    "RACE_ROBOT",
+    "RACE_SUPER_MUTANT",
+    "RADS_LABELS",
+    "REMOVE_MONEY",
+    "RESISTANCES",
+    "RESISTANCE_DAMAGE",
+    "RESISTANCE_ELECTRICITY",
+    "RESISTANCE_EXPLOSIVE",
+    "RESISTANCE_FIRE",
+    "RESISTANCE_GAZ_CONTACT",
+    "RESISTANCE_GAZ_INHALED",
+    "RESISTANCE_LASER",
+    "RESISTANCE_NORMAL",
+    "RESISTANCE_PLASMA",
+    "RESISTANCE_POISON",
+    "RESISTANCE_RADIATION",
+    "ROLL_STATS",
+    "SECONDARY_STATS",
+    "SKILLS",
+    "SKILL_BARTER",
+    "SKILL_BIG_GUNS",
+    "SKILL_CHEMS",
+    "SKILL_DOCTOR",
+    "SKILL_ENERGY_WEAPONS",
+    "SKILL_EXPLOSIVES",
+    "SKILL_FIRST_AID",
+    "SKILL_KNOWLEDGE",
+    "SKILL_LOCKPICK",
+    "SKILL_MELEE_WEAPONS",
+    "SKILL_POINTS_PER_LEVEL",
+    "SKILL_REPAIR",
+    "SKILL_SCIENCE",
+    "SKILL_SMALL_GUNS",
+    "SKILL_SNEAK",
+    "SKILL_SPEECH",
+    "SKILL_STEAL",
+    "SKILL_SURVIVAL",
+    "SKILL_THROWING",
+    "SKILL_TRAPS",
+    "SKILL_UNARMED",
+    "SLEEP_LABELS",
+    "SLOT_ITEM_TYPES",
+    "SPECIALS",
+    "SPECIAL_AGILITY",
+    "SPECIAL_CHARISMA",
+    "SPECIAL_ENDURANCE",
+    "SPECIAL_INTELLIGENCE",
+    "SPECIAL_LUCK",
+    "SPECIAL_PERCEPTION",
+    "SPECIAL_STRENGTH",
+    "STATS_ACTION_POINTS",
+    "STATS_AP_COST_MODIFIER",
+    "STATS_ARMOR_CLASS",
+    "STATS_CARRY_WEIGHT",
+    "STATS_CRITICAL_CHANCE",
+    "STATS_CRITICAL_DAMAGE",
+    "STATS_CRITICAL_RAW_CHANCE",
+    "STATS_DAMAGE_MODIFIER",
+    "STATS_EXPERIENCE",
+    "STATS_HEALING_RATE",
+    "STATS_HEALTH",
+    "STATS_HUNGER",
+    "STATS_KARMA",
+    "STATS_MAX_ACTION_POINTS",
+    "STATS_MAX_HEALTH",
+    "STATS_MONEY",
+    "STATS_MELEE_DAMAGE",
+    "STATS_ONE_HAND_ACCURACY",
+    "STATS_PERK_POINTS",
+    "STATS_RADS",
+    "STATS_REWARD",
+    "STATS_SEQUENCE",
+    "STATS_SKILL_POINTS",
+    "STATS_SLEEP",
+    "STATS_THIRST",
+    "STATS_TWO_HANDS_ACCURACY",
+    "STATUS_HIT_FAILED",
+    "STATUS_HIT_SUCCEED",
+    "STATUS_NOT_ENOUGH_AP",
+    "STATUS_NO_MORE_AMMO",
+    "STATUS_TARGET_DEAD",
+    "STATUS_TARGET_KILLED",
+    "STATUS_WEAPON_BROKEN",
+    "THIRST_LABELS",
+    "THRESHOLDS",
+    "THRESHOLD_DAMAGE",
+    "THRESHOLD_ELECTRICITY",
+    "THRESHOLD_EXPLOSIVE",
+    "THRESHOLD_FIRE",
+    "THRESHOLD_GAZ_CONTACT",
+    "THRESHOLD_GAZ_INHALED",
+    "THRESHOLD_LASER",
+    "THRESHOLD_NORMAL",
+    "THRESHOLD_PLASMA",
+    "THRESHOLD_POISON",
+    "THRESHOLD_RADIATION",
+    "WEAPON_TYPE_GRENADE",
+    "WEAPON_TYPE_PRIMARY",
+    "WEAPON_TYPE_SECONDARY",
+    "WEAPON_TYPE_UNARMED",
+    "WEAPON_TYPES",
+    "get_label",
 )

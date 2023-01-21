@@ -4,6 +4,7 @@ from rest_framework.serializers import ModelSerializer, MultipleChoiceField
 # Patch de django-multiselectfield pour compatibilité Django 2
 # https://github.com/goinnn/django-multiselectfield/issues/74
 try:
+
     def value_to_string(self, obj):
         try:
             value = self.val_from_object(obj)
@@ -12,6 +13,7 @@ try:
         return self.get_prep_value(value)
 
     from multiselectfield.db.fields import MultiSelectField
+
     MultiSelectField.value_to_string = value_to_string
 
     # Patch des serializers DRF pour la gestion des champs MultiSelectField

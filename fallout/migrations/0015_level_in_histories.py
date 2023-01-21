@@ -6,28 +6,28 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('fallout', '0014_more_skills'),
+        ("fallout", "0014_more_skills"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='damagehistory',
-            name='level',
-            field=models.SmallIntegerField(default=0, verbose_name='niveau'),
+            model_name="damagehistory",
+            name="level",
+            field=models.SmallIntegerField(default=0, verbose_name="niveau"),
         ),
         migrations.AddField(
-            model_name='fighthistory',
-            name='attacker_level',
+            model_name="fighthistory",
+            name="attacker_level",
             field=models.SmallIntegerField(default=0, verbose_name="niveau de l'attaquant"),
         ),
         migrations.AddField(
-            model_name='fighthistory',
-            name='defender_level',
-            field=models.SmallIntegerField(default=0, verbose_name='niveau du défenseur'),
+            model_name="fighthistory",
+            name="defender_level",
+            field=models.SmallIntegerField(default=0, verbose_name="niveau du défenseur"),
         ),
         migrations.AddField(
-            model_name='rollhistory',
-            name='level',
-            field=models.SmallIntegerField(default=0, verbose_name='niveau'),
+            model_name="rollhistory",
+            name="level",
+            field=models.SmallIntegerField(default=0, verbose_name="niveau"),
         ),
     ]

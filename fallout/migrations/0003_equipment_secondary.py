@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('fallout', '0002_log'),
+        ("fallout", "0002_log"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='equipment',
-            name='secondary',
-            field=models.BooleanField(default=False, verbose_name='secondaire'),
+            model_name="equipment",
+            name="secondary",
+            field=models.BooleanField(default=False, verbose_name="secondaire"),
         ),
     ]

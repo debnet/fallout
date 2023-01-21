@@ -1,8 +1,8 @@
 # coding: utf-8
+from common.excel import ImportExport
 from django.core.management import BaseCommand
 from django.utils.translation import gettext as _
 
-from common.excel import ImportExport
 from fallout.models import MODELS
 
 
@@ -11,8 +11,8 @@ class Command(BaseCommand):
     leave_locale_alone = True
 
     def add_arguments(self, parser):
-        parser.add_argument('--all', action='store_true', dest='_all', help=_("Tous les champs"))
-        parser.add_argument('filename', type=str, help=_("Chemin du fichier"))
+        parser.add_argument("--all", action="store_true", dest="_all", help=_("Tous les champs"))
+        parser.add_argument("filename", type=str, help=_("Chemin du fichier"))
 
     def handle(self, _all=False, filename=None, *args, **options):
         handler = ImportExport(models=MODELS, non_editables=_all)

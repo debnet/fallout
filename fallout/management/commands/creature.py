@@ -46,12 +46,12 @@ class Command(BaseCommand):
                     line = input()
                     if not line:
                         break
-                    line = line.replace('%', '')
-                    line = re.sub(r'-\t', '\n', line)
-                    line = re.sub(r'Icon(\s[a-zA-Z]+)+', '', line)
-                    line = re.sub(r'\sGametitle-\w+', '', line)
+                    line = line.replace("%", "")
+                    line = re.sub(r"-\t", "\n", line)
+                    line = re.sub(r"Icon(\s[a-zA-Z]+)+", "", line)
+                    line = re.sub(r"\sGametitle-\w+", "", line)
                     if line.strip():
-                        lines.extend(line.split('\n'))
+                        lines.extend(line.split("\n"))
                 if not lines:
                     break
                 lines = [lines[0]] + [int(e) for e in lines[2:-2]]
@@ -59,8 +59,13 @@ class Command(BaseCommand):
                 print(creature)
                 creature.name = input(_("Nom : ")) or creature.name
                 character = Character(
-                    race='creature', health=creature.max_health, action_points=creature.max_action_points,
-                    is_active=False, has_stats=False, **creature.__dict__)
+                    race="creature",
+                    health=creature.max_health,
+                    action_points=creature.max_action_points,
+                    is_active=False,
+                    has_stats=False,
+                    **creature.__dict__
+                )
                 character.save()
         except KeyboardInterrupt:
             pass

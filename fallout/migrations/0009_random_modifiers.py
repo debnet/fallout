@@ -6,48 +6,40 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('fallout', '0008_effect_character'),
+        ("fallout", "0008_effect_character"),
     ]
 
     operations = [
-        migrations.RenameField(
-            model_name='effectmodifier',
-            old_name='value',
-            new_name='raw_value'
-        ),
-        migrations.RenameField(
-            model_name='itemmodifier',
-            old_name='value',
-            new_name='raw_value'
+        migrations.RenameField(model_name="effectmodifier", old_name="value", new_name="raw_value"),
+        migrations.RenameField(model_name="itemmodifier", old_name="value", new_name="raw_value"),
+        migrations.AlterField(
+            model_name="effectmodifier",
+            name="raw_value",
+            field=models.SmallIntegerField(default=0, verbose_name="valeur brute"),
         ),
         migrations.AlterField(
-            model_name='effectmodifier',
-            name='raw_value',
-            field=models.SmallIntegerField(default=0, verbose_name='valeur brute'),
-        ),
-        migrations.AlterField(
-            model_name='itemmodifier',
-            name='raw_value',
-            field=models.SmallIntegerField(default=0, verbose_name='valeur brute'),
+            model_name="itemmodifier",
+            name="raw_value",
+            field=models.SmallIntegerField(default=0, verbose_name="valeur brute"),
         ),
         migrations.AddField(
-            model_name='effectmodifier',
-            name='min_value',
-            field=models.SmallIntegerField(default=0, verbose_name='valeur min.'),
+            model_name="effectmodifier",
+            name="min_value",
+            field=models.SmallIntegerField(default=0, verbose_name="valeur min."),
         ),
         migrations.AddField(
-            model_name='effectmodifier',
-            name='max_value',
-            field=models.SmallIntegerField(default=0, verbose_name='valeur max.'),
+            model_name="effectmodifier",
+            name="max_value",
+            field=models.SmallIntegerField(default=0, verbose_name="valeur max."),
         ),
         migrations.AddField(
-            model_name='itemmodifier',
-            name='min_value',
-            field=models.SmallIntegerField(default=0, verbose_name='valeur min.'),
+            model_name="itemmodifier",
+            name="min_value",
+            field=models.SmallIntegerField(default=0, verbose_name="valeur min."),
         ),
         migrations.AddField(
-            model_name='itemmodifier',
-            name='max_value',
-            field=models.SmallIntegerField(default=0, verbose_name='valeur max.'),
+            model_name="itemmodifier",
+            name="max_value",
+            field=models.SmallIntegerField(default=0, verbose_name="valeur max."),
         ),
     ]

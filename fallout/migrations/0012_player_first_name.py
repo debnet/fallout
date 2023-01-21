@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('fallout', '0011_campaign_view_config'),
+        ("fallout", "0011_campaign_view_config"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='player',
-            name='first_name',
-            field=models.CharField(blank=True, max_length=150, verbose_name='first name'),
+            model_name="player",
+            name="first_name",
+            field=models.CharField(blank=True, max_length=150, verbose_name="first name"),
         ),
     ]
