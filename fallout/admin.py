@@ -207,9 +207,9 @@ class CharacterAdmin(EntityAdmin):
     list_filter = ('campaign', 'is_player', 'is_active', 'has_stats', 'has_needs', 'race', 'player', )
     search_fields = ('name', 'title', 'description', 'background', )
     ordering = ('name', 'title', )
-    actions = EntityAdmin.actions + (
+    actions = EntityAdmin.actions + [
         'duplicate', 'heal', 'damage', 'roll', 'fight', 'equip', 'loot', 'move',
-        'randomize', 'randomize_special', 'randomize_stats', 'generate_stats', )
+        'randomize', 'randomize_special', 'randomize_stats', 'generate_stats', ]
     autocomplete_fields = ('campaign', 'player', )
     save_on_top = True
     actions_on_bottom = True
@@ -508,7 +508,7 @@ class ItemAdmin(EntityAdmin):
     list_filter = ('type', 'hands', 'attack_mode', 'skill', 'is_quest', 'is_droppable', )
     search_fields = ('name', 'title', 'description', )
     ordering = ('name', 'title', )
-    actions = EntityAdmin.actions + ('duplicate', )
+    actions = EntityAdmin.actions + ['duplicate', ]
     autocomplete_fields = ('effects', 'ammunitions', )
     save_on_top = True
     actions_on_bottom = True
@@ -599,7 +599,7 @@ class EffectAdmin(EntityAdmin):
     search_fields = ('name', 'title', 'description', )
     ordering = ('name', 'title', )
     autocomplete_fields = ('character', 'next_effect', 'cancel_effect', )
-    actions = EntityAdmin.actions + ('duplicate', )
+    actions = EntityAdmin.actions + ['duplicate', ]
     save_on_top = True
     actions_on_bottom = True
 
