@@ -639,6 +639,7 @@ class Character(Entity, BaseStatistics):
     karma = models.SmallIntegerField(default=0, verbose_name=_("karma"))
     money = models.PositiveIntegerField(default=0, verbose_name=_("argent"))
     reward = models.PositiveSmallIntegerField(default=0, verbose_name=_("récompense"))
+    loot_on_death = models.BooleanField(default=True, verbose_name=_("butin au décès ?"))
     # Needs
     rads = models.FloatField(default=0.0, verbose_name=_("rads"))
     thirst = models.FloatField(default=0.0, verbose_name=_("soif"))
@@ -1967,7 +1968,8 @@ class Character(Entity, BaseStatistics):
             self.action_points = self.stats.max_action_points
         # Loot character if NPC
         if self.is_active and self.health <= 0 and not self.is_player:
-            self.loot(empty=True)
+            if self.loot_on_death:
+                self.loot(empty=True)
             self.is_active = False
         # Fixing min value for needs
         self.rads = min(max(self.rads, 0), 1000)

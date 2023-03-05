@@ -11,7 +11,6 @@ def deprecate_stats(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("fallout", "0013_translation"),
     ]

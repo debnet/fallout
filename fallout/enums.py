@@ -204,16 +204,7 @@ WEAPON_TYPES = (
     (WEAPON_TYPE_UNARMED, _("à mains nues")),
 )
 
-
-def mix_resistances():
-    resistances = []
-    for resistance, threshold in zip(THRESHOLDS, RESISTANCES):
-        resistances.append(resistance)
-        resistances.append(threshold)
-    return resistances
-
-
-ALL_RESISTANCES = tuple(mix_resistances())
+ALL_RESISTANCES = tuple((field, label) for field, label in THRESHOLDS + RESISTANCES)
 LIST_ALL_RESISTANCES = dict(ALL_RESISTANCES)
 
 # Damage

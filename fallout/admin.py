@@ -1,4 +1,6 @@
 # coding: utf-8
+from itertools import zip_longest
+
 from common.admin import CommonAdmin, EntityAdmin, EntityTabularInline
 from django.contrib import admin, messages
 from django.contrib.admin.helpers import ACTION_CHECKBOX_NAME
@@ -20,6 +22,11 @@ ROLL_LEVELS = {
     (True, False): messages.SUCCESS,
     (True, True): messages.INFO,
 }
+
+
+def pairwise_stats(stats, columns=2):
+    for (a, _), (b, _) in zip_longest(*[iter(stats)] * columns, fillvalue=(None, None)):
+        yield (a, b) if b else a
 
 
 @admin.register(Player)
@@ -91,8 +98,10 @@ class CampaignAdmin(CommonAdmin):
             _("Informations techniques"),
             dict(
                 fields=(
-                    "start_game_date",
-                    "current_game_date",
+                    (
+                        "start_game_date",
+                        "current_game_date",
+                    ),
                     "current_character",
                 ),
                 classes=("wide",),
@@ -101,7 +110,12 @@ class CampaignAdmin(CommonAdmin):
         (
             _("Traductions"),
             dict(
-                fields=(("name_fr", "name_en"), ("title_fr", "title_en"), ("description_fr", "description_en")),
+                fields=(
+                    ("name_fr", "name_en"),
+                    ("title_fr", "title_en"),
+                    "description_fr",
+                    "description_en",
+                ),
                 classes=(
                     "wide",
                     "collapse",
@@ -222,7 +236,7 @@ class StatsAdmin(CommonAdmin):
                 (
                     title,
                     dict(
-                        fields=tuple(a for a, b in fields),
+                        fields=tuple(pairwise_stats(fields)),
                         classes=(
                             "wide",
                             "collapse",
@@ -278,16 +292,22 @@ class CharacterAdmin(EntityAdmin):
                     fields=(
                         "name",
                         "title",
-                        ("description", "background"),
+                        "description",
+                        "background",
                         "image",
                         "thumbnail",
                         "race",
                         "level",
-                        "is_active",
-                        "is_player",
-                        "is_resting",
-                        "has_stats",
-                        "has_needs",
+                        (
+                            "is_active",
+                            "is_player",
+                            "is_resting",
+                        ),
+                        (
+                            "has_stats",
+                            "has_needs",
+                            "loot_on_death",
+                        ),
                     ),
                     classes=("wide",),
                 ),
@@ -306,7 +326,12 @@ class CharacterAdmin(EntityAdmin):
             (
                 _("Traductions"),
                 dict(
-                    fields=(("name_fr", "name_en"), ("title_fr", "title_en"), ("description_fr", "description_en")),
+                    fields=(
+                        ("name_fr", "name_en"),
+                        ("title_fr", "title_en"),
+                        "description_fr",
+                        "description_en",
+                    ),
                     classes=(
                         "wide",
                         "collapse",
@@ -317,14 +342,17 @@ class CharacterAdmin(EntityAdmin):
                 _("Spécialités"),
                 dict(
                     fields=("tag_skills",),
-                    classes=("collapse",),
+                    classes=(
+                        "collapse",
+                        "wide",
+                    ),
                 ),
             ),
             *(
                 (
                     title,
                     dict(
-                        fields=tuple(a for a, b in fields),
+                        fields=tuple(pairwise_stats(fields)),
                         classes=(
                             "wide",
                             "collapse",
@@ -704,12 +732,18 @@ class ItemAdmin(EntityAdmin):
                     "image",
                     "thumbnail",
                     "type",
-                    "value",
-                    "weight",
-                    "durability",
-                    "condition_modifier",
-                    "is_quest",
-                    "is_droppable",
+                    (
+                        "value",
+                        "weight",
+                    ),
+                    (
+                        "durability",
+                        "condition_modifier",
+                    ),
+                    (
+                        "is_quest",
+                        "is_droppable",
+                    ),
                 ),
                 classes=("wide",),
             ),
@@ -717,7 +751,12 @@ class ItemAdmin(EntityAdmin):
         (
             _("Traductions"),
             dict(
-                fields=(("name_fr", "name_en"), ("title_fr", "title_en"), ("description_fr", "description_en")),
+                fields=(
+                    ("name_fr", "name_en"),
+                    ("title_fr", "title_en"),
+                    "description_fr",
+                    "description_en",
+                ),
                 classes=(
                     "wide",
                     "collapse",
@@ -728,26 +767,44 @@ class ItemAdmin(EntityAdmin):
             _("Armes uniquement"),
             dict(
                 fields=(
-                    "attack_mode",
-                    "skill",
-                    "min_skill",
+                    (
+                        "attack_mode",
+                        "hands",
+                    ),
+                    (
+                        "skill",
+                        "min_skill",
+                    ),
                     "min_strength",
-                    "hands",
-                    "min_range",
-                    "min_burst_range",
-                    "max_range",
-                    "max_burst_range",
-                    "clip_size",
-                    "burst_count",
-                    "hit_chance_modifier",
-                    "armor_class_modifier",
-                    "threshold_modifier",
-                    "threshold_rate_modifier",
+                    (
+                        "min_range",
+                        "max_range",
+                    ),
+                    (
+                        "min_burst_range",
+                        "max_burst_range",
+                    ),
+                    (
+                        "clip_size",
+                        "burst_count",
+                    ),
+                    (
+                        "hit_chance_modifier",
+                        "armor_class_modifier",
+                    ),
+                    (
+                        "threshold_modifier",
+                        "threshold_rate_modifier",
+                    ),
                     "resistance_modifier",
-                    "ap_cost_reload",
-                    "ap_cost_normal",
-                    "ap_cost_target",
-                    "ap_cost_burst",
+                    (
+                        "ap_cost_normal",
+                        "ap_cost_target",
+                    ),
+                    (
+                        "ap_cost_burst",
+                        "ap_cost_reload",
+                    ),
                     "is_single_charge",
                 ),
                 classes=(
@@ -760,16 +817,24 @@ class ItemAdmin(EntityAdmin):
             _("Dégâts"),
             dict(
                 fields=(
-                    "body_part",
-                    "damage_type",
-                    "raw_damage",
-                    "min_damage",
-                    "max_damage",
+                    (
+                        "damage_type",
+                        "body_part",
+                    ),
+                    (
+                        "min_damage",
+                        "max_damage",
+                        "raw_damage",
+                    ),
                     "damage_modifier",
-                    "critical_modifier",
-                    "critical_raw_modifier",
-                    "critical_damage",
-                    "critical_damage_modifier",
+                    (
+                        "critical_modifier",
+                        "critical_raw_modifier",
+                    ),
+                    (
+                        "critical_damage",
+                        "critical_damage_modifier",
+                    ),
                 ),
                 classes=(
                     "wide",
@@ -782,7 +847,7 @@ class ItemAdmin(EntityAdmin):
             dict(
                 fields=(
                     "armor_class",
-                    *LIST_ALL_RESISTANCES,
+                    *tuple(pairwise_stats(ALL_RESISTANCES)),
                 ),
                 classes=(
                     "wide",
@@ -956,7 +1021,12 @@ class EffectAdmin(EntityAdmin):
         (
             _("Traductions"),
             dict(
-                fields=(("name_fr", "name_en"), ("title_fr", "title_en"), ("description_fr", "description_en")),
+                fields=(
+                    ("name_fr", "name_en"),
+                    ("title_fr", "title_en"),
+                    "description_fr",
+                    "description_en",
+                ),
                 classes=(
                     "wide",
                     "collapse",
@@ -981,12 +1051,16 @@ class EffectAdmin(EntityAdmin):
                 fields=(
                     "apply",
                     "interval",
-                    "body_part",
-                    "damage_type",
-                    "raw_damage",
-                    "min_damage",
-                    "max_damage",
                     "damage_chance",
+                    (
+                        "damage_type",
+                        "body_part",
+                    ),
+                    (
+                        "min_damage",
+                        "max_damage",
+                        "raw_damage",
+                    ),
                 ),
                 classes=(
                     "wide",
@@ -1230,7 +1304,12 @@ class LootTemplateAdmin(CommonAdmin):
         (
             _("Traductions"),
             dict(
-                fields=(("name_fr", "name_en"), ("title_fr", "title_en"), ("description_fr", "description_en")),
+                fields=(
+                    ("name_fr", "name_en"),
+                    ("title_fr", "title_en"),
+                    "description_fr",
+                    "description_en",
+                ),
                 classes=(
                     "wide",
                     "collapse",
