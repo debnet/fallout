@@ -15,6 +15,9 @@ from fallout.enums import *  # noqa
 from fallout.forms import *  # noqa
 from fallout.models import *  # noqa
 
+
+admin.site.site_header = _("Fallout RPG")
+
 # Niveaux des messages en fonction du jet de compétence (success, critical)
 ROLL_LEVELS = {
     (False, True): messages.ERROR,
@@ -98,10 +101,8 @@ class CampaignAdmin(CommonAdmin):
             _("Informations techniques"),
             dict(
                 fields=(
-                    (
-                        "start_game_date",
-                        "current_game_date",
-                    ),
+                    "start_game_date",
+                    "current_game_date",
                     "current_character",
                 ),
                 classes=("wide",),

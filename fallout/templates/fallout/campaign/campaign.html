@@ -10,6 +10,9 @@
     <a class="dropdown-item" href="{% url 'admin:fallout_campaign_add' %}">{% trans "Ajouter une campagne" %}</a>
     {% if campaign %}
     <a class="dropdown-item" href="{% url 'admin:fallout_campaign_change' campaign.id %}">{% trans "Modifier la campagne" %}</a>
+    <a class="dropdown-item" href="{% url 'fallout:create_character' campaign.id %}">{% trans "Créer un personnage" %}</a>
+    {% else %}
+    <a class="dropdown-item" href="{% url 'fallout:create_character' %}">{% trans "Créer un personnage" %}</a>
     {% endif %}
     <a class="dropdown-item" href="{% url 'admin:fallout_character_add' %}?campaign={{ campaign.id }}">{% trans "Ajouter un personnage" %}</a>
 {% endblock %}

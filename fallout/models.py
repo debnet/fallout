@@ -1036,6 +1036,7 @@ class Character(Entity, BaseStatistics):
         :param save: Sauvegarde le personnage ?
         :return: Rien
         """
+        points = points or 40
         race = RACES_STATS.get(self.race) or RACES_STATS.get(RACE_HUMAN)
         points_min = points_max = 0
         for stat in LIST_SPECIALS:
@@ -1074,8 +1075,8 @@ class Character(Entity, BaseStatistics):
             self.skill_points = self.perk_points = self.max_health = 0
             for skill in LIST_SKILLS:
                 setattr(self, skill, 0)
-        # Experience points for the targetted level
-        level = level or self.level
+        # Experience points for the targeted level
+        level = level or self.level or 1
         self.level = 1
         self.experience = sum((lvl - 1) * BASE_XP for lvl in range(2, level + 1))
         self.check_level()
@@ -1155,7 +1156,7 @@ class Character(Entity, BaseStatistics):
         if equiped_weapon and ammo:
             equiped_weapon.reload(is_action=False)
 
-    def generate_stats(self, reset: bool = True, save: bool = True) -> None:
+    def generate_stats(self, reset: bool = True, save: bool = True, **kwargs) -> None:
         """
         Génère définitivement les statistiques secondaires et les affecte au personnage
         :param reset: Réinitialise les compétences à 0 ?
@@ -1196,7 +1197,12 @@ class Character(Entity, BaseStatistics):
             self.save(reset=False)
 
     def update_needs(
-        self, hours: float = 0.0, radiation: int = 0, resting: bool = True, needs: bool = True, save: bool = True
+        self,
+        hours: float = 0.0,
+        radiation: int = 0,
+        resting: bool = True,
+        needs: bool = True,
+        save: bool = True,
     ) -> List["DamageHistory"]:
         """
         Mise à jour des besoins
@@ -1262,6 +1268,8 @@ class Character(Entity, BaseStatistics):
         :param empty: Vide l'inventaire du joueur ?
         :return: Liste des butins
         """
+        if not self.pk:
+            return
         loots = []
         for equipement in self.inventory.exclude(slot=""):
             equipement.equip(is_action=False)
@@ -1504,7 +1512,7 @@ class Character(Entity, BaseStatistics):
             if log and not simulation:
                 history.save()
             return history
-        # Targetted body part modifiers and equipment
+        # Targeted body part modifiers and equipment
         roll_modifier = int(round((5 - self.stats.luck) * LUCK_ROLL_MULT, 0))
         body_part = target_part
         if not target_part:
@@ -1570,8 +1578,8 @@ class Character(Entity, BaseStatistics):
             attacker_range_stats = SPECIAL_STRENGTH if attacker_weapon.is_throwable else SPECIAL_PERCEPTION
             attacker_hit_chance += RANGED_NORMAL_MULT * getattr(self.stats, attacker_range_stats, 0)
             attacker_hit_chance -= target_range * RANGED_MALUS_MULT
-        # Targetted hit chance modifier
-        if target_part:  # Hit chance malus are only for targetted shot
+        # Targeted hit chance modifier
+        if target_part:  # Hit chance malus are only for targeted shot
             attacker_hit_chance += melee_hit_modifier if is_melee else ranged_hit_modifier
         # Hit chance modifiers
         attacker_hit_chance += getattr(attacker_weapon, "hit_chance_modifier", 0)  # Weapon hit_count chance modifier

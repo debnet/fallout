@@ -1,5 +1,6 @@
 {% extends "fallout/base.html" %}
 {% load static i18n %}
+{% get_current_language as LANGUAGE_CODE %}
 
 {% block navbar %}
     {% with campaign=character.campaign %}

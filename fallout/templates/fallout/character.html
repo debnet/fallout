@@ -1,0 +1,280 @@
+{% extends "fallout/base.html" %}
+{% load static i18n custom %}
+{% get_current_language as LANGUAGE_CODE %}
+
+{% block navbar %}
+    <ul class="navbar-nav mr-auto"></ul>
+{% endblock %}
+
+{% block content %}
+    {% if form.errors %}
+    <div class="alert alert-danger">
+        {% for field, label in form.errors.items %}
+        <p>{{ label }}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+    <form method="post" action="{{ request.path }}">
+        <div class="row">
+            <div class="col-xl-4 col-lg-4 col-md-6 col-12">
+                <table class="table table-sm table-striped">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th colspan="2" class="text-center">{% trans "Informations générales" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <label for="{{ form.name.id_for_label }}" class="d-inline">
+                                    {{ form.name.label }}
+                                </label>
+                            </td>
+                            <td class="text-right">
+                                {{ form.name }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label for="{{ form.race.id_for_label }}" class="d-inline">
+                                    {{ form.race.label }}
+                                </label>
+                            </td>
+                            <td class="text-right">
+                                {{ form.race }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label for="{{ form.level.id_for_label }}" class="d-inline">
+                                    {{ form.level.label }}
+                                </label>
+                            </td>
+                            <td class="text-right">
+                                {{ form.level|add_class:"ismall" }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label for="{{ form.strength.id_for_label }}" class="d-inline">
+                                    {{ form.strength.label }}
+                                </label>
+                            </td>
+                            <td class="text-right">
+                                {{ form.strength|add_class:"ismall" }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label for="{{ form.perception.id_for_label }}" class="d-inline">
+                                    {{ form.perception.label }}
+                                </label>
+                            </td>
+                            <td class="text-right">
+                                {{ form.perception|add_class:"ismall" }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label for="{{ form.endurance.id_for_label }}" class="d-inline">
+                                    {{ form.endurance.label }}
+                                </label>
+                            </td>
+                            <td class="text-right">
+                                {{ form.endurance|add_class:"ismall" }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label for="{{ form.charisma.id_for_label }}" class="d-inline">
+                                    {{ form.charisma.label }}
+                                </label>
+                            </td>
+                            <td class="text-right">
+                                {{ form.charisma|add_class:"ismall" }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label for="{{ form.intelligence.id_for_label }}" class="d-inline">
+                                    {{ form.intelligence.label }}
+                                </label>
+                            </td>
+                            <td class="text-right">
+                                {{ form.intelligence|add_class:"ismall" }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label for="{{ form.agility.id_for_label }}" class="d-inline">
+                                    {{ form.agility.label }}
+                                </label>
+                            </td>
+                            <td class="text-right">
+                                {{ form.agility|add_class:"ismall" }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label for="{{ form.luck.id_for_label }}" class="d-inline">
+                                    {{ form.luck.label }}
+                                </label>
+                            </td>
+                            <td class="text-right">
+                                {{ form.luck|add_class:"ismall" }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label for="{{ form.points.id_for_label }}" class="d-inline">
+                                    {{ form.points.label }}
+                                </label>
+                            </td>
+                            <td class="text-right">
+                                {{ form.points|add_class:"ismall" }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label for="{{ form.rate.id_for_label }}" class="d-inline">
+                                    {{ form.rate.label }}
+                                </label>
+                            </td>
+                            <td class="text-right">
+                                {{ form.rate|add_class:"ismall" }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-xl-4 col-lg-4 col-md-6 col-12">
+                <table class="table table-sm table-striped">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th colspan="2" class="text-center">{% trans "Compétences" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <label for="{{ form.tag_skills.id_for_label }}" class="d-inline">
+                                    {{ form.tag_skills.label }}
+                                </label>
+                            </td>
+                            <td class="">
+                                {{ form.tag_skills }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-xl-4 col-lg-4 col-md-6 col-12">
+                <table class="table table-sm table-striped">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th colspan="2" class="text-center">{% trans "Equipement" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <label for="{{ form.armor.id_for_label }}" class="d-inline">
+                                    {{ form.armor.label }}
+                                </label>
+                            </td>
+                            <td class="text-right">
+                                {{ form.armor|add_class:"select2" }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label for="" class="d-inline">
+                                    {% trans "Condition d'armure" %}
+                                </label>
+                            </td>
+                            <td class="text-right">
+                                {{ form.armor_min_condition|add_class:"ismall" }}
+                                &dash;
+                                {{ form.armor_max_condition|add_class:"ismall" }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label for="{{ form.helmet.id_for_label }}" class="d-inline">
+                                    {{ form.helmet.label }}
+                                </label>
+                            </td>
+                            <td class="text-right">
+                                {{ form.helmet|add_class:"select2" }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label for="" class="d-inline">
+                                    {% trans "Condition de casque" %}
+                                </label>
+                            </td>
+                            <td class="text-right">
+                                {{ form.helmet_min_condition|add_class:"ismall" }}
+                                &dash;
+                                {{ form.helmet_max_condition|add_class:"ismall" }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label for="{{ form.weapon.id_for_label }}" class="d-inline">
+                                    {{ form.weapon.label }}
+                                </label>
+                            </td>
+                            <td class="text-right">
+                                {{ form.weapon|add_class:"select2" }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label for="" class="d-inline">
+                                    {% trans "Condition d'arme" %}
+                                </label>
+                            </td>
+                            <td class="text-right">
+                                {{ form.weapon_min_condition|add_class:"ismall" }}
+                                &dash;
+                                {{ form.weapon_max_condition|add_class:"ismall" }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label for="{{ form.ammo.id_for_label }}" class="d-inline">
+                                    {{ form.ammo.label }}
+                                </label>
+                            </td>
+                            <td class="text-right">
+                                {{ form.ammo|add_class:"select2" }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label for="" class="d-inline">
+                                    {% trans "Nombre de munitions" %}
+                                </label>
+                            </td>
+                            <td class="text-right">
+                                {{ form.ammo_min_count|add_class:"ismall" }}
+                                &dash;
+                                {{ form.ammo_max_count|add_class:"ismall" }}
+                            </td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th colspan="2" class="text-right">
+                                <button type="submit" class="btn btn-sm btn-success">{% trans "OK" %}</button>
+                                {% csrf_token %}
+                            </th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </form>
+{% endblock %}

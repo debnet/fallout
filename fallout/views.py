@@ -1,5 +1,5 @@
 # coding: utf-8
-from common.utils import ajax_request, render_to
+from common.utils import ajax_request, render_to, to_object
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
@@ -12,6 +12,7 @@ from rest_framework.authtoken.models import Token
 
 from fallout.enums import *  # noqa
 from fallout.models import *  # noqa
+from fallout.forms import QuickCreateCharacterForm
 
 
 @login_required
@@ -50,6 +51,9 @@ def view_dashboard(request, campaign_id):
     if not request.user.is_superuser:
         campaigns = campaigns.filter(Q(characters__player=request.user) | Q(game_master=request.user))
     campaign = campaigns.filter(id=campaign_id).first()
+    if not campaign:
+        raise Http404()
+
     characters = Character.objects.select_related("player", "statistics", "campaign__current_character").filter(
         campaign=campaign, is_active=True
     )
@@ -112,6 +116,9 @@ def view_campaign(request, campaign_id):
     if not request.user.is_superuser:
         campaigns = campaigns.filter(Q(characters__player=request.user) | Q(game_master=request.user))
     campaign = campaigns.filter(id=campaign_id).first()
+    if not campaign:
+        raise Http404()
+
     characters = Character.objects.select_related("player", "statistics", "campaign__current_character").filter(
         campaign=campaign, is_active=True
     )
@@ -390,7 +397,9 @@ def view_character(request, character_id):
                         if not character.has_stats:
                             character.generate_stats(reset=True, save=False)
                         character.randomize_stats(
-                            level=int(data.get("level") or 1), rate=int(data.get("rate") or 0) / 100.0, save=True
+                            level=int(data.get("level") or 1),
+                            rate=int(data.get("rate") or 0) / 100.0,
+                            save=True,
                         )
             elif authorized and type == "fight" and data.get("target"):
                 result = character.fight(
@@ -747,3 +756,38 @@ def view_campaign_rolls(request, campaign_id):
     )
     rolls = sorted(list(rolls) + list(damages) + list(fights), key=lambda r: r.date, reverse=True)[:limit]
     return {"rolls": rolls}
+
+
+@login_required
+@render_to("fallout/items.html")
+def items(request):
+    return {"items": Item.objects.prefetch_related("modifiers").order_by("type", "name")}
+
+
+@login_required
+@render_to("fallout/character.html")
+def create_character(request, campaign_id=None):
+    campaign = Campaign.objects.filter(id=campaign_id).first()
+    if campaign_id and not campaign:
+        raise Http404()
+    if request.user and (request.user.is_superuser or (campaign and campaign.game_master_id == request.user.id)):
+        raise Http404()
+
+    form = QuickCreateCharacterForm(request.POST or None, request.FILES or None)
+    if request.method == "POST" and form.is_valid():
+        data = to_object(form.cleaned_data)
+        character = Character.objects.create(
+            name=data.name,
+            race=data.race,
+            campaign_id=campaign_id,
+            has_stats=False,
+            has_needs=False,
+        )
+        if data.points:
+            character.randomize_special(**form.cleaned_data, save=False)
+        character.generate_stats(**form.cleaned_data, save=False)
+        character.randomize_stats(**form.cleaned_data, save=False)
+        character.equip(**form.cleaned_data)
+        character.save()
+        return redirect("fallout:character", character.id)
+    return {"form": form}

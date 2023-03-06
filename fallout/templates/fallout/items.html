@@ -1,0 +1,127 @@
+{% extends "fallout/base.html" %}
+{% load static i18n %}
+{% get_current_language as LANGUAGE_CODE %}
+
+{% block navbar %}
+    <ul class="navbar-nav mr-auto"></ul>
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        {% for item in items %}
+            <div class="col-xl-3 col-lg-4 col-md-6 col-12 mb-3">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <span class="card-title">{{ item.name }}</span>
+                        {% if item.title %}
+                            <small class="card-subtitle mb-2 text-muted">{{ item.title }}</small>
+                        {% endif %}
+                        <span class="badge badge-info float-right">{{ item.get_type_display }}</span>
+                    </div>
+                    <div class="card-body">
+                        {% with image=item.image thumbnail=item.thumbnail %}
+                            {% if thumbnail %}
+                                <div class="thumbnail rounded mb-2">
+                                    <img class="img-fluid d-block m-auto" src="{% static "fallout/img/" %}{{ thumbnail }}">
+                                </div>
+                            {% elif image %}
+                                <img class="img-fluid m-auto mb-2" src="{{ image.url }}">
+                            {% endif %}
+                        {% endwith %}
+                        <p class="card-text">
+                            <small class="badge badge-light">
+                                {{ item.weight|floatformat:2 }} {% trans "kg" %}
+                            </small>
+                            <small class="badge badge-warning">
+                                {{ item.value|floatformat:2 }} {% trans "¤" %}
+                            </small>
+                            {% if item.clip_size %}
+                                <small class="badge badge-danger">
+                                    {{ item.clip_size }} {% trans "rounds" %}
+                                </small>
+                            {% endif %}
+                            {% for modifier in item.modifiers.all %}
+                                <small class="badge {% if modifier.is_bonus %}badge-success{% else %}badge-danger{% endif %}">
+                                    {{ modifier.label }}
+                                </small>
+                            {% endfor %}
+                        </p>
+                        {% if item.description %}
+                            <p class="card-text">
+                                <small class="text-muted">{{ item.description }}</small>
+                            </p>
+                        {% endif %}
+                        {% if item.label_damage %}
+                            <p class="card-text">
+                                <small class="badge badge-light">
+                                    {{ item.long_label_damage }}
+                                </small>
+                                {% if item.ap_cost_reload %}
+                                    <small class="badge badge-secondary">
+                                        {{ item.ap_cost_reload }} {% trans "PA recharge" %}
+                                    </small>
+                                {% endif %}
+                                {% if item.ap_cost_normal %}
+                                    <small class="badge badge-secondary">
+                                        {{ item.ap_cost_normal }} {% trans "PA attaque" %}
+                                    </small>
+                                {% endif %}
+                                {% if item.ap_cost_target %}
+                                    <small class="badge badge-secondary">
+                                        {{ item.ap_cost_target }} {% trans "PA ciblé" %}
+                                    </small>
+                                {% endif %}
+                                {% if item.ap_cost_burst %}
+                                    <small class="badge badge-secondary">
+                                        {{ item.ap_cost_burst }} {% trans "PA rafale" %}
+                                    </small>
+                                {% endif %}
+                            </p>
+                        {% endif %}
+                        {% with resistances=item.resistances %}
+                            {% if resistances %}
+                                <div class="table-responsive">
+                                    <table class="table table-sm mb-0 small">
+                                        <thead class="thead-dark">
+                                            <tr>
+                                                <th scope="col" class="text-center font-weight-bold"
+                                                    title="{% trans "classe d'armure" %}" data-toggle="tooltip" data-placement="bottom">
+                                                    {% trans "CA" %}
+                                                </th>
+                                                {% for resistance in resistances %}
+                                                    <th scope="col" class="text-center font-weight-bold"
+                                                        title="{{ resistance.long_label }}" data-toggle="tooltip" data-placement="bottom">
+                                                        {{ resistance.short_label }}
+                                                    </th>
+                                                {% endfor %}
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td class="text-center" rowspan="2">
+                                                    <strong>{{ item.armor_class }}</strong>
+                                                </td>
+                                                {% for resistance in resistances %}
+                                                    <td class="text-center">
+                                                        {{ resistance.threshold }}
+                                                    </td>
+                                                {% endfor %}
+                                            </tr>
+                                            <tr>
+                                                {% for resistance in resistances %}
+                                                    <td class="text-center">
+                                                        {{ resistance.resistance }}%
+                                                    </td>
+                                                {% endfor %}
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% endif %}
+                        {% endwith %}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

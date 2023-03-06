@@ -14,6 +14,8 @@ $(document).ready(function($) {
         input.prop('disabled', !checked);
     });
 
+    // Génération des listes avec recherche
+    $('.select2').select2();
     $('a[data-toggle="tab"]').on('shown.bs.tab', function (event) {
         localStorage.activePanel = event.target.id;
         $('.select2').select2();

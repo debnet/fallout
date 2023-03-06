@@ -1,6 +1,7 @@
 # coding: utf-8
 from django import forms
 from django.utils.translation import gettext_lazy as _
+from multiselectfield.forms.fields import MultiSelectFormField
 
 from fallout.enums import *  # noqa
 from fallout.models import *  # noqa
@@ -93,7 +94,7 @@ class RandomizeCharacterSpecialForm(forms.Form):
     Formulaire pour randomiser le SPECIAL d'un personnage
     """
 
-    points = forms.IntegerField(min_value=1, initial=40, label=_("Points"))
+    points = forms.IntegerField(min_value=1, initial=40, required=False, label=_("Points"))
 
 
 class RandomizeCharacterStatsForm(forms.Form):
@@ -102,13 +103,30 @@ class RandomizeCharacterStatsForm(forms.Form):
     """
 
     level = forms.IntegerField(min_value=0, initial=0, label=_("Niveau"))
-    rate = forms.FloatField(min_value=0.0, max_value=1.0, initial=1.0, label=_("Ratio"))
+    rate = forms.FloatField(min_value=0.0, max_value=1.0, initial=0.5, label=_("Ratio"))
 
 
 class RandomizeCharacterForm(EquipCharacterForm, RandomizeCharacterStatsForm, RandomizeCharacterSpecialForm):
     """
     Formulaire pour générer aléatoirement un nouveau personnage et son équipement
     """
+
+
+class QuickCreateCharacterForm(RandomizeCharacterForm):
+    """
+    Formulaire pour créer rapidement un personnage
+    """
+
+    name = forms.CharField(label=_("Nom"))
+    race = forms.ChoiceField(choices=RACES, label=_("Race"))
+    strength = forms.IntegerField(min_value=1, required=False, label=_("Force"))
+    perception = forms.IntegerField(min_value=1, required=False, label=_("Perception"))
+    endurance = forms.IntegerField(min_value=1, required=False, label=_("Endurance"))
+    charisma = forms.IntegerField(min_value=1, required=False, label=_("Charisme"))
+    intelligence = forms.IntegerField(min_value=1, required=False, label=_("Intelligence"))
+    agility = forms.IntegerField(min_value=1, required=False, label=_("Agilité"))
+    luck = forms.IntegerField(min_value=1, required=False, label=_("Chance"))
+    tag_skills = MultiSelectFormField(choices=SKILLS, required=False, label=_("Spécialités"))
 
 
 __all__ = (
@@ -121,4 +139,5 @@ __all__ = (
     "RandomizeCharacterSpecialForm",
     "RandomizeCharacterStatsForm",
     "RandomizeCharacterForm",
+    "QuickCreateCharacterForm",
 )

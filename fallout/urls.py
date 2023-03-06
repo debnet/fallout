@@ -15,4 +15,7 @@ urlpatterns = [
     path("next_turn/<int:campaign_id>/", views.next_turn, name="next_turn"),
     path("simulation/", views.simulation, name="simulation"),
     path("thumbnails/", views.thumbnails, name="thumbnails"),
+    path("items/", views.items, name="items"),
+    path("campaign/<int:campaign_id>/create/", views.create_character, name="create_character"),
+    path("create/", views.create_character, name="create_character"),
 ]
