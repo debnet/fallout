@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-02-08 21:43+0100\n"
+"POT-Creation-Date: 2023-03-06 21:41+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Marc Debureaux <marc@debnet.fr>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,6 +17,9 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Fallout RPG"
+msgstr "Fallout RPG"
 
 msgid "Fallout"
 msgstr "Fallout"
@@ -330,9 +333,6 @@ msgstr "suffix"
 
 msgid "titre"
 msgstr "title"
-
-msgid "Fallout RPG"
-msgstr "Fallout RPG"
 
 msgid "santé"
 msgstr "health"
@@ -967,6 +967,30 @@ msgstr "Level"
 msgid "Ratio"
 msgstr "Ratio"
 
+msgid "Race"
+msgstr ""
+
+msgid "Force"
+msgstr "Strength"
+
+msgid "Perception"
+msgstr "Perception"
+
+msgid "Endurance"
+msgstr "Endurance"
+
+msgid "Charisme"
+msgstr "Charisma"
+
+msgid "Intelligence"
+msgstr "Intelligence"
+
+msgid "Agilité"
+msgstr "Agility"
+
+msgid "Chance"
+msgstr "Luck"
+
 msgid "Importe des créatures"
 msgstr "Import creatures"
 
@@ -1138,6 +1162,9 @@ msgstr "player?"
 
 msgid "stats calculées ?"
 msgstr "calculated stats?"
+
+msgid "butin au décès ?"
+msgstr ""
 
 msgid "regénération"
 msgstr "regeneration"
@@ -1657,6 +1684,9 @@ msgstr "Add a campaign"
 msgid "Modifier la campagne"
 msgstr "Edit the campaign"
 
+msgid "Créer un personnage"
+msgstr "Create a character"
+
 msgid "Ajouter un personnage"
 msgstr "Add a character"
 
@@ -1862,6 +1892,24 @@ msgstr "Mod"
 msgid "XP"
 msgstr "XP"
 
+msgid "Equipement"
+msgstr "Equipment"
+
+msgid "Condition d'armure"
+msgstr "Armor condition"
+
+msgid "Condition de casque"
+msgstr "Helmet condition"
+
+msgid "Condition d'arme"
+msgstr "Weapon condition"
+
+msgid "Nombre de munitions"
+msgstr "Ammo count"
+
+msgid "OK"
+msgstr "OK"
+
 msgid "Infliger des dégâts à des personnages"
 msgstr "Damage characters"
 
@@ -1915,9 +1963,6 @@ msgstr "Health points"
 
 msgid "Se repose ?"
 msgstr "Resting?"
-
-msgid "OK"
-msgstr "OK"
 
 msgid "Attaque en rafale"
 msgstr "Burst attack"
@@ -2075,6 +2120,9 @@ msgstr "The"
 
 msgid "par"
 msgstr "by"
+
+msgid "coups"
+msgstr "rounds"
 
 msgid "Connectez-vous !"
 msgstr "Log in!"
