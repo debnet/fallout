@@ -51,7 +51,7 @@ def view_dashboard(request, campaign_id):
     if not request.user.is_superuser:
         campaigns = campaigns.filter(Q(characters__player=request.user) | Q(game_master=request.user))
     campaign = campaigns.filter(id=campaign_id).first()
-    if not campaign:
+    if campaign_id and not campaign:
         raise Http404()
 
     characters = Character.objects.select_related("player", "statistics", "campaign__current_character").filter(
@@ -116,7 +116,7 @@ def view_campaign(request, campaign_id):
     if not request.user.is_superuser:
         campaigns = campaigns.filter(Q(characters__player=request.user) | Q(game_master=request.user))
     campaign = campaigns.filter(id=campaign_id).first()
-    if not campaign:
+    if campaign_id and not campaign:
         raise Http404()
 
     characters = Character.objects.select_related("player", "statistics", "campaign__current_character").filter(
