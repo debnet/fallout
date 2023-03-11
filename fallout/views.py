@@ -770,7 +770,7 @@ def create_character(request, campaign_id=None):
     campaign = Campaign.objects.filter(id=campaign_id).first()
     if campaign_id and not campaign:
         raise Http404()
-    if request.user and (request.user.is_superuser or (campaign and campaign.game_master_id == request.user.id)):
+    if not (request.user and (request.user.is_superuser or (campaign and campaign.game_master_id == request.user.id))):
         raise Http404()
 
     form = QuickCreateCharacterForm(request.POST or None, request.FILES or None)

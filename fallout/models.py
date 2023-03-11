@@ -602,7 +602,7 @@ class Character(Entity, BaseStatistics):
     Personnage
     """
 
-    # Technical informations
+    # Technical information
     player = models.ForeignKey(
         "Player", blank=True, null=True, on_delete=models.SET_NULL, related_name="characters", verbose_name=_("joueur")
     )
@@ -1954,7 +1954,8 @@ class Character(Entity, BaseStatistics):
         # Remove stats in cache
         if reset:
             Character.reset_stats(self)
-        if self.pk:
+        newly_created = not self.pk
+        if not newly_created:
             # Fixing health and action points
             self.health = (
                 self.stats.max_health
@@ -1971,11 +1972,8 @@ class Character(Entity, BaseStatistics):
                 if not campaign_id:
                     continue
                 Campaign.objects.filter(id=campaign_id).update(current_character=None)
-        else:
-            self.health = self.stats.max_health
-            self.action_points = self.stats.max_action_points
         # Loot character if NPC
-        if self.is_active and self.health <= 0 and not self.is_player:
+        if not newly_created and self.is_active and self.health <= 0 and not self.is_player:
             if self.loot_on_death:
                 self.loot(empty=True)
             self.is_active = False
@@ -1986,6 +1984,8 @@ class Character(Entity, BaseStatistics):
         self.sleep = min(max(self.sleep, 0), 1000)
         self.money = max(self.money, 0)
         super().save(*args, **kwargs)
+        if newly_created:
+            self.heal()
 
     def get_absolute_url(self):
         """
