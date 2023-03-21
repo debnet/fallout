@@ -1,8 +1,20 @@
 {% load i18n %}
 
 <ul class="navbar-nav mr-auto">
+    {% if campaign and page != "campaign" %}
+    {% if authorized or campaigns|length > 1 %}
+    <li class="nav-item" title="{% trans "Campagne courante" %}">
+        <a class="nav-link{% if page == 'campaign' %} active{% endif %}"
+           href="{% url 'fallout:campaign' campaign.id %}">
+            <span class="d-inline d-lg-none">{% trans "Campagne courante" %}</span>
+            <span class="d-none d-lg-inline">▶</span>
+        </a>
+    </li>
+    {% endif %}
+    {% endif %}
+    {% if authorized or campaigns|length > 1 %}
     <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle{% if page in 'campaign,dashboard' %} active{% endif %}"
+        <a class="nav-link dropdown-toggle{% if page == 'campaign' %} active{% endif %}"
            id="campaign-navbar" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             {{ campaign.name|default:_("Aucune campagne") }}
         </a>
@@ -29,6 +41,15 @@
             {% endwith %}
         </div>
     </li>
+    {% else %}
+    <li class="nav-item">
+        <a class="nav-link{% if page == 'campaign' %} active{% endif %}"
+           href="{% url 'fallout:campaign' campaign.id %}">
+            {{ campaign.name }}
+        </a>
+    </li>
+    {% endif %}
+    {% if authorized or characters|length > 1 %}
     <li class="nav-item dropdown">
         <a class="nav-link dropdown-toggle{% if not characters %} disabled{% endif %}{% if page == 'character' %} active{% endif %}"
            id="campaign-navbar" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -61,54 +82,59 @@
             {% endwith %}
         </div>
     </li>
-    {% if campaign %}
-        <li class="nav-item">
-            <a class="nav-link{% if page == 'campaign' %} active{% endif %}"
-               href="{% url 'fallout:campaign' campaign.id %}">
-                {% trans "Campagne courante" %}
-            </a>
-        </li>
-        {% if authorized %}
-        <li class="nav-item">
-            <a class="nav-link{% if page == 'dashboard' %} active{% endif %}"
-               href="{% url 'fallout:dashboard' campaign.id %}">
-                {% trans "Tableau de bord" %}
-            </a>
-        </li>
-        {% endif %}
+    {% else %}
+    <li class="nav-item">
+        <a class="nav-link{% if page == 'character' %} active{% endif %}"
+           href="{% url 'fallout:character' characters.0.id %}">
+            {{ characters.0.name }}
+        </a>
+    </li>
+    {% endif %}
+    {% if campaign and authorized %}
+    <li class="nav-item">
+        <a class="nav-link{% if page == 'dashboard' %} active{% endif %}"
+           href="{% url 'fallout:dashboard' campaign.id %}">
+            {% trans "Tableau de bord" %}
+        </a>
+    </li>
+    {% endif %}
+    {% if request.user.is_authenticated %}
+    <li class="nav-item">
+        <a class="nav-link" href="{% url "logout" %}">{% trans "Se déconnecter" %}</a>
+    </li>
     {% endif %}
 </ul>
 {% if campaign %}
-    <form class="form-inline" method="post" action="{% url 'fallout:next_turn' campaign.id %}">
-        <label class="text-white">
-            {{ campaign.current_game_date }}
-            {% with current=campaign.current_character %}
-                {% if current %}
-                    (&nbsp;<a class="{% if current.is_player %}text-success{% else %}text-warning{% endif %}"
-                        href="{% url 'fallout:character' current.id %}">{{ current }}</a>&nbsp;)
-                {% endif %}
-            {% endwith %}
-        </label>
-        {% if authorized %}
-            <select class="form-control form-control-sm custom-select custom-select-sm ilarge ml-2 mr-2" name="seconds">
-                <option value="0" selected="selected">{% trans "0 s" %}</option>
-                <option value="30">{% trans "30 s" %}</option>
-                <option value="60">{% trans "1 mn" %}</option>
-                <option value="120">{% trans "2 mn" %}</option>
-                <option value="300">{% trans "5 mn" %}</option>
-                <option value="600">{% trans "10 mn" %}</option>
-                <option value="1200">{% trans "20 mn" %}</option>
-                <option value="1800">{% trans "30 mn" %}</option>
-                <option value="3600">{% trans "1 h" %}</option>
-            </select>
-            <button class="btn btn-success btn-sm" name="next">{% trans "Tour suivant" %}</button>
-            {% if campaign.current_character %}
-                <button class="btn btn-warning btn-sm ml-2" name="cancel">{% trans "Annuler" %}</button>
+<form class="form-inline my-2" method="post" action="{% url 'fallout:next_turn' campaign.id %}">
+    <label class="text-white">
+        {{ campaign.current_game_date }}
+        {% with current=campaign.current_character %}
+            {% if current %}
+                (&nbsp;<a class="{% if current.is_player %}text-success{% else %}text-warning{% endif %}"
+                    href="{% url 'fallout:character' current.id %}">{{ current }}</a>&nbsp;)
             {% endif %}
-            <input type="hidden" name="page" value="{{ request.path }}" />
-            {% csrf_token %}
+        {% endwith %}
+    </label>
+    {% if authorized %}
+        <select class="form-control form-control-sm custom-select custom-select-sm ilarge ml-2 mr-2" name="seconds">
+            <option value="0" selected="selected">{% trans "0 s" %}</option>
+            <option value="30">{% trans "30 s" %}</option>
+            <option value="60">{% trans "1 mn" %}</option>
+            <option value="120">{% trans "2 mn" %}</option>
+            <option value="300">{% trans "5 mn" %}</option>
+            <option value="600">{% trans "10 mn" %}</option>
+            <option value="1200">{% trans "20 mn" %}</option>
+            <option value="1800">{% trans "30 mn" %}</option>
+            <option value="3600">{% trans "1 h" %}</option>
+        </select>
+        <button class="btn btn-success btn-sm" name="next">{% trans "Tour suivant" %}</button>
+        {% if campaign.current_character %}
+            <button class="btn btn-warning btn-sm ml-2" name="cancel">{% trans "Annuler" %}</button>
         {% endif %}
-        <button type="button" class="btn btn-sm btn-secondary ml-2" data-toggle="modal" data-target="#diceroll"
-            title="{% trans "Lancer les dés (CTRL+ESPACE)" %}">{% trans "Dés" %}</button>
-    </form>
+        <input type="hidden" name="page" value="{{ request.path }}" />
+        {% csrf_token %}
+    {% endif %}
+    <button type="button" class="btn btn-sm btn-secondary ml-2" data-toggle="modal" data-target="#diceroll"
+        title="{% trans "Lancer les dés (CTRL+ESPACE)" %}">{% trans "Dés" %}</button>
+</form>
 {% endif %}

@@ -20,6 +20,9 @@ def view_index(request):
     """
     Page d'accueil
     """
+    characters = Character.objects.filter(player=request.user).values_list("id", flat=True)
+    if len(characters) == 1:
+        return view_character(request, characters[0])
     return view_campaign(request, 0)
 
 
