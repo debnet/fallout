@@ -1,7 +1,7 @@
 # coding: utf-8
 # flake8: noqa
 __all__ = []
-__version__ = "2022.2.1"
+__version__ = "2023.10.1"
 
 try:
     # Get celery configuration

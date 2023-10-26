@@ -1259,7 +1259,7 @@ class Character(Entity, BaseStatistics):
         if log:
             history.save()
         if xp:
-            self.add_experience(XP_GAIN_ROLL[history.success])
+            self.add_experience(XP_GAIN_ROLL[history.success] * self.level)
         return history
 
     def loot(self, empty: bool = True) -> Optional[List["Loot"]]:
