@@ -5892,7 +5892,7 @@
         "critical_modifier": 0,
         "critical_raw_modifier": 0,
         "critical_damage": 0,
-        "critical_damage_modifier": 0,,
+        "critical_damage_modifier": 0,
         "armor_class": 0,
         "effects": [],
         "ammunitions": []
@@ -5976,7 +5976,7 @@
         "critical_modifier": 0,
         "critical_raw_modifier": 0,
         "critical_damage": 0,
-        "critical_damage_modifier": 0,,
+        "critical_damage_modifier": 0,
         "armor_class": 0,
         "effects": [],
         "ammunitions": []
@@ -6060,7 +6060,7 @@
         "critical_modifier": 0,
         "critical_raw_modifier": 0,
         "critical_damage": 0,
-        "critical_damage_modifier": 0,,
+        "critical_damage_modifier": 0,
         "armor_class": 0,
         "effects": [],
         "ammunitions": []
@@ -6144,7 +6144,7 @@
         "critical_modifier": 0,
         "critical_raw_modifier": 0,
         "critical_damage": 0,
-        "critical_damage_modifier": 0,,
+        "critical_damage_modifier": 0,
         "armor_class": 0,
         "effects": [],
         "ammunitions": []
@@ -6228,7 +6228,7 @@
         "critical_modifier": 0,
         "critical_raw_modifier": 0,
         "critical_damage": 0,
-        "critical_damage_modifier": 0,,
+        "critical_damage_modifier": 0,
         "armor_class": 0,
         "effects": [],
         "ammunitions": []
@@ -6312,7 +6312,7 @@
         "critical_modifier": 0,
         "critical_raw_modifier": 0,
         "critical_damage": 0,
-        "critical_damage_modifier": 0,,
+        "critical_damage_modifier": 0,
         "armor_class": 0,
         "effects": [],
         "ammunitions": []
@@ -6396,7 +6396,7 @@
         "critical_modifier": 0,
         "critical_raw_modifier": 0,
         "critical_damage": 0,
-        "critical_damage_modifier": 0,,
+        "critical_damage_modifier": 0,
         "armor_class": 0,
         "effects": [],
         "ammunitions": []
@@ -6480,7 +6480,7 @@
         "critical_modifier": 0,
         "critical_raw_modifier": 0,
         "critical_damage": 0,
-        "critical_damage_modifier": 0,,
+        "critical_damage_modifier": 0,
         "armor_class": 0,
         "effects": [],
         "ammunitions": []
@@ -6564,7 +6564,7 @@
         "critical_modifier": 0,
         "critical_raw_modifier": 0,
         "critical_damage": 0,
-        "critical_damage_modifier": 0,,
+        "critical_damage_modifier": 0,
         "armor_class": 0,
         "effects": [],
         "ammunitions": []
@@ -6648,7 +6648,7 @@
         "critical_modifier": 0,
         "critical_raw_modifier": 0,
         "critical_damage": 0,
-        "critical_damage_modifier": 0,,
+        "critical_damage_modifier": 0,
         "armor_class": 0,
         "effects": [],
         "ammunitions": []
@@ -6732,7 +6732,7 @@
         "critical_modifier": 0,
         "critical_raw_modifier": 0,
         "critical_damage": 0,
-        "critical_damage_modifier": 0,,
+        "critical_damage_modifier": 0,
         "armor_class": 0,
         "effects": [],
         "ammunitions": []
@@ -6816,7 +6816,7 @@
         "critical_modifier": 0,
         "critical_raw_modifier": 0,
         "critical_damage": 0,
-        "critical_damage_modifier": 0,,
+        "critical_damage_modifier": 0,
         "armor_class": 0,
         "effects": [],
         "ammunitions": []
@@ -6900,7 +6900,7 @@
         "critical_modifier": 0,
         "critical_raw_modifier": 0,
         "critical_damage": 0,
-        "critical_damage_modifier": 0,,
+        "critical_damage_modifier": 0,
         "armor_class": 0,
         "effects": [],
         "ammunitions": [
@@ -6986,7 +6986,7 @@
         "critical_modifier": 0,
         "critical_raw_modifier": 0,
         "critical_damage": 0,
-        "critical_damage_modifier": 0,,
+        "critical_damage_modifier": 0,
         "armor_class": 0,
         "effects": [],
         "ammunitions": [
@@ -7072,7 +7072,7 @@
         "critical_modifier": 0,
         "critical_raw_modifier": 0,
         "critical_damage": 0,
-        "critical_damage_modifier": 0,,
+        "critical_damage_modifier": 0,
         "armor_class": 0,
         "effects": [],
         "ammunitions": [
@@ -7158,7 +7158,7 @@
         "critical_modifier": 0,
         "critical_raw_modifier": 0,
         "critical_damage": 0,
-        "critical_damage_modifier": 0,,
+        "critical_damage_modifier": 0,
         "armor_class": 0,
         "effects": [],
         "ammunitions": []
@@ -7242,7 +7242,7 @@
         "critical_modifier": 0,
         "critical_raw_modifier": 0,
         "critical_damage": 0,
-        "critical_damage_modifier": 0,,
+        "critical_damage_modifier": 0,
         "armor_class": 0,
         "effects": [],
         "ammunitions": []
@@ -7326,7 +7326,7 @@
         "critical_modifier": 0,
         "critical_raw_modifier": 0,
         "critical_damage": 0,
-        "critical_damage_modifier": 0,,
+        "critical_damage_modifier": 0,
         "armor_class": 0,
         "effects": [],
         "ammunitions": [
@@ -7412,7 +7412,7 @@
         "critical_modifier": 0,
         "critical_raw_modifier": 0,
         "critical_damage": 0,
-        "critical_damage_modifier": 0,,
+        "critical_damage_modifier": 0,
         "armor_class": 0,
         "effects": [],
         "ammunitions": [
@@ -15004,7 +15004,7 @@
         "critical_modifier": 0,
         "critical_raw_modifier": 0,
         "critical_damage": 0,
-        "critical_damage_modifier": 0,,
+        "critical_damage_modifier": 0,
         "armor_class": 0,
         "effects": [],
         "ammunitions": []
@@ -15088,7 +15088,7 @@
         "critical_modifier": 0,
         "critical_raw_modifier": 0,
         "critical_damage": 0,
-        "critical_damage_modifier": 0,,
+        "critical_damage_modifier": 0,
         "armor_class": 0,
         "effects": [],
         "ammunitions": []
@@ -15172,7 +15172,7 @@
         "critical_modifier": 0,
         "critical_raw_modifier": 0,
         "critical_damage": 0,
-        "critical_damage_modifier": 0,,
+        "critical_damage_modifier": 0,
         "armor_class": 0,
         "effects": [],
         "ammunitions": []
@@ -15256,7 +15256,7 @@
         "critical_modifier": 0,
         "critical_raw_modifier": 0,
         "critical_damage": 0,
-        "critical_damage_modifier": 0,,
+        "critical_damage_modifier": 0,
         "armor_class": 0,
         "effects": [],
         "ammunitions": []
