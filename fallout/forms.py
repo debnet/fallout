@@ -68,22 +68,30 @@ class EquipCharacterForm(forms.Form):
     """
 
     armor = forms.ModelChoiceField(
-        required=False, queryset=Item.objects.filter(type=ITEM_ARMOR).order_by("name"), label=_("Armure")
+        required=False,
+        queryset=Item.objects.filter(type=ITEM_ARMOR).order_by("name"),
+        label=_("Armure"),
     )
     armor_min_condition = forms.IntegerField(min_value=0, max_value=100, initial=100, label=_("Condition min. armure"))
     armor_max_condition = forms.IntegerField(min_value=0, max_value=100, initial=100, label=_("Condition max. armure"))
     helmet = forms.ModelChoiceField(
-        required=False, queryset=Item.objects.filter(type=ITEM_HELMET).order_by("name"), label=_("Casque")
+        required=False,
+        queryset=Item.objects.filter(type=ITEM_HELMET).order_by("name"),
+        label=_("Casque"),
     )
     helmet_min_condition = forms.IntegerField(min_value=0, max_value=100, initial=100, label=_("Condition min. casque"))
     helmet_max_condition = forms.IntegerField(min_value=0, max_value=100, initial=100, label=_("Condition max. casque"))
     weapon = forms.ModelChoiceField(
-        required=False, queryset=Item.objects.filter(type=ITEM_WEAPON).order_by("name"), label=_("Arme")
+        required=False,
+        queryset=Item.objects.filter(type=ITEM_WEAPON).order_by("name"),
+        label=_("Arme"),
     )
     weapon_min_condition = forms.IntegerField(min_value=0, max_value=100, initial=100, label=_("Condition min. arme"))
     weapon_max_condition = forms.IntegerField(min_value=0, max_value=100, initial=100, label=_("Condition max. arme"))
     ammo = forms.ModelChoiceField(
-        required=False, queryset=Item.objects.filter(type=ITEM_AMMO).order_by("name"), label=_("Munition")
+        required=False,
+        queryset=Item.objects.filter(type=ITEM_AMMO).order_by("name"),
+        label=_("Munition"),
     )
     ammo_min_count = forms.IntegerField(min_value=0, initial=10, label=_("Nombre min. de munitions"))
     ammo_max_count = forms.IntegerField(min_value=0, initial=20, label=_("Nombre max. de munitions"))
@@ -94,7 +102,13 @@ class RandomizeCharacterSpecialForm(forms.Form):
     Formulaire pour randomiser le SPECIAL d'un personnage
     """
 
-    points = forms.IntegerField(min_value=1, initial=40, required=False, label=_("Points"))
+    points = forms.IntegerField(
+        min_value=1,
+        initial=0,
+        required=False,
+        label=_("Points"),
+        help_text=_("Ces points seront aléatoirement répartis dans le S.P.E.C.I.A.L."),
+    )
 
 
 class RandomizeCharacterStatsForm(forms.Form):
@@ -102,8 +116,19 @@ class RandomizeCharacterStatsForm(forms.Form):
     Formulaire pour randomiser les compétences d'un personnage
     """
 
-    level = forms.IntegerField(min_value=0, initial=0, label=_("Niveau"))
-    rate = forms.FloatField(min_value=0.0, max_value=1.0, initial=0.5, label=_("Ratio"))
+    level = forms.IntegerField(
+        min_value=0,
+        initial=0,
+        label=_("Niveau"),
+        help_text=_("Les points de compétences seront aléatoirement répartis pour chaque montée de niveau."),
+    )
+    balance = forms.IntegerField(
+        min_value=0,
+        max_value=100,
+        initial=50,
+        label=_("Balance"),
+        help_text=_("Pourcentage de points de compétences à répartir dans les spécialités."),
+    )
 
 
 class RandomizeCharacterForm(EquipCharacterForm, RandomizeCharacterStatsForm, RandomizeCharacterSpecialForm):

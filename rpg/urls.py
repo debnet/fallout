@@ -10,7 +10,11 @@ admin.site.site_header = "Fallout RPG"
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("login/", auth_views.LoginView.as_view(template_name="fallout/login.html"), name="login"),
+    path(
+        "login/",
+        auth_views.LoginView.as_view(template_name="fallout/login.html"),
+        name="login",
+    ),
     path("logout/", auth_views.LogoutView.as_view(), name="logout"),
     path("favicon.ico", RedirectView.as_view(url="/static/favicon.ico", permanent=True)),
     # Django REST Framework

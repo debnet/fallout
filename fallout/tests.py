@@ -51,7 +51,11 @@ def create_admin_tests():
                 test.setUpTestData = classmethod(setup)
                 tests[model] = test
 
-            setattr(test, f"test_admin_get_{url.name}", lambda s, u=url, p=pk_required: s.get(u, p))
+            setattr(
+                test,
+                f"test_admin_get_{url.name}",
+                lambda s, u=url, p=pk_required: s.get(u, p),
+            )
     return tests
 
 

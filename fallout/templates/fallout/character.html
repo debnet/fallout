@@ -49,9 +49,32 @@
                                 <label for="{{ form.level.id_for_label }}" class="d-inline">
                                     {{ form.level.label }}
                                 </label>
+                                <small class="text-muted">{{ form.level.help_text }}</small>
                             </td>
                             <td class="text-right">
                                 {{ form.level|add_class:"ismall" }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label for="{{ form.points.id_for_label }}" class="d-inline">
+                                    {{ form.points.label }}
+                                </label>
+                                <small class="text-muted">{{ form.points.help_text }}</small>
+                            </td>
+                            <td class="text-right">
+                                {{ form.points|add_class:"ismall" }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label for="{{ form.balance.id_for_label }}" class="d-inline">
+                                    {{ form.balance.label }}
+                                </label>
+                                <small class="text-muted">{{ form.balance.help_text }}</small>
+                            </td>
+                            <td class="text-right">
+                                {{ form.balance|add_class:"ismall" }}
                             </td>
                         </tr>
                         <tr>
@@ -124,26 +147,6 @@
                                 {{ form.luck|add_class:"ismall" }}
                             </td>
                         </tr>
-                        <tr>
-                            <td>
-                                <label for="{{ form.points.id_for_label }}" class="d-inline">
-                                    {{ form.points.label }}
-                                </label>
-                            </td>
-                            <td class="text-right">
-                                {{ form.points|add_class:"ismall" }}
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <label for="{{ form.rate.id_for_label }}" class="d-inline">
-                                    {{ form.rate.label }}
-                                </label>
-                            </td>
-                            <td class="text-right">
-                                {{ form.rate|add_class:"ismall" }}
-                            </td>
-                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -176,50 +179,6 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>
-                                <label for="{{ form.armor.id_for_label }}" class="d-inline">
-                                    {{ form.armor.label }}
-                                </label>
-                            </td>
-                            <td class="text-right">
-                                {{ form.armor|add_class:"select2" }}
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <label for="" class="d-inline">
-                                    {% trans "Condition d'armure" %}
-                                </label>
-                            </td>
-                            <td class="text-right">
-                                {{ form.armor_min_condition|add_class:"ismall" }}
-                                &dash;
-                                {{ form.armor_max_condition|add_class:"ismall" }}
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <label for="{{ form.helmet.id_for_label }}" class="d-inline">
-                                    {{ form.helmet.label }}
-                                </label>
-                            </td>
-                            <td class="text-right">
-                                {{ form.helmet|add_class:"select2" }}
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <label for="" class="d-inline">
-                                    {% trans "Condition de casque" %}
-                                </label>
-                            </td>
-                            <td class="text-right">
-                                {{ form.helmet_min_condition|add_class:"ismall" }}
-                                &dash;
-                                {{ form.helmet_max_condition|add_class:"ismall" }}
-                            </td>
-                        </tr>
                         <tr>
                             <td>
                                 <label for="{{ form.weapon.id_for_label }}" class="d-inline">
@@ -262,6 +221,50 @@
                                 {{ form.ammo_min_count|add_class:"ismall" }}
                                 &dash;
                                 {{ form.ammo_max_count|add_class:"ismall" }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label for="{{ form.armor.id_for_label }}" class="d-inline">
+                                    {{ form.armor.label }}
+                                </label>
+                            </td>
+                            <td class="text-right">
+                                {{ form.armor|add_class:"select2" }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label for="" class="d-inline">
+                                    {% trans "Condition d'armure" %}
+                                </label>
+                            </td>
+                            <td class="text-right">
+                                {{ form.armor_min_condition|add_class:"ismall" }}
+                                &dash;
+                                {{ form.armor_max_condition|add_class:"ismall" }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label for="{{ form.helmet.id_for_label }}" class="d-inline">
+                                    {{ form.helmet.label }}
+                                </label>
+                            </td>
+                            <td class="text-right">
+                                {{ form.helmet|add_class:"select2" }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label for="" class="d-inline">
+                                    {% trans "Condition de casque" %}
+                                </label>
+                            </td>
+                            <td class="text-right">
+                                {{ form.helmet_min_condition|add_class:"ismall" }}
+                                &dash;
+                                {{ form.helmet_max_condition|add_class:"ismall" }}
                             </td>
                         </tr>
                     </tbody>

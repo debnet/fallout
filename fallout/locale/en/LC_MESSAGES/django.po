@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-21 20:00+0100\n"
+"POT-Creation-Date: 2023-11-13 23:15+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Marc Debureaux <marc@debnet.fr>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -29,9 +29,6 @@ msgstr "General informations"
 
 msgid "Informations techniques"
 msgstr "Technical informations"
-
-msgid "Traductions"
-msgstr "Translations"
 
 msgid "Effets"
 msgstr "Effects"
@@ -61,7 +58,7 @@ msgid "Dupliquer les personnages sélectionnés"
 msgstr "Duplicate selected characters"
 
 msgid "Faire un jet de compétence"
-msgstr "Make a skill role"
+msgstr "Make a skill roll"
 
 msgid "Infliger des dégâts aux personnages sélectionnés"
 msgstr "Damage selected characters"
@@ -283,11 +280,11 @@ msgstr "points"
 msgid "niveau"
 msgstr "level"
 
-msgid "taux"
-msgstr "rate"
+msgid "balance"
+msgstr "balance"
 
 msgid "reset ?"
-msgstr ""
+msgstr "reset?"
 
 msgid "objet"
 msgstr "item"
@@ -327,6 +324,9 @@ msgstr "maximum"
 
 msgid "CSS"
 msgstr "CSS"
+
+msgid "taux"
+msgstr "rate"
 
 msgid "suffixe"
 msgstr "suffix"
@@ -961,14 +961,23 @@ msgstr "Max. ammo count"
 msgid "Points"
 msgstr "Points"
 
+msgid "Ces points seront aléatoirement répartis dans le S.P.E.C.I.A.L."
+msgstr "These points will be randomly distributed in the S.P.E.C.I.A.L."
+
 msgid "Niveau"
 msgstr "Level"
 
-msgid "Ratio"
-msgstr "Ratio"
+msgid "Les points de compétences seront aléatoirement répartis pour chaque montée de niveau."
+msgstr "Skill points will be randomly distributed for each level up."
+
+msgid "Balance"
+msgstr "Balance"
+
+msgid "Pourcentage de points de compétences à répartir dans les spécialités."
+msgstr "Percentage of skill points to be distributed into tag skills."
 
 msgid "Race"
-msgstr ""
+msgstr "Race"
 
 msgid "Force"
 msgstr "Strength"
@@ -1164,7 +1173,7 @@ msgid "stats calculées ?"
 msgstr "calculated stats?"
 
 msgid "butin au décès ?"
-msgstr ""
+msgstr "loot on death?"
 
 msgid "regénération"
 msgstr "regeneration"
@@ -1684,11 +1693,11 @@ msgstr "Add a campaign"
 msgid "Modifier la campagne"
 msgstr "Edit the campaign"
 
-msgid "Créer un personnage"
-msgstr "Create a character"
-
 msgid "Ajouter un personnage"
 msgstr "Add a character"
+
+msgid "Créer un PNJ rapide"
+msgstr "Quick create a NPC"
 
 msgid "Aucune campagne"
 msgstr "No campaign"
@@ -1895,17 +1904,17 @@ msgstr "XP"
 msgid "Equipement"
 msgstr "Equipment"
 
-msgid "Condition d'armure"
-msgstr "Armor condition"
-
-msgid "Condition de casque"
-msgstr "Helmet condition"
-
 msgid "Condition d'arme"
 msgstr "Weapon condition"
 
 msgid "Nombre de munitions"
 msgstr "Ammo count"
+
+msgid "Condition d'armure"
+msgstr "Armor condition"
+
+msgid "Condition de casque"
+msgstr "Helmet condition"
 
 msgid "OK"
 msgstr "OK"
@@ -2136,11 +2145,11 @@ msgstr "Password"
 msgid "Connexion"
 msgstr "Login"
 
-msgid "Personnages"
-msgstr "Characters"
-
 msgid "Campagne courante"
 msgstr "Current campaign"
+
+msgid "Personnages"
+msgstr "Characters"
 
 msgid "Tableau de bord"
 msgstr "Dashboard"
@@ -2210,3 +2219,6 @@ msgstr "<strong>{attacker} vs {defender}</strong> {fail} failed hits and {succes
 #, python-brace-format
 msgid "Erreur : {error}"
 msgstr "Error: {error}"
+
+#~ msgid "Traductions"
+#~ msgstr "Translations"

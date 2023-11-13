@@ -108,21 +108,21 @@ class CampaignAdmin(CommonAdmin):
                 classes=("wide",),
             ),
         ),
-        (
-            _("Traductions"),
-            dict(
-                fields=(
-                    ("name_fr", "name_en"),
-                    ("title_fr", "title_en"),
-                    "description_fr",
-                    "description_en",
-                ),
-                classes=(
-                    "wide",
-                    "collapse",
-                ),
-            ),
-        ),
+        # (
+        #     _("Traductions"),
+        #     dict(
+        #         fields=(
+        #             ("name_fr", "name_en"),
+        #             ("title_fr", "title_en"),
+        #             "description_fr",
+        #             "description_en",
+        #         ),
+        #         classes=(
+        #             "wide",
+        #             "collapse",
+        #         ),
+        #     ),
+        # ),
         (
             _("Effets"),
             dict(
@@ -324,21 +324,21 @@ class CharacterAdmin(EntityAdmin):
                     classes=("wide",),
                 ),
             ),
-            (
-                _("Traductions"),
-                dict(
-                    fields=(
-                        ("name_fr", "name_en"),
-                        ("title_fr", "title_en"),
-                        "description_fr",
-                        "description_en",
-                    ),
-                    classes=(
-                        "wide",
-                        "collapse",
-                    ),
-                ),
-            ),
+            # (
+            #     _("Traductions"),
+            #     dict(
+            #         fields=(
+            #             ("name_fr", "name_en"),
+            #             ("title_fr", "title_en"),
+            #             "description_fr",
+            #             "description_en",
+            #         ),
+            #         classes=(
+            #             "wide",
+            #             "collapse",
+            #         ),
+            #     ),
+            # ),
             (
                 _("Spécialités"),
                 dict(
@@ -458,7 +458,9 @@ class CharacterAdmin(EntityAdmin):
                         new_name = f"{name or character_name} {nb + 1}" if count > 1 else name
                         character.duplicate(name=new_name, campaign=campaign)
                 self.message_user(
-                    request, message=_("Les personnages sélectionnés ont été dupliqués."), level=messages.SUCCESS
+                    request,
+                    message=_("Les personnages sélectionnés ont été dupliqués."),
+                    level=messages.SUCCESS,
                 )
                 return HttpResponseRedirect(request.get_full_path())
         else:
@@ -466,7 +468,11 @@ class CharacterAdmin(EntityAdmin):
         return render(
             request,
             "fallout/character/admin/duplicate.html",
-            {"form": form, "characters": queryset, "targets": request.POST.getlist(ACTION_CHECKBOX_NAME)},
+            {
+                "form": form,
+                "characters": queryset,
+                "targets": request.POST.getlist(ACTION_CHECKBOX_NAME),
+            },
         )
 
     duplicate.short_description = _("Dupliquer les personnages sélectionnés")
@@ -487,7 +493,11 @@ class CharacterAdmin(EntityAdmin):
         return render(
             request,
             "fallout/character/admin/roll.html",
-            {"form": form, "characters": queryset, "targets": request.POST.getlist(ACTION_CHECKBOX_NAME)},
+            {
+                "form": form,
+                "characters": queryset,
+                "targets": request.POST.getlist(ACTION_CHECKBOX_NAME),
+            },
         )
 
     roll.short_description = _("Faire un jet de compétence")
@@ -508,7 +518,11 @@ class CharacterAdmin(EntityAdmin):
         return render(
             request,
             "fallout/character/admin/damage.html",
-            {"form": form, "characters": queryset, "targets": request.POST.getlist(ACTION_CHECKBOX_NAME)},
+            {
+                "form": form,
+                "characters": queryset,
+                "targets": request.POST.getlist(ACTION_CHECKBOX_NAME),
+            },
         )
 
     damage.short_description = _("Infliger des dégâts aux personnages sélectionnés")
@@ -536,7 +550,11 @@ class CharacterAdmin(EntityAdmin):
         return render(
             request,
             "fallout/character/admin/fight.html",
-            {"form": form, "characters": queryset, "targets": request.POST.getlist(ACTION_CHECKBOX_NAME)},
+            {
+                "form": form,
+                "characters": queryset,
+                "targets": request.POST.getlist(ACTION_CHECKBOX_NAME),
+            },
         )
 
     fight.short_description = _("Attaquer un autre personnage")
@@ -568,7 +586,11 @@ class CharacterAdmin(EntityAdmin):
         return render(
             request,
             "fallout/character/admin/randomize.html",
-            {"form": form, "characters": queryset, "targets": request.POST.getlist(ACTION_CHECKBOX_NAME)},
+            {
+                "form": form,
+                "characters": queryset,
+                "targets": request.POST.getlist(ACTION_CHECKBOX_NAME),
+            },
         )
 
     randomize.short_description = _("Générer complètement les personnages")
@@ -593,7 +615,11 @@ class CharacterAdmin(EntityAdmin):
         return render(
             request,
             "fallout/character/admin/randomize_special.html",
-            {"form": form, "characters": queryset, "targets": request.POST.getlist(ACTION_CHECKBOX_NAME)},
+            {
+                "form": form,
+                "characters": queryset,
+                "targets": request.POST.getlist(ACTION_CHECKBOX_NAME),
+            },
         )
 
     randomize_special.short_description = _("Générer aléatoirement le S.P.E.C.I.A.L.")
@@ -618,7 +644,11 @@ class CharacterAdmin(EntityAdmin):
         return render(
             request,
             "fallout/character/admin/randomize_stats.html",
-            {"form": form, "characters": queryset, "targets": request.POST.getlist(ACTION_CHECKBOX_NAME)},
+            {
+                "form": form,
+                "characters": queryset,
+                "targets": request.POST.getlist(ACTION_CHECKBOX_NAME),
+            },
         )
 
     randomize_stats.short_description = _("Générer aléatoirement les compétences")
@@ -646,7 +676,11 @@ class CharacterAdmin(EntityAdmin):
         return render(
             request,
             "fallout/character/admin/equip.html",
-            {"form": form, "characters": queryset, "targets": request.POST.getlist(ACTION_CHECKBOX_NAME)},
+            {
+                "form": form,
+                "characters": queryset,
+                "targets": request.POST.getlist(ACTION_CHECKBOX_NAME),
+            },
         )
 
     equip.short_description = _("Equiper les personnages sélectionnés")
@@ -692,7 +726,11 @@ class CharacterAdmin(EntityAdmin):
         return render(
             request,
             "fallout/character/admin/move.html",
-            {"form": form, "characters": queryset, "targets": request.POST.getlist(ACTION_CHECKBOX_NAME)},
+            {
+                "form": form,
+                "characters": queryset,
+                "targets": request.POST.getlist(ACTION_CHECKBOX_NAME),
+            },
         )
 
     move.short_description = _("Déplacer les personnages sélectionnés")
@@ -749,21 +787,21 @@ class ItemAdmin(EntityAdmin):
                 classes=("wide",),
             ),
         ),
-        (
-            _("Traductions"),
-            dict(
-                fields=(
-                    ("name_fr", "name_en"),
-                    ("title_fr", "title_en"),
-                    "description_fr",
-                    "description_en",
-                ),
-                classes=(
-                    "wide",
-                    "collapse",
-                ),
-            ),
-        ),
+        # (
+        #     _("Traductions"),
+        #     dict(
+        #         fields=(
+        #             ("name_fr", "name_en"),
+        #             ("title_fr", "title_en"),
+        #             "description_fr",
+        #             "description_en",
+        #         ),
+        #         classes=(
+        #             "wide",
+        #             "collapse",
+        #         ),
+        #     ),
+        # ),
         (
             _("Armes uniquement"),
             dict(
@@ -1019,21 +1057,21 @@ class EffectAdmin(EntityAdmin):
                 classes=("wide",),
             ),
         ),
-        (
-            _("Traductions"),
-            dict(
-                fields=(
-                    ("name_fr", "name_en"),
-                    ("title_fr", "title_en"),
-                    "description_fr",
-                    "description_en",
-                ),
-                classes=(
-                    "wide",
-                    "collapse",
-                ),
-            ),
-        ),
+        # (
+        #     _("Traductions"),
+        #     dict(
+        #         fields=(
+        #             ("name_fr", "name_en"),
+        #             ("title_fr", "title_en"),
+        #             "description_fr",
+        #             "description_en",
+        #         ),
+        #         classes=(
+        #             "wide",
+        #             "collapse",
+        #         ),
+        #     ),
+        # ),
         (
             _("Effet"),
             dict(
@@ -1302,21 +1340,21 @@ class LootTemplateAdmin(CommonAdmin):
                 classes=("wide",),
             ),
         ),
-        (
-            _("Traductions"),
-            dict(
-                fields=(
-                    ("name_fr", "name_en"),
-                    ("title_fr", "title_en"),
-                    "description_fr",
-                    "description_en",
-                ),
-                classes=(
-                    "wide",
-                    "collapse",
-                ),
-            ),
-        ),
+        # (
+        #     _("Traductions"),
+        #     dict(
+        #         fields=(
+        #             ("name_fr", "name_en"),
+        #             ("title_fr", "title_en"),
+        #             "description_fr",
+        #             "description_en",
+        #         ),
+        #         classes=(
+        #             "wide",
+        #             "collapse",
+        #         ),
+        #     ),
+        # ),
     )
     inlines = [LootTemplateItemInline]
     list_display_links = ("name",)

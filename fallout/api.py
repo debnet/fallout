@@ -124,7 +124,11 @@ class RollHistorySerializer(HistorySerializer):
     character = SimpleCharacterSerializer(read_only=True, label=_("personnage"))
 
 
-@api_view_with_serializer(["POST"], input_serializer=CampaignRollInputSerializer, serializer=RollHistorySerializer)
+@api_view_with_serializer(
+    ["POST"],
+    input_serializer=CampaignRollInputSerializer,
+    serializer=RollHistorySerializer,
+)
 def campaign_roll(request, campaign_id):
     """
     API pour effectuer un jet de compétence l'ensemble des personnages d'une campagne
@@ -161,7 +165,11 @@ class CampaignEffectSerializer(CommonModelSerializer):
     damages = create_model_serializer(DamageHistory)(read_only=True, many=True, label=_("dégâts"))
 
 
-@api_view_with_serializer(["POST"], input_serializer=EffectAffectInputSerializer, serializer=CampaignEffectSerializer)
+@api_view_with_serializer(
+    ["POST"],
+    input_serializer=EffectAffectInputSerializer,
+    serializer=CampaignEffectSerializer,
+)
 def campaign_effect(request, campaign_id):
     """
     API permettant d'affecter un effet à une campagne
@@ -183,7 +191,11 @@ class ExperienceInputSerializer(BaseCustomSerializer):
     amount = serializers.IntegerField(default=0, label=_("quantité"))
 
 
-@api_view_with_serializer(["POST"], input_serializer=ExperienceInputSerializer, serializer=SimpleCharacterSerializer)
+@api_view_with_serializer(
+    ["POST"],
+    input_serializer=ExperienceInputSerializer,
+    serializer=SimpleCharacterSerializer,
+)
 def character_xp(request, character_id):
     """
     API pour augmenter l'expérience d'un personnage
@@ -240,7 +252,9 @@ class FightInputSerializer(BaseFightInputSerializer):
         choices=BODY_PARTS, allow_blank=True, required=False, label=_("partie du corps")
     )
     fail_target = serializers.PrimaryKeyRelatedField(
-        queryset=Character.objects.order_by("name"), required=False, label=_("cible d'échec")
+        queryset=Character.objects.order_by("name"),
+        required=False,
+        label=_("cible d'échec"),
     )
     hit_chance_modifier = serializers.IntegerField(initial=0, required=False, label=_("modificateur"))
     force_success = serializers.BooleanField(initial=False, required=False, label=_("succès ?"))
@@ -360,7 +374,11 @@ class DamageHistorySerializer(HistorySerializer):
     icon = serializers.ReadOnlyField()
 
 
-@api_view_with_serializer(["POST"], input_serializer=MultiDamageInputSerializer, serializer=DamageHistorySerializer)
+@api_view_with_serializer(
+    ["POST"],
+    input_serializer=MultiDamageInputSerializer,
+    serializer=DamageHistorySerializer,
+)
 def campaign_damage(request, campaign_id):
     """
     API permettant d'infliger des dégâts à plusieurs personnages de la campagne
@@ -401,7 +419,11 @@ class CharacterCopyInputSerializer(BaseCustomSerializer):
     is_active = serializers.BooleanField(initial=True, required=False, label=_("actif ?"))
 
 
-@api_view_with_serializer(["POST"], input_serializer=CharacterCopyInputSerializer, serializer=SimpleCharacterSerializer)
+@api_view_with_serializer(
+    ["POST"],
+    input_serializer=CharacterCopyInputSerializer,
+    serializer=SimpleCharacterSerializer,
+)
 def character_copy(request, character_id):
     """
     API permettant de copier un personnage dans une campagne
@@ -431,7 +453,9 @@ class CharacterRandomizeSpecialSerializer(BaseCustomSerializer):
 
 
 @api_view_with_serializer(
-    ["POST"], input_serializer=CharacterRandomizeSpecialSerializer, serializer=SimpleCharacterSerializer
+    ["POST"],
+    input_serializer=CharacterRandomizeSpecialSerializer,
+    serializer=SimpleCharacterSerializer,
 )
 def character_randomize_special(request, character_id):
     """
@@ -452,12 +476,14 @@ class CharacterRandomizeStatsSerializer(BaseCustomSerializer):
     """
 
     level = serializers.IntegerField(initial=1, min_value=1, label=_("niveau"))
-    rate = serializers.FloatField(initial=0, min_value=0, max_value=1, label=_("taux"))
+    balance = serializers.IntegerField(initial=0, min_value=0, max_value=100, label=_("balance"))
     reset = serializers.BooleanField(initial=False, required=False, label=_("reset ?"))
 
 
 @api_view_with_serializer(
-    ["POST"], input_serializer=CharacterRandomizeStatsSerializer, serializer=SimpleCharacterSerializer
+    ["POST"],
+    input_serializer=CharacterRandomizeStatsSerializer,
+    serializer=SimpleCharacterSerializer,
 )
 def character_randomize_stats(request, character_id):
     """
@@ -483,7 +509,11 @@ class CharacterEffectSerializer(CommonModelSerializer):
     damages = create_model_serializer(DamageHistory)(read_only=True, many=True, label=_("dégâts"))
 
 
-@api_view_with_serializer(["POST"], input_serializer=EffectAffectInputSerializer, serializer=CharacterEffectSerializer)
+@api_view_with_serializer(
+    ["POST"],
+    input_serializer=EffectAffectInputSerializer,
+    serializer=CharacterEffectSerializer,
+)
 def character_effect(request, character_id):
     """
     API permettant d'affecter un effet à un personnage
@@ -615,7 +645,11 @@ class LootSerializer(CommonModelSerializer):
     item = create_model_serializer(Item)(read_only=True, label=_("objet"))
 
 
-@api_view_with_serializer(["POST"], input_serializer=ActionWithQuantityInputSerializer, serializer=LootSerializer)
+@api_view_with_serializer(
+    ["POST"],
+    input_serializer=ActionWithQuantityInputSerializer,
+    serializer=LootSerializer,
+)
 def equipment_drop(request, equipment_id):
     """
     API permettant de séparer d'un équipement et d'en faire un butin
@@ -675,7 +709,11 @@ class LootTemplateOpenInputSerializer(BaseCustomSerializer):
     )
 
 
-@api_view_with_serializer(["POST"], input_serializer=LootTemplateOpenInputSerializer, serializer=LootSerializer)
+@api_view_with_serializer(
+    ["POST"],
+    input_serializer=LootTemplateOpenInputSerializer,
+    serializer=LootSerializer,
+)
 def loottemplate_open(request, template_id):
     """
     API permettant d'ouvrir un butin dans une campagne
@@ -747,29 +785,115 @@ def character_stats(request, character_id):
 namespace = "fallout-api"
 app_name = "fallout"
 urlpatterns = [
-    path("campaign/<int:campaign_id>/next/", campaign_next_turn, name="campaign_next_turn"),
-    path("campaign/<int:campaign_id>/clear/", campaign_clear_loot, name="campaign_clear_loot"),
-    path("campaign/<int:campaign_id>/roll/", campaign_roll, name="campaign_roll"),
-    path("campaign/<int:campaign_id>/damage/", campaign_damage, name="campaign_damage"),
-    path("campaign/<int:campaign_id>/effect/", campaign_effect, name="campaign_effect"),
-    path("character/<int:character_id>/xp/", character_xp, name="character_xp"),
-    path("character/<int:character_id>/roll/", character_roll, name="character_roll"),
-    path("character/<int:character_id>/fight/", character_fight, name="character_fight"),
-    path("character/<int:character_id>/burst/", character_burst, name="character_burst"),
-    path("character/<int:character_id>/damage/", character_damage, name="character_damage"),
-    path("character/<int:character_id>/copy/", character_copy, name="character_copy"),
     path(
-        "character/<int:character_id>/random_special/", character_randomize_special, name="character_randomize_special"
+        "campaign/<int:campaign_id>/next/",
+        campaign_next_turn,
+        name="campaign_next_turn",
     ),
-    path("character/<int:character_id>/random_stats/", character_randomize_stats, name="character_randomize_stats"),
-    path("character/<int:character_id>/effect/", character_effect, name="character_effect"),
-    path("character/<int:character_id>/item/", character_item, name="character_item"),
-    path("character/<int:character_id>/stats/", character_stats, name="character_stats"),
-    path("equipment/<int:equipment_id>/equip/", equipment_equip, name="equipment_equip"),
-    path("equipment/<int:equipment_id>/use/", equipment_use, name="equipment_use"),
-    path("equipment/<int:equipment_id>/reload/", equipment_reload, name="equipment_reload"),
-    path("equipment/<int:equipment_id>/drop/", equipment_drop, name="equipment_drop"),
-    path("loottemplate/<int:template_id>/open/", loottemplate_open, name="loottemplate_open"),
-    path("loot/<int:loot_id>/take/", loot_take, name="loot_take"),
+    path(
+        "campaign/<int:campaign_id>/clear/",
+        campaign_clear_loot,
+        name="campaign_clear_loot",
+    ),
+    path(
+        "campaign/<int:campaign_id>/roll/",
+        campaign_roll,
+        name="campaign_roll",
+    ),
+    path(
+        "campaign/<int:campaign_id>/damage/",
+        campaign_damage,
+        name="campaign_damage",
+    ),
+    path(
+        "campaign/<int:campaign_id>/effect/",
+        campaign_effect,
+        name="campaign_effect",
+    ),
+    path(
+        "character/<int:character_id>/xp/",
+        character_xp,
+        name="character_xp",
+    ),
+    path(
+        "character/<int:character_id>/roll/",
+        character_roll,
+        name="character_roll",
+    ),
+    path(
+        "character/<int:character_id>/fight/",
+        character_fight,
+        name="character_fight",
+    ),
+    path(
+        "character/<int:character_id>/burst/",
+        character_burst,
+        name="character_burst",
+    ),
+    path(
+        "character/<int:character_id>/damage/",
+        character_damage,
+        name="character_damage",
+    ),
+    path(
+        "character/<int:character_id>/copy/",
+        character_copy,
+        name="character_copy",
+    ),
+    path(
+        "character/<int:character_id>/random_special/",
+        character_randomize_special,
+        name="character_randomize_special",
+    ),
+    path(
+        "character/<int:character_id>/random_stats/",
+        character_randomize_stats,
+        name="character_randomize_stats",
+    ),
+    path(
+        "character/<int:character_id>/effect/",
+        character_effect,
+        name="character_effect",
+    ),
+    path(
+        "character/<int:character_id>/item/",
+        character_item,
+        name="character_item",
+    ),
+    path(
+        "character/<int:character_id>/stats/",
+        character_stats,
+        name="character_stats",
+    ),
+    path(
+        "equipment/<int:equipment_id>/equip/",
+        equipment_equip,
+        name="equipment_equip",
+    ),
+    path(
+        "equipment/<int:equipment_id>/use/",
+        equipment_use,
+        name="equipment_use",
+    ),
+    path(
+        "equipment/<int:equipment_id>/reload/",
+        equipment_reload,
+        name="equipment_reload",
+    ),
+    path(
+        "equipment/<int:equipment_id>/drop/",
+        equipment_drop,
+        name="equipment_drop",
+    ),
+    path(
+        "loottemplate/<int:template_id>/open/",
+        loottemplate_open,
+        name="loottemplate_open",
+    ),
+    path(
+        "loot/<int:loot_id>/take/",
+        loot_take,
+        name="loot_take",
+    ),
 ] + router.urls
 urls = (urlpatterns, namespace, app_name)

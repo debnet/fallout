@@ -3,21 +3,21 @@ from typing import Callable, Dict, Iterable, Mapping, Optional, Tuple
 
 from fallout.enums import *  # noqa
 
-# Body part modifiers (ranged, melee, critical)
+# Body part modifiers (ranged, melee, critical chance, critical damage)
 BODY_PARTS_MODIFIERS: Dict[str, Tuple[int, int, int]] = {
-    PART_TORSO: (0, 0, 0),
-    PART_LEGS: (-20, -10, 5),
-    PART_ARMS: (-30, -15, 10),
-    PART_HEAD: (-40, -20, 15),
-    PART_EYES: (-60, -30, 20),
+    PART_TORSO: (0, 0, 0, 100),
+    PART_LEGS: (-20, -10, 10, 50),
+    PART_ARMS: (-30, -15, 10, 50),
+    PART_HEAD: (-40, -20, 20, 100),
+    PART_EYES: (-60, -30, 30, 200),
 }
 
 # Body part randomly hit if not targetted (body part, chance)
 BODY_PARTS_RANDOM_CHANCES: Iterable[Tuple[str, int]] = (
     (PART_EYES, 1),
-    (PART_HEAD, 2),
-    (PART_ARMS, 5),
-    (PART_LEGS, 10),
+    (PART_HEAD, 5),
+    (PART_ARMS, 10),
+    (PART_LEGS, 15),
     (PART_TORSO, 100),
 )
 
@@ -307,7 +307,10 @@ LEVELED_STATS_MULT: int = 10
 COMPUTED_STATS: Iterable[Tuple[str, Callable]] = (
     ("hit_points_per_level", lambda s, c: 3 + (s.endurance // 2)),
     ("skill_points_per_level", lambda s, c: (5 + (2 * s.intelligence)) * 2),
-    ("max_health", lambda s, c: (15 + (s.strength + (2 * s.endurance)) + ((c.level - 1) * s.hit_points_per_level))),
+    (
+        "max_health",
+        lambda s, c: (15 + (s.strength + (2 * s.endurance)) + ((c.level - 1) * s.hit_points_per_level)),
+    ),
     ("max_action_points", lambda s, c: 5 + (s.agility // 2)),
     # Secondary statistics
     ("armor_class", lambda s, c: s.agility),

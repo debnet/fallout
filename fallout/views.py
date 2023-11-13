@@ -48,8 +48,14 @@ def view_dashboard(request, campaign_id):
     Vue générale
     """
     campaigns = Campaign.objects.annotate(
-        pcs=Count("characters", filter=Q(characters__is_player=True, characters__is_active=True)),
-        npcs=Count("characters", filter=Q(characters__is_player=False, characters__is_active=True)),
+        pcs=Count(
+            "characters",
+            filter=Q(characters__is_player=True, characters__is_active=True),
+        ),
+        npcs=Count(
+            "characters",
+            filter=Q(characters__is_player=False, characters__is_active=True),
+        ),
     ).select_related("current_character")
     if not request.user.is_superuser:
         campaigns = campaigns.filter(Q(characters__player=request.user) | Q(game_master=request.user))
@@ -113,8 +119,14 @@ def view_campaign(request, campaign_id):
     Vue principale des campagnes
     """
     campaigns = Campaign.objects.annotate(
-        pcs=Count("characters", filter=Q(characters__is_player=True, characters__is_active=True)),
-        npcs=Count("characters", filter=Q(characters__is_player=False, characters__is_active=True)),
+        pcs=Count(
+            "characters",
+            filter=Q(characters__is_player=True, characters__is_active=True),
+        ),
+        npcs=Count(
+            "characters",
+            filter=Q(characters__is_player=False, characters__is_active=True),
+        ),
     ).select_related("current_character")
     if not request.user.is_superuser:
         campaigns = campaigns.filter(Q(characters__player=request.user) | Q(game_master=request.user))
@@ -155,7 +167,12 @@ def view_campaign(request, campaign_id):
                     condition = int(data.get("condition") or 100) / 100.0
                     filter = dict(pk=item_id) if item_id else dict(name__icontains=item_name)
                     item = Item.objects.filter(**filter).first()
-                    Loot.create(campaign=campaign, item=item, quantity=quantity, condition=condition)
+                    Loot.create(
+                        campaign=campaign,
+                        item=item,
+                        quantity=quantity,
+                        condition=condition,
+                    )
                 elif method == "clear":
                     Loot.objects.filter(campaign=campaign).delete()
                 elif method.startswith("delete"):
@@ -254,7 +271,10 @@ def view_campaign(request, campaign_id):
                         ),
                     )
             elif type == "gain":
-                group, experience = (data.get("group"), int(data.get("experience") or 0))
+                group, experience = (
+                    data.get("group"),
+                    int(data.get("experience") or 0),
+                )
                 filter = dict(is_player=(group == "pj")) if group else dict()
                 for character in characters.filter(is_active=True, **filter):
                     old_level = character.level
@@ -266,7 +286,11 @@ def view_campaign(request, campaign_id):
                                 "<strong>{character}</strong> vient de passer au niveau "
                                 "<strong>{level}</strong> et a besoin de <strong>{experience}</strong> "
                                 "points d'expérience pour passer au niveau suivant."
-                            ).format(character=character, level=level, experience=required_experience),
+                            ).format(
+                                character=character,
+                                level=level,
+                                experience=required_experience,
+                            ),
                         )
                     else:
                         messages.success(
@@ -339,15 +363,22 @@ def view_character(request, character_id):
     Vue principale des personnages
     """
     campaigns = Campaign.objects.annotate(
-        pcs=Count("characters", filter=Q(characters__is_player=True, characters__is_active=True)),
-        npcs=Count("characters", filter=Q(characters__is_player=False, characters__is_active=True)),
+        pcs=Count(
+            "characters",
+            filter=Q(characters__is_player=True, characters__is_active=True),
+        ),
+        npcs=Count(
+            "characters",
+            filter=Q(characters__is_player=False, characters__is_active=True),
+        ),
     ).select_related("current_character")
     if not request.user.is_superuser:
         campaigns = campaigns.filter(Q(characters__player=request.user) | Q(game_master=request.user))
     characters = (
         Character.objects.prefetch_related("perks")
         .select_related(
-            "player", "campaign__current_character"  # 'statistics' is not prefetched in order to always have fresh data
+            "player",
+            "campaign__current_character",  # 'statistics' is not prefetched in order to always have fresh data
         )
         .filter(is_active=True)
     )
@@ -375,7 +406,11 @@ def view_character(request, character_id):
     try:
         if request.method == "POST" and character:
             data = request.POST
-            type, subtype, method = data.get("type"), data.get("subtype"), data.get("method")
+            type, subtype, method = (
+                data.get("type"),
+                data.get("subtype"),
+                data.get("method"),
+            )
             if authorized and type == "stats":
                 if "roll" in data:
                     result = character.roll(stats=data.get("roll"), modifier=int(data.get("modifier") or 0))
@@ -401,7 +436,7 @@ def view_character(request, character_id):
                             character.generate_stats(reset=True, save=False)
                         character.randomize_stats(
                             level=int(data.get("level") or 1),
-                            rate=int(data.get("rate") or 0) / 100.0,
+                            balance=int(data.get("balance") or 0),
                             save=True,
                         )
             elif authorized and type == "fight" and data.get("target"):
@@ -454,7 +489,10 @@ def view_character(request, character_id):
                 else:
                     results = {}
                     for result in results:
-                        results.setdefault(result.defender, dict(attacker=result.attacker, fail=0, success=0, damage=0))
+                        results.setdefault(
+                            result.defender,
+                            dict(attacker=result.attacker, fail=0, success=0, damage=0),
+                        )
                         results[result.defender]["fail"] += int(result.success is False)
                         results[result.defender]["success"] += int(result.success is True)
                         results[result.defender]["damage"] += result.damage.real_damage if result.damage else 0
@@ -555,7 +593,11 @@ def view_character(request, character_id):
                 character.is_resting = bool(data.get("is_resting", False))
                 character.save()
             elif type == "log":
-                log_id, log_text, log_private = int(data.get("log") or 0), data.get("text"), bool(data.get("private"))
+                log_id, log_text, log_private = (
+                    int(data.get("log") or 0),
+                    data.get("text"),
+                    bool(data.get("private")),
+                )
                 if log_id and method == "edit":
                     log_to_edit = logs.filter(id=log_id)
                     if not authorized:
@@ -719,7 +761,16 @@ def view_campaign_rolls(request, campaign_id):
             character__campaign_id=campaign_id,
         )
         .order_by("-date")
-        .only("character__name", "value", "roll", "modifier", "stats", "success", "critical", "date")[:limit]
+        .only(
+            "character__name",
+            "value",
+            "roll",
+            "modifier",
+            "stats",
+            "success",
+            "critical",
+            "date",
+        )[:limit]
     )
     damages = (
         DamageHistory.objects.select_related("character")
@@ -732,7 +783,14 @@ def view_campaign_rolls(request, campaign_id):
             fight__isnull=True,
         )
         .order_by("-date")
-        .only("character__name", "damage_type", "base_damage", "real_damage", "body_part", "date")[:limit]
+        .only(
+            "character__name",
+            "damage_type",
+            "base_damage",
+            "real_damage",
+            "body_part",
+            "date",
+        )[:limit]
     )
     fights = (
         FightHistory.objects.select_related("attacker", "defender", "damage")
@@ -782,6 +840,7 @@ def create_character(request, campaign_id=None):
         character = Character.objects.create(
             name=data.name,
             race=data.race,
+            tag_skills=data.tag_skills,
             campaign_id=campaign_id,
             has_stats=False,
             has_needs=False,
