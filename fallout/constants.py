@@ -4,7 +4,7 @@ from typing import Callable, Dict, Iterable, Mapping, Optional, Tuple
 from fallout.enums import *  # noqa
 
 # Body part modifiers (ranged, melee, critical chance, critical damage)
-BODY_PARTS_MODIFIERS: Dict[str, Tuple[int, int, int]] = {
+BODY_PARTS_MODIFIERS: Dict[str, Tuple[int, int, int, int]] = {
     PART_TORSO: (0, 0, 0, 100),
     PART_LEGS: (-20, -10, 10, 50),
     PART_ARMS: (-30, -15, 10, 50),
@@ -89,8 +89,8 @@ RACES_STATS: Dict[str, Dict[str, Tuple[int, Optional[int], Optional[int]]]] = {
         RESISTANCE_POISON: (100, -100, 100),
         RESISTANCE_FIRE: (40, -100, 100),
         RESISTANCE_ELECTRICITY: (-50, -100, 100),
-        RESISTANCE_GAZ_CONTACT: (1.0, -100, 100),
-        RESISTANCE_GAZ_INHALED: (1.0, -100, 100),
+        RESISTANCE_GAZ_CONTACT: (100, -100, 100),
+        RESISTANCE_GAZ_INHALED: (100, -100, 100),
         HIT_POINTS_PER_LEVEL: (0, 0, 0),
         PERK_RATE: (10, None, None),
     },
