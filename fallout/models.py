@@ -3,6 +3,7 @@ import dataclasses
 from collections import OrderedDict as odict
 from collections import namedtuple
 from datetime import datetime, timedelta
+from operator import add
 from random import choice, randint
 from typing import Dict, Iterable, List, Optional, Tuple, Union
 
@@ -23,8 +24,7 @@ from fallout.constants import *  # noqa
 from fallout.enums import *  # noqa
 
 
-gv = getattr
-sv = setattr
+gv, sv = getattr, setattr
 
 
 def _assert(condition, message: str = None) -> None:
@@ -1530,11 +1530,9 @@ class Character(Entity, BaseStatistics):
                         * (1.0 / attacker_weapon.durability)
                         * (
                             1.0
-                            - sum(
-                                (
-                                    gv(attacker_weapon, "condition_modifier", 0.0),
-                                    gv(attacker_ammo, "condition_modifier", 0.0),
-                                )
+                            - add(
+                                gv(attacker_weapon, "condition_modifier", 0.0),
+                                gv(attacker_ammo, "condition_modifier", 0.0),
                             ),
                         )
                     )
@@ -1714,11 +1712,9 @@ class Character(Entity, BaseStatistics):
             0
             if not attacker_weapon
             else max(
-                sum(
-                    (
-                        gv(attacker_weapon, attacker_range_type.format("min"), 0),
-                        gv(attacker_ammo, attacker_range_type.format("min"), 0),
-                    )
+                add(
+                    gv(attacker_weapon, attacker_range_type.format("min"), 0),
+                    gv(attacker_ammo, attacker_range_type.format("min"), 0),
                 ),
                 0,
             )
@@ -1727,11 +1723,9 @@ class Character(Entity, BaseStatistics):
             1
             if not attacker_weapon
             else max(
-                sum(
-                    (
-                        gv(attacker_weapon, attacker_range_type.format("max"), 0),
-                        gv(attacker_ammo, attacker_range_type.format("max"), 0),
-                    )
+                add(
+                    gv(attacker_weapon, attacker_range_type.format("max"), 0),
+                    gv(attacker_ammo, attacker_range_type.format("max"), 0),
                 ),
                 1,
             )
@@ -1759,11 +1753,9 @@ class Character(Entity, BaseStatistics):
         defender_armor_class *= max(
             (
                 1.0
-                + sum(
-                    (  # Armor class modifiers by weapon/ammo
-                        gv(attacker_weapon, "armor_class_modifier", 0),
-                        gv(attacker_ammo, "armor_class_modifier", 0),
-                    )
+                + add(  # Armor class modifiers by weapon/ammo
+                    gv(attacker_weapon, "armor_class_modifier", 0),
+                    gv(attacker_ammo, "armor_class_modifier", 0),
                 )
                 / 100.0
             ),
@@ -1796,8 +1788,8 @@ class Character(Entity, BaseStatistics):
             damage *= max(
                 (
                     1.0
-                    + sum(
-                        (  # Damage modifiers (in %) by weapon/ammo
+                    + sum(  # Damage modifiers (in %) by weapon/ammo
+                        (
                             self.stats.damage_modifier,
                             gv(attacker_weapon, "damage_modifier", 0),
                             gv(attacker_ammo, "damage_modifier", 0),
@@ -1810,11 +1802,9 @@ class Character(Entity, BaseStatistics):
             # Critical chance
             critical_chance = gv(self.stats, "critical_chance", 0)  # Base critical chance
             critical_chance += critical_modifier  # Critical chance modifiers by body part
-            critical_chance += sum(
-                (  # Critical chance modifiers by weapon/ammo
-                    gv(attacker_weapon, "critical_modifier", 0),
-                    gv(attacker_ammo, "critical_modifier", 0),
-                )
+            critical_chance += add(  # Critical chance modifiers by weapon/ammo
+                gv(attacker_weapon, "critical_modifier", 0),
+                gv(attacker_ammo, "critical_modifier", 0),
             )
             history.status = STATUS_HIT_SUCCEED
             history.critical = bool(force_critical) or history.hit_roll <= critical_chance
@@ -1823,8 +1813,8 @@ class Character(Entity, BaseStatistics):
                 damage *= max(
                     (
                         1.0
-                        + sum(
-                            (  # Critical damage modifiers (in %) by weapon/ammo
+                        + sum(  # Critical damage modifiers (in %) by weapon/ammo
+                            (
                                 self.stats.critical_damage,
                                 critical_damage_modifier,
                                 gv(attacker_weapon, "critical_damage_modifier", 0),
@@ -1836,39 +1826,29 @@ class Character(Entity, BaseStatistics):
                     ),
                     0.0,
                 )
-                damage += sum(
-                    (  # Critical damage modifiers (in raw damage) by weapon/ammo
-                        gv(attacker_weapon, "critical_damage", 0),
-                        gv(attacker_ammo, "critical_damage", 0),
-                    )
+                damage += add(  # Critical damage modifiers (in raw damage) by weapon/ammo
+                    gv(attacker_weapon, "critical_damage", 0),
+                    gv(attacker_ammo, "critical_damage", 0),
                 )
-                critical_raw_chance = self.stats.critical_raw_chance + sum(
-                    (  # Raw damage type chance modifiers
-                        gv(attacker_weapon, "critical_raw_modifier", 0),
-                        gv(attacker_ammo, "critical_raw_modifier", 0),
-                    )
+                critical_raw_chance = self.stats.critical_raw_chance + add(  # Raw damage type chance modifiers
+                    gv(attacker_weapon, "critical_raw_modifier", 0),
+                    gv(attacker_ammo, "critical_raw_modifier", 0),
                 )
                 critical_raw_damage = force_raw_damage or randint(1, 100) <= critical_raw_chance
                 if attacker_damage_type not in LIST_NON_DAMAGE and critical_raw_damage:
                     attacker_damage_type = DAMAGE_RAW
             damage = max(damage, 0)  # Avoid negative damage
-            threshold_modifier = sum(
-                (  # Threshold modifiers from weapon/ammo
-                    gv(attacker_weapon, "threshold_modifier", 0),
-                    gv(attacker_ammo, "threshold_modifier", 0),
-                )
+            threshold_modifier = add(  # Threshold modifiers from weapon/ammo
+                gv(attacker_weapon, "threshold_modifier", 0),
+                gv(attacker_ammo, "threshold_modifier", 0),
             )
-            threshold_rate_modifier = sum(
-                (  # Threshold rate modifiers from weapon/ammo
-                    gv(attacker_weapon, "threshold_rate_modifier", 0),
-                    gv(attacker_ammo, "threshold_rate_modifier", 0),
-                )
+            threshold_rate_modifier = add(  # Threshold rate modifiers from weapon/ammo
+                gv(attacker_weapon, "threshold_rate_modifier", 0),
+                gv(attacker_ammo, "threshold_rate_modifier", 0),
             )
-            resistance_modifier = sum(
-                (  # Resistance modifiers from weapon/ammo
-                    gv(attacker_weapon, "resistance_modifier", 0),
-                    gv(attacker_ammo, "resistance_modifier", 0),
-                )
+            resistance_modifier = add(  # Resistance modifiers from weapon/ammo
+                gv(attacker_weapon, "resistance_modifier", 0),
+                gv(attacker_ammo, "resistance_modifier", 0),
             )
             history.damage = target.damage(
                 raw_damage=damage,
@@ -1917,11 +1897,9 @@ class Character(Entity, BaseStatistics):
             if attacker_weapon.durability and attacker_weapon.is_repairable:
                 attacker_weapon_damage = (1.0 / attacker_weapon.durability) * (
                     1.0
-                    - sum(
-                        (  # Weapon/ammo condition modifier
-                            gv(attacker_weapon, "condition_modifier", 0.0),
-                            gv(attacker_ammo, "condition_modifier", 0.0),
-                        )
+                    - add(  # Weapon/ammo condition modifier
+                        gv(attacker_weapon, "condition_modifier", 0.0),
+                        gv(attacker_ammo, "condition_modifier", 0.0),
                     )
                 )
                 attacker_weapon_equipment.condition -= attacker_weapon_damage
