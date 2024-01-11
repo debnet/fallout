@@ -183,6 +183,9 @@ def view_campaign(request, campaign_id):
                     )
                 elif method == "clear":
                     Loot.objects.filter(campaign=campaign).delete()
+                    if campaign.money_loot:
+                        campaign.money_loot = 0
+                        campaign.save(update_fields=("money_loot", ))
                 elif method.startswith("delete"):
                     method, loot_id = method.split("-")
                     quantity = int(data.get(f"quantity-{loot_id}") or 0)
