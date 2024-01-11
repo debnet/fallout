@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-11-13 23:15+0100\n"
+"POT-Creation-Date: 2024-01-11 22:07+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Marc Debureaux <marc@debnet.fr>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -32,6 +32,11 @@ msgstr "Technical informations"
 
 msgid "Effets"
 msgstr "Effects"
+
+#, fuzzy
+#| msgid "argent"
+msgid "Argent"
+msgstr "money"
 
 msgid "Autres"
 msgstr "Others"
@@ -1072,6 +1077,9 @@ msgstr "view non-player characters"
 msgid "voir les jets lancés"
 msgstr "view rolls"
 
+msgid "argent à piller"
+msgstr "loot money"
+
 msgid "campagnes"
 msgstr "campaigns"
 
@@ -1745,8 +1753,8 @@ msgstr "in"
 msgid "Supprimer"
 msgstr "Delete"
 
-msgid "Joueur"
-msgstr "Player"
+msgid "¤"
+msgstr "¤"
 
 msgid "Points d'action"
 msgstr "Action points"
@@ -1754,11 +1762,14 @@ msgstr "Action points"
 msgid "PA"
 msgstr "AP"
 
+msgid "Prendre"
+msgstr "Take"
+
+msgid "Vider"
+msgstr "Empty"
+
 msgid "kg"
 msgstr "kg"
-
-msgid "¤"
-msgstr "¤"
 
 msgid "incassable"
 msgstr "unbreakable"
@@ -1780,9 +1791,6 @@ msgstr "AC"
 
 msgid "Quantité"
 msgstr "Quantity"
-
-msgid "Prendre"
-msgstr "Take"
 
 msgid "Détruire"
 msgstr "Destroy"
@@ -1862,6 +1870,9 @@ msgstr "NPC's name: "
 msgid "Ajouter"
 msgstr "Add"
 
+msgid "Modifier l'argent :"
+msgstr "Change money:"
+
 msgid "Ouvrir un contenant :"
 msgstr "Open a container:"
 
@@ -1873,9 +1884,6 @@ msgstr "Loot"
 
 msgid "Ouvrir"
 msgstr "Open"
-
-msgid "Vider"
-msgstr "Empty"
 
 msgid "Ajouter un butin :"
 msgstr "Add a loot:"
@@ -2094,6 +2102,15 @@ msgstr ""
 msgid "(aucune attaque)"
 msgstr "(no attack)"
 
+msgid "total"
+msgstr ""
+
+msgid "niveau précédent"
+msgstr "previous level"
+
+msgid "niveau actuel"
+msgstr "current level"
+
 #, python-format
 msgid ""
 "\n"
@@ -2219,6 +2236,3 @@ msgstr "<strong>{attacker} vs {defender}</strong> {fail} failed hits and {succes
 #, python-brace-format
 msgid "Erreur : {error}"
 msgstr "Error: {error}"
-
-#~ msgid "Traductions"
-#~ msgstr "Translations"

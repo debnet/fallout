@@ -133,6 +133,16 @@ class CampaignAdmin(CommonAdmin):
                 classes=("wide",),
             ),
         ),
+        (
+            _("Argent"),
+            dict(
+                fields=(
+                    "money",
+                    "money_loot",
+                ),
+                classes=("wide",),
+            ),
+        ),
     )
     inlines = [LootInline, CampaignEffectInlineAdmin]
     list_display_links = ("name",)

@@ -1,6 +1,6 @@
 # coding: utf-8
 import dataclasses
-from collections import OrderedDict as odict
+from collections import OrderedDict as odict, Counter
 from collections import namedtuple
 from datetime import datetime, timedelta
 from operator import add
@@ -346,6 +346,8 @@ class Campaign(CommonModel):
     view_pc = models.BooleanField(default=False, verbose_name=_("voir les personnages joueurs"))
     view_npc = models.BooleanField(default=False, verbose_name=_("voir les personnages non-joueurs"))
     view_rolls = models.BooleanField(default=False, verbose_name=_("voir les jets lancés"))
+    money = models.PositiveIntegerField(default=0, verbose_name=_("argent"))
+    money_loot = models.PositiveIntegerField(default=0, verbose_name=_("argent à piller"))
     damages: List["DamageHistory"] = []
     # Cache
     _effects: "CommonQuerySet[ActiveEffect]" = None
@@ -1415,6 +1417,9 @@ class Character(Entity, BaseStatistics):
         if not self.pk:
             return
         loots = []
+        if self.money:
+            self.campaign.money_loot += self.money
+            self.campaign.save(update_fields=("money_loot",))
         for equipement in self.inventory.exclude(slot=""):
             equipement.equip(is_action=False)
         for equipement in self.inventory.filter(item__is_droppable=True):
@@ -1428,6 +1433,9 @@ class Character(Entity, BaseStatistics):
             )
         if empty:
             self.inventory.delete()
+            if self.money:
+                self.money = 0
+                self.save(update_fields=("money",))
         return loots
 
     def burst(
@@ -3583,23 +3591,31 @@ class RollHistory(CommonModel):
         Statistiques des jets
         """
 
-        def __init__(self, character: Union["Character", int], code: str, label: str):
+        def __init__(self, character: "Character", code: str, label: str):
             self.character = character
             self.code = code
             self.label = label
             self.total_count = 0
+            self.count_by_level = Counter()
             self.stats = odict((((1, 1), 0), ((1, 0), 0), ((0, 0), 0), ((0, 1), 0)))
+            self.stats_by_level = {}
 
-        def add(self, success: bool, critical: bool, count: int):
+        def add(self, level: int, success: bool, critical: bool, count: int):
             """
             Ajoute un jet aux statistiques
+            :param level: Niveau
             :param success: Succès ?
             :param critical: Critique ?
             :param count: Nombre
             :return: Rien
             """
             self.total_count += count
+            self.count_by_level[level] += count
             self.stats[success, critical] += count
+            self.stats_by_level.setdefault(
+                level,
+                odict((((1, 1), 0), ((1, 0), 0), ((0, 0), 0), ((0, 1), 0))),
+            )[success, critical] += count
 
         @property
         def all(self) -> List[Tuple[int, float, str, str]]:
@@ -3609,26 +3625,64 @@ class RollHistory(CommonModel):
             """
             return [
                 (
-                    value,
-                    round(((value / self.total_count) * 100) if self.total_count else 0, 2),
+                    count,
+                    round(((count / self.total_count) * 100) if self.total_count else 0, 2),
                     settings.CSS_CLASSES[success, critical],
                     get_label(success, critical),
                 )
-                for (success, critical), value in self.stats.items()
+                for (success, critical), count in self.stats.items()
+            ]
+
+        def get_all_by_level(self, level: int) -> List[Tuple[int, float, str, str]]:
+            """
+            Ventilation des statistiques par succès/échec en fonction du niveau
+            :param level: Niveau cible
+            :return: Liste ventilée par valeur, pourcentage, classe CSS et libellé
+            """
+            return [
+                (
+                    count,
+                    round(((count / self.count_by_level[level]) * 100) if self.count_by_level.get(level) else 0, 2),
+                    settings.CSS_CLASSES[success, critical],
+                    get_label(success, critical),
+                )
+                for (success, critical), count in self.stats_by_level.get(level, {}).items()
             ]
 
         @property
+        def previous_stats(self) -> List[Tuple[int, float, str, str]]:
+            return self.get_all_by_level(self.character.level - 1)
+
+        @property
+        def current_stats(self) -> List[Tuple[int, float, str, str]]:
+            return self.get_all_by_level(self.character.level)
+
+        @property
+        def previous_total(self) -> int:
+            return self.count_by_level.get(self.character.level - 1, 0)
+
+        @property
+        def current_total(self) -> int:
+            return self.count_by_level.get(self.character.level, 0)
+
+        @property
         def total_success(self) -> int:
+            """
+            Nombre total des succès
+            """
             return sum(self.stats[1, x] for x in range(2))
 
         @property
         def success_rate(self) -> float:
+            """
+            Taux de succès
+            """
             if not self.total_count:
                 return 0.0
             return round(self.total_success * 100.0 / self.total_count, 1)
 
     @staticmethod
-    def get_stats(character: Union["Character", int]):
+    def get_stats(character: "Character") -> List[RollStats]:
         """
         Récupère les statistiques de jets
         :param character: Personnage
@@ -3639,12 +3693,12 @@ class RollHistory(CommonModel):
             all_stats[code] = RollHistory.RollStats(character, code, label)
         rolls = (
             RollHistory.objects.filter(character=character)
-            .values("stats", "success", "critical")
+            .values("level", "stats", "success", "critical")
             .annotate(count=Count("*"))
-            .values_list("stats", "success", "critical", "count")
+            .values_list("level", "stats", "success", "critical", "count")
         )
-        for stats, success, critical, count in rolls:
-            all_stats[stats].add(success, critical, count or 0)
+        for level, stats, success, critical, count in rolls:
+            all_stats[stats].add(level, success, critical, count or 0)
         return list(all_stats.values())
 
     @property
@@ -3865,15 +3919,19 @@ class FightHistory(CommonModel):
         Statistiques des combats
         """
 
-        def __init__(self, character: Union["Character", int], is_attacker: bool = True):
+        def __init__(self, character: "Character", is_attacker: bool = True):
             self.character = character
             self.is_attacker = is_attacker
             self.total_count = self.total_damage = 0
+            self.count_by_level = Counter()
+            self.damage_by_level = Counter()
             self.stats = odict((((1, 1), [0, 0]), ((1, 0), [0, 0]), ((0, 0), [0, 0]), ((0, 1), [0, 0])))
+            self.stats_by_level = {}
 
-        def add(self, success: bool, critical: bool, count: int, damage: int) -> None:
+        def add(self, level: int, success: bool, critical: bool, count: int, damage: int) -> None:
             """
             Ajoute un combat aux statistiques
+            :param level: Niveau
             :param success: Succès ?
             :param critical: Critique ?
             :param count: Nombre
@@ -3881,8 +3939,16 @@ class FightHistory(CommonModel):
             :return: Rien
             """
             self.total_count += count
+            self.count_by_level[level] += 1
             self.total_damage += damage
+            self.damage_by_level[level] += 1
             value = self.stats[success, critical]
+            value[0] += count
+            value[1] += damage
+            value = self.stats_by_level.setdefault(
+                level,
+                odict((((1, 1), [0, 0]), ((1, 0), [0, 0]), ((0, 0), [0, 0]), ((0, 1), [0, 0]))),
+            )[success, critical]
             value[0] += count
             value[1] += damage
 
@@ -3901,6 +3967,46 @@ class FightHistory(CommonModel):
                 )
                 for (success, critical), (count, damage) in self.stats.items()
             ]
+
+        def get_all_by_level(self, level: int) -> List[Tuple[int, float, str, str]]:
+            """
+            Ventilation des statistiques par succès/échec en fonction du niveau
+            :param level: Niveau cible
+            :return: Liste ventilée par valeur, pourcentage, classe CSS et libellé
+            """
+            return [
+                (
+                    count,
+                    round(((count / self.count_by_level[level]) * 100) if self.count_by_level.get(level) else 0, 2),
+                    settings.CSS_CLASSES[success, critical],
+                    get_label(success, critical),
+                )
+                for (success, critical), (count, damage) in self.stats_by_level.get(level, {}).items()
+            ]
+
+        @property
+        def previous_stats(self) -> List[Tuple[int, float, str, str]]:
+            return self.get_all_by_level(self.character.level - 1)
+
+        @property
+        def current_stats(self) -> List[Tuple[int, float, str, str]]:
+            return self.get_all_by_level(self.character.level)
+
+        @property
+        def previous_total(self) -> int:
+            return self.count_by_level.get(self.character.level - 1, 0)
+
+        @property
+        def current_total(self) -> int:
+            return self.count_by_level.get(self.character.level, 0)
+
+        @property
+        def previous_damage(self) -> int:
+            return self.damage_by_level.get(self.character.level - 1, 0)
+
+        @property
+        def current_damage(self) -> int:
+            return self.damage_by_level.get(self.character.level, 0)
 
         @property
         def total_success(self) -> int:
@@ -3928,13 +4034,12 @@ class FightHistory(CommonModel):
             return round(self.total_damage / self.total_success, 1)
 
     @staticmethod
-    def get_stats(character: Union["Character", int]):
+    def get_stats(character: "Character") -> Tuple[FightStats, FightStats]:
         """
         Récupère les statistiques de combats
         :param character: Personnage
         :return: Liste des statistiques de combats
         """
-        boolean = models.BooleanField()
         fights = (
             FightHistory.objects.filter(
                 Q(attacker=character) | Q(defender=character),
@@ -3946,17 +4051,21 @@ class FightHistory(CommonModel):
             )
             .annotate(
                 is_attacker=Case(
-                    When(attacker=character, then=Value(True, boolean)),
-                    default=Value(False, boolean),
-                )
+                    When(attacker=character, then=Value(True, models.BooleanField())),
+                    default=Value(False, models.BooleanField()),
+                ),
+                level=Case(
+                    When(attacker=character, then=F("attacker_level")),
+                    default=F("defender_level"),
+                ),
             )
-            .values("success", "critical", "is_attacker")
+            .values("level", "success", "critical", "is_attacker")
             .annotate(count=Count("*"), damage=Sum("damage__real_damage"))
-            .values_list("is_attacker", "success", "critical", "count", "damage")
+            .values_list("level", "is_attacker", "success", "critical", "count", "damage")
         )
         attacker, defender = FightHistory.FightStats(character, True), FightHistory.FightStats(character, False)
-        for is_attacker, success, critical, count, damage in fights:
-            (defender, attacker)[is_attacker].add(success, critical, count or 0, damage or 0)
+        for level, is_attacker, success, critical, count, damage in fights:
+            (defender, attacker)[is_attacker].add(level, success, critical, count or 0, damage or 0)
         return attacker, defender
 
     @property

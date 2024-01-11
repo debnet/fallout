@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
-from django.db.models import Count, Q
+from django.db.models import Count, F, Q
 from django.http import Http404
 from django.shortcuts import redirect
 from django.utils.translation import gettext as _
@@ -21,7 +21,7 @@ def view_index(request):
     Page d'accueil
     """
     characters = Character.objects.filter(player=request.user).values_list("id", flat=True)
-    if len(characters) == 1:
+    if len(characters) == 1 and not request.user.is_superuser:
         return view_character(request, characters[0])
     return view_campaign(request, 0)
 
@@ -155,7 +155,15 @@ def view_campaign(request, campaign_id):
             data = request.POST
             type = data.get("type")
             method = data.get("method")
-            if type == "loot":
+            if type == "money":
+                character = int(data.get("character-id") or 0)
+                money = int(data.get("money") or 0)
+                if character:
+                    Character.objects.filter(id=character).update(money=F("money") + money)
+                else:
+                    campaign.money += money
+                    campaign.save(update_fields=("money",))
+            elif type == "loot":
                 if method == "open":
                     loot_id, loot_name = data.get("loot-id"), data.get("loot-name")
                     character_id = data.get("character-id") or None
@@ -184,12 +192,19 @@ def view_campaign(request, campaign_id):
                         loot.save()
                 elif method.startswith("take"):
                     method, loot_id = method.split("-")
-                    character = int(data.get("character") or 0)
+                    character = int(data.get("character-id") or 0)
                     quantity = int(data.get(f"quantity-{loot_id}") or 0)
                     is_action = bool(data.get("is_action"))
-                    if quantity:
+                    if loot_id and character and quantity:
                         loot = Loot.objects.filter(pk=loot_id).first()
                         loot.take(character, quantity, is_action=is_action)
+                    elif money := min(int(data.get("money") or 0), campaign.money_loot):
+                        if character:
+                            Character.objects.filter(id=character).update(money=F("money") + money)
+                        else:
+                            campaign.money += money
+                        campaign.money_loot -= money
+                        campaign.save(update_fields=("money", "money_loot"))
             elif type == "damage":
                 group, damage_type, body_part, min_damage, max_damage, raw_damage = (
                     data.get("group"),
@@ -225,11 +240,9 @@ def view_campaign(request, campaign_id):
                 elif method == "remove":
                     scope = data.get("scope")
                     if scope == "character":
-                        effect = CharacterEffect.objects.filter(pk=effect_id).first()
-                        effect.delete() if effect else None
+                        CharacterEffect.objects.filter(pk=effect_id).delete()
                     elif scope == "campaign":
-                        effect = CampaignEffect.objects.filter(pk=effect_id).first()
-                        effect.delete() if effect else None
+                        CampaignEffect.objects.filter(pk=effect_id).delete()
             elif type == "radiation":
                 if method == "set":
                     radiation = int(data.get("radiation") or 0)

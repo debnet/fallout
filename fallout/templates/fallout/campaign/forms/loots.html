@@ -1,18 +1,36 @@
-{% load static i18n l10n custom %}
+{% load static i18n l10n humanize custom %}
 
 <form method="post" action="{{ request.path }}">
-    {% if authorized and loots %}
+    {% if authorized %}
+    {% if loots or campaign.money_loot %}
         <div class="form-row align-items-center form-inline justify-content-center mb-3 collapse-form collapse show">
             <div class="col-auto">
                 <div class="input-group input-group-sm mb-2 mb-sm-0">
                     <div class="input-group-prepend">
-                        <label for="pick-character-list" class="input-group-text">{% trans "Joueur" %}</label>
+                        <label for="pick-character-list" class="input-group-text">{% trans "Personnage" %}</label>
                     </div>
-                    <select name="character" id="pick-character-list" class="form-control form-control-sm custom-select custom-select-sm">
+                    <select name="character-id" id="pick-character-list" class="form-control form-control-sm custom-select custom-select-sm">
+                        <option value="">({% trans "Campagne" %})</option>
                         {% for character in characters %}
                             <option value="{{ character.id }}">{{ character.name }}</option>
                         {% endfor %}
                     </select>
+                </div>
+            </div>
+            <div class="col-auto{% if not campaign.money_loot %} d-none{% endif %}">
+                <div class="input-group input-group-sm">
+                    <div class="input-group-prepend">
+                        <label for="money-loot" class="input-group-text">{% trans "Argent" %}</label>
+                    </div>
+                    <input type="number" class="form-control form-control-sm imedium" id="money-loot"
+                           name="money" placeholder="{% trans "¤" %}" value="0"
+                           aria-valuemin="0" min="0"
+                           aria-valuemax="{{ campaign.money_loot }}" max="{{ campaign.money_loot }}">
+                    <div class="input-group-append">
+                        <label for="money-loot" class="input-group-text font-weight-bold alert-warning">
+                            / {{ campaign.money_loot|intcomma }} {% trans "¤" %}
+                        </label>
+                    </div>
                 </div>
             </div>
             <div class="col-auto form-check ml-1">
@@ -21,7 +39,16 @@
                     <span title="{% trans "Points d'action" %}">{% trans "PA" %}</span>
                 </label>
             </div>
+            <div class="col-auto">
+                {% if campaign.money_loot %}
+                <button class="btn btn-sm btn-success mr-1" type="submit"
+                    name="method" value="take-{{ loot.id }}">{% trans "Prendre" %}</button>
+                {% endif %}
+                <button type="submit" class="btn btn-sm btn-danger"
+                        name="method" value="clear">{% trans "Vider" %}</button>
+            </div>
         </div>
+    {% endif %}
     {% endif %}
     <div class="row">
         {% for loot in loots %}

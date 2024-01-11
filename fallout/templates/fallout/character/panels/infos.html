@@ -25,16 +25,51 @@
                 <div class="progress">
                     {% for value, width, class, label in fight.all %}
                         {% if value %}
-                            {% localize off %}
                             <div class="progress-bar bg-{{ class }} text-light" role="progressbar"
                                  aria-valuenow="{{ value }}" aria-valuemin="0" aria-valuemax="{{ roll.count }}"
-                                 style="width: {{ width }}%" title="{{ label }}" data-toggle="tooltip" data-placement="top">
-                            {% endlocalize %}
+                                 style="width: {{ width }}%" data-toggle="tooltip" data-placement="top"
+                                 title="{{ label }} ({% trans "total" %})">
                                 {{ value }}
                             </div>
                         {% endif %}
                     {% endfor %}
                 </div>
+                {% if character.is_player and character.level > 2 %}
+                <div class="progress mt-1">
+                    {% for value, width, class, label in fight.previous_stats %}
+                        {% if value %}
+                            <div class="progress-bar bg-{{ class }} text-light" role="progressbar"
+                                 aria-valuenow="{{ value }}" aria-valuemin="0" aria-valuemax="{{ fight.previous_total }}"
+                                 style="width: {{ width }}%" data-toggle="tooltip" data-placement="top"
+                                 title="{{ label }} ({% trans "niveau précédent" %})">
+                                {{ value }}
+                            </div>
+                        {% endif %}
+                    {% empty %}
+                        <div class="progress-bar" role="progressbar" style="width: 100%">
+                            {% trans "niveau précédent" %}
+                        </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                {% if character.is_player and character.level > 1 %}
+                <div class="progress mt-1">
+                    {% for value, width, class, label in fight.current_stats %}
+                        {% if value %}
+                            <div class="progress-bar bg-{{ class }} text-light" role="progressbar"
+                                 aria-valuenow="{{ value }}" aria-valuemin="0" aria-valuemax="{{ fight.current_total }}"
+                                 style="width: {{ width }}%" data-toggle="tooltip" data-placement="top"
+                                 title="{{ label }} ({% trans "niveau actuel" %})">
+                                {{ value }}
+                            </div>
+                        {% endif %}
+                    {% empty %}
+                        <div class="progress-bar" role="progressbar" style="width: 100%">
+                            {% trans "niveau actuel" %}
+                        </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
             </div>
         {% endfor %}
     </div>
@@ -57,16 +92,51 @@
                 <div class="progress">
                     {% for value, width, class, label in roll.all %}
                         {% if value %}
-                            {% localize off %}
                             <div class="progress-bar bg-{{ class }} text-light" role="progressbar"
                                  aria-valuenow="{{ value }}" aria-valuemin="0" aria-valuemax="{{ roll.count }}"
-                                 style="width: {{ width }}%" title="{{ label }}" data-toggle="tooltip" data-placement="bottom">
-                            {% endlocalize %}
+                                 style="width: {{ width }}%" data-toggle="tooltip" data-placement="bottom"
+                                 title="{{ label }} ({% trans "total" %})">
                                 {{ value }}
                             </div>
                         {% endif %}
                     {% endfor %}
                 </div>
+                {% if character.is_player and character.level > 2 %}
+                <div class="progress mt-1">
+                    {% for value, width, class, label in roll.previous_stats %}
+                        {% if value %}
+                            <div class="progress-bar bg-{{ class }} text-light" role="progressbar"
+                                 aria-valuenow="{{ value }}" aria-valuemin="0" aria-valuemax="{{ roll.previous_total }}"
+                                 style="width: {{ width }}%" data-toggle="tooltip" data-placement="bottom"
+                                 title="{{ label }} ({% trans "niveau précédent" %})">
+                                {{ value }}
+                            </div>
+                        {% endif %}
+                    {% empty %}
+                        <div class="progress-bar" role="progressbar" style="width: 100%">
+                            {% trans "niveau précédent" %}
+                        </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                {% if character.is_player and character.level > 1 %}
+                <div class="progress mt-1">
+                    {% for value, width, class, label in roll.current_stats %}
+                        {% if value %}
+                            <div class="progress-bar bg-{{ class }} text-light" role="progressbar"
+                                 aria-valuenow="{{ value }}" aria-valuemin="0" aria-valuemax="{{ roll.current_total }}"
+                                 style="width: {{ width }}%" data-toggle="tooltip" data-placement="bottom"
+                                 title="{{ label }} ({% trans "niveau actuel" %})">
+                                {{ value }}
+                            </div>
+                        {% endif %}
+                    {% empty %}
+                        <div class="progress-bar" role="progressbar" style="width: 100%">
+                            {% trans "niveau actuel" %}
+                        </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
             </div>
             {% if forloop.counter == 7 %}
                 </div><hr /><div class="row">
