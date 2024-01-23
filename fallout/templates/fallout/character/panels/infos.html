@@ -34,7 +34,7 @@
                         {% endif %}
                     {% endfor %}
                 </div>
-                {% if character.is_player and character.level > 2 %}
+                {% if character.is_player and character.level > 1 %}
                 <div class="progress mt-1">
                     {% for value, width, class, label in fight.previous_stats %}
                         {% if value %}
@@ -51,8 +51,6 @@
                         </div>
                     {% endfor %}
                 </div>
-                {% endif %}
-                {% if character.is_player and character.level > 1 %}
                 <div class="progress mt-1">
                     {% for value, width, class, label in fight.current_stats %}
                         {% if value %}
