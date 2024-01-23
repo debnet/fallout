@@ -2,7 +2,7 @@ Django==5.0.1
 Pillow==10.2.0
 celery==5.3.6
 coreapi==2.3.3
-common-framework==2024.1.2
+common-framework==2024.1.4
 dj-database-url==2.1.0
 django-compressor==4.4
 django-configurations==2.5
