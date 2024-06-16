@@ -58,3 +58,9 @@ Feel free to provide any feedback or anomalies through an issue or an email.
 
 There is no licence provided but you can fork, edit and redistribute the source code,
 just keep me in touch because I'm curious of what the others do with my job. ;)
+
+### Infrastructure model
+![Infrastructure main model](.infragenie/infrastructure_main_model.svg)
+- [web component model](.infragenie/web_component_model.svg)
+
+---
