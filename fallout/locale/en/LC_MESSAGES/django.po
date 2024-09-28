@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-11 22:07+0100\n"
+"POT-Creation-Date: 2024-09-28 15:46+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Marc Debureaux <marc@debnet.fr>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -33,10 +33,8 @@ msgstr "Technical informations"
 msgid "Effets"
 msgstr "Effects"
 
-#, fuzzy
-#| msgid "argent"
 msgid "Argent"
-msgstr "money"
+msgstr "Money"
 
 msgid "Autres"
 msgstr "Others"
@@ -332,6 +330,9 @@ msgstr "CSS"
 
 msgid "taux"
 msgstr "rate"
+
+msgid "préfixe"
+msgstr "prefix"
 
 msgid "suffixe"
 msgstr "suffix"
@@ -648,6 +649,12 @@ msgstr "money gain"
 msgid "perte d'argent"
 msgstr "money loss"
 
+msgid "gain de karma"
+msgstr "karma gain"
+
+msgid "perte de karma"
+msgstr "karma loss"
+
 msgid "soins"
 msgstr "heals"
 
@@ -884,6 +891,21 @@ msgstr "Dangerously tired"
 
 msgid "Mortellement fatigué"
 msgstr "Deadly tired"
+
+msgid "Non chargé"
+msgstr "Not encumbered"
+
+msgid "Légèrement encombré"
+msgstr "Slightly encumbered"
+
+msgid "Encombré"
+msgstr "Encumbered"
+
+msgid "Lourdement encombré"
+msgstr "Heavily encumbered"
+
+msgid "Immobilisé"
+msgstr "Immobilized"
 
 msgid "échec"
 msgstr "fail"
@@ -1174,6 +1196,9 @@ msgstr "background"
 msgid "race"
 msgstr "race"
 
+msgid "visible ?"
+msgstr ""
+
 msgid "joueur ?"
 msgstr "player?"
 
@@ -1191,6 +1216,21 @@ msgstr "speciality"
 
 msgid "données complémentaires"
 msgstr "additional data"
+
+msgid " kg"
+msgstr " kg"
+
+msgid " ¤"
+msgstr " ¤"
+
+msgid " XP"
+msgstr " XP"
+
+msgid " PV/h"
+msgstr " HP/h"
+
+msgid " PA"
+msgstr " AP"
 
 msgid "aucun malus"
 msgstr "no malus"
@@ -1491,6 +1531,9 @@ msgstr "ingame date"
 
 msgid "jet"
 msgstr "roll"
+
+msgid "niveau+ ?"
+msgstr "level up?"
 
 #, python-brace-format
 msgid "🎲 {character}"
@@ -2103,7 +2146,7 @@ msgid "(aucune attaque)"
 msgstr "(no attack)"
 
 msgid "total"
-msgstr ""
+msgstr "total"
 
 msgid "niveau précédent"
 msgstr "previous level"

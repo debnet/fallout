@@ -70,8 +70,8 @@ def view_dashboard(request, campaign_id):
         characters = characters.filter(
             Q(player=request.user)
             | Q(campaign__game_master=request.user)
-            | Q(is_player=True, campaign__view_pc=True)
-            | Q(is_player=False, campaign__view_npc=True)
+            | (Q(is_player=True) & (Q(is_visible=True) | Q(campaign__view_pc=True)))
+            | (Q(is_player=False) & (Q(is_visible=True) | Q(campaign__view_npc=True)))
         )
 
     authorized = request.user and (
@@ -141,8 +141,8 @@ def view_campaign(request, campaign_id):
         characters = characters.filter(
             Q(player=request.user)
             | Q(campaign__game_master=request.user)
-            | Q(is_player=True, campaign__view_pc=True)
-            | Q(is_player=False, campaign__view_npc=True)
+            | (Q(is_player=True) & (Q(is_visible=True) | Q(campaign__view_pc=True)))
+            | (Q(is_player=False) & (Q(is_visible=True) | Q(campaign__view_npc=True)))
         )
     loots = Loot.objects.select_related("item").filter(campaign=campaign).order_by("item__name")
 
@@ -293,9 +293,8 @@ def view_campaign(request, campaign_id):
                 )
                 filter = dict(is_player=(group == "pj")) if group else dict()
                 for character in characters.filter(is_active=True, **filter):
-                    old_level = character.level
-                    level, required_experience = character.add_experience(experience)
-                    if level != old_level:
+                    level, required_xp, level_up = character.add_experience(experience)
+                    if level_up:
                         messages.info(
                             request,
                             _(
@@ -305,7 +304,7 @@ def view_campaign(request, campaign_id):
                             ).format(
                                 character=character,
                                 level=level,
-                                experience=required_experience,
+                                experience=required_xp,
                             ),
                         )
                     else:
@@ -314,7 +313,7 @@ def view_campaign(request, campaign_id):
                             _(
                                 "<strong>{character}</strong> a encore besoin de <strong>{experience}</strong> "
                                 "points d'expérience pour passer au niveau suivant."
-                            ).format(character=character, experience=required_experience),
+                            ).format(character=character, experience=required_xp),
                         )
             elif type == "npc":
                 name, number, character_id, campaign_id = (

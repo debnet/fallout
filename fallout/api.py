@@ -191,10 +191,18 @@ class ExperienceInputSerializer(BaseCustomSerializer):
     amount = serializers.IntegerField(default=0, label=_("quantité"))
 
 
+class ExperienceSerializer(SimpleCharacterSerializer):
+    """
+    Serializer de l'expérience acquise d'un personnage
+    """
+
+    level_up = serializers.BooleanField()
+
+
 @api_view_with_serializer(
     ["POST"],
     input_serializer=ExperienceInputSerializer,
-    serializer=SimpleCharacterSerializer,
+    serializer=ExperienceSerializer,
 )
 def character_xp(request, character_id):
     """
@@ -203,13 +211,17 @@ def character_xp(request, character_id):
     character = get_object_or_404(Character.objects.select_related("campaign", "statistics"), pk=character_id)
     is_authorized(request, character.campaign)
     try:
-        character.add_experience(**request.validated_data)
+        level, required_xp, character.level_up = character.add_experience(**request.validated_data)
         return character
     except Exception as exception:
         raise ValidationError(str(exception))
 
 
-@api_view_with_serializer(["POST"], input_serializer=RollInputSerializer, serializer=RollHistorySerializer)
+@api_view_with_serializer(
+    ["POST"],
+    input_serializer=RollInputSerializer,
+    serializer=RollHistorySerializer,
+)
 def character_roll(request, character_id):
     """
     API pour effectuer un jet de compétence sur un personnage
@@ -249,22 +261,52 @@ class FightInputSerializer(BaseFightInputSerializer):
     """
 
     target_part = serializers.ChoiceField(
-        choices=BODY_PARTS, allow_blank=True, required=False, label=_("partie du corps")
+        choices=BODY_PARTS,
+        allow_blank=True,
+        required=False,
+        label=_("partie du corps"),
     )
     fail_target = serializers.PrimaryKeyRelatedField(
         queryset=Character.objects.order_by("name"),
         required=False,
         label=_("cible d'échec"),
     )
-    hit_chance_modifier = serializers.IntegerField(initial=0, required=False, label=_("modificateur"))
-    force_success = serializers.BooleanField(initial=False, required=False, label=_("succès ?"))
-    force_critical = serializers.BooleanField(initial=False, required=False, label=_("critique ?"))
-    force_raw_damage = serializers.BooleanField(initial=False, required=False, label=_("dégâts bruts ?"))
-    is_action = serializers.BooleanField(initial=False, required=False, label=_("action ?"))
-    weapon_type = serializers.ChoiceField(
-        initial="primary", choices=WEAPON_TYPES, required=False, label=_("type d'arme")
+    hit_chance_modifier = serializers.IntegerField(
+        initial=0,
+        required=False,
+        label=_("modificateur"),
     )
-    simulation = serializers.BooleanField(initial=False, required=False, label=_("simulation ?"))
+    force_success = serializers.BooleanField(
+        initial=False,
+        required=False,
+        label=_("succès ?"),
+    )
+    force_critical = serializers.BooleanField(
+        initial=False,
+        required=False,
+        label=_("critique ?"),
+    )
+    force_raw_damage = serializers.BooleanField(
+        initial=False,
+        required=False,
+        label=_("dégâts bruts ?"),
+    )
+    is_action = serializers.BooleanField(
+        initial=False,
+        required=False,
+        label=_("action ?"),
+    )
+    weapon_type = serializers.ChoiceField(
+        initial="primary",
+        choices=WEAPON_TYPES,
+        required=False,
+        label=_("type d'arme"),
+    )
+    simulation = serializers.BooleanField(
+        initial=False,
+        required=False,
+        label=_("simulation ?"),
+    )
 
 
 class BurstInputSerializer(BaseCustomSerializer):
@@ -272,16 +314,47 @@ class BurstInputSerializer(BaseCustomSerializer):
     Serializer d'entrée pour les attaques en rafales
     """
 
-    targets = BaseFightInputSerializer(many=True, required=False, label=_("cibles"))
-    hit_chance_modifier = serializers.IntegerField(initial=0, required=False, label=_("modificateur"))
-    force_success = serializers.BooleanField(initial=False, required=False, label=_("succès ?"))
-    force_critical = serializers.BooleanField(initial=False, required=False, label=_("critique ?"))
-    force_raw_damage = serializers.BooleanField(initial=False, required=False, label=_("dégâts bruts ?"))
-    is_action = serializers.BooleanField(initial=False, required=False, label=_("action ?"))
-    weapon_type = serializers.ChoiceField(
-        initial="primary", choices=WEAPON_TYPES, required=False, label=_("type d'arme")
+    targets = BaseFightInputSerializer(
+        many=True,
+        required=False,
+        label=_("cibles"),
     )
-    simulation = serializers.BooleanField(initial=False, required=False, label=_("simulation ?"))
+    hit_chance_modifier = serializers.IntegerField(
+        initial=0,
+        required=False,
+        label=_("modificateur"),
+    )
+    force_success = serializers.BooleanField(
+        initial=False,
+        required=False,
+        label=_("succès ?"),
+    )
+    force_critical = serializers.BooleanField(
+        initial=False,
+        required=False,
+        label=_("critique ?"),
+    )
+    force_raw_damage = serializers.BooleanField(
+        initial=False,
+        required=False,
+        label=_("dégâts bruts ?"),
+    )
+    is_action = serializers.BooleanField(
+        initial=False,
+        required=False,
+        label=_("action ?"),
+    )
+    weapon_type = serializers.ChoiceField(
+        initial="primary",
+        choices=WEAPON_TYPES,
+        required=False,
+        label=_("type d'arme"),
+    )
+    simulation = serializers.BooleanField(
+        initial=False,
+        required=False,
+        label=_("simulation ?"),
+    )
 
 
 @to_model_serializer(FightHistory)
@@ -296,7 +369,11 @@ class FightHistorySerializer(HistorySerializer):
     fail = RecursiveField(read_only=True)
 
 
-@api_view_with_serializer(["POST"], input_serializer=FightInputSerializer, serializer=FightHistorySerializer)
+@api_view_with_serializer(
+    ["POST"],
+    input_serializer=FightInputSerializer,
+    serializer=FightHistorySerializer,
+)
 def character_fight(request, character_id):
     """
     API permettant d'attaquer un autre personnage
@@ -309,7 +386,11 @@ def character_fight(request, character_id):
         raise ValidationError(str(exception))
 
 
-@api_view_with_serializer(["POST"], input_serializer=BurstInputSerializer, serializer=FightHistorySerializer)
+@api_view_with_serializer(
+    ["POST"],
+    input_serializer=BurstInputSerializer,
+    serializer=FightHistorySerializer,
+)
 def character_burst(request, character_id):
     """
     API permettant d'effectuer une attaque en rafale sur un ou plusieurs personnages
@@ -328,19 +409,52 @@ class DamageInputSerializer(BaseCustomSerializer):
     Serializer d'entrée pour infliger des dégâts à un seul personnages
     """
 
-    raw_damage = serializers.IntegerField(initial=0, required=False, label=_("dégâts bruts"))
-    min_damage = serializers.IntegerField(initial=0, required=False, label=_("dégâts min."))
-    max_damage = serializers.IntegerField(initial=0, required=False, label=_("dégâts max."))
-    damage_type = serializers.ChoiceField(choices=DAMAGES_TYPES, required=False, label=_("type de dégâts"))
+    raw_damage = serializers.IntegerField(
+        initial=0,
+        required=False,
+        label=_("dégâts bruts"),
+    )
+    min_damage = serializers.IntegerField(
+        initial=0,
+        required=False,
+        label=_("dégâts min."),
+    )
+    max_damage = serializers.IntegerField(
+        initial=0,
+        required=False,
+        label=_("dégâts max."),
+    )
+    damage_type = serializers.ChoiceField(
+        choices=DAMAGES_TYPES,
+        required=False,
+        label=_("type de dégâts"),
+    )
     body_part = serializers.ChoiceField(
-        choices=BODY_PARTS, allow_blank=True, required=False, label=_("partie du corps")
+        choices=BODY_PARTS,
+        allow_blank=True,
+        required=False,
+        label=_("partie du corps"),
     )
-    threshold_modifier = serializers.IntegerField(initial=0, required=False, label=_("modificateur d'absorption"))
+    threshold_modifier = serializers.IntegerField(
+        initial=0,
+        required=False,
+        label=_("modificateur d'absorption"),
+    )
     threshold_rate_modifier = serializers.IntegerField(
-        initial=0, required=False, label=_("modificateur taux d'absorption")
+        initial=0,
+        required=False,
+        label=_("modificateur taux d'absorption"),
     )
-    resistance_modifier = serializers.IntegerField(initial=0, required=False, label=_("modificateur de résistance"))
-    simulation = serializers.BooleanField(initial=False, required=False, label=_("simulation ?"))
+    resistance_modifier = serializers.IntegerField(
+        initial=0,
+        required=False,
+        label=_("modificateur de résistance"),
+    )
+    simulation = serializers.BooleanField(
+        initial=False,
+        required=False,
+        label=_("simulation ?"),
+    )
 
 
 class MultiDamageInputSerializer(DamageInputSerializer):
@@ -349,7 +463,9 @@ class MultiDamageInputSerializer(DamageInputSerializer):
     """
 
     characters = serializers.PrimaryKeyRelatedField(
-        queryset=Character.objects.order_by("name"), many=True, label=_("personnages")
+        queryset=Character.objects.order_by("name"),
+        many=True,
+        label=_("personnages"),
     )
 
     def __init__(self, *args, **kwargs):
@@ -393,7 +509,11 @@ def campaign_damage(request, campaign_id):
         raise ValidationError(str(exception))
 
 
-@api_view_with_serializer(["POST"], input_serializer=DamageInputSerializer, serializer=DamageHistorySerializer)
+@api_view_with_serializer(
+    ["POST"],
+    input_serializer=DamageInputSerializer,
+    serializer=DamageHistorySerializer,
+)
 def character_damage(request, character_id):
     """
     API permettant d'infliger des dégâts à un seul personnage
@@ -411,12 +531,35 @@ class CharacterCopyInputSerializer(BaseCustomSerializer):
     Serializer d'entrée pour la copie de personnages
     """
 
-    campaign = serializers.PrimaryKeyRelatedField(queryset=Campaign.objects.order_by("name"), label=_("campagne"))
-    name = serializers.CharField(allow_blank=True, required=False, label=_("nom"))
-    count = serializers.IntegerField(initial=1, required=False, label=_("nombre"))
-    equipments = serializers.BooleanField(initial=True, required=False, label=_("équipements ?"))
-    effects = serializers.BooleanField(initial=True, required=False, label=_("effets ?"))
-    is_active = serializers.BooleanField(initial=True, required=False, label=_("actif ?"))
+    campaign = serializers.PrimaryKeyRelatedField(
+        queryset=Campaign.objects.order_by("name"),
+        label=_("campagne"),
+    )
+    name = serializers.CharField(
+        allow_blank=True,
+        required=False,
+        label=_("nom"),
+    )
+    count = serializers.IntegerField(
+        initial=1,
+        required=False,
+        label=_("nombre"),
+    )
+    equipments = serializers.BooleanField(
+        initial=True,
+        required=False,
+        label=_("équipements ?"),
+    )
+    effects = serializers.BooleanField(
+        initial=True,
+        required=False,
+        label=_("effets ?"),
+    )
+    is_active = serializers.BooleanField(
+        initial=True,
+        required=False,
+        label=_("actif ?"),
+    )
 
 
 @api_view_with_serializer(
@@ -547,7 +690,11 @@ class ItemGiveInputSerializer(BaseCustomSerializer):
     condition = serializers.IntegerField(initial=100, required=False, label=_("état"))
 
 
-@api_view_with_serializer(["POST"], input_serializer=ItemGiveInputSerializer, serializer=EquipmentSerializer)
+@api_view_with_serializer(
+    ["POST"],
+    input_serializer=ItemGiveInputSerializer,
+    serializer=EquipmentSerializer,
+)
 def character_item(request, character_id):
     """
     API permettant de donner un objet à un personnage
@@ -569,7 +716,11 @@ class ActionInputSerializer(BaseCustomSerializer):
     is_action = serializers.BooleanField(initial=False, required=False, label=_("action ?"))
 
 
-@api_view_with_serializer(["POST"], input_serializer=ActionInputSerializer, serializer=EquipmentSerializer)
+@api_view_with_serializer(
+    ["POST"],
+    input_serializer=ActionInputSerializer,
+    serializer=EquipmentSerializer,
+)
 def equipment_equip(request, equipment_id):
     """
     API permettant de s'équiper ou de déséquiper d'un équipement de l'inventaire
@@ -600,7 +751,11 @@ class EquipmentUseSerializer(BaseCustomSerializer):
     modifiers = ItemModifierSerializer(read_only=True, many=True, label=_("modificateurs"))
 
 
-@api_view_with_serializer(["POST"], input_serializer=ActionInputSerializer, serializer=EquipmentUseSerializer)
+@api_view_with_serializer(
+    ["POST"],
+    input_serializer=ActionInputSerializer,
+    serializer=EquipmentUseSerializer,
+)
 def equipment_use(request, equipment_id):
     """
     API permettant d'utiliser un objet (si applicable)
@@ -614,7 +769,11 @@ def equipment_use(request, equipment_id):
         raise ValidationError(str(exception))
 
 
-@api_view_with_serializer(["POST"], input_serializer=ActionInputSerializer, serializer=EquipmentSerializer)
+@api_view_with_serializer(
+    ["POST"],
+    input_serializer=ActionInputSerializer,
+    serializer=EquipmentSerializer,
+)
 def equipment_reload(request, equipment_id):
     """
     API permettant de recharger une arme à feu (si applicable)
@@ -667,7 +826,10 @@ class LootTakeInputSerializer(ActionInputSerializer):
     Serializer d'entrée pour ramasser un butin
     """
 
-    character = serializers.PrimaryKeyRelatedField(queryset=Character.objects.order_by("name"), label=_("personnage"))
+    character = serializers.PrimaryKeyRelatedField(
+        queryset=Character.objects.order_by("name"),
+        label=_("personnage"),
+    )
     count = serializers.IntegerField(initial=1, required=False, label=_("nombre"))
 
     def __init__(self, *args, **kwargs):
@@ -681,7 +843,11 @@ class LootTakeInputSerializer(ActionInputSerializer):
             character_field.queryset = character_field.queryset.filter(campaign__loots=loot_id)
 
 
-@api_view_with_serializer(["POST"], input_serializer=LootTakeInputSerializer, serializer=EquipmentSerializer)
+@api_view_with_serializer(
+    ["POST"],
+    input_serializer=LootTakeInputSerializer,
+    serializer=EquipmentSerializer,
+)
 def loot_take(request, loot_id):
     """
     API permettant de ramasser un butin
@@ -699,7 +865,10 @@ class LootTemplateOpenInputSerializer(BaseCustomSerializer):
     Serializer d'entrée pour l'ouverture des butins
     """
 
-    campaign = serializers.PrimaryKeyRelatedField(queryset=Campaign.objects.order_by("name"), label=_("campagne"))
+    campaign = serializers.PrimaryKeyRelatedField(
+        queryset=Campaign.objects.order_by("name"),
+        label=_("campagne"),
+    )
     character = serializers.PrimaryKeyRelatedField(
         allow_empty=True,
         allow_null=True,
@@ -747,7 +916,11 @@ class NextTurnSerializer(BaseCustomSerializer):
     damages = DamageHistorySerializer(read_only=True, many=True, label=_("dégâts"))
 
 
-@api_view_with_serializer(["POST"], input_serializer=NextTurnInputSerializer, serializer=NextTurnSerializer)
+@api_view_with_serializer(
+    ["POST"],
+    input_serializer=NextTurnInputSerializer,
+    serializer=NextTurnSerializer,
+)
 def campaign_next_turn(request, campaign_id):
     """
     API pour changer le tour des personnages
@@ -762,13 +935,18 @@ def campaign_next_turn(request, campaign_id):
 
 
 class StatInfoSerializer(BaseCustomSerializer):
+    """
+    Serializer des statistiques de personnage
+    """
+
     code = serializers.CharField(label=_("code"))
     label = serializers.CharField(label=_("libellé"))
     value = serializers.IntegerField(source="lvalue", label=_("valeur"))
     max = serializers.IntegerField(source="rvalue", label=_("maximum"))
     css = serializers.CharField(label=_("CSS"))
     rate = serializers.FloatField(label=_("taux"))
-    end = serializers.CharField(label=_("suffixe"))
+    prefix = serializers.CharField(label=_("préfixe"))
+    suffix = serializers.CharField(label=_("suffixe"))
     title = serializers.CharField(label=_("titre"))
 
 

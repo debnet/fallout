@@ -793,6 +793,13 @@ class Migration(migrations.Migration):
                                     ("remove_money", "perte d'argent"),
                                 ),
                             ),
+                            (
+                                "karma",
+                                (
+                                    ("add_karma", "gain de karma"),
+                                    ("remove_karma", "perte de karma"),
+                                ),
+                            ),
                         ],
                         max_length=20,
                         verbose_name="type de dégâts",
@@ -941,6 +948,13 @@ class Migration(migrations.Migration):
                                 (
                                     ("add_money", "gain d'argent"),
                                     ("remove_money", "perte d'argent"),
+                                ),
+                            ),
+                            (
+                                "karma",
+                                (
+                                    ("add_karma", "gain de karma"),
+                                    ("remove_karma", "perte de karma"),
                                 ),
                             ),
                         ],
@@ -1243,6 +1257,13 @@ class Migration(migrations.Migration):
                                 (
                                     ("add_money", "gain d'argent"),
                                     ("remove_money", "perte d'argent"),
+                                ),
+                            ),
+                            (
+                                "karma",
+                                (
+                                    ("add_karma", "gain de karma"),
+                                    ("remove_karma", "perte de karma"),
                                 ),
                             ),
                         ],

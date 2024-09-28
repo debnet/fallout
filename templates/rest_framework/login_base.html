@@ -1,0 +1,8 @@
+{% extends "rest_framework/login_base.html" %}
+{% load i18n %}
+
+{% block title %}{% if name %}{{ name }} – {% endif %}{% trans "Fallout RPG" %}{% endblock %}
+
+{% block branding %}
+    <h3 style="margin: 0 0 20px;">{% trans "Fallout RPG" %}</h3>
+{% endblock %}

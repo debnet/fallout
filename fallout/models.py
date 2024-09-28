@@ -222,7 +222,7 @@ class Stats:
         # Survival modifiers
         for stats_name, survival in SURVIVAL_EFFECTS:
             for (mini, maxi), effects in survival.items():
-                if (mini or 0) <= gv(character, stats_name, 0) < (maxi or float("+inf")):
+                if (mini or 0) <= gv(character, stats_name, 0) < (maxi or float("inf")):
                     stats.change_all_stats(**effects)
                     break
         # Equipment modifiers
@@ -239,13 +239,23 @@ class Stats:
             for effect in character.campaign.effects.exclude(effect__modifiers__isnull=True):
                 for modifier in effect.effect.modifiers.all():
                     stats.change_stats(modifier.stats, modifier.calculated_value, limit=False)
+        # Carry weight & charge
+        for stats_name, formula in COMPUTED_STATS[:1]:  # Only carry weight formula (1st in list)
+            stats.change_stats(stats_name, formula(stats, character) + stats.raw.get(stats_name, 0), raw=False)
+        stats.charge = (
+            character.equipments.aggregate(
+                charge=Sum(F("quantity") * F("item__weight"), output_field=models.FloatField())
+            ).get("charge")
+            or 0.0
+        )
+        charge_rate = (stats.charge / (stats.carry_weight or 1)) * 100.0
+        for (mini, maxi), effects in CARRY_WEIGHT_EFFECTS.items():
+            if (mini or 0.0) <= charge_rate < (maxi or float("inf")):
+                stats.change_all_stats(**effects)
+                break
         # Derivated statistics
-        for stats_name, formula in COMPUTED_STATS:
-            stats.change_stats(
-                stats_name,
-                formula(stats, character) + stats.raw.get(stats_name, 0),
-                raw=False,
-            )
+        for stats_name, formula in COMPUTED_STATS[1:]:  # Except carry weight
+            stats.change_stats(stats_name, formula(stats, character) + stats.raw.get(stats_name, 0), raw=False)
         # Modifiers
         for stats_name in LIST_EDITABLE_STATS:
             from_base = stats.base.get(stats_name, 0)
@@ -253,13 +263,6 @@ class Stats:
             if from_base == from_stats:
                 continue
             stats.modifiers[stats_name] = from_stats - from_base
-        # Charge
-        stats.charge = (
-            character.equipments.aggregate(
-                charge=Sum(F("quantity") * F("item__weight"), output_field=models.FloatField())
-            ).get("charge")
-            or 0.0
-        )
         return stats
 
     def change_all_stats(self, limit: bool = False, **stats: Tuple[int, Optional[int], Optional[int]]) -> None:
@@ -629,7 +632,8 @@ StatInfo = namedtuple(
         "rvalue",
         "css",
         "rate",
-        "end",
+        "prefix",
+        "suffix",
         "title",
     ),
 )
@@ -682,6 +686,7 @@ class Character(Entity, BaseStatistics):
     )
     level = models.PositiveSmallIntegerField(default=1, verbose_name=_("niveau"))
     is_active = models.BooleanField(default=True, db_index=True, verbose_name=_("actif ?"))
+    is_visible = models.BooleanField(default=False, db_index=True, verbose_name=_("visible ?"))
     is_player = models.BooleanField(default=False, db_index=True, verbose_name=_("joueur ?"))
     is_resting = models.BooleanField(default=False, verbose_name=_("au repos ?"))
     has_stats = models.BooleanField(default=True, verbose_name=_("stats calculées ?"))
@@ -825,7 +830,17 @@ class Character(Entity, BaseStatistics):
         Retourne le S.P.E.C.I.A.L.
         """
         for code, label, value in self._get_stats(SPECIALS):
-            yield StatInfo(code, label, value, None, get_class(value, maximum=10), None, None, None)
+            yield StatInfo(
+                code=code,
+                label=label,
+                lvalue=value,
+                rvalue=None,
+                css=get_class(value, maximum=10),
+                rate=None,
+                prefix=None,
+                suffix=None,
+                title=None,
+            )
 
     @property
     def skills(self) -> Iterable[StatInfo]:
@@ -834,14 +849,15 @@ class Character(Entity, BaseStatistics):
         """
         for code, label, value in self._get_stats(SKILLS):
             yield StatInfo(
-                code,
-                label,
-                value,
-                None,
-                get_class(value, maximum=100),
-                None,
-                None,
-                None,
+                code=code,
+                label=label,
+                lvalue=value,
+                rvalue=None,
+                css=get_class(value, maximum=100),
+                rate=None,
+                prefix=None,
+                suffix=" %",
+                title=None,
             )
 
     @property
@@ -862,7 +878,7 @@ class Character(Entity, BaseStatistics):
         values: Iterable[float] = (0.000, 0.001, 0.200, 0.400, 0.600, 0.800, 1.000)
         for code, label in GENERAL_STATS:
             lvalue = gv(self, code, 0)
-            rvalue, rclass, title = None, None, None
+            rvalue, rclass, prefix, suffix, title = None, None, None, None, None
             if code == STATS_HEALTH:
                 code = STATS_MAX_HEALTH
                 rvalue = gv(self.stats, STATS_MAX_HEALTH, 0)
@@ -887,21 +903,23 @@ class Character(Entity, BaseStatistics):
                         "secondary",
                     )
                     values = (0.000, 0.001, 0.250, 0.500, 0.750, 1.000)
+                    rate = (charge / carry_weight or 0) * 100.0
                     yield StatInfo(
-                        STATS_CARRY_WEIGHT,
-                        _("charge"),
-                        charge,
-                        carry_weight,
-                        get_class(
+                        code=STATS_CARRY_WEIGHT,
+                        label=_("charge"),
+                        lvalue=charge,
+                        rvalue=carry_weight,
+                        css=get_class(
                             charge,
                             carry_weight,
                             reverse=True,
                             classes=classes,
                             values=values,
                         ),
-                        (charge / carry_weight * 100.0),
-                        None,
-                        None,
+                        rate=rate,
+                        prefix=None,
+                        suffix=_(" kg"),
+                        title=self.get_need_label(STATS_CARRY_WEIGHT, value=rate),
                     )
                 lvalue = lvalue - self.previous_required_experience
                 rvalue = self.next_required_experience - self.previous_required_experience
@@ -910,17 +928,27 @@ class Character(Entity, BaseStatistics):
                 rvalue = 1000
                 rclass = get_class(lvalue, rvalue, reverse=True, classes=classes, values=values)
                 title = self.get_need_label(code)
+            elif code == STATS_KARMA:
+                prefix = "+" if lvalue > 0 else ""
+                rclass = "success" if lvalue > 0 else "danger" if lvalue < 0 else None
+            elif code == STATS_MONEY:
+                suffix, rclass = _(" ¤"), "warning" if lvalue > 0 else None
+            elif code == STATS_REWARD:
+                suffix, rclass = _(" XP"), "success" if lvalue > 0 else None
             rate = ((lvalue / rvalue) * 100.0) if rvalue else None
-            yield StatInfo(code, label, lvalue, rvalue, rclass, rate, None, title)
+            yield StatInfo(
+                code=code,
+                label=label,
+                lvalue=lvalue,
+                rvalue=rvalue,
+                css=rclass,
+                rate=rate,
+                prefix=prefix,
+                suffix=suffix,
+                title=title,
+            )
         # Secondary stats
         for statinfo in self.secondary_stats:
-            if statinfo.code in (
-                STATS_MAX_HEALTH,
-                STATS_MAX_ACTION_POINTS,
-                STATS_CARRY_WEIGHT,
-                STATS_ARMOR_CLASS,
-            ):
-                continue
             yield statinfo
 
     @property
@@ -929,7 +957,33 @@ class Character(Entity, BaseStatistics):
         Retourne les statistiques secondaires
         """
         for code, label, value in self._get_stats(SECONDARY_STATS):
-            yield StatInfo(code, label, value, None, None, None, None, None)
+            if code in (
+                STATS_MAX_HEALTH,
+                STATS_MAX_ACTION_POINTS,
+                STATS_CARRY_WEIGHT,
+                STATS_ARMOR_CLASS,
+            ):
+                continue
+            rclass, prefix, suffix, title = None, None, None, None
+            if code == STATS_HEALING_RATE:
+                suffix, rclass = _(" PV/h"), "success" if value > 0 else "danger" if value < 0 else None
+            elif code == STATS_AP_COST_MODIFIER:
+                prefix, suffix = "+" if value > 0 else None, _(" PA")
+                rclass = "danger" if value > 0 else "success" if value < 0 else None
+            elif code != STATS_SEQUENCE:
+                prefix, suffix = "+" if value > 0 else None, " %" if code != STATS_MELEE_DAMAGE else None
+                rclass = "success" if value > 0 else "danger" if value < 0 else None
+            yield StatInfo(
+                code=code,
+                label=label,
+                lvalue=value,
+                rvalue=None,
+                css=rclass,
+                rate=None,
+                prefix=prefix,
+                suffix=suffix,
+                title=title,
+            )
 
     @property
     def resistances(self) -> Iterable[StatInfo]:
@@ -946,15 +1000,17 @@ class Character(Entity, BaseStatistics):
         )
         armor_v, helmet_v = gv(armor, code, 0) or 0, gv(helmet, code, 0) or 0
         title = EQUIP_TITLE.format(armor=armor_v, helmet=helmet_v)
+        css = "info" if armor_v or helmet_v else "success" if value > 0 else "danger" if value < 0 else None
         yield StatInfo(
-            code,
-            label,
-            value,
-            None,
-            "info" if armor_v or helmet_v else None,
-            None,
-            None,
-            title,
+            code=code,
+            label=label,
+            lvalue=value,
+            rvalue=None,
+            css=css,
+            rate=None,
+            prefix=None,
+            suffix=None,
+            title=title,
         )
         # Damage threshold and damage resistance
         for threshold, resistance in zip(self._get_stats(THRESHOLDS), self._get_stats(RESISTANCES)):
@@ -966,8 +1022,8 @@ class Character(Entity, BaseStatistics):
             armor_t, helmet_t = gv(armor, code_t, 0), gv(helmet, code_t, 0)
             armor_r, helmet_r = gv(armor, code_r, 0), gv(helmet, code_r, 0)
             css_t, css_r = (
-                "info" if armor_t or helmet_t else None,
-                "info" if armor_r or helmet_r else None,
+                "info" if armor_t or helmet_t else "success" if value_t > 0 else "danger" if value_t < 0 else None,
+                "info" if armor_r or helmet_r else "success" if value_r > 0 else "danger" if value_r < 0 else None,
             )
             title_t, title_r = (
                 EQUIP_TITLE.format(armor=armor_t or EMPTY, helmet=helmet_t or EMPTY),
@@ -977,24 +1033,26 @@ class Character(Entity, BaseStatistics):
                 ),
             )
             yield StatInfo(
-                code_t,
-                label_t,
-                value_t,
-                None,
-                css_t,
-                None,
-                None,
-                title_t if css_t else None,
+                code=code_t,
+                label=label_t,
+                lvalue=value_t,
+                rvalue=None,
+                css=css_t,
+                rate=None,
+                prefix=None,
+                suffix=None,
+                title=title_t if css_t else None,
             )
             yield StatInfo(
-                code_r,
-                label_r,
-                value_r,
-                None,
-                css_r,
-                None,
-                "%",
-                title_r if css_r else None,
+                code=code_r,
+                label=label_r,
+                lvalue=value_r,
+                rvalue=None,
+                css=css_r,
+                rate=None,
+                prefix=None,
+                suffix=" %",
+                title=title_r if css_r else None,
             )
 
     @property
@@ -1050,24 +1108,31 @@ class Character(Entity, BaseStatistics):
         """
         return self.next_required_experience - self.experience
 
-    def get_need_label(self, need: str) -> str:
+    def get_need_label(self, need: str, value: Optional[Union[int, float]] = None) -> str:
         """
         Retourne le libellé relatif au niveau d'un besoin
         :param need: Code du besoin
+        :param value: Valeur du besoin en question
         :return: Libellé
         """
-        value = gv(self, need, 0.0)
+        value = gv(self, need, 0.0) if value is None else value
         labels, effects = {
             STATS_RADS: (RADS_LABELS, RADS_EFFECTS),
             STATS_THIRST: (THIRST_LABELS, THIRST_EFFECTS),
             STATS_HUNGER: (HUNGER_LABELS, HUNGER_EFFECTS),
             STATS_SLEEP: (SLEEP_LABELS, SLEEP_EFFECTS),
+            STATS_CARRY_WEIGHT: (CARRY_WEIGHT_LABELS, CARRY_WEIGHT_EFFECTS),
         }[need]
-        label = next(iter(label for (mini, maxi), label in labels.items() if mini <= value < (maxi or float("inf"))))
-        effects = next(
-            iter(modifiers for (mini, maxi), modifiers in effects.items() if mini <= value < (maxi or float("inf")))
+        label = None
+        for (mini, maxi), label in labels.items():
+            if (mini or 0) <= value < (maxi or float("inf")):
+                break
+        for (mini, maxi), modifiers in effects.items():
+            if (mini or 0) <= value < (maxi or float("inf")):
+                break
+        effects = ", ".join(
+            f"{modifier} {LIST_ALL_STATS[stats]}" for stats, (modifier, mini, maxi) in modifiers.items()
         )
-        effects = ", ".join(f"{modifier} {LIST_ALL_STATS[stats]}" for stats, (modifier, mini, maxi) in effects.items())
         effects = effects or _("aucun malus")
         if label:
             return f"{label} ({effects})"
@@ -1126,18 +1191,21 @@ class Character(Entity, BaseStatistics):
         sv(self, name, value)
         return value
 
-    def add_experience(self, amount: int = 0, save: bool = True) -> Tuple[int, int]:
+    def add_experience(self, amount: int = 0, save: bool = True) -> Tuple[int, int, bool]:
         """
         Ajoute de l'expérience à ce personnage
         :param amount: Quantité d'expérience ajoutée
         :param save: Sauvegarder les modifications sur le personnage ?
         :return: Niveau actuel, expérience requise jusqu'au niveau suivant
         """
+        level_up = False
         if amount:
+            previous_level = self.level
             self.experience += amount
             if save:
                 self.save()
-        return self.level, self.required_experience
+            level_up = self.level > previous_level
+        return self.level, self.required_experience, level_up
 
     def check_level(self) -> Tuple[int, int]:
         """
@@ -1402,10 +1470,11 @@ class Character(Entity, BaseStatistics):
                 if history.success
                 else history.roll >= min(100, CRITICAL_FAIL_D100 - roll_modifier)
             )
+        if xp:
+            history.experience = XP_GAIN_ROLL[history.success] * self.level
+            level, required_xp, history.level_up = self.add_experience(history.experience)
         if log:
             history.save()
-        if xp:
-            self.add_experience(XP_GAIN_ROLL[history.success] * self.level)
         return history
 
     def loot(self, empty: bool = True) -> Optional[List["Loot"]]:
@@ -1551,10 +1620,10 @@ class Character(Entity, BaseStatistics):
         if not simulation:
             for history in histories:
                 if history.defender.reward and history.damage and history.damage.damage_rate:
-                    experience = int(history.defender.reward * history.damage.damage_rate)
+                    history.experience = int(history.defender.reward * history.damage.damage_rate)
                 else:
-                    experience = max(history.defender.level - self.level, 1) * XP_GAIN_BURST
-                self.add_experience(experience, save=False)
+                    history.experience = max(history.defender.level - self.level, 1) * XP_GAIN_BURST
+                level, required_xp, history.level_up = self.add_experience(history.experience, save=False)
             for target, target_range in targets:
                 target.save()
             self.save()
@@ -1920,10 +1989,10 @@ class Character(Entity, BaseStatistics):
             if not is_burst and not fail:
                 # Experience only on single shot
                 if target.reward and history.damage and history.damage.damage_rate:
-                    experience = int(target.reward * history.damage.damage_rate)
+                    history.experience = int(target.reward * history.damage.damage_rate)
                 else:
-                    experience = max(target.level - self.level, 1) * XP_GAIN_FIGHT[history.success]
-                self.add_experience(experience, save=False)
+                    history.experience = max(target.level - self.level, 1) * XP_GAIN_FIGHT[history.success]
+                level, required_xp, history.level_up = self.add_experience(history.experience, save=False)
                 self.save()
             if log and not simulation:
                 history.save()
@@ -2046,6 +2115,8 @@ class Character(Entity, BaseStatistics):
                 self.sleep += total_damage
             elif damage_type in (ADD_MONEY, REMOVE_MONEY):
                 self.money -= total_damage
+            elif damage_type in (ADD_KARMA, REMOVE_KARMA):
+                self.karma -= total_damage
             else:
                 history.damage_rate = min(self.health, abs(total_damage)) / self.stats.max_health
                 self.health -= total_damage
@@ -2314,7 +2385,7 @@ class Damage(CommonModel):
         Retourne si le type de dégâts est curatif ou non
         :return: Vrai si curatif, faux sinon
         """
-        return self.damage_type in LIST_HEALS + (ADD_MONEY,)
+        return self.damage_type in LIST_HEALS + (ADD_MONEY, ADD_KARMA)
 
     @property
     def calculated_damage(self) -> int:
@@ -3585,6 +3656,8 @@ class RollHistory(CommonModel):
     roll = models.PositiveIntegerField(default=0, verbose_name=_("jet"))
     success = models.BooleanField(default=False, verbose_name=_("succès ?"))
     critical = models.BooleanField(default=False, verbose_name=_("critique ?"))
+    experience = models.PositiveSmallIntegerField(default=0, verbose_name=_("expérience"))
+    level_up = models.BooleanField(default=False, verbose_name=_("niveau+ ?"))
 
     class RollStats:
         """
@@ -3912,6 +3985,8 @@ class FightHistory(CommonModel):
         related_name="fight",
         verbose_name=_("historique des dégâts"),
     )
+    experience = models.PositiveSmallIntegerField(default=0, verbose_name=_("expérience"))
+    level_up = models.BooleanField(default=False, verbose_name=_("niveau+ ?"))
     fail = None  # Placeholder for fight against a secondary target when critical fail
 
     class FightStats:

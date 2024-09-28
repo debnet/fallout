@@ -229,6 +229,8 @@ HEAL_SLEEP = "heal_sleep"
 HEAL_RADIATION = "heal_rad"
 ADD_MONEY = "add_money"
 REMOVE_MONEY = "remove_money"
+ADD_KARMA = "add_karma"
+REMOVE_KARMA = "remove_karma"
 
 DAMAGES = (
     (DAMAGE_NORMAL, _("dégâts normaux")),
@@ -257,10 +259,15 @@ MONEY = (
     (ADD_MONEY, _("gain d'argent")),
     (REMOVE_MONEY, _("perte d'argent")),
 )
+KARMA = (
+    (ADD_KARMA, _("gain de karma")),
+    (REMOVE_KARMA, _("perte de karma")),
+)
 DAMAGES_TYPES = (
     (_("dégâts"), DAMAGES),
     (_("soins"), HEALS),
     (_("argent"), MONEY),
+    (_("karma"), KARMA),
 )
 LIST_DAMAGES_TYPES = dict(DAMAGES + HEALS + MONEY)
 LIST_PHYSICAL_DAMAGE = (
@@ -272,7 +279,8 @@ LIST_PHYSICAL_DAMAGE = (
 )
 LIST_HEALS = (HEAL_HEALTH, HEAL_RADIATION, HEAL_THIRST, HEAL_HUNGER, HEAL_SLEEP)
 LIST_MONEY = (ADD_MONEY, REMOVE_MONEY)
-LIST_NON_DAMAGE = (DAMAGE_RAW, DAMAGE_THIRST, DAMAGE_HUNGER, DAMAGE_SLEEP) + LIST_HEALS + LIST_MONEY
+LIST_KARMA = (ADD_KARMA, REMOVE_KARMA)
+LIST_NON_DAMAGE = (DAMAGE_RAW, DAMAGE_THIRST, DAMAGE_HUNGER, DAMAGE_SLEEP) + LIST_HEALS + LIST_MONEY + LIST_KARMA
 
 # Damage / resistance
 DAMAGE_RESISTANCE = {
@@ -339,6 +347,8 @@ DAMAGE_ICONS = {
     HEAL_SLEEP: "💤🔺",
     ADD_MONEY: "💰",
     REMOVE_MONEY: "💸",
+    ADD_KARMA: "😇",
+    REMOVE_KARMA: "😈",
 }
 
 # Leveled stats
@@ -479,7 +489,7 @@ FIGHT_STATUS = (
 )
 LIST_FIGHT_STATUS = dict(FIGHT_STATUS)
 
-# Radiation effects
+# Radiation labels
 RADS_LABELS = {
     (0, 200): _("Etat normal"),
     (200, 400): _("Faiblement irradié"),
@@ -489,7 +499,7 @@ RADS_LABELS = {
     (1000, None): _("Mortellement irradié"),
 }
 
-# Dehydration effets
+# Dehydration labels
 THIRST_LABELS = {
     (0, 200): _("Désaltéré"),
     (200, 400): _("Faiblement assoiffé"),
@@ -499,7 +509,7 @@ THIRST_LABELS = {
     (1000, None): _("Mortellement assoiffé"),
 }
 
-# Hunger effects
+# Hunger labels
 HUNGER_LABELS = {
     (0, 200): _("Rassasié"),
     (200, 400): _("Faiblement affamé"),
@@ -509,7 +519,7 @@ HUNGER_LABELS = {
     (1000, None): _("Mortellement affamé"),
 }
 
-# Sleep deprivation effects
+# Sleep deprivation labels
 SLEEP_LABELS = {
     (0, 200): _("Reposé"),
     (200, 400): _("Faiblement fatigué"),
@@ -517,6 +527,15 @@ SLEEP_LABELS = {
     (600, 800): _("Fortement fatigué"),
     (800, 1000): _("Dangereusement fatigué"),
     (1000, None): _("Mortellement fatigué"),
+}
+
+# Carrying capacity labels
+CARRY_WEIGHT_LABELS = {
+    (0, 25): _("Non chargé"),
+    (25, 50): _("Légèrement encombré"),
+    (50, 75): _("Encombré"),
+    (75, 100): _("Lourdement encombré"),
+    (100, None): _("Immobilisé"),
 }
 
 # Labels
@@ -530,11 +549,13 @@ def get_label(success, critical):
 
 
 __all__ = (
+    "ADD_KARMA",
     "ADD_MONEY",
     "ALL_EDITABLE_STATS",
     "ALL_RESISTANCES",
     "ALL_STATS",
     "BODY_PARTS",
+    "CARRY_WEIGHT_LABELS",
     "DAMAGES",
     "DAMAGES_TYPES",
     "DAMAGE_ELECTRICITY",
@@ -592,6 +613,7 @@ __all__ = (
     "LIST_GENERAL_STATS",
     "LIST_HEALS",
     "LIST_ITEM_TYPES",
+    "LIST_KARMA",
     "LIST_LEVELED_STATS",
     "LIST_MONEY",
     "LIST_NEEDS",
@@ -628,6 +650,7 @@ __all__ = (
     "RACE_ROBOT",
     "RACE_SUPER_MUTANT",
     "RADS_LABELS",
+    "REMOVE_KARMA",
     "REMOVE_MONEY",
     "RESISTANCES",
     "RESISTANCE_DAMAGE",

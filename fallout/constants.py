@@ -230,6 +230,23 @@ SURVIVAL_EFFECTS: Iterable[Tuple[str, Mapping]] = (
     (STATS_SLEEP, SLEEP_EFFECTS),
 )
 
+# Carrying capacity effects
+CARRY_WEIGHT_EFFECTS: Dict[Tuple[int, Optional[int]], Dict[str, Tuple[int, Optional[int], Optional[int]]]] = {
+    (0, 25): {},
+    (25, 50): {
+        STATS_MAX_ACTION_POINTS: (-1, 0, None),
+    },
+    (50, 75): {
+        STATS_MAX_ACTION_POINTS: (-2, 0, None),
+    },
+    (75, 100): {
+        STATS_MAX_ACTION_POINTS: (-4, 0, None),
+    },
+    (100, None): {
+        STATS_MAX_ACTION_POINTS: (-100, 0, None),
+    },
+}
+
 # S.P.E.C.I.A.L.
 SPECIAL_POINTS: int = 40
 
@@ -305,6 +322,7 @@ LEVELED_STATS_MULT: int = 10
 
 # Computed statistics from S.P.E.C.I.A.L.
 COMPUTED_STATS: Iterable[Tuple[str, Callable]] = (
+    ("carry_weight", lambda s, c: (15 + (15 * s.strength)) // 3),
     ("hit_points_per_level", lambda s, c: 3 + (s.endurance // 2)),
     ("skill_points_per_level", lambda s, c: (5 + (2 * s.intelligence)) * 2),
     (
@@ -314,7 +332,6 @@ COMPUTED_STATS: Iterable[Tuple[str, Callable]] = (
     ("max_action_points", lambda s, c: 5 + (s.agility // 2)),
     # Secondary statistics
     ("armor_class", lambda s, c: s.agility),
-    ("carry_weight", lambda s, c: (15 + (15 * s.strength)) // 3),
     ("melee_damage", lambda s, c: max(1, s.strength - 5) * 2),
     ("sequence", lambda s, c: 2 * s.perception),
     ("healing_rate", lambda s, c: (s.endurance // 3)),
@@ -370,6 +387,7 @@ __all__ = (
     "BASE_XP",
     "BODY_PARTS_MODIFIERS",
     "BODY_PARTS_RANDOM_CHANCES",
+    "CARRY_WEIGHT_EFFECTS",
     "COMPUTED_NEEDS",
     "COMPUTED_STATS",
     "CRITICAL_FAIL_D10",

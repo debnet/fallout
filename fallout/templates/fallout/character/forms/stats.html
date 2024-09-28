@@ -41,7 +41,7 @@
                         {% endif %}
                         <span {% if modifier %}title="{% if modifier > 0 %}+{% endif %}{{ modifier|default:"" }}" data-toggle="tooltip" data-placement="right"
                               class="{% if modifier > 0 %}text-success{% elif modifier < 0 %}text-danger{% endif %} pr-1"{% endif %}>
-                            {% if modifier > 0 %}&blacktriangle;{% elif modifier < 0 %}&blacktriangledown;{% endif %}
+                            {% if modifier > 0 %}&bigtriangleup;{% elif modifier < 0 %}&bigtriangledown;{% endif %}
                             {% if s.code in character.tag_skills %}<strong>{{ s.label }}</strong>{% else %}{{ s.label }}{% endif %}
                         </span>
                     </td>
@@ -49,8 +49,7 @@
                         {% if view or not authorized %}
                             <strong class="text-{{ s.css|default:'light' }}" {% if s.title %}title="{{ s.title }}{% endif %}"
                                     data-html="true" data-toggle="tooltip" data-placement="left">
-                                {{ s.lvalue|floatformat:0 }}{% if s.rvalue is not None %}&nbsp;/&nbsp;{{ s.rvalue|floatformat:0 }}{% endif %}
-                                {% if s.end %}{{ s.end }}{% endif %}
+                                {% if s.prefix %}{{ s.prefix }}{% endif %}{{ s.lvalue|floatformat:0 }}{% if s.rvalue is not None %}&nbsp;/&nbsp;{{ s.rvalue|floatformat:0 }}{% endif %}{% if s.suffix %}{{ s.suffix }}{% endif %}
                             </strong>
                         {% elif authorized %}
                             {% if levelup and character.used_skill_points < character.skill_points %}
