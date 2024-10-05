@@ -3893,6 +3893,13 @@ class DamageHistory(Damage):
         """
         Libellé des dégâts
         """
+        return self.get_damage_type_display()
+
+    @property
+    def long_label(self) -> str:
+        """
+        Libellé long des dégâts
+        """
         if self.body_part:
             label = _("{real_damage} points de {type} ({body_part})").format(
                 real_damage=self.real_damage * (1, -1)[self.is_heal],
@@ -3905,10 +3912,6 @@ class DamageHistory(Damage):
                 type=self.get_damage_type_display(),
             )
         return _("{label} - source : {source}").format(label=label, source=self.source) if self.source else label
-
-    @property
-    def long_label(self) -> str:
-        return self.label
 
     def __str__(self) -> str:
         return f"{self.pre_label} - {self.label}"
@@ -4190,7 +4193,9 @@ class FightHistory(CommonModel):
         if not self.damage:
             return _("{label} : {status}").format(label=self.label, status=self.get_status_display())
         return _("{label} : {status} - {damage}").format(
-            label=self.label, status=self.get_status_display(), damage=self.damage_label
+            label=self.label,
+            status=self.get_status_display(),
+            damage=self.damage_label,
         )
 
     @property
@@ -4202,9 +4207,9 @@ class FightHistory(CommonModel):
             return ""
         return _("{real_damage} {damage_type} infligés ({body_part}) sur {base_damage}").format(
             real_damage=self.damage.real_damage,
-            base_damage=int(self.damage.base_damage),
             damage_type=self.damage.get_damage_type_display(),
             body_part=self.get_body_part_display(),
+            base_damage=int(self.damage.base_damage),
         )
 
     @property

@@ -313,6 +313,7 @@ class Base(Configuration):
         }
     )
     MODELTRANSLATION_ENABLE_FALLBACKS = values.BooleanValue(True)
+    MODELTRANSLATION_AUTO_POPULATE = values.BooleanValue(True)
 
 
 class Prod(Base):

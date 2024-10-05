@@ -406,7 +406,7 @@ def character_burst(request, character_id):
 
 class DamageInputSerializer(BaseCustomSerializer):
     """
-    Serializer d'entrée pour infliger des dégâts à un seul personnages
+    Serializer d'entrée pour infliger des dégâts à un seul personnage
     """
 
     raw_damage = serializers.IntegerField(
@@ -432,6 +432,7 @@ class DamageInputSerializer(BaseCustomSerializer):
     body_part = serializers.ChoiceField(
         choices=BODY_PARTS,
         allow_blank=True,
+        allow_null=True,
         required=False,
         label=_("partie du corps"),
     )
@@ -488,6 +489,7 @@ class DamageHistorySerializer(HistorySerializer):
 
     character = SimpleCharacterSerializer(read_only=True, label=_("personnage"))
     icon = serializers.ReadOnlyField()
+    is_heal = serializers.ReadOnlyField()
 
 
 @api_view_with_serializer(
