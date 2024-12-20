@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-28 15:46+0200\n"
+"POT-Creation-Date: 2024-12-20 21:58+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Marc Debureaux <marc@debnet.fr>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1205,6 +1205,15 @@ msgstr "player?"
 msgid "stats calculées ?"
 msgstr "calculated stats?"
 
+msgid "montée de niveau ?"
+msgstr "can  level up?"
+
+msgid "active les stats ?"
+msgstr "enable stats?"
+
+msgid "active le journal ?"
+msgstr "enable logs?"
+
 msgid "butin au décès ?"
 msgstr "loot on death?"
 
@@ -1943,6 +1952,9 @@ msgstr "Item"
 msgid "Objets"
 msgstr "Items"
 
+msgid "Argent trouvé :"
+msgstr "Money found:"
+
 msgid "Faire un lancer :"
 msgstr "Make a roll:"
 
@@ -2102,6 +2114,12 @@ msgstr "Use"
 msgid "Armer"
 msgstr "Arm"
 
+msgid "Coût :"
+msgstr "Cost:"
+
+msgid "PS"
+msgstr "SP"
+
 msgid "+"
 msgstr "+"
 
@@ -2121,11 +2139,14 @@ msgstr "%%"
 msgid "Générer"
 msgstr "Generate"
 
-msgid "Talents"
-msgstr "Perks"
+msgid "Talents activables"
+msgstr "Activable perks"
 
-msgid "Général"
-msgstr "General"
+msgid "Effets globaux"
+msgstr "Global effects"
+
+msgid "Effets de personnage"
+msgstr "Character effects"
 
 msgid "Attaques données"
 msgstr "Given attacks"
@@ -2168,6 +2189,9 @@ msgstr "(no roll)"
 
 msgid "Ajouter un objet :"
 msgstr "Add an item:"
+
+msgid "Argent en poche :"
+msgstr "Pocket money:"
 
 msgid "Equipé"
 msgstr "Equiped"

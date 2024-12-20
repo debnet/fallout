@@ -34,21 +34,29 @@
         {% endif %}
     </div>
     {% if authorized and perks %}
-        <h4 class="text-center mb-3">{% trans "Talents" %}</h4>
-        {% with effects=perks scope='perk' %}
-            {% include "fallout/character/forms/effects.html" %}
-        {% endwith %}
+        <div class="border border-secondary rounded p-2">
+            <h4 class="text-center mb-3">{% trans "Talents activables" %}</h4>
+            {% with effects=perks scope='perk' %}
+                {% include "fallout/character/forms/effects.html" %}
+            {% endwith %}
+        </div>
         <hr />
     {% endif %}
     {% if campaign_effects %}
-        <h4 class="text-center mb-3">{% trans "Général" %}</h4>
-        {% with effects=campaign_effects scope='campaign' %}
-            {% include "fallout/character/forms/effects.html" %}
-        {% endwith %}
+        <div class="border border-secondary rounded p-2">
+            <h4 class="text-center mb-3">{% trans "Effets globaux" %}</h4>
+            {% with effects=campaign_effects scope='campaign' %}
+                {% include "fallout/character/forms/effects.html" %}
+            {% endwith %}
+        </div>
         <hr />
     {% endif %}
-    <h4 class="text-center mb-3">{% trans "Personnage" %}</h4>
-    {% with effects=character_effects scope='character' %}
-        {% include "fallout/character/forms/effects.html" %}
-    {% endwith %}
+    {% if character_effects %}
+    <div class="border border-secondary rounded p-2">
+        <h4 class="text-center mb-3">{% trans "Effets de personnage" %}</h4>
+        {% with effects=character_effects scope='character' %}
+            {% include "fallout/character/forms/effects.html" %}
+        {% endwith %}
+    </div>
+    {% endif %}
 </div>

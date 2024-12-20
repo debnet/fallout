@@ -28,11 +28,6 @@
                             </div>
                             <input type="number" class="form-control form-control-sm imedium" id="money-quantity"
                                    name="money" placeholder="{% trans "¤" %}" value="0" />
-                            <div class="input-group-append">
-                                <label for="money-quantity" class="input-group-text font-weight-bold alert-warning">
-                                    {{ campaign.money|intcomma }} {% trans "¤" %}
-                                </label>
-                            </div>
                         </div>
                     </div>
                     <div class="col-auto">
@@ -140,7 +135,17 @@
         </div>
         <hr class="mt-1 mb-3" />
     {% endif %}
+    {% if campaign.money %}
+    <h5 class="text-center mb-3">
+        {% trans "Argent trouvé :" %}
+        <span class="badge badge-warning">{{ campaign.money|intcomma }} {% trans "¤" %}</span>
+    </h5>
+    {% endif %}
     {% with loots=loots %}
-        {% include "fallout/campaign/forms/loots.html" %}
+        {% if loots %}
+        <div class="border border-secondary rounded p-2">
+            {% include "fallout/campaign/forms/loots.html" %}
+        </div>
+        {% endif %}
     {% endwith %}
 </div>

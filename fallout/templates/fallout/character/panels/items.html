@@ -1,9 +1,32 @@
-{% load i18n %}
+{% load i18n humanize %}
 
 <div class="tab-pane fade" role="tabpanel" id="character-items">
     <div id="character-items-form" class="collapse-form collapse show">
         {% if authorized %}
+            <form method="post" action="{{ request.path }}" class="form-inline justify-content-center">
+                <div class="form-row align-items-center">
+                    <div class="col-auto text-nowrap font-weight-bold">
+                        {% trans "Modifier l'argent :" %}
+                    </div>
+                    <div class="col-auto">
+                        <div class="input-group input-group-sm">
+                            <div class="input-group-prepend">
+                                <label for="money-quantity" class="input-group-text">{% trans "Argent" %}</label>
+                            </div>
+                            <input type="number" class="form-control form-control-sm imedium" id="money-quantity"
+                                   name="money" placeholder="{% trans "¤" %}" value="0" />
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-sm btn-primary"
+                                name="method" value="change">{% trans "Modifier" %}</button>
+                        <input type="hidden" name="type" value="money" />
+                        {% csrf_token %}
+                    </div>
+                </div>
+            </form>
             {% if all_items %}
+            <hr class="my-1" />
             <form method="post" action="{{ request.path }}" class="form-inline justify-content-center">
                 <div class="form-row align-items-center">
                     <div class="col-auto text-nowrap font-weight-bold">
@@ -58,13 +81,23 @@
             {% endif %}
         {% endif %}
     </div>
-    <h4 class="text-center mb-3">{% trans "Equipé" %}</h4>
-    {% with items=inventory equiped=True %}
-        {% include "fallout/character/forms/items.html" %}
-    {% endwith %}
+    {% if character.money %}
+    <h5 class="text-center mb-3">
+        {% trans "Argent en poche :" %}
+        <span class="badge badge-warning">{{ character.money|intcomma }} {% trans "¤" %}</span>
+    </h5>
+    {% endif %}
+    <div class="border border-secondary rounded p-2">
+        <h4 class="text-center mb-3">{% trans "Equipé" %}</h4>
+        {% with items=inventory equiped=True %}
+            {% include "fallout/character/forms/items.html" %}
+        {% endwith %}
+    </div>
     <hr />
-    <h4 class="text-center mb-3">{% trans "Inventaire" %}</h4>
-    {% with items=inventory equiped=False %}
-        {% include "fallout/character/forms/items.html" %}
-    {% endwith %}
+    <div class="border border-secondary rounded p-2">
+        <h4 class="text-center mb-3">{% trans "Inventaire" %}</h4>
+        {% with items=inventory equiped=False %}
+            {% include "fallout/character/forms/items.html" %}
+        {% endwith %}
+    </div>
 </div>

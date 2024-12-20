@@ -135,6 +135,10 @@
         <hr class="mt-1 mb-3" />
     </div>
     {% with effects=campaign.effects scope='campaign' %}
-        {% include "fallout/campaign/forms/effects.html" %}
+        {% if effects %}
+        <div class="border border-secondary rounded p-2">
+            {% include "fallout/campaign/forms/effects.html" %}
+        </div>
+        {% endif %}
     {% endwith %}
 </div>

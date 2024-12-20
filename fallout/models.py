@@ -691,6 +691,9 @@ class Character(Entity, BaseStatistics):
     is_resting = models.BooleanField(default=False, verbose_name=_("au repos ?"))
     has_stats = models.BooleanField(default=True, verbose_name=_("stats calculées ?"))
     has_needs = models.BooleanField(default=True, verbose_name=_("besoins activés ?"))
+    enable_levelup = models.BooleanField(default=False, verbose_name=_("montée de niveau ?"))
+    enable_stats = models.BooleanField(default=False, verbose_name=_("active les stats ?"))
+    enable_logs = models.BooleanField(default=False, verbose_name=_("active le journal ?"))
     # Primary statistics
     health = models.PositiveSmallIntegerField(default=0, verbose_name=_("santé"))
     action_points = models.PositiveSmallIntegerField(default=0, verbose_name=_("points d'action"))

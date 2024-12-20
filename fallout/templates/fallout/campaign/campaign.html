@@ -58,15 +58,19 @@ effets) sont désactivés.
                 <a class="nav-link" data-toggle="tab" role="tab"
                    id="campaign-infos-tab" href="#campaign-infos">{% trans "Campagne" %}</a>
             </li>
-            <li class="nav-item">
-                <a class="nav-link" data-toggle="tab" role="tab"
-                   id="campaign-loots-tab" href="#campaign-loots">{% trans "Butins" %}</a>
-            </li>
-            {% if campaign %}
+            {% if authorized or campaign.money or loots %}
                 <li class="nav-item">
                     <a class="nav-link" data-toggle="tab" role="tab"
-                       id="campaign-effects-tab" href="#campaign-effects">{% trans "Effets" %}</a>
+                       id="campaign-loots-tab" href="#campaign-loots">{% trans "Butins" %}</a>
                 </li>
+            {% endif %}
+            {% if campaign %}
+                {% if authorized or campaign.radiation or campaign.effects %}
+                    <li class="nav-item">
+                        <a class="nav-link" data-toggle="tab" role="tab"
+                           id="campaign-effects-tab" href="#campaign-effects">{% trans "Effets" %}</a>
+                    </li>
+                {% endif %}
                 {% if authorized or campaign.view_rolls %}
                     <li class="nav-item">
                         <a class="nav-link" data-toggle="tab" role="tab"
@@ -77,9 +81,13 @@ effets) sont désactivés.
         </ul>
         <div class="tab-content">
             {% include "fallout/campaign/panels/infos.html" %}
-            {% include "fallout/campaign/panels/loots.html" %}
+            {% if authorized or campaign.money or loots %}
+                {% include "fallout/campaign/panels/loots.html" %}
+            {% endif %}
             {% if campaign %}
-                {% include "fallout/campaign/panels/effects.html" %}
+                {% if authorized or campaign.radiation or campaign.effects %}
+                    {% include "fallout/campaign/panels/effects.html" %}
+                {% endif %}
                 {% if authorized or campaign.view_rolls %}
                     {% include "fallout/campaign/panels/rolls.html" %}
                 {% endif %}

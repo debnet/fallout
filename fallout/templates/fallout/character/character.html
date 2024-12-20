@@ -61,37 +61,82 @@
                     <a class="nav-link" data-toggle="tab" role="tab"
                        href="#character-stats" id="character-stats-tab">{% trans "Personnage" %}</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" data-toggle="tab" role="tab"
-                       href="#character-items" id="character-items-tab">{% trans "Inventaire" %}</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" data-toggle="tab" role="tab"
-                       href="#character-effects" id="character-effects-tab">{% trans "Effets" %}</a>
-                </li>
+                {% if authorized or inventory %}
+                    <li class="nav-item">
+                        <a class="nav-link" data-toggle="tab" role="tab"
+                           href="#character-items" id="character-items-tab">{% trans "Inventaire" %}</a>
+                    </li>
+                {% endif %}
+                {% if authorized or campaign_effects or character_effects %}
+                    <li class="nav-item">
+                        <a class="nav-link" data-toggle="tab" role="tab"
+                           href="#character-effects" id="character-effects-tab">{% trans "Effets" %}</a>
+                    </li>
+                {% endif %}
                 {% if authorized %}
                     <li class="nav-item">
                         <a class="nav-link" data-toggle="tab" role="tab"
                            href="#character-actions" id="character-actions-tab">{% trans "Actions" %}</a>
                     </li>
                 {% endif %}
-                <li class="nav-item">
-                    <a class="nav-link" data-toggle="tab" role="tab"
-                       href="#character-infos" id="character-infos-tab">{% trans "Statistiques" %}</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" data-toggle="tab" role="tab"
-                       href="#character-journal" id="character-journal-tab">{% trans "Journal" %}</a>
-                </li>
+                {% if authorized or character.enable_stats %}
+                    <li class="nav-item">
+                        <a class="nav-link" data-toggle="tab" role="tab"
+                           href="#character-infos" id="character-infos-tab">{% trans "Statistiques" %}</a>
+                    </li>
+                {% endif %}
+                {% if authorized or character.enable_logs %}
+                    <li class="nav-item">
+                        <a class="nav-link" data-toggle="tab" role="tab"
+                           href="#character-journal" id="character-journal-tab">{% trans "Journal" %}</a>
+                    </li>
+                {% endif %}
             </ul>
             <div class="tab-content">
                 {% include "fallout/character/panels/stats.html" %}
-                {% include "fallout/character/panels/items.html" %}
-                {% include "fallout/character/panels/effects.html" %}
-                {% include "fallout/character/panels/actions.html" %}
-                {% include "fallout/character/panels/infos.html" %}
-                {% include "fallout/character/panels/journal.html" %}
+                {% if authorized or inventory %}
+                    {% include "fallout/character/panels/items.html" %}
+                {% endif %}
+                {% if authorized or campaign_effects or character_effects %}
+                    {% include "fallout/character/panels/effects.html" %}
+                {% endif %}
+                {% if authorized %}
+                    {% include "fallout/character/panels/actions.html" %}
+                {% endif %}
+                {% if authorized or character.enable_stats %}
+                    {% include "fallout/character/panels/infos.html" %}
+                {% endif %}
+                {% if authorized or character.enable_logs %}
+                    {% include "fallout/character/panels/journal.html" %}
+                {% endif %}
             </div>
         </div>
     {% endif %}
+{% endblock %}
+
+{% block scripts %}
+{% if authorized %}
+<script type="application/javascript">
+$(function() {
+	$('input.modifier').on('change keyup', function() {
+        let modifier = parseInt($(this).val());
+        let code = $(this).data('code');
+        if (isNaN(modifier) || !code) return;
+        let special = code === "special";
+        $('.stats-' + code).each(function(i, e) {
+            let button = $(e).parent();
+            let value = parseInt($(e).data('value')) + modifier;
+            let rate = value / (special ? 10 : 100);
+            $(e).text(value);
+            button.removeClass('btn-secondary btn-danger btn-warning btn-success btn-info');
+            if (rate < 0.2) button.addClass('btn-secondary');
+            else if (rate < 0.4) button.addClass('btn-danger');
+            else if (rate < 0.6) button.addClass('btn-warning');
+            else if (rate < 0.8) button.addClass('btn-success');
+            else button.addClass('btn-info');
+        });
+	}).trigger('change');
+});
+</script>
+{% endif %}
 {% endblock %}

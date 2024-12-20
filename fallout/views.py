@@ -161,7 +161,7 @@ def view_campaign(request, campaign_id):
                 if character:
                     Character.objects.filter(id=character).update(money=F("money") + money)
                 else:
-                    campaign.money += money
+                    campaign.money = max(campaign.money + money, 0)
                     campaign.save(update_fields=("money",))
             elif type == "loot":
                 if method == "open":
@@ -426,7 +426,10 @@ def view_character(request, character_id):
                 data.get("subtype"),
                 data.get("method"),
             )
-            if authorized and type == "stats":
+            if character.enable_level_up and type == "stats" and "levelup" in data:
+                stats = data.get("levelup")
+                character.levelup(stats, 1, _ignore_log=True)
+            elif authorized and type == "stats":
                 if "roll" in data:
                     result = character.roll(stats=data.get("roll"), modifier=int(data.get("modifier") or 0))
                     messages.add_message(
@@ -535,6 +538,10 @@ def view_character(request, character_id):
                     result.message_level,
                     _("<strong>{pre_label}</strong> {label}").format(pre_label=result.pre_label, label=result.label),
                 )
+            elif authorized and type == "money":
+                money = int(data.get("money") or 0)
+                character.money = max(character.money + money, 0)
+                character.save(update_fields=("money",))
             elif authorized and type == "item":
                 item_id, item_name = data.get("item-id"), data.get("item-name")
                 if method == "add":

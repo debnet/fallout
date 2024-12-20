@@ -320,6 +320,11 @@ class CharacterAdmin(EntityAdmin):
                             "has_needs",
                             "loot_on_death",
                         ),
+                        (
+                            "enable_levelup",
+                            "enable_stats",
+                            "enable_logs",
+                        ),
                     ),
                     classes=("wide",),
                 ),

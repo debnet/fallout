@@ -16,8 +16,8 @@
                         </label>
                     </td>
                     <td class="text-right">
-                        <input id="{{ code }}-modifier-{{ character.id }}" class="form-control form-control-sm itiny"
-                               type="number" name="modifier" value="" />
+                        <input id="{{ code }}-modifier-{{ character.id }}" class="modifier form-control form-control-sm itiny"
+                               type="number" name="modifier" value="" data-code="{{ code }}" />
                     </td>
                 </tr>
             {% else %}
@@ -29,7 +29,7 @@
                     <td>
                         {% if authorized and not view and not character.is_player and code == 'skill' %}
                         <div class="form-check form-check-inline">
-                            <label class="form-check-label" class="d-inline" title="{{ s.label }}">
+                            <label class="form-check-label d-inline" title="{{ s.label }}">
                                 <input class="form-check-input" type="checkbox" name="skills"
                                        value="{{ s.code }}"{% if s.code in character.tag_skills %} checked{% endif %}>
                             </label>
@@ -47,20 +47,29 @@
                     </td>
                     <td class="text-right">
                         {% if view or not authorized %}
-                            <strong class="text-{{ s.css|default:'light' }}" {% if s.title %}title="{{ s.title }}{% endif %}"
+                            {% if not view and levelup and character.enable_levelup and character.used_skill_points < character.skill_points %}
+                                {% if s.code in character.tag_skills or character.used_skill_points|add:2 <= character.skill_points %}
+                                    <button class="btn btn-sm btn-primary" type="submit" name="levelup" value="{{ s.code }}"
+                                            title="{% trans "Coût :" %} {% if s.code in character.tag_skills %}1{% else %}2{% endif %} {% trans "PS" %}" data-toggle="tooltip" data-placement="left">
+                                        <strong>{% trans "+" %}</strong>
+                                    </button>
+                                {% endif %}
+                            {% endif %}
+                            <strong class="text-{{ s.css|default:'light' }}" {% if s.title %}title="{{ s.title }}"{% endif %}
                                     data-html="true" data-toggle="tooltip" data-placement="left">
                                 {% if s.prefix %}{{ s.prefix }}{% endif %}{{ s.lvalue|floatformat:0 }}{% if s.rvalue is not None %}&nbsp;/&nbsp;{{ s.rvalue|floatformat:0 }}{% endif %}{% if s.suffix %}{{ s.suffix }}{% endif %}
                             </strong>
                         {% elif authorized %}
                             {% if levelup and character.used_skill_points < character.skill_points %}
                                 {% if s.code in character.tag_skills or character.used_skill_points|add:2 <= character.skill_points %}
-                                    <button class="btn btn-sm btn-primary" type="submit" name="levelup" value="{{ s.code }}">
+                                    <button class="btn btn-sm btn-primary" type="submit" name="levelup" value="{{ s.code }}"
+                                            title="{% trans "Coût :" %} {% if s.code in character.tag_skills %}1{% else %}2{% endif %} {% trans "PS" %}" data-toggle="tooltip" data-placement="left">
                                         <strong>{% trans "+" %}</strong>
                                     </button>
                                 {% endif %}
                             {% endif %}
                             <button class="btn btn-sm btn-{{ s.css }} itiny" type="submit" name="roll" value="{{ s.code }}">
-                                <strong class="stats" data-code="{{ code }}" data-value="{{ s.lvalue|floatformat:0 }}">{{ s.lvalue|floatformat:0 }}</strong>
+                                <strong class="stats stats-{{ code }}" data-code="{{ code }}" data-value="{{ s.lvalue|floatformat:0 }}">{{ s.lvalue|floatformat:0 }}</strong>
                             </button>
                         {% endif %}
                     </td>
@@ -86,7 +95,7 @@
                         </div>
                         {% if not character.has_stats %}
                         <div class="form-check form-check-inline">
-                            <label class="form-check-label" class="d-inline" title="{% trans "Stats" %}">
+                            <label class="form-check-label d-inline" title="{% trans "Stats" %}">
                                 <input class="form-check-input" type="checkbox" name="stats" checked>
                                 {% trans "Stats" %}
                             </label>
