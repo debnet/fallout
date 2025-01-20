@@ -426,7 +426,7 @@ def view_character(request, character_id):
                 data.get("subtype"),
                 data.get("method"),
             )
-            if character.enable_level_up and type == "stats" and "levelup" in data:
+            if character.enable_levelup and type == "stats" and "levelup" in data:
                 stats = data.get("levelup")
                 character.levelup(stats, 1, _ignore_log=True)
             elif authorized and type == "stats":
