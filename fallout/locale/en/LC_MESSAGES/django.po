@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-20 21:58+0100\n"
+"POT-Creation-Date: 2025-01-21 12:04+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Marc Debureaux <marc@debnet.fr>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -303,6 +303,14 @@ msgstr "effects"
 
 msgid "modificateurs"
 msgstr "modifiers"
+
+msgid "butins"
+msgstr "loots"
+
+#, fuzzy
+#| msgid "Argent trouvé :"
+msgid "argent trouvé"
+msgstr "Money found:"
 
 msgid "secondes"
 msgstr "seconds"
@@ -1352,11 +1360,23 @@ msgstr "critical damage"
 msgid "types de munitions"
 msgstr "ammunition types"
 
+msgid "La portée minimale ne peut être plus grande que la portée maximale."
+msgstr "Minimum range cannot be higher than maximum range."
+
+msgid "En rafale, la portée minimale ne peut être plus grand que la portée maximale."
+msgstr "Minimum burst range cannot be higher than maximum burst range."
+
+msgid "Les dégâts minimums ne peuvent être plus grands que les dégâts maximums."
+msgstr "Minimum damage cannot be higher than maximum damage."
+
 msgid "Cet objet doit être préalablement enregistré avant d'être dupliqué."
 msgstr "This item must be saved before to be duplicated."
 
 msgid "objets"
 msgstr "items"
+
+msgid "La valeur minimale ne peut être plus grande que la valeur maximale."
+msgstr "Minimum value cannot be higher than maximum value."
 
 msgid "modificateur d'objet"
 msgstr "item modifier"
@@ -1442,8 +1462,11 @@ msgstr "equipments"
 msgid "chance d'effet"
 msgstr "effect chance"
 
-msgid "durée d'effet"
-msgstr "effect duration"
+msgid "durée d'effet min."
+msgstr "min. effect duration"
+
+msgid "durée d'effet max."
+msgstr "max. effect duration"
 
 msgid "appliquer ?"
 msgstr "apply?"
@@ -1459,6 +1482,9 @@ msgstr "next effect"
 
 msgid "effet annulé"
 msgstr "canceled effect"
+
+msgid "La durée minimale ne peut être plus grande que la durée maximale."
+msgstr "Minimum duration cannot be higher than maximum duration."
 
 msgid "Le personnage doit faire partie d'une campagne pour lui appliquer un effet sur la durée."
 msgstr "This character must be in a campaign in order to apply an effect on him."
@@ -1499,8 +1525,14 @@ msgstr "This character must be in the same campaign."
 msgid "butin"
 msgstr "loot"
 
-msgid "butins"
-msgstr "loots"
+msgid "argent min."
+msgstr "min. money"
+
+msgid "argent max."
+msgstr "max. money"
+
+msgid "L'argent minimal ne peut être plus grand que l'argent maximal."
+msgstr "Minimum money cannot be higher than maximum money."
 
 msgid "Le personnage concerné doit être dans la même campagne que le butin a créer."
 msgstr "This character must be in the same campaign as tbe created loot."
@@ -1528,6 +1560,12 @@ msgstr "min. condition"
 
 msgid "état max."
 msgstr "max. condition"
+
+msgid "La quantité minimale ne peut être plus grande que la quantité maximale."
+msgstr "Minimum quantity cannot be higher than maximum quantity."
+
+msgid "L'état minimum ne peut être plus grand que l'état maximum."
+msgstr "Minimum condition cannot be higher than maximum condition."
 
 msgid "objet de butin"
 msgstr "loot item"
@@ -1917,7 +1955,7 @@ msgid "Nb"
 msgstr "Nb"
 
 msgid "Nom du PNJ"
-msgstr "NPC's name: "
+msgstr "NPC's name"
 
 msgid "Ajouter"
 msgstr "Add"
@@ -2287,6 +2325,10 @@ msgstr "<strong>{pre_label}</strong> {label}"
 #, python-brace-format
 msgid "<strong>Erreur</strong> {error}"
 msgstr "<strong>Error</strong> {error}"
+
+#, python-brace-format
+msgid "<strong>{money} ¤</strong> ont été trouvé dans le butin."
+msgstr "<strong>{money} ¤</strong> were found in loot."
 
 #, python-brace-format
 msgid "<strong>{character}</strong> vient de passer au niveau <strong>{level}</strong> et a besoin de <strong>{experience}</strong> points d'expérience pour passer au niveau suivant."

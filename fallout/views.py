@@ -168,7 +168,12 @@ def view_campaign(request, campaign_id):
                     loot_id, loot_name = data.get("loot-id"), data.get("loot-name")
                     character_id = data.get("character-id") or None
                     filter = dict(pk=loot_id) if loot_id else dict(name__icontains=loot_name)
-                    LootTemplate.objects.filter(**filter).first().create(campaign, character_id)
+                    loots, money = LootTemplate.objects.filter(**filter).first().create(campaign, character_id)
+                    if money:
+                        messages.success(
+                            request,
+                            _("<strong>{money} ¤</strong> ont été trouvé dans le butin.").format(money=money),
+                        )
                 elif method == "add":
                     item_id, item_name = data.get("item-id"), data.get("item-name")
                     quantity = int(data.get("quantity") or 1)

@@ -1096,7 +1096,10 @@ class EffectAdmin(EntityAdmin):
             dict(
                 fields=(
                     "chance",
-                    "duration",
+                    (
+                        "min_duration",
+                        "max_duration",
+                    ),
                     "next_effect",
                     "cancel_effect",
                 ),
@@ -1359,6 +1362,18 @@ class LootTemplateAdmin(CommonAdmin):
                 classes=("wide",),
             ),
         ),
+        (
+            _("Argent"),
+            dict(
+                fields=(
+                    (
+                        "min_money",
+                        "max_money",
+                    ),
+                ),
+                classes=("wide",),
+            ),
+        ),
         # (
         #     _("Traductions"),
         #     dict(
@@ -1509,9 +1524,9 @@ class DamageHistoryAdmin(CommonAdmin):
                 fields=(
                     "body_part",
                     "damage_type",
-                    "raw_damage",
                     "min_damage",
                     "max_damage",
+                    "raw_damage",
                     "base_damage",
                 ),
                 classes=("wide",),

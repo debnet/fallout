@@ -263,6 +263,9 @@ CRITICAL_FAIL_D100: int = 96
 # Multiplier effect of luck on rolls
 LUCK_ROLL_MULT: int = 1
 
+# Extra luck money modifier
+EXTRA_LUCK_MONEY_MULT: float = 0.05
+
 # Base value for experience points
 BASE_XP: int = 1000
 
@@ -394,6 +397,7 @@ __all__ = (
     "CRITICAL_FAIL_D100",
     "CRITICAL_SUCCESS_D10",
     "CRITICAL_SUCCESS_D100",
+    "EXTRA_LUCK_MONEY_MULT",
     "HEALING_RATE_RESTING_MULT",
     "HUNGER_EFFECTS",
     "LEVELED_STATS_MULT",

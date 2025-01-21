@@ -797,9 +797,9 @@ class ActionWithQuantityInputSerializer(ActionInputSerializer):
 
 
 @to_model_serializer(Loot)
-class LootSerializer(CommonModelSerializer):
+class LootItemSerializer(CommonModelSerializer):
     """
-    Serializer des butins
+    Serializer des butins d'objet
     """
 
     campaign = create_model_serializer(Campaign)(read_only=True, label=_("campagne"))
@@ -809,7 +809,7 @@ class LootSerializer(CommonModelSerializer):
 @api_view_with_serializer(
     ["POST"],
     input_serializer=ActionWithQuantityInputSerializer,
-    serializer=LootSerializer,
+    serializer=LootItemSerializer,
 )
 def equipment_drop(request, equipment_id):
     """
@@ -880,6 +880,15 @@ class LootTemplateOpenInputSerializer(BaseCustomSerializer):
     )
 
 
+class LootSerializer(BaseCustomSerializer):
+    """
+    Serializer des butins (objets et argent)
+    """
+
+    money = serializers.IntegerField(label=_("argent trouvé"))
+    loots = LootItemSerializer(many=True, read_only=True, label=_("butins"))
+
+
 @api_view_with_serializer(
     ["POST"],
     input_serializer=LootTemplateOpenInputSerializer,
@@ -892,7 +901,8 @@ def loottemplate_open(request, template_id):
     loot_template = get_object_or_404(LootTemplate, pk=template_id)
     is_authorized(request, request.validated_data.get("campaign"))
     try:
-        return loot_template.create(**request.validated_data)
+        loots, money = loot_template.create(**request.validated_data)
+        return {"loots": loots, "money": money}
     except Exception as exception:
         raise ValidationError(str(exception))
 

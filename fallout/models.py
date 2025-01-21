@@ -1345,7 +1345,7 @@ class Character(Entity, BaseStatistics):
                 item=item,
                 slot=slot,
                 quantity=1,
-                condition=randint(mini, maxi) / 100.0,
+                condition=round(randint(mini, maxi) / 100.0, 0),
             )
             if slot == ITEM_WEAPON:
                 equiped_weapon = equipment
@@ -2512,6 +2512,20 @@ class Item(Entity, Resistance, Damage):
         verbose_name=_("types de munitions"),
     )
 
+    def clean(self):
+        if self.min_range > self.max_range:
+            raise ValidationError(
+                dict(min_range=_("La portée minimale ne peut être plus grande que la portée maximale."))
+            )
+        if self.min_burst_range > self.max_burst_range:
+            raise ValidationError(
+                dict(min_burst_range=_("En rafale, la portée minimale ne peut être plus grand que la portée maximale."))
+            )
+        if self.min_damage > self.max_damage:
+            raise ValidationError(
+                dict(min_damage=_("Les dégâts minimums ne peuvent être plus grands que les dégâts maximums."))
+            )
+
     @property
     def is_equipable(self) -> bool:
         """
@@ -2665,6 +2679,12 @@ class ItemModifier(Modifier):
         related_name="modifiers",
         verbose_name=_("objet"),
     )
+
+    def clean(self):
+        if self.min_value > self.max_value:
+            raise ValidationError(
+                dict(min_value=_("La valeur minimale ne peut être plus grande que la valeur maximale."))
+            )
 
     class Meta:
         verbose_name = _("modificateur d'objet")
@@ -3026,7 +3046,8 @@ class Effect(Entity, Damage):
         choices=get_thumbnails("effects") + get_thumbnails("items"),
     )
     chance = models.PositiveSmallIntegerField(default=100, verbose_name=_("chance d'effet"))
-    duration = models.DurationField(blank=True, null=True, verbose_name=_("durée d'effet"))
+    min_duration = models.DurationField(blank=True, null=True, verbose_name=_("durée d'effet min."))
+    max_duration = models.DurationField(blank=True, null=True, verbose_name=_("durée d'effet max."))
     # Timed effects
     apply = models.BooleanField(default=True, verbose_name=_("appliquer ?"))
     interval = models.DurationField(blank=True, null=True, verbose_name=_("intervalle"))
@@ -3050,6 +3071,16 @@ class Effect(Entity, Damage):
     )
     damages = []
 
+    def clean(self):
+        if self.min_duration and self.max_duration and self.min_duration > self.max_duration:
+            raise ValidationError(
+                dict(min_duration=_("La durée minimale ne peut être plus grande que la durée maximale."))
+            )
+        if self.min_damage > self.max_damage:
+            raise ValidationError(
+                dict(min_damage=_("Les dégâts minimums ne peuvent être plus grands que les dégâts maximums."))
+            )
+
     @property
     def damage_config(self) -> Optional[Dict[str, Union[str, int]]]:
         """
@@ -3064,6 +3095,20 @@ class Effect(Entity, Damage):
             damage_type=self.damage_type,
             body_part=self.body_part,
         )
+
+    @property
+    def duration(self) -> timedelta:
+        if self.min_duration and not self.max_duration:
+            return self.min_duration
+        if self.max_duration and not self.min_duration:
+            return self.max_duration
+        if self.min_duration and self.max_duration:
+            return timedelta(
+                seconds=randint(
+                    int(self.min_duration.total_seconds()),
+                    int(self.max_duration.total_seconds()),
+                )
+            )
 
     def affect(
         self,
@@ -3153,6 +3198,12 @@ class EffectModifier(Modifier):
         related_name="modifiers",
         verbose_name=_("effet"),
     )
+
+    def clean(self):
+        if self.min_value > self.max_value:
+            raise ValidationError(
+                dict(min_value=_("La valeur minimale ne peut être plus grande que la valeur maximale."))
+            )
 
     class Meta:
         verbose_name = _("modificateur d'effet")
@@ -3542,6 +3593,8 @@ class LootTemplate(CommonModel):
     title = models.CharField(max_length=200, blank=True, verbose_name=_("titre"))
     description = models.TextField(blank=True, verbose_name=_("description"))
     image = models.ImageField(blank=True, null=True, upload_to="loots", verbose_name=_("image"))
+    min_money = models.PositiveIntegerField(default=0, verbose_name=_("argent min."))
+    max_money = models.PositiveIntegerField(default=0, verbose_name=_("argent max."))
     thumbnail = models.CharField(
         blank=True,
         max_length=100,
@@ -3549,16 +3602,20 @@ class LootTemplate(CommonModel):
         verbose_name=_("miniature"),
     )
 
+    def clean(self):
+        if self.min_money and self.max_money and self.min_money > self.max_money:
+            raise ValidationError(dict(min_money=_("L'argent minimal ne peut être plus grand que l'argent maximal.")))
+
     def create(
         self,
         campaign: Union["Campaign", int],
         character: Optional[Union["Character", int]] = None,
-    ):
+    ) -> (List["Loot"], int):
         """
         Permet de créer un butin à partir du modèle (éventuellement en fonction de la chance du personnage)
         :param campaign: Campagne
         :param character: Personnage
-        :return: Liste de butins
+        :return: Liste de butins, argent trouvé
         """
         loots = []
         if isinstance(campaign, (int, str)):
@@ -3572,8 +3629,12 @@ class LootTemplate(CommonModel):
             not character or campaign.pk == character.campaign_id,
             _("Le personnage concerné doit être dans la même campagne que le butin a créer."),
         )
+        money = int(round(randint(self.min_money, self.max_money) * (1 - roll_modifier) * EXTRA_LUCK_MONEY_MULT, 0))
+        if money:
+            campaign.money += money
+            campaign.save(update_fields=("money",))
         for template in self.items.select_related("item").all():
-            if randint(1, 100 - roll_modifier) > template.chance:
+            if randint(1, 100 + roll_modifier) > template.chance:
                 continue
             loots.append(
                 Loot.create(
@@ -3583,7 +3644,7 @@ class LootTemplate(CommonModel):
                     condition=randint(template.min_condition, template.max_condition) / 100.0,
                 )
             )
-        return loots
+        return loots, money
 
     def duplicate(self, name: str = None) -> "LootTemplate":
         """
@@ -3630,6 +3691,14 @@ class LootTemplateItem(CommonModel):
     max_quantity = models.PositiveIntegerField(default=1, null=True, verbose_name=_("nombre max."))
     min_condition = models.PositiveSmallIntegerField(default=100, verbose_name=_("état min."))
     max_condition = models.PositiveSmallIntegerField(default=100, verbose_name=_("état max."))
+
+    def clean(self):
+        if self.min_quantity > self.max_quantity:
+            raise ValidationError(
+                dict(min_quantity=_("La quantité minimale ne peut être plus grande que la quantité maximale."))
+            )
+        if self.min_condition > self.max_condition:
+            raise ValidationError(dict(min_condition=_("L'état minimum ne peut être plus grand que l'état maximum.")))
 
     def __str__(self) -> str:
         return f"({self.template.name}) {self.item}"
