@@ -9,6 +9,7 @@ from rest_framework.authtoken import views as drf_views
 admin.site.site_header = "Fallout RPG"
 
 urlpatterns = [
+    path("i18n/", include("django.conf.urls.i18n")),
     path("admin/", admin.site.urls),
     path(
         "login/",
