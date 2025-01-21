@@ -412,6 +412,7 @@ def view_character(request, character_id):
     character = characters.filter(id=character_id).first()
     if not character:
         raise Http404()
+    is_player_character = character.player == request.user
 
     authorized = request.user and (
         request.user.is_superuser
@@ -431,11 +432,11 @@ def view_character(request, character_id):
                 data.get("subtype"),
                 data.get("method"),
             )
-            if character.enable_levelup and type == "stats" and "levelup" in data:
-                stats = data.get("levelup")
-                character.levelup(stats, 1, _ignore_log=True)
-            elif authorized and type == "stats":
-                if "roll" in data:
+            if type == "stats":
+                if "levelup" in data and (authorized or (is_player_character and character.enable_levelup)):
+                    stats = data.get("levelup")
+                    character.levelup(stats, 1, _ignore_log=True)
+                elif authorized and "roll" in data:
                     result = character.roll(stats=data.get("roll"), modifier=int(data.get("modifier") or 0))
                     messages.add_message(
                         request,
@@ -444,10 +445,7 @@ def view_character(request, character_id):
                             pre_label=result.pre_label, label=result.long_label
                         ),
                     )
-                elif "levelup" in data:
-                    stats = data.get("levelup")
-                    character.levelup(stats, 1, _ignore_log=True)
-                elif method == "randomize":
+                elif authorized and method == "randomize":
                     if subtype == "special":
                         character.randomize_special(points=int(data.get("points") or 1), save=False)
                         if bool(data.get("stats", False)):
