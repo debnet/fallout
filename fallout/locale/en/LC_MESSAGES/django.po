@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-21 12:04+0100\n"
+"POT-Creation-Date: 2025-01-21 13:04+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Marc Debureaux <marc@debnet.fr>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -133,8 +133,14 @@ msgstr "Effect"
 msgid "Dégâts temporels"
 msgstr "Temporal damages"
 
-msgid "Dégâts ?"
-msgstr "Damages?"
+msgid "dégâts ?"
+msgstr "damage?"
+
+msgid "variable"
+msgstr "varies"
+
+msgid "durée"
+msgstr "duration"
 
 msgid "Les effets sélectionnés ont été dupliqués."
 msgstr "Selected effects were duplicated."
@@ -150,6 +156,9 @@ msgstr "Duplicate selected loots"
 
 msgid "nombre"
 msgstr "count"
+
+msgid "argent"
+msgstr "money"
 
 msgid "Jet"
 msgstr "Roll"
@@ -304,13 +313,11 @@ msgstr "effects"
 msgid "modificateurs"
 msgstr "modifiers"
 
+msgid "argent trouvé"
+msgstr "money found"
+
 msgid "butins"
 msgstr "loots"
-
-#, fuzzy
-#| msgid "Argent trouvé :"
-msgid "argent trouvé"
-msgstr "Money found:"
 
 msgid "secondes"
 msgstr "seconds"
@@ -374,9 +381,6 @@ msgstr "talent points"
 
 msgid "karma"
 msgstr "karma"
-
-msgid "argent"
-msgstr "money"
 
 msgid "récompense"
 msgstr "reward"

@@ -1168,7 +1168,15 @@ class EffectAdmin(EntityAdmin):
         return bool(obj.damage_type and (obj.apply or obj.interval))
 
     has_damage.boolean = True
-    has_damage.short_description = _("Dégâts ?")
+    has_damage.short_description = _("dégâts ?")
+
+    def duration(self, obj):
+        if obj.min_duration and obj.max_duration:
+            return _("variable")
+        return obj.duration
+
+    duration.short_description = _("durée")
+    duration.admin_order_field = "min_duration"
 
     def duplicate(self, request, queryset):
         """
@@ -1396,6 +1404,7 @@ class LootTemplateAdmin(CommonAdmin):
         "name",
         "title",
         "count",
+        "money",
     )
     list_editable = ()
     list_filter = ()
@@ -1430,6 +1439,16 @@ class LootTemplateAdmin(CommonAdmin):
 
     count.short_description = _("nombre")
     count.admin_order_field = "count"
+
+    def money(self, obj):
+        """
+        Argent dans le butin
+        """
+        if obj.min_money and obj.max_money:
+            return f"{obj.min_money}-{obj.max_money}"
+
+    money.short_description = _("argent")
+    money.admin_order_field = "min_money"
 
     def get_queryset(self, request):
         return super().get_queryset(request).annotate(count=Count("items"))
