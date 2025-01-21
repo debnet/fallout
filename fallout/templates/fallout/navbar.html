@@ -140,7 +140,7 @@
 {% endif %}
 {% get_current_language as lang %}
 <form method="post" action="{% url "set_language" %}">
-    <button type="submit" class="btn btn-secondary btn-sm ml-2"
+    <button type="submit" class="btn btn-dark btn-sm ml-2"
             name="language" value="{% if lang == "en" %}fr{% else %}en{% endif %}">
         {% if lang == "en" %}🇫🇷{% else %}🇬🇧{% endif %}
     </button>
