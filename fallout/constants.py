@@ -327,7 +327,7 @@ LEVELED_STATS_MULT: int = 10
 COMPUTED_STATS: Iterable[Tuple[str, Callable]] = (
     ("carry_weight", lambda s, c: (15 + (15 * s.strength)) // 3),
     ("hit_points_per_level", lambda s, c: 3 + (s.endurance // 2)),
-    ("skill_points_per_level", lambda s, c: (5 + (2 * s.intelligence)) * 2),
+    ("skill_points_per_level", lambda s, c: 10 + (2 * s.intelligence)),
     (
         "max_health",
         lambda s, c: (15 + (s.strength + (2 * s.endurance)) + ((c.level - 1) * s.hit_points_per_level)),
