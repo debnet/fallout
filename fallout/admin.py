@@ -1102,6 +1102,7 @@ class EffectAdmin(EntityAdmin):
                     ),
                     "next_effect",
                     "cancel_effect",
+                    "controlled",
                 ),
                 classes=("wide",),
             ),

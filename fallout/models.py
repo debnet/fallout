@@ -3048,6 +3048,7 @@ class Effect(Entity, Damage):
     chance = models.PositiveSmallIntegerField(default=100, verbose_name=_("chance d'effet"))
     min_duration = models.DurationField(blank=True, null=True, verbose_name=_("durée d'effet min."))
     max_duration = models.DurationField(blank=True, null=True, verbose_name=_("durée d'effet max."))
+    controlled = models.BooleanField(default=False, verbose_name=_("contrôlable ?"))
     # Timed effects
     apply = models.BooleanField(default=True, verbose_name=_("appliquer ?"))
     interval = models.DurationField(blank=True, null=True, verbose_name=_("intervalle"))
@@ -3221,12 +3222,10 @@ class ActiveEffect(CommonModel):
     next_date = models.DateTimeField(blank=True, null=True, verbose_name=_("date suivante"))
     damages, next_effects = [], []
 
-    def get_progress(
-        self, current_date: datetime
-    ) -> Optional[Tuple[Tuple[float, datetime, str], Tuple[float, datetime, str]]]:
+    def get_progress(self, current_date: datetime) -> Optional[List[Tuple[float, datetime, str]]]:
         """
         Retourne l'avancement de l'effet dans le temps
-        :param current_date: Date de jeu actuelle
+        :param current_date: Date actuelle de jeu
         :return: Tuple avec la progression en pourcentage et le temps écoulé/restant
         """
         if not self.start_date or not self.end_date:
@@ -3237,10 +3236,15 @@ class ActiveEffect(CommonModel):
             (current_date - start_date),
             (end_date - current_date),
         )
-        return (
-            (round(elapsed * 100 / total, 2), start_date, "danger"),
-            (round(remaining * 100 / total, 2), end_date, "success"),
+        elapsed_rate, remaining_rate = (
+            max(0.0, min(100.0, round(elapsed * 100 / total, 2))),
+            max(0.0, min(100.0, round(remaining * 100 / total, 2))),
         )
+        elapsed_style, remaining_style = (
+            ("primary" if elapsed_rate < 100 else "success") if self.effect.controlled else "danger",
+            "dark" if self.effect.controlled else "success",
+        )
+        return [(elapsed_rate, start_date, elapsed_style), (remaining_rate, end_date, remaining_style)]
 
     class Meta:
         abstract = True
@@ -3259,7 +3263,7 @@ class CampaignEffect(ActiveEffect):
     )
 
     @property
-    def progress(self):
+    def progress(self) -> Optional[List[Tuple[float, datetime, str]]]:
         if not self.end_date or not self.campaign:
             return
         return super().get_progress(self.campaign.current_game_date)
@@ -3338,7 +3342,7 @@ class CampaignEffect(ActiveEffect):
                 self.next_date = self.start_date + self.effect.interval
             if self.next_date and self.end_date and self.next_date > self.end_date:
                 self.next_date = None
-        if self.end_date and self.end_date <= self.campaign.current_game_date:
+        if self.end_date and self.end_date <= self.campaign.current_game_date and not self.effect.controlled:
             if self.effect.next_effect:
                 effect = self.effect.next_effect.affect(self.campaign, self.end_date)
                 if effect:
@@ -3378,7 +3382,7 @@ class CharacterEffect(ActiveEffect):
     )
 
     @property
-    def progress(self):
+    def progress(self) -> Optional[List[Tuple[float, datetime, str]]]:
         if not self.end_date or not self.character.campaign:
             return None
         return super().get_progress(self.character.campaign.current_game_date)
@@ -3435,7 +3439,11 @@ class CharacterEffect(ActiveEffect):
                     self.next_date = self.start_date + self.effect.interval
                 if self.next_date and self.end_date and self.next_date > self.end_date:
                     self.next_date = None
-            if self.end_date and self.end_date <= self.character.campaign.current_game_date:
+            if (
+                self.end_date
+                and self.end_date <= self.character.campaign.current_game_date
+                and not self.effect.controlled
+            ):
                 if self.effect.next_effect:
                     effect = self.effect.next_effect.affect(self.character, self.end_date)
                     if effect:

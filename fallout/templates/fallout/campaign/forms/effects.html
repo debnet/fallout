@@ -25,11 +25,11 @@
                                     <div class="progress">
                                         {% for value, date, css in effect.progress %}
                                             {% localize off %}
-                                            <div role="progressbar" style="width: {{ value }}%;" aria-valuenow="{{ value }}"
-                                                 aria-valuemin="0" aria-valuemax="100" class="progress-bar bg-{{ css }} text-light"
+                                            <div role="progressbar" style="width: {{ value }}%;" aria-valuenow="{{ value }}" aria-valuemin="0" aria-valuemax="100"
+                                                 class="progress-bar bg-{{ css }} {% if info.controlled and not forloop.counter0 %}progress-bar-striped {% if value != 0 and value != 100 %}progress-bar-animated{% endif %}{% endif %} text-light"
                                             {% endlocalize %}
-                                                 {% if date < current_date %}title="{% trans "Actif depuis" %} {{ date|timesince:current_date }}"
-                                                 {% elif date >= current_date %}title="{% trans "Actif encore" %} {{ date|timeuntil:current_date }}"{% endif %}
+                                                 {% if date < current_date and not info.controlled %}title="{% trans "Actif depuis" %} {{ date|timesince:current_date }}"
+                                                 {% elif date >= current_date %}title="{% if info.controlled %}{% trans "Activable dans" %}{% else %}{% trans "Actif encore" %}{% endif %} {{ date|timeuntil:current_date }}"{% endif %}
                                                  data-toggle="tooltip" data-placement="bottom">
                                                 {{ value|floatformat:0 }}%
                                             </div>
@@ -66,6 +66,11 @@
                     {% if authorized %}
                         <div class="card-footer collapse-form collapse show">
                             <form class="form-inline" method="post" action="{{ request.path }}">
+                                {% if info.controlled %}
+                                <button class="btn btn-sm btn-info mr-1" type="submit"
+                                        {% if effect.end_date > campaign.current_game_date %}disabled="disabled"{% endif %}
+                                        name="method" value="enable">{% trans "Activer" %}</button>
+                                {% endif %}
                                 <button class="btn btn-sm btn-danger mr-1" type="submit"
                                         name="method" value="remove">{% trans "Supprimer" %}</button>
                                 <input type="hidden" name="type" value="effect" />

@@ -25,9 +25,11 @@
                 <div class="progress">
                     {% for value, width, class, label in fight.all %}
                         {% if value %}
+                            {% localize off %}
                             <div class="progress-bar bg-{{ class }} text-light" role="progressbar"
                                  aria-valuenow="{{ value }}" aria-valuemin="0" aria-valuemax="{{ roll.count }}"
                                  style="width: {{ width }}%" data-toggle="tooltip" data-placement="top"
+                            {% endlocalize %}
                                  title="{{ label }} ({% trans "total" %})">
                                 {{ value }}
                             </div>
@@ -38,9 +40,11 @@
                 <div class="progress mt-1">
                     {% for value, width, class, label in fight.previous_stats %}
                         {% if value %}
+                            {% localize off %}
                             <div class="progress-bar bg-{{ class }} text-light" role="progressbar"
                                  aria-valuenow="{{ value }}" aria-valuemin="0" aria-valuemax="{{ fight.previous_total }}"
                                  style="width: {{ width }}%" data-toggle="tooltip" data-placement="top"
+                            {% endlocalize %}
                                  title="{{ label }} ({% trans "niveau précédent" %})">
                                 {{ value }}
                             </div>
@@ -54,9 +58,11 @@
                 <div class="progress mt-1">
                     {% for value, width, class, label in fight.current_stats %}
                         {% if value %}
+                            {% localize off %}
                             <div class="progress-bar bg-{{ class }} text-light" role="progressbar"
                                  aria-valuenow="{{ value }}" aria-valuemin="0" aria-valuemax="{{ fight.current_total }}"
                                  style="width: {{ width }}%" data-toggle="tooltip" data-placement="top"
+                            {% endlocalize %}
                                  title="{{ label }} ({% trans "niveau actuel" %})">
                                 {{ value }}
                             </div>
@@ -90,9 +96,11 @@
                 <div class="progress">
                     {% for value, width, class, label in roll.all %}
                         {% if value %}
+                            {% localize off %}
                             <div class="progress-bar bg-{{ class }} text-light" role="progressbar"
                                  aria-valuenow="{{ value }}" aria-valuemin="0" aria-valuemax="{{ roll.count }}"
                                  style="width: {{ width }}%" data-toggle="tooltip" data-placement="bottom"
+                            {% endlocalize %}
                                  title="{{ label }} ({% trans "total" %})">
                                 {{ value }}
                             </div>
@@ -103,9 +111,11 @@
                 <div class="progress mt-1">
                     {% for value, width, class, label in roll.previous_stats %}
                         {% if value %}
+                            {% localize off %}
                             <div class="progress-bar bg-{{ class }} text-light" role="progressbar"
                                  aria-valuenow="{{ value }}" aria-valuemin="0" aria-valuemax="{{ roll.previous_total }}"
                                  style="width: {{ width }}%" data-toggle="tooltip" data-placement="bottom"
+                            {% endlocalize %}
                                  title="{{ label }} ({% trans "niveau précédent" %})">
                                 {{ value }}
                             </div>
@@ -121,9 +131,11 @@
                 <div class="progress mt-1">
                     {% for value, width, class, label in roll.current_stats %}
                         {% if value %}
+                            {% localize off %}
                             <div class="progress-bar bg-{{ class }} text-light" role="progressbar"
                                  aria-valuenow="{{ value }}" aria-valuemin="0" aria-valuemax="{{ roll.current_total }}"
                                  style="width: {{ width }}%" data-toggle="tooltip" data-placement="bottom"
+                            {% endlocalize %}
                                  title="{{ label }} ({% trans "niveau actuel" %})">
                                 {{ value }}
                             </div>

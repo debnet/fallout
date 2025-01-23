@@ -91,7 +91,8 @@ def view_dashboard(request, campaign_id):
                     request,
                     result.message_level,
                     _("<strong>{pre_label}</strong> {label}").format(
-                        pre_label=result.pre_label, label=result.long_label
+                        pre_label=result.pre_label,
+                        label=result.long_label,
                     ),
                 )
             elif "rest" in data:
@@ -229,7 +230,8 @@ def view_campaign(request, campaign_id):
                         request,
                         result.message_level,
                         _("<strong>{pre_label}</strong> {label}").format(
-                            pre_label=result.pre_label, label=result.label
+                            pre_label=result.pre_label,
+                            label=result.label,
                         ),
                     )
             elif type == "effect":
@@ -242,7 +244,8 @@ def view_campaign(request, campaign_id):
                             request,
                             damage.message_level,
                             _("<strong>{pre_label}</strong> {label}").format(
-                                pre_label=damage.pre_label, label=damage.label
+                                pre_label=damage.pre_label,
+                                label=damage.label,
                             ),
                         )
                 elif method == "remove":
@@ -251,6 +254,21 @@ def view_campaign(request, campaign_id):
                         CharacterEffect.objects.filter(pk=effect_id).delete()
                     elif scope == "campaign":
                         CampaignEffect.objects.filter(pk=effect_id).delete()
+                elif method == "enable":
+                    current = CampaignEffect.objects.select_related("effect__next_effect").filter(pk=effect_id).first()
+                    for effect in (current.effect, current.effect.next_effect):
+                        if not effect:
+                            continue
+                        effect = effect.affect(campaign, force=True)
+                        for damage in getattr(effect, "damages", []):
+                            messages.add_message(
+                                request,
+                                damage.message_level,
+                                _("<strong>{pre_label}</strong> {label}").format(
+                                    pre_label=damage.pre_label,
+                                    label=damage.label,
+                                ),
+                            )
             elif type == "radiation":
                 if method == "set":
                     radiation = int(data.get("radiation") or 0)
@@ -264,14 +282,17 @@ def view_campaign(request, campaign_id):
                         "resting" in data,
                     )
                     character, damages = campaign.next_turn(
-                        seconds=hours * 3600 + minutes * 60, resting=resting, reset=True
+                        seconds=hours * 3600 + minutes * 60,
+                        resting=resting,
+                        reset=True,
                     )
                     for damage in damages:
                         messages.add_message(
                             request,
                             damage.message_level,
                             _("<strong>{pre_label}</strong> {label}").format(
-                                pre_label=damage.pre_label, label=damage.label
+                                pre_label=damage.pre_label,
+                                label=damage.label,
                             ),
                         )
             elif type == "roll":
@@ -288,7 +309,8 @@ def view_campaign(request, campaign_id):
                         request,
                         result.message_level,
                         _("<strong>{pre_label}</strong> {label}").format(
-                            pre_label=result.pre_label, label=result.long_label
+                            pre_label=result.pre_label,
+                            label=result.long_label,
                         ),
                     )
             elif type == "gain":
@@ -442,7 +464,8 @@ def view_character(request, character_id):
                         request,
                         result.message_level,
                         _("<strong>{pre_label}</strong> {label}").format(
-                            pre_label=result.pre_label, label=result.long_label
+                            pre_label=result.pre_label,
+                            label=result.long_label,
                         ),
                     )
                 elif authorized and method == "randomize":
@@ -477,7 +500,8 @@ def view_character(request, character_id):
                     request,
                     result.message_level,
                     _("<strong>{pre_label}</strong> {label}").format(
-                        pre_label=result.pre_label, label=result.long_label
+                        pre_label=result.pre_label,
+                        label=result.long_label,
                     ),
                 )
                 if result.fail:
@@ -485,7 +509,8 @@ def view_character(request, character_id):
                         request,
                         result.message_level,
                         _("<strong>{pre_label}</strong> {label}").format(
-                            pre_label=result.pre_label, label=result.long_label
+                            pre_label=result.pre_label,
+                            label=result.long_label,
                         ),
                     )
             elif authorized and type == "burst" and data.get("targets"):
@@ -504,7 +529,8 @@ def view_character(request, character_id):
                             request,
                             result.message_level,
                             _("<strong>{pre_label}</strong> {label}").format(
-                                pre_label=result.pre_label, label=result.long_label
+                                pre_label=result.pre_label,
+                                label=result.long_label,
                             ),
                         )
                 else:
@@ -569,7 +595,8 @@ def view_character(request, character_id):
                                     request,
                                     damage.message_level,
                                     _("<strong>{pre_label}</strong> {label}").format(
-                                        pre_label=damage.pre_label, label=damage.label
+                                        pre_label=damage.pre_label,
+                                        label=damage.label,
                                     ),
                                 )
                         for modifier in modifiers:
@@ -577,7 +604,8 @@ def view_character(request, character_id):
                                 request,
                                 modifier.message_level,
                                 _("<strong>{pre_label}</strong> {label}").format(
-                                    pre_label=character, label=modifier.label
+                                    pre_label=character,
+                                    label=modifier.label,
                                 ),
                             )
                     elif method == "repair":
@@ -596,7 +624,8 @@ def view_character(request, character_id):
                             request,
                             damage.message_level,
                             _("<strong>{pre_label}</strong> {label}").format(
-                                pre_label=damage.pre_label, label=damage.label
+                                pre_label=damage.pre_label,
+                                label=damage.label,
                             ),
                         )
                 elif method == "remove":
@@ -607,6 +636,21 @@ def view_character(request, character_id):
                     elif scope == "campaign":
                         effect = CampaignEffect.objects.filter(pk=effect_id).first()
                         effect.delete() if effect else None
+                elif method == "enable":
+                    current = CharacterEffect.objects.select_related("effect__next_effect").filter(pk=effect_id).first()
+                    for effect in (current.effect, current.effect.next_effect):
+                        if not effect:
+                            continue
+                        effect = effect.affect(character, force=True)
+                        for damage in getattr(effect, "damages", []):
+                            messages.add_message(
+                                request,
+                                damage.message_level,
+                                _("<strong>{pre_label}</strong> {label}").format(
+                                    pre_label=damage.pre_label,
+                                    label=damage.label,
+                                ),
+                            )
             elif authorized and type == "action":
                 character.health, character.action_points = int(data.get("hp")), int(data.get("ap"))
                 character.experience, character.karma = int(data.get("xp")), int(data.get("karma"))
@@ -692,9 +736,16 @@ def next_turn(request, campaign_id):
     data = request.POST
     campaign = Campaign.objects.filter(id=campaign_id).first()
     if action and campaign and (request.user.is_superuser or campaign.game_master == request.user):
-        # Prochain tour
-        if "next" in data:
-            next_character, damages = campaign.next_turn(seconds=int(data.get("seconds") or 0))
+        # Fin du tour
+        if "cancel" in data:
+            campaign.clear_turn()
+            return redirect(data.get("page"))
+        # Prochain tour ou passer le temps
+        else:
+            next_character, damages = campaign.next_turn(
+                seconds=int(data.get("seconds") or 0),
+                reset="time" in data,
+            )
             for damage in damages:
                 messages.add_message(
                     request,
@@ -703,9 +754,6 @@ def next_turn(request, campaign_id):
                 )
             if next_character:
                 return redirect("fallout:character", next_character.id)
-        # Fin du tour
-        if "cancel" in data:
-            campaign.clear_turn()
             return redirect(data.get("page"))
     return redirect("fallout:campaign", campaign_id)
 

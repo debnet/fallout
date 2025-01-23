@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-21 13:04+0100\n"
+"POT-Creation-Date: 2025-01-23 15:07+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Marc Debureaux <marc@debnet.fr>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1472,6 +1472,9 @@ msgstr "min. effect duration"
 msgid "durée d'effet max."
 msgstr "max. effect duration"
 
+msgid "contrôlable ?"
+msgstr "controlled?"
+
 msgid "appliquer ?"
 msgstr "apply?"
 
@@ -1839,10 +1842,13 @@ msgid "Actif depuis"
 msgstr "Active since"
 
 msgid "Actif encore"
-msgstr "Active until"
+msgstr "Active for another"
 
 msgid "dans"
 msgstr "in"
+
+msgid "Activer"
+msgstr "Enable"
 
 msgid "Supprimer"
 msgstr "Delete"
@@ -2126,6 +2132,9 @@ msgstr "Simulate"
 msgid "valeur fixe"
 msgstr "fixed value"
 
+msgid "Activable dans"
+msgstr "Can be activated in"
+
 msgid "vide"
 msgstr "empty"
 
@@ -2310,8 +2319,11 @@ msgstr "30 mn"
 msgid "1 h"
 msgstr "1 h"
 
-msgid "Tour suivant"
-msgstr "Next turn"
+msgid "Passer"
+msgstr "Pass"
+
+msgid "Suivant"
+msgstr "Next"
 
 msgid "Lancer les dés (CTRL+ESPACE)"
 msgstr "Roll the dices (CTRL+SPACE)"
