@@ -1994,8 +1994,8 @@ msgstr "Item"
 msgid "Objets"
 msgstr "Items"
 
-msgid "Argent trouvé :"
-msgstr "Money found:"
+msgid "Argent total :"
+msgstr "Total money:"
 
 msgid "Faire un lancer :"
 msgstr "Make a roll:"

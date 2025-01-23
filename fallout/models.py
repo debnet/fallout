@@ -3631,8 +3631,8 @@ class LootTemplate(CommonModel):
         )
         money = int(round(randint(self.min_money, self.max_money) * (1 - roll_modifier) * EXTRA_LUCK_MONEY_MULT, 0))
         if money:
-            campaign.money += money
-            campaign.save(update_fields=("money",))
+            campaign.money_loot += money
+            campaign.save(update_fields=("money_loot",))
         for template in self.items.select_related("item").all():
             if randint(1, 100 + roll_modifier) > template.chance:
                 continue
