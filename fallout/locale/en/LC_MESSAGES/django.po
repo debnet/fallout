@@ -578,7 +578,7 @@ msgid "absorption de l'électricité"
 msgstr "electricity threshold"
 
 msgid "absorption des poisons"
-msgstr "explosive threshold"
+msgstr "poison threshold"
 
 msgid "absorption des radiations"
 msgstr "radiation threshold"
