@@ -85,6 +85,7 @@ class RollInputSerializer(BaseCustomSerializer):
     stats = serializers.ChoiceField(choices=ROLL_STATS, label=_("statistique"))
     modifier = serializers.IntegerField(initial=0, required=False, label=_("modificateur"))
     xp = serializers.BooleanField(initial=True, required=False, label=_("expérience"))
+    reason = serializers.CharField(required=False, label=_("raison"))
 
 
 class CampaignRollInputSerializer(RollInputSerializer):
@@ -307,6 +308,7 @@ class FightInputSerializer(BaseFightInputSerializer):
         required=False,
         label=_("simulation ?"),
     )
+    reason = serializers.CharField(required=False, label=_("raison"))
 
 
 class BurstInputSerializer(BaseCustomSerializer):
@@ -355,6 +357,7 @@ class BurstInputSerializer(BaseCustomSerializer):
         required=False,
         label=_("simulation ?"),
     )
+    reason = serializers.CharField(required=False, label=_("raison"))
 
 
 @to_model_serializer(FightHistory)
@@ -456,6 +459,7 @@ class DamageInputSerializer(BaseCustomSerializer):
         required=False,
         label=_("simulation ?"),
     )
+    reason = serializers.CharField(required=False, label=_("raison"))
 
 
 class MultiDamageInputSerializer(DamageInputSerializer):

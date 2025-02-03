@@ -1471,6 +1471,7 @@ class RollHistoryAdmin(CommonAdmin):
                     "level",
                     "experience",
                     "level_up",
+                    "reason",
                 ),
                 classes=("wide",),
             ),
@@ -1498,6 +1499,7 @@ class RollHistoryAdmin(CommonAdmin):
         "value",
         "success",
         "critical",
+        "has_reason",
     )
     list_editable = ()
     list_filter = (
@@ -1511,6 +1513,13 @@ class RollHistoryAdmin(CommonAdmin):
     ordering = ("-date",)
     date_hierarchy = "date"
     autocomplete_fields = ("character",)
+
+    def has_reason(self, obj):
+        return bool(obj.reason)
+
+    has_reason.boolean = True
+    has_reason.short_description = _("raison ?")
+    has_reason.admin_order_field = "reason"
 
     def get_queryset(self, request):
         queryset = super().get_queryset(request).select_related("character")
@@ -1534,6 +1543,7 @@ class DamageHistoryAdmin(CommonAdmin):
                     "character",
                     "level",
                     "source",
+                    "reason",
                 ),
                 classes=("wide",),
             ),
@@ -1585,6 +1595,7 @@ class DamageHistoryAdmin(CommonAdmin):
         "damage_type",
         "base_damage",
         "real_damage",
+        "has_reason",
     )
     list_editable = ()
     list_filter = (
@@ -1599,7 +1610,15 @@ class DamageHistoryAdmin(CommonAdmin):
     autocomplete_fields = (
         "character",
         "armor",
+        "source",
     )
+
+    def has_reason(self, obj):
+        return bool(obj.reason)
+
+    has_reason.boolean = True
+    has_reason.short_description = _("raison ?")
+    has_reason.admin_order_field = "reason"
 
     def get_queryset(self, request):
         queryset = super().get_queryset(request).select_related("character")
@@ -1618,7 +1637,10 @@ class FightHistoryAdmin(CommonAdmin):
         (
             _("Informations techniques"),
             dict(
-                fields=("game_date",),
+                fields=(
+                    "game_date",
+                    "reason",
+                ),
                 classes=("wide",),
             ),
         ),
@@ -1677,6 +1699,7 @@ class FightHistoryAdmin(CommonAdmin):
         "hit_roll",
         "hit_chance",
         "real_damage",
+        "has_reason",
     )
     list_editable = ()
     list_filter = (
@@ -1708,6 +1731,13 @@ class FightHistoryAdmin(CommonAdmin):
 
     real_damage.short_description = _("dégâts")
     real_damage.admin_order_field = "damage__real_damage"
+
+    def has_reason(self, obj):
+        return bool(obj.reason)
+
+    has_reason.boolean = True
+    has_reason.short_description = _("raison ?")
+    has_reason.admin_order_field = "reason"
 
     def get_queryset(self, request):
         queryset = super().get_queryset(request).select_related("attacker", "defender")

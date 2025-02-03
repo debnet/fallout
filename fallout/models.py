@@ -1438,7 +1438,7 @@ class Character(Entity, BaseStatistics):
                 save=False,
                 log=False,
             )
-            damage.source = _("environnement radioactif")
+            damage.reason = _("environnement radioactif")
             damages.append(damage)
         healing_rate_modifier = HEALING_RATE_RESTING_MULT if (resting or self.is_resting) else 1.0
         self.regeneration += max(self.stats.healing_rate * (hours / 24.0) * healing_rate_modifier, 0.0)
@@ -1446,16 +1446,17 @@ class Character(Entity, BaseStatistics):
             self.save(reset=False)
         return damages
 
-    def roll(self, stats: str, modifier: int = 0, xp: bool = True, log: bool = True) -> "RollHistory":
+    def roll(self, stats: str, modifier: int = 0, xp: bool = True, log: bool = True, reason: str = "") -> "RollHistory":
         """
         Réalise un jet de compétence pour un personnage
         :param stats: Code de la statistique
         :param modifier: Modificateur de jet éventuel
         :param xp: Gain d'expérience ?
         :param log: Historise le jet ?
+        :param reason: Raison du jet ou de ses modificateurs (facultatif)
         :return: Historique de jet
         """
-        history = RollHistory(character=self, level=self.level, stats=stats, modifier=modifier)
+        history = RollHistory(character=self, level=self.level, stats=stats, modifier=modifier, reason=reason or "")
         history.game_date = self.campaign and self.campaign.current_game_date
         history.value = gv(self.stats, stats, 0)
         if stats in LIST_SPECIALS:
@@ -1651,6 +1652,7 @@ class Character(Entity, BaseStatistics):
         attacker_ammo: Optional["Equipment"] = None,
         fail_target: Union["Character", int] = None,
         fail: bool = False,
+        reason: str = "",
         **kwargs,
     ) -> Optional["FightHistory"]:
         """
@@ -1672,6 +1674,7 @@ class Character(Entity, BaseStatistics):
         :param attacker_ammo: Munition équipée pour l'attaque en rafale (optimisation)
         :param fail_target: Cible secondaire en cas d'échec critique
         :param fail: Attaque donnée sur la cible secondaire en cas d'échec critique ?
+        :param reason: Raison de l'attaque ou de ses modificateurs (facultatif)
         :return: Historique de combat
         """
         if not target:
@@ -1687,6 +1690,7 @@ class Character(Entity, BaseStatistics):
             range=target_range,
             burst=is_burst,
             hit_count=hit_count + 1,
+            reason=reason or "",
         )
         history.game_date = self.campaign and self.campaign.current_game_date
         # Equipment
@@ -2014,6 +2018,7 @@ class Character(Entity, BaseStatistics):
         save: bool = True,
         log: bool = True,
         simulation: bool = False,
+        reason: str = "",
     ) -> "DamageHistory":
         """
         Inflige des dégâts au personnage
@@ -2028,6 +2033,7 @@ class Character(Entity, BaseStatistics):
         :param save: Sauvegarder les modifications sur le personnage ?
         :param log: Historise les dégâts ?
         :param simulation: Fait une simulation des dégâts ?
+        :param reason: Raison de l'origine des dégâts (facultatif)
         :return: Nombre de dégâts
         """
         threshold_rate_modifier = round(threshold_rate_modifier / 100.0, 2)
@@ -2050,6 +2056,7 @@ class Character(Entity, BaseStatistics):
             raw_damage=raw_damage,
             min_damage=min_damage,
             max_damage=max_damage,
+            reason=reason,
         )
         history.game_date = self.campaign and self.campaign.current_game_date
         # Base damage
@@ -2121,7 +2128,7 @@ class Character(Entity, BaseStatistics):
             elif damage_type in (ADD_KARMA, REMOVE_KARMA):
                 self.karma -= total_damage
             else:
-                history.damage_rate = min(self.health, abs(total_damage)) / self.stats.max_health
+                history.damage_rate = round(min(self.health, abs(total_damage)) / self.stats.max_health, 2)
                 self.health -= total_damage
             if save and not simulation:
                 self.save()
@@ -3285,7 +3292,7 @@ class CampaignEffect(ActiveEffect):
             if self.end_date and self.next_date > self.end_date:
                 break
             damage = character.damage(save=save, **self.effect.damage_config)
-            damage.source = self.effect.name
+            damage.source = self.effect
             self.damages.append(damage)
             if not self.effect.interval:
                 break
@@ -3314,7 +3321,7 @@ class CampaignEffect(ActiveEffect):
                     break
                 for character in characters:
                     damage = character.damage(save=save, **self.effect.damage_config)
-                    damage.source = self.effect.name
+                    damage.source = self.effect
                     self.damages.append(damage)
                 if not self.effect.interval:
                     break
@@ -3406,7 +3413,7 @@ class CharacterEffect(ActiveEffect):
                 if self.end_date and self.next_date > self.end_date:
                     break
                 damage = character.damage(save=save, **self.effect.damage_config)
-                damage.source = self.effect.name
+                damage.source = self.effect
                 self.damages.append(damage)
                 if not self.effect.interval:
                     break
@@ -3738,6 +3745,7 @@ class RollHistory(CommonModel):
     critical = models.BooleanField(default=False, verbose_name=_("critique ?"))
     experience = models.PositiveSmallIntegerField(default=0, verbose_name=_("expérience"))
     level_up = models.BooleanField(default=False, verbose_name=_("niveau+ ?"))
+    reason = models.TextField(blank=True, verbose_name=_("raison"))
 
     class RollStats:
         """
@@ -3938,7 +3946,8 @@ class DamageHistory(Damage):
     damage_resistance = models.FloatField(default=0.0, verbose_name=_("résistance dégâts"))
     real_damage = models.SmallIntegerField(default=0, verbose_name=_("dégâts réels"))
     damage_rate = models.FloatField(default=0.0, verbose_name=_("taux de dégâts"))
-    source = models.CharField(max_length=200, blank=True, verbose_name=_("source"))
+    source = models.ForeignKey("Effect", blank=True, null=True, on_delete=models.SET_NULL, verbose_name=_("source"))
+    reason = models.TextField(blank=True, verbose_name=_("raison"))
 
     @property
     def css_class(self) -> str:
@@ -4070,6 +4079,7 @@ class FightHistory(CommonModel):
     )
     experience = models.PositiveSmallIntegerField(default=0, verbose_name=_("expérience"))
     level_up = models.BooleanField(default=False, verbose_name=_("niveau+ ?"))
+    reason = models.TextField(blank=True, verbose_name=_("raison"))
     fail = None  # Placeholder for fight against a secondary target when critical fail
 
     class FightStats:

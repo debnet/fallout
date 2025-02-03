@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-23 15:07+0100\n"
+"POT-Creation-Date: 2025-02-03 10:13+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Marc Debureaux <marc@debnet.fr>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -163,6 +163,9 @@ msgstr "money"
 msgid "Jet"
 msgstr "Roll"
 
+msgid "raison ?"
+msgstr "reason?"
+
 msgid "Dégâts de base"
 msgstr "Base damage"
 
@@ -192,6 +195,9 @@ msgstr "modifier"
 
 msgid "expérience"
 msgstr "experience"
+
+msgid "raison"
+msgstr "reason"
 
 msgid "Tous les personnages"
 msgstr "All characters"
@@ -1841,6 +1847,9 @@ msgstr "Resting"
 msgid "Actif depuis"
 msgstr "Active since"
 
+msgid "Activable dans"
+msgstr "Can be activated in"
+
 msgid "Actif encore"
 msgstr "Active for another"
 
@@ -2131,9 +2140,6 @@ msgstr "Simulate"
 
 msgid "valeur fixe"
 msgstr "fixed value"
-
-msgid "Activable dans"
-msgstr "Can be activated in"
 
 msgid "vide"
 msgstr "empty"
