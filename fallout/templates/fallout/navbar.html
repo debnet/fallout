@@ -98,15 +98,24 @@
         </a>
     </li>
     {% endif %}
-    {% if request.user.is_authenticated %}
-    <li class="nav-item">
-        <a class="nav-link" href="{% url "logout" %}">{% trans "Se déconnecter" %}</a>
-    </li>
-    {% endif %}
 </ul>
+{% if request.user.is_authenticated %}
+<form class="form-inline ml-2 my-2" method="post" action="{% url 'logout' %}?next={{ request.path }}">
+    <button class="btn btn-warning btn-sm">{% trans "Se déconnecter" %}</button>
+    {% csrf_token %}
+</form>
+{% endif %}
+{% get_current_language as lang %}
+<form class="form-inline ml-2 my-2" method="post" action="{% url "set_language" %}">
+    <button type="submit" class="btn btn-primary btn-sm"
+            name="language" value="{% if lang == "en" %}fr{% else %}en{% endif %}">
+        {% if lang == "en" %}🇫🇷{% else %}🇬🇧{% endif %}
+    </button>
+    {% csrf_token %}
+</form>
 {% if campaign %}
-<form class="form-inline my-2" method="post" action="{% url 'fallout:next_turn' campaign.id %}">
-    <label class="text-white">
+<form class="form-inline ml-2 my-2" method="post" action="{% url 'fallout:next_turn' campaign.id %}">
+    <label class="text-white my-auto">
         {{ campaign.current_game_date }}
         {% with current=campaign.current_character %}
             {% if current %}
@@ -135,15 +144,5 @@
         <input type="hidden" name="page" value="{{ request.path }}" />
         {% csrf_token %}
     {% endif %}
-    <button type="button" class="btn btn-sm btn-secondary ml-2" data-toggle="modal" data-target="#diceroll"
-        title="{% trans "Lancer les dés (CTRL+ESPACE)" %}">{% trans "Dés" %}</button>
 </form>
 {% endif %}
-{% get_current_language as lang %}
-<form method="post" action="{% url "set_language" %}">
-    <button type="submit" class="btn btn-primary btn-sm ml-2"
-            name="language" value="{% if lang == "en" %}fr{% else %}en{% endif %}">
-        {% if lang == "en" %}🇫🇷{% else %}🇬🇧{% endif %}
-    </button>
-    {% csrf_token %}
-</form>
