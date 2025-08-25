@@ -28,5 +28,5 @@ python-dateutil<2.9.0
 pytz==2024.2
 redis==5.2.1
 requests==2.32.3
-setuptools==75.8.0
+setuptools==78.1.1
 wheel==0.45.1
