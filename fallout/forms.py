@@ -151,7 +151,7 @@ class QuickCreateCharacterForm(RandomizeCharacterForm):
     intelligence = forms.IntegerField(min_value=1, required=False, label=_("Intelligence"))
     agility = forms.IntegerField(min_value=1, required=False, label=_("Agilité"))
     luck = forms.IntegerField(min_value=1, required=False, label=_("Chance"))
-    tag_skills = MultiSelectFormField(choices=SKILLS, flat_choices=SKILLS, required=False, label=_("Spécialités"))
+    tag_skills = MultiSelectFormField(choices=SKILLS, required=False, label=_("Spécialités"))
 
 
 __all__ = (
