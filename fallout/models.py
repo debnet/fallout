@@ -969,7 +969,7 @@ class Character(Entity, BaseStatistics):
                 continue
             rclass, prefix, suffix, title = None, None, None, None
             if code == STATS_HEALING_RATE:
-                suffix, rclass = _(" PV/h"), "success" if value > 0 else "danger" if value < 0 else None
+                suffix, rclass = _(" PV/j"), "success" if value > 0 else "danger" if value < 0 else None
             elif code == STATS_AP_COST_MODIFIER:
                 prefix, suffix = "+" if value > 0 else None, _(" PA")
                 rclass = "danger" if value > 0 else "success" if value < 0 else None
@@ -1441,7 +1441,9 @@ class Character(Entity, BaseStatistics):
             damage.reason = _("environnement radioactif")
             damages.append(damage)
         healing_rate_modifier = HEALING_RATE_RESTING_MULT if (resting or self.is_resting) else 1.0
+        print(healing_rate_modifier)
         self.regeneration += max(self.stats.healing_rate * (hours / 24.0) * healing_rate_modifier, 0.0)
+        print(self.regeneration)
         if save:
             self.save(reset=False)
         return damages

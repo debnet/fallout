@@ -1253,8 +1253,8 @@ msgstr " ¤"
 msgid " XP"
 msgstr " XP"
 
-msgid " PV/h"
-msgstr " HP/h"
+msgid " PV/j"
+msgstr " HP/d"
 
 msgid " PA"
 msgstr " AP"

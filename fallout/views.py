@@ -565,7 +565,10 @@ def view_character(request, character_id):
                 messages.add_message(
                     request,
                     result.message_level,
-                    _("<strong>{pre_label}</strong> {label}").format(pre_label=result.pre_label, label=result.label),
+                    _("<strong>{pre_label}</strong> {label}").format(
+                        pre_label=result.pre_label,
+                        label=result.long_label,
+                    ),
                 )
             elif authorized and type == "money":
                 money = int(data.get("money") or 0)
