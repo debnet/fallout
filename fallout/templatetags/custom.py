@@ -1,6 +1,7 @@
 # coding: utf-8
-from copy import copy
 import types
+from copy import copy
+
 from django import template
 from django.utils.safestring import mark_safe
 

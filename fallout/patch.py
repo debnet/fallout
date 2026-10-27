@@ -1,7 +1,6 @@
 # coding: utf-8
 from rest_framework.serializers import ModelSerializer, MultipleChoiceField
 
-
 # Patch de django-multiselectfield pour compatibilité Django 2
 # https://github.com/goinnn/django-multiselectfield/issues/74
 

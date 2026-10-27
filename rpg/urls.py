@@ -3,10 +3,11 @@ from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from django.urls import include, path
+from django.utils.translation import gettext_lazy as _
 from django.views.generic import RedirectView
 from rest_framework.authtoken import views as drf_views
 
-admin.site.site_header = "Fallout RPG"
+admin.site.site_header = _("Fallout RPG")
 
 urlpatterns = [
     path("i18n/", include("django.conf.urls.i18n")),

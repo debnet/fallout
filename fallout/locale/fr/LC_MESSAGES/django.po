@@ -1,0 +1,3494 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Fallout RPG\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-26 00:30+0100\n"
+"PO-Revision-Date: 2026-10-25 23:31+0000\n"
+"Last-Translator: Fallout contributors\n"
+"Language-Team: French\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;\n"
+
+#: fallout/admin.py:18 fallout/apps.py:8
+#: fallout/templates/fallout/base.html:11
+#: fallout/templates/fallout/base.html:29
+msgid "Fallout RPG"
+msgstr "Fallout RPG"
+
+#: fallout/admin.py:42
+msgid "Fallout"
+msgstr "Fallout"
+
+#: fallout/admin.py:84 fallout/admin.py:226 fallout/admin.py:300
+#: fallout/admin.py:783 fallout/admin.py:986 fallout/admin.py:1065
+#: fallout/admin.py:1203 fallout/admin.py:1251 fallout/admin.py:1302
+#: fallout/admin.py:1361 fallout/templates/fallout/character.html:23
+msgid "Informations générales"
+msgstr "Informations générales"
+
+#: fallout/admin.py:100 fallout/admin.py:332 fallout/admin.py:1465
+#: fallout/admin.py:1538 fallout/admin.py:1637
+msgid "Informations techniques"
+msgstr "Informations techniques"
+
+#: fallout/admin.py:126 fallout/templates/fallout/campaign/campaign.html:71
+#: fallout/templates/fallout/campaign/panels/effects.html:115
+#: fallout/templates/fallout/character/character.html:73
+#: fallout/templates/fallout/character/panels/effects.html:15
+msgid "Effets"
+msgstr "Effets"
+
+#: fallout/admin.py:136 fallout/admin.py:1374
+#: fallout/templates/fallout/campaign/forms/loots.html:23
+#: fallout/templates/fallout/campaign/panels/loots.html:27
+#: fallout/templates/fallout/character/panels/items.html:14
+msgid "Argent"
+msgstr "Argent"
+
+#: fallout/admin.py:233
+msgid "Autres"
+msgstr "Autres"
+
+#: fallout/admin.py:272 fallout/api.py:144 fallout/api.py:557
+#: fallout/api.py:708 fallout/api.py:734 fallout/api.py:879 fallout/api.py:922
+#: fallout/api.py:967 fallout/models.py:633 fallout/models.py:2313
+#: fallout/models.py:2743 fallout/models.py:3076 fallout/models.py:3457
+#: fallout/models.py:3809 fallout/models.py:4001 fallout/models.py:4437
+msgid "personnage"
+msgstr "personnage"
+
+#: fallout/admin.py:278 fallout/api.py:190 fallout/api.py:598
+#: fallout/api.py:854 fallout/api.py:915 fallout/api.py:966
+#: fallout/models.py:512 fallout/models.py:693 fallout/models.py:3324
+#: fallout/models.py:3562
+msgid "campagne"
+msgstr "campagne"
+
+#: fallout/admin.py:358 fallout/forms.py:154
+msgid "Spécialités"
+msgstr "Spécialités"
+
+#: fallout/admin.py:458
+#, python-brace-format
+msgid "Valeur actuelle : {}."
+msgstr "Valeur actuelle : {}."
+
+#: fallout/admin.py:460
+#, python-brace-format
+msgid " (Spécialité +{}) "
+msgstr " (Spécialité +{}) "
+
+#: fallout/admin.py:480
+msgid "Les personnages sélectionnés ont été dupliqués."
+msgstr "Les personnages sélectionnés ont été dupliqués."
+
+#: fallout/admin.py:496
+msgid "Dupliquer les personnages sélectionnés"
+msgstr "Dupliquer les personnages sélectionnés"
+
+#: fallout/admin.py:521 fallout/templates/fallout/character/admin/roll.html:5
+msgid "Faire un jet de compétence"
+msgstr "Faire un jet de compétence"
+
+#: fallout/admin.py:546
+msgid "Infliger des dégâts aux personnages sélectionnés"
+msgstr "Infliger des dégâts aux personnages sélectionnés"
+
+#: fallout/admin.py:562 fallout/admin.py:688
+#, python-brace-format
+msgid "{character} : {error}"
+msgstr "{character} : {error}"
+
+#: fallout/admin.py:578 fallout/templates/fallout/character/admin/fight.html:5
+msgid "Attaquer un autre personnage"
+msgstr "Attaquer un autre personnage"
+
+#: fallout/admin.py:598
+msgid ""
+"Les personnages sélectionnés ont été générés aléatoirement avec succès."
+msgstr ""
+"Les personnages sélectionnés ont été générés aléatoirement avec succès."
+
+#: fallout/admin.py:614
+msgid "Générer complètement les personnages"
+msgstr "Générer complètement les personnages"
+
+#: fallout/admin.py:627
+msgid ""
+"Le S.P.E.C.I.A.L. des personnages sélectionnés ont été générées avec succès."
+msgstr ""
+"Le S.P.E.C.I.A.L. des personnages sélectionnés ont été générées avec succès."
+
+#: fallout/admin.py:643
+#: fallout/templates/fallout/character/admin/randomize_special.html:5
+msgid "Générer aléatoirement le S.P.E.C.I.A.L."
+msgstr "Générer aléatoirement le S.P.E.C.I.A.L."
+
+#: fallout/admin.py:656
+msgid ""
+"Les compétences des personnages sélectionnés ont été générées avec succès."
+msgstr ""
+"Les compétences des personnages sélectionnés ont été générées avec succès."
+
+#: fallout/admin.py:672
+#: fallout/templates/fallout/character/admin/randomize_stats.html:5
+msgid "Générer aléatoirement les compétences"
+msgstr "Générer aléatoirement les compétences"
+
+#: fallout/admin.py:704
+msgid "Equiper les personnages sélectionnés"
+msgstr "Equiper les personnages sélectionnés"
+
+#: fallout/admin.py:713
+msgid "Générer les statistiques secondaires"
+msgstr "Générer les statistiques secondaires"
+
+#: fallout/admin.py:722
+msgid "Soigner les personnages sélectionnés"
+msgstr "Soigner les personnages sélectionnés"
+
+#: fallout/admin.py:731
+msgid "Lâcher tous les équipements"
+msgstr "Lâcher tous les équipements"
+
+#: fallout/admin.py:754
+msgid "Déplacer les personnages sélectionnés"
+msgstr "Déplacer les personnages sélectionnés"
+
+#: fallout/admin.py:824
+msgid "Armes uniquement"
+msgstr "Armes uniquement"
+
+#: fallout/admin.py:874
+#: fallout/templates/fallout/character/forms/damage.html:7
+msgid "Dégâts"
+msgstr "Dégâts"
+
+#: fallout/admin.py:903
+msgid "Protections uniquement"
+msgstr "Protections uniquement"
+
+#: fallout/admin.py:916
+msgid "Effets et munitions"
+msgstr "Effets et munitions"
+
+#: fallout/admin.py:973
+msgid "Les objets sélectionnés ont été dupliqués."
+msgstr "Les objets sélectionnés ont été dupliqués."
+
+#: fallout/admin.py:975
+msgid "Dupliquer les objets sélectionnés"
+msgstr "Dupliquer les objets sélectionnés"
+
+#: fallout/admin.py:997
+msgid "Etats"
+msgstr "Etats"
+
+#: fallout/admin.py:1094
+#: fallout/templates/fallout/campaign/panels/effects.html:113
+#: fallout/templates/fallout/character/panels/effects.html:13
+msgid "Effet"
+msgstr "Effet"
+
+#: fallout/admin.py:1110
+msgid "Dégâts temporels"
+msgstr "Dégâts temporels"
+
+#: fallout/admin.py:1171
+msgid "dégâts ?"
+msgstr "dégâts ?"
+
+#: fallout/admin.py:1175
+msgid "variable"
+msgstr "variable"
+
+#: fallout/admin.py:1178
+msgid "durée"
+msgstr "durée"
+
+#: fallout/admin.py:1187
+msgid "Les effets sélectionnés ont été dupliqués."
+msgstr "Les effets sélectionnés ont été dupliqués."
+
+#: fallout/admin.py:1189
+msgid "Dupliquer les effets sélectionnés"
+msgstr "Dupliquer les effets sélectionnés"
+
+#: fallout/admin.py:1430
+msgid "Les modèles de butins sélectionnés ont été dupliqués."
+msgstr "Les modèles de butins sélectionnés ont été dupliqués."
+
+#: fallout/admin.py:1432
+msgid "Dupliquer les butins sélectionnés"
+msgstr "Dupliquer les butins sélectionnés"
+
+#: fallout/admin.py:1440 fallout/api.py:610
+msgid "nombre"
+msgstr "nombre"
+
+#: fallout/admin.py:1450 fallout/enums.py:28 fallout/enums.py:269
+#: fallout/models.py:370 fallout/models.py:731
+#: fallout/templates/fallout/character/forms/action.html:99
+msgid "argent"
+msgstr "argent"
+
+#: fallout/admin.py:1479
+msgid "Jet"
+msgstr "Jet"
+
+#: fallout/admin.py:1520 fallout/admin.py:1619 fallout/admin.py:1738
+msgid "raison ?"
+msgstr "raison ?"
+
+#: fallout/admin.py:1551
+msgid "Dégâts de base"
+msgstr "Dégâts de base"
+
+#: fallout/admin.py:1565
+msgid "Etat de la protection"
+msgstr "Etat de la protection"
+
+#: fallout/admin.py:1577
+msgid "Etat du personnage"
+msgstr "Etat du personnage"
+
+#: fallout/admin.py:1647
+msgid "Attaquant"
+msgstr "Attaquant"
+
+#: fallout/admin.py:1661
+msgid "Défenseur"
+msgstr "Défenseur"
+
+#: fallout/admin.py:1674
+msgid "Combat"
+msgstr "Combat"
+
+#: fallout/admin.py:1731 fallout/api.py:192 fallout/api.py:440
+#: fallout/api.py:710 fallout/api.py:968 fallout/enums.py:267
+msgid "dégâts"
+msgstr "dégâts"
+
+#: fallout/api.py:85
+msgid "Inclure les capsules"
+msgstr "Inclure les capsules"
+
+#: fallout/api.py:104 fallout/models.py:2332 fallout/models.py:3812
+msgid "statistique"
+msgstr "statistique"
+
+#: fallout/api.py:105 fallout/api.py:347 fallout/api.py:396
+#: fallout/models.py:3814
+#: fallout/templates/fallout/character/forms/attack.html:113
+#: fallout/templates/fallout/character/forms/stats.html:15
+msgid "modificateur"
+msgstr "modificateur"
+
+#: fallout/api.py:106 fallout/enums.py:24 fallout/models.py:729
+#: fallout/models.py:3818 fallout/models.py:4152
+#: fallout/templates/fallout/character/forms/action.html:81
+msgid "expérience"
+msgstr "expérience"
+
+#: fallout/api.py:107 fallout/api.py:380 fallout/api.py:429 fallout/api.py:525
+#: fallout/models.py:3820 fallout/models.py:4022 fallout/models.py:4154
+msgid "raison"
+msgstr "raison"
+
+#: fallout/api.py:116
+msgid "Tous les personnages"
+msgstr "Tous les personnages"
+
+#: fallout/api.py:117
+msgid "Personnages joueurs uniquement"
+msgstr "Personnages joueurs uniquement"
+
+#: fallout/api.py:118
+msgid "Personnages non joueurs uniquement"
+msgstr "Personnages non joueurs uniquement"
+
+#: fallout/api.py:120
+msgid "groupe"
+msgstr "groupe"
+
+#: fallout/api.py:172 fallout/api.py:191 fallout/api.py:709
+#: fallout/models.py:3249 fallout/models.py:3262 fallout/models.py:3281
+msgid "effet"
+msgstr "effet"
+
+#: fallout/api.py:173
+msgid "Forcer l’application"
+msgstr "Forcer l’application"
+
+#: fallout/api.py:215 fallout/api.py:744 fallout/api.py:845 fallout/api.py:881
+#: fallout/models.py:2752 fallout/models.py:3565
+msgid "quantité"
+msgstr "quantité"
+
+#: fallout/api.py:242 fallout/api.py:247 fallout/models.py:2517
+msgid "compétence"
+msgstr "compétence"
+
+#: fallout/api.py:243
+msgid "augmentation"
+msgstr "augmentation"
+
+#: fallout/api.py:248 fallout/api.py:799 fallout/api.py:993
+#: fallout/models.py:2508 fallout/models.py:3813
+msgid "valeur"
+msgstr "valeur"
+
+#: fallout/api.py:249
+msgid "budget total"
+msgstr "budget total"
+
+#: fallout/api.py:250
+msgid "points utilisés"
+msgstr "points utilisés"
+
+#: fallout/api.py:291 fallout/templates/fallout/character/forms/attack.html:93
+#: fallout/templates/fallout/character/forms/damage.html:42
+msgid "cible"
+msgstr "cible"
+
+#: fallout/api.py:292 fallout/models.py:4133
+#: fallout/templates/fallout/character/forms/attack.html:105
+msgid "distance"
+msgstr "distance"
+
+#: fallout/api.py:324
+msgid "Cible non autorisée dans cette campagne."
+msgstr "Cible non autorisée dans cette campagne."
+
+#: fallout/api.py:337 fallout/api.py:503 fallout/forms.py:59
+#: fallout/models.py:2423 fallout/models.py:4134
+msgid "partie du corps"
+msgstr "partie du corps"
+
+#: fallout/api.py:342
+msgid "cible d'échec"
+msgstr "cible d'échec"
+
+#: fallout/api.py:352 fallout/api.py:401 fallout/models.py:3816
+msgid "succès ?"
+msgstr "succès ?"
+
+#: fallout/api.py:357 fallout/api.py:406 fallout/models.py:3817
+#: fallout/models.py:4141
+msgid "critique ?"
+msgstr "critique ?"
+
+#: fallout/api.py:362 fallout/api.py:411
+msgid "dégâts bruts ?"
+msgstr "dégâts bruts ?"
+
+#: fallout/api.py:367 fallout/api.py:416 fallout/api.py:776
+msgid "action ?"
+msgstr "action ?"
+
+#: fallout/api.py:373 fallout/api.py:422
+msgid "type d'arme"
+msgstr "type d'arme"
+
+#: fallout/api.py:378 fallout/api.py:427 fallout/api.py:523
+msgid "simulation ?"
+msgstr "simulation ?"
+
+#: fallout/api.py:391
+msgid "cibles"
+msgstr "cibles"
+
+#: fallout/api.py:438 fallout/models.py:4096
+msgid "attaquant"
+msgstr "attaquant"
+
+#: fallout/api.py:439 fallout/models.py:4103
+msgid "défenseur"
+msgstr "défenseur"
+
+#: fallout/api.py:481 fallout/forms.py:55 fallout/models.py:2422
+msgid "dégâts bruts"
+msgstr "dégâts bruts"
+
+#: fallout/api.py:486 fallout/forms.py:56 fallout/models.py:2420
+msgid "dégâts min."
+msgstr "dégâts min."
+
+#: fallout/api.py:491 fallout/forms.py:57 fallout/models.py:2421
+msgid "dégâts max."
+msgstr "dégâts max."
+
+#: fallout/api.py:496 fallout/forms.py:58 fallout/models.py:2418
+msgid "type de dégâts"
+msgstr "type de dégâts"
+
+#: fallout/api.py:508 fallout/forms.py:60 fallout/models.py:2528
+msgid "modificateur d'absorption"
+msgstr "modificateur d'absorption"
+
+#: fallout/api.py:513 fallout/forms.py:61 fallout/models.py:2529
+msgid "modificateur taux d'absorption"
+msgstr "modificateur taux d'absorption"
+
+#: fallout/api.py:518 fallout/forms.py:62 fallout/models.py:2530
+msgid "modificateur de résistance"
+msgstr "modificateur de résistance"
+
+#: fallout/api.py:536 fallout/models.py:2314
+msgid "personnages"
+msgstr "personnages"
+
+#: fallout/api.py:603 fallout/models.py:337 fallout/models.py:696
+#: fallout/models.py:2497 fallout/models.py:3078 fallout/models.py:3679
+msgid "nom"
+msgstr "nom"
+
+#: fallout/api.py:615
+msgid "équipements ?"
+msgstr "équipements ?"
+
+#: fallout/api.py:620
+msgid "effets ?"
+msgstr "effets ?"
+
+#: fallout/api.py:625 fallout/models.py:715
+msgid "actif ?"
+msgstr "actif ?"
+
+#: fallout/api.py:659
+msgid "points"
+msgstr "points"
+
+#: fallout/api.py:682 fallout/models.py:714 fallout/models.py:3811
+#: fallout/models.py:4003
+msgid "niveau"
+msgstr "niveau"
+
+#: fallout/api.py:683
+msgid "balance"
+msgstr "balance"
+
+#: fallout/api.py:684
+msgid "reset ?"
+msgstr "reset ?"
+
+#: fallout/api.py:735 fallout/api.py:743 fallout/api.py:855
+#: fallout/models.py:2707 fallout/models.py:2720 fallout/models.py:2745
+#: fallout/models.py:3564 fallout/models.py:3775
+msgid "objet"
+msgstr "objet"
+
+#: fallout/api.py:750
+msgid "État (%)"
+msgstr "État (%)"
+
+#: fallout/api.py:751
+msgid "État en pourcentage (0 à 100)."
+msgstr "État en pourcentage (0 à 100)."
+
+#: fallout/api.py:807 fallout/models.py:2546 fallout/models.py:3250
+msgid "effets"
+msgstr "effets"
+
+#: fallout/api.py:808 fallout/models.py:637
+msgid "modificateurs"
+msgstr "modificateurs"
+
+#: fallout/api.py:931
+msgid "argent trouvé"
+msgstr "argent trouvé"
+
+#: fallout/api.py:932 fallout/models.py:3671
+msgid "butins"
+msgstr "butins"
+
+#: fallout/api.py:955
+msgid "secondes"
+msgstr "secondes"
+
+#: fallout/api.py:956 fallout/models.py:718
+msgid "au repos ?"
+msgstr "au repos ?"
+
+#: fallout/api.py:957
+msgid "valider ?"
+msgstr "valider ?"
+
+#: fallout/api.py:958
+msgid "réinitialiser ?"
+msgstr "réinitialiser ?"
+
+#: fallout/api.py:991
+msgid "code"
+msgstr "code"
+
+#: fallout/api.py:992
+msgid "libellé"
+msgstr "libellé"
+
+#: fallout/api.py:994
+msgid "maximum"
+msgstr "maximum"
+
+#: fallout/api.py:995
+msgid "CSS"
+msgstr "CSS"
+
+#: fallout/api.py:996
+msgid "taux"
+msgstr "taux"
+
+#: fallout/api.py:997
+msgid "préfixe"
+msgstr "préfixe"
+
+#: fallout/api.py:998
+msgid "suffixe"
+msgstr "suffixe"
+
+#: fallout/api.py:999 fallout/models.py:338 fallout/models.py:697
+#: fallout/models.py:2498 fallout/models.py:3079 fallout/models.py:3680
+msgid "titre"
+msgstr "titre"
+
+#: fallout/api_utils.py:39
+msgid "Action impossible."
+msgstr "Action impossible."
+
+#: fallout/api_utils.py:42
+msgid "Une erreur interne a empêché cette opération."
+msgstr "Une erreur interne a empêché cette opération."
+
+#: fallout/enums.py:18 fallout/models.py:725
+msgid "santé"
+msgstr "santé"
+
+#: fallout/enums.py:19 fallout/models.py:726
+#: fallout/templates/fallout/character/forms/action.html:29
+msgid "points d'action"
+msgstr "points d'action"
+
+#: fallout/enums.py:20 fallout/models.py:736
+#: fallout/templates/fallout/character/forms/action.html:45
+msgid "soif"
+msgstr "soif"
+
+#: fallout/enums.py:21 fallout/models.py:737
+#: fallout/templates/fallout/character/forms/action.html:54
+msgid "faim"
+msgstr "faim"
+
+#: fallout/enums.py:22 fallout/models.py:738
+#: fallout/templates/fallout/character/forms/action.html:63
+msgid "sommeil"
+msgstr "sommeil"
+
+#: fallout/enums.py:23 fallout/models.py:735
+#: fallout/templates/fallout/character/forms/action.html:72
+msgid "rads"
+msgstr "rads"
+
+#: fallout/enums.py:25 fallout/models.py:727
+msgid "points de compétence"
+msgstr "points de compétence"
+
+#: fallout/enums.py:26 fallout/models.py:728
+msgid "points de talent"
+msgstr "points de talent"
+
+#: fallout/enums.py:27 fallout/enums.py:270 fallout/models.py:730
+#: fallout/templates/fallout/character/forms/action.html:90
+msgid "karma"
+msgstr "karma"
+
+#: fallout/enums.py:29 fallout/models.py:732
+msgid "récompense"
+msgstr "récompense"
+
+#: fallout/enums.py:43 fallout/models.py:566
+msgid "force"
+msgstr "force"
+
+#: fallout/enums.py:44 fallout/models.py:567
+msgid "perception"
+msgstr "perception"
+
+#: fallout/enums.py:45 fallout/models.py:568
+msgid "endurance"
+msgstr "endurance"
+
+#: fallout/enums.py:46 fallout/models.py:569
+msgid "charisme"
+msgstr "charisme"
+
+#: fallout/enums.py:47 fallout/models.py:570
+msgid "intelligence"
+msgstr "intelligence"
+
+#: fallout/enums.py:48 fallout/models.py:571
+msgid "agilité"
+msgstr "agilité"
+
+#: fallout/enums.py:49 fallout/models.py:572 fallout/models.py:3776
+msgid "chance"
+msgstr "chance"
+
+#: fallout/enums.py:69 fallout/models.py:574
+msgid "santé maximale"
+msgstr "santé maximale"
+
+#: fallout/enums.py:70 fallout/models.py:575
+msgid "points d'action max."
+msgstr "points d'action max."
+
+#: fallout/enums.py:71 fallout/models.py:577
+msgid "charge maximale"
+msgstr "charge maximale"
+
+#: fallout/enums.py:72 fallout/models.py:576 fallout/models.py:2544
+#: fallout/templates/fallout/campaign/forms/loots.html:153
+#: fallout/templates/fallout/character/forms/items.html:112
+#: fallout/templates/fallout/items.html:88
+msgid "classe d'armure"
+msgstr "classe d'armure"
+
+#: fallout/enums.py:73 fallout/models.py:578
+msgid "dégâts en mêlée"
+msgstr "dégâts en mêlée"
+
+#: fallout/enums.py:74 fallout/models.py:579
+msgid "initiative"
+msgstr "initiative"
+
+#: fallout/enums.py:75 fallout/models.py:580
+msgid "taux de regénération"
+msgstr "taux de regénération"
+
+#: fallout/enums.py:76 fallout/models.py:581
+msgid "modificateur d'action"
+msgstr "modificateur d'action"
+
+#: fallout/enums.py:77 fallout/models.py:582
+msgid "précision à une main"
+msgstr "précision à une main"
+
+#: fallout/enums.py:78 fallout/models.py:583
+msgid "précision à deux mains"
+msgstr "précision à deux mains"
+
+#: fallout/enums.py:79 fallout/models.py:584 fallout/models.py:2538
+msgid "modificateur de dégâts"
+msgstr "modificateur de dégâts"
+
+#: fallout/enums.py:80
+msgid "chance de critique"
+msgstr "chance de critique"
+
+#: fallout/enums.py:81
+msgid "chance de dégâts bruts"
+msgstr "chance de dégâts bruts"
+
+#: fallout/enums.py:82 fallout/models.py:587 fallout/models.py:2542
+msgid "modificateur dégâts critiques"
+msgstr "modificateur dégâts critiques"
+
+#: fallout/enums.py:113 fallout/models.py:589
+msgid "armes à feu légères"
+msgstr "armes à feu légères"
+
+#: fallout/enums.py:114 fallout/models.py:590
+msgid "armes à feu lourdes"
+msgstr "armes à feu lourdes"
+
+#: fallout/enums.py:115 fallout/models.py:591
+msgid "armes à énergie"
+msgstr "armes à énergie"
+
+#: fallout/enums.py:116 fallout/enums.py:204 fallout/models.py:592
+msgid "à mains nues"
+msgstr "à mains nues"
+
+#: fallout/enums.py:117 fallout/models.py:593
+msgid "armes de mêlée"
+msgstr "armes de mêlée"
+
+#: fallout/enums.py:118 fallout/models.py:594
+msgid "armes de lancer"
+msgstr "armes de lancer"
+
+#: fallout/enums.py:119 fallout/models.py:595
+msgid "athlétisme"
+msgstr "athlétisme"
+
+#: fallout/enums.py:120 fallout/models.py:596
+msgid "détection"
+msgstr "détection"
+
+#: fallout/enums.py:121 fallout/models.py:597
+msgid "premiers secours"
+msgstr "premiers secours"
+
+#: fallout/enums.py:122 fallout/models.py:598
+msgid "médecine"
+msgstr "médecine"
+
+#: fallout/enums.py:123 fallout/models.py:599
+msgid "pharmacologie"
+msgstr "pharmacologie"
+
+#: fallout/enums.py:124 fallout/models.py:600
+msgid "discrétion"
+msgstr "discrétion"
+
+#: fallout/enums.py:125 fallout/models.py:601
+msgid "crochetage"
+msgstr "crochetage"
+
+#: fallout/enums.py:126 fallout/models.py:602
+msgid "pickpocket"
+msgstr "pickpocket"
+
+#: fallout/enums.py:127 fallout/models.py:603
+msgid "pièges"
+msgstr "pièges"
+
+#: fallout/enums.py:128 fallout/models.py:604
+msgid "explosifs"
+msgstr "explosifs"
+
+#: fallout/enums.py:129 fallout/models.py:605
+msgid "science"
+msgstr "science"
+
+#: fallout/enums.py:130 fallout/models.py:606
+msgid "mécanique"
+msgstr "mécanique"
+
+#: fallout/enums.py:131 fallout/models.py:607
+msgid "informatique"
+msgstr "informatique"
+
+#: fallout/enums.py:132 fallout/models.py:608
+msgid "électronique"
+msgstr "électronique"
+
+#: fallout/enums.py:133 fallout/models.py:609
+msgid "persuasion"
+msgstr "persuasion"
+
+#: fallout/enums.py:134 fallout/models.py:610
+msgid "tromperie"
+msgstr "tromperie"
+
+#: fallout/enums.py:135 fallout/models.py:611
+msgid "marchandage"
+msgstr "marchandage"
+
+#: fallout/enums.py:136 fallout/models.py:612
+msgid "survie"
+msgstr "survie"
+
+#: fallout/enums.py:137 fallout/models.py:613
+msgid "connaissance"
+msgstr "connaissance"
+
+#: fallout/enums.py:154 fallout/models.py:522
+msgid "résistance aux dégâts"
+msgstr "résistance aux dégâts"
+
+#: fallout/enums.py:155
+msgid "résistance physique"
+msgstr "résistance physique"
+
+#: fallout/enums.py:156
+msgid "résistance aux lasers"
+msgstr "résistance aux lasers"
+
+#: fallout/enums.py:157
+msgid "résistance au plasma"
+msgstr "résistance au plasma"
+
+#: fallout/enums.py:158
+msgid "résistance aux explosions"
+msgstr "résistance aux explosions"
+
+#: fallout/enums.py:159
+msgid "résistance au feu"
+msgstr "résistance au feu"
+
+#: fallout/enums.py:160
+msgid "résistance à l'électricité"
+msgstr "résistance à l'électricité"
+
+#: fallout/enums.py:161
+msgid "résistance aux poisons"
+msgstr "résistance aux poisons"
+
+#: fallout/enums.py:162
+msgid "résistance aux radiations"
+msgstr "résistance aux radiations"
+
+#: fallout/enums.py:163
+msgid "résistance au gaz (contact)"
+msgstr "résistance au gaz (contact)"
+
+#: fallout/enums.py:164
+msgid "résistance au gaz (inhalé)"
+msgstr "résistance au gaz (inhalé)"
+
+#: fallout/enums.py:181 fallout/models.py:521
+msgid "absorption de dégâts"
+msgstr "absorption de dégâts"
+
+#: fallout/enums.py:182
+msgid "absorption physique"
+msgstr "absorption physique"
+
+#: fallout/enums.py:183
+msgid "absorption des lasers"
+msgstr "absorption des lasers"
+
+#: fallout/enums.py:184
+msgid "absorption du plasma"
+msgstr "absorption du plasma"
+
+#: fallout/enums.py:185
+msgid "absorption des explosions"
+msgstr "absorption des explosions"
+
+#: fallout/enums.py:186
+msgid "absorption du feu"
+msgstr "absorption du feu"
+
+#: fallout/enums.py:187
+msgid "absorption de l'électricité"
+msgstr "absorption de l'électricité"
+
+#: fallout/enums.py:188
+msgid "absorption des poisons"
+msgstr "absorption des poisons"
+
+#: fallout/enums.py:189
+msgid "absorption des radiations"
+msgstr "absorption des radiations"
+
+#: fallout/enums.py:190
+msgid "absorption du gaz (contact)"
+msgstr "absorption du gaz (contact)"
+
+#: fallout/enums.py:191
+msgid "absorption du gaz (inhalé)"
+msgstr "absorption du gaz (inhalé)"
+
+#: fallout/enums.py:201
+msgid "arme principale"
+msgstr "arme principale"
+
+#: fallout/enums.py:202
+msgid "arme secondaire"
+msgstr "arme secondaire"
+
+#: fallout/enums.py:203 fallout/enums.py:398
+msgid "grenade"
+msgstr "grenade"
+
+#: fallout/enums.py:236
+msgid "dégâts normaux"
+msgstr "dégâts normaux"
+
+#: fallout/enums.py:237
+msgid "dégâts de laser"
+msgstr "dégâts de laser"
+
+#: fallout/enums.py:238
+msgid "dégâts de plasma"
+msgstr "dégâts de plasma"
+
+#: fallout/enums.py:239
+msgid "dégâts explosifs"
+msgstr "dégâts explosifs"
+
+#: fallout/enums.py:240
+msgid "dégâts de feu"
+msgstr "dégâts de feu"
+
+#: fallout/enums.py:241
+msgid "dégâts d'électricité"
+msgstr "dégâts d'électricité"
+
+#: fallout/enums.py:242
+msgid "dégâts de poison"
+msgstr "dégâts de poison"
+
+#: fallout/enums.py:243
+msgid "dégâts de radiations"
+msgstr "dégâts de radiations"
+
+#: fallout/enums.py:244
+msgid "dégâts de gaz (contact)"
+msgstr "dégâts de gaz (contact)"
+
+#: fallout/enums.py:245
+msgid "dégâts de gaz (inhalé)"
+msgstr "dégâts de gaz (inhalé)"
+
+#: fallout/enums.py:246
+msgid "dégâts directs"
+msgstr "dégâts directs"
+
+#: fallout/enums.py:247
+msgid "augmentation de la soif"
+msgstr "augmentation de la soif"
+
+#: fallout/enums.py:248
+msgid "augmentation de la faim"
+msgstr "augmentation de la faim"
+
+#: fallout/enums.py:249
+msgid "augmentation du sommeil"
+msgstr "augmentation du sommeil"
+
+#: fallout/enums.py:252
+msgid "soins de santé"
+msgstr "soins de santé"
+
+#: fallout/enums.py:253
+msgid "soins de radiations"
+msgstr "soins de radiations"
+
+#: fallout/enums.py:254
+msgid "diminution de la soif"
+msgstr "diminution de la soif"
+
+#: fallout/enums.py:255
+msgid "diminution de la faim"
+msgstr "diminution de la faim"
+
+#: fallout/enums.py:256
+msgid "diminution du sommeil"
+msgstr "diminution du sommeil"
+
+#: fallout/enums.py:259
+msgid "gain d'argent"
+msgstr "gain d'argent"
+
+#: fallout/enums.py:260
+msgid "perte d'argent"
+msgstr "perte d'argent"
+
+#: fallout/enums.py:263
+msgid "gain de karma"
+msgstr "gain de karma"
+
+#: fallout/enums.py:264
+msgid "perte de karma"
+msgstr "perte de karma"
+
+#: fallout/enums.py:268
+msgid "soins"
+msgstr "soins"
+
+#: fallout/enums.py:315
+msgid "N"
+msgstr "N"
+
+#: fallout/enums.py:316
+msgid "L"
+msgstr "L"
+
+#: fallout/enums.py:317 fallout/enums.py:321
+msgid "P"
+msgstr "P"
+
+#: fallout/enums.py:318 fallout/enums.py:320
+msgid "E"
+msgstr "E"
+
+#: fallout/enums.py:319
+msgid "F"
+msgstr "F"
+
+#: fallout/enums.py:322
+msgid "R"
+msgstr "R"
+
+#: fallout/enums.py:323
+msgid "GC"
+msgstr "GC"
+
+#: fallout/enums.py:324
+msgid "GI"
+msgstr "GI"
+
+#: fallout/enums.py:359 fallout/models.py:615
+msgid "santé par niveau"
+msgstr "santé par niveau"
+
+#: fallout/enums.py:360 fallout/models.py:616
+msgid "compétences par niveau"
+msgstr "compétences par niveau"
+
+#: fallout/enums.py:361 fallout/models.py:617
+msgid "niveaux pour un talent"
+msgstr "niveaux pour un talent"
+
+#: fallout/enums.py:367
+#: fallout/templates/fallout/character/panels/stats.html:11
+msgid "S.P.E.C.I.A.L."
+msgstr "S.P.E.C.I.A.L."
+
+#: fallout/enums.py:368 fallout/templates/fallout/character.html:157
+#: fallout/templates/fallout/character/panels/stats.html:16
+msgid "Compétences"
+msgstr "Compétences"
+
+#: fallout/enums.py:374
+msgid "Statistiques secondaires"
+msgstr "Statistiques secondaires"
+
+#: fallout/enums.py:375
+msgid "Statistiques de niveau"
+msgstr "Statistiques de niveau"
+
+#: fallout/enums.py:376
+#: fallout/templates/fallout/character/panels/stats.html:21
+msgid "Résistances"
+msgstr "Résistances"
+
+#: fallout/enums.py:378
+#: fallout/templates/fallout/character/panels/stats.html:6
+msgid "Etat général"
+msgstr "Etat général"
+
+#: fallout/enums.py:394
+msgid "arme"
+msgstr "arme"
+
+#: fallout/enums.py:395
+msgid "munition"
+msgstr "munition"
+
+#: fallout/enums.py:396
+msgid "armure"
+msgstr "armure"
+
+#: fallout/enums.py:397
+msgid "casque"
+msgstr "casque"
+
+#: fallout/enums.py:409
+msgid "accessoire"
+msgstr "accessoire"
+
+#: fallout/enums.py:410
+msgid "outil"
+msgstr "outil"
+
+#: fallout/enums.py:411
+msgid "nourriture"
+msgstr "nourriture"
+
+#: fallout/enums.py:412
+msgid "drogue"
+msgstr "drogue"
+
+#: fallout/enums.py:413
+msgid "livre"
+msgstr "livre"
+
+#: fallout/enums.py:414
+msgid "autre"
+msgstr "autre"
+
+#: fallout/enums.py:425
+msgid "attaque à distance"
+msgstr "attaque à distance"
+
+#: fallout/enums.py:426
+msgid "attaque à longue distance"
+msgstr "attaque à longue distance"
+
+#: fallout/enums.py:427
+msgid "attaque avec lunette"
+msgstr "attaque avec lunette"
+
+#: fallout/enums.py:428
+msgid "attaque en mêlée"
+msgstr "attaque en mêlée"
+
+#: fallout/enums.py:429
+msgid "attaque de lancer"
+msgstr "attaque de lancer"
+
+#: fallout/enums.py:434
+msgid "aucune"
+msgstr "aucune"
+
+#: fallout/enums.py:435
+msgid "une main"
+msgstr "une main"
+
+#: fallout/enums.py:436
+msgid "deux mains"
+msgstr "deux mains"
+
+#: fallout/enums.py:448
+msgid "humain"
+msgstr "humain"
+
+#: fallout/enums.py:449
+msgid "ghoule"
+msgstr "ghoule"
+
+#: fallout/enums.py:450
+msgid "super-mutant"
+msgstr "super-mutant"
+
+#: fallout/enums.py:451
+msgid "écorcheur"
+msgstr "écorcheur"
+
+#: fallout/enums.py:452
+msgid "robot"
+msgstr "robot"
+
+#: fallout/enums.py:453
+msgid "animal"
+msgstr "animal"
+
+#: fallout/enums.py:454
+msgid "créature"
+msgstr "créature"
+
+#: fallout/enums.py:465
+msgid "torse"
+msgstr "torse"
+
+#: fallout/enums.py:466
+msgid "jambes"
+msgstr "jambes"
+
+#: fallout/enums.py:467
+msgid "bras"
+msgstr "bras"
+
+#: fallout/enums.py:468
+msgid "tête"
+msgstr "tête"
+
+#: fallout/enums.py:469
+msgid "yeux"
+msgstr "yeux"
+
+#: fallout/enums.py:482
+msgid "cible touchée"
+msgstr "cible touchée"
+
+#: fallout/enums.py:483
+msgid "cible manquée"
+msgstr "cible manquée"
+
+#: fallout/enums.py:484
+msgid "points d'action insuffisants"
+msgstr "points d'action insuffisants"
+
+#: fallout/enums.py:485
+msgid "munitions insuffisantes"
+msgstr "munitions insuffisantes"
+
+#: fallout/enums.py:486
+msgid "cible inconsciente"
+msgstr "cible inconsciente"
+
+#: fallout/enums.py:487
+msgid "cible tuée"
+msgstr "cible tuée"
+
+#: fallout/enums.py:488
+msgid "arme défectueuse"
+msgstr "arme défectueuse"
+
+#: fallout/enums.py:494
+msgid "Etat normal"
+msgstr "Etat normal"
+
+#: fallout/enums.py:495
+msgid "Faiblement irradié"
+msgstr "Faiblement irradié"
+
+#: fallout/enums.py:496
+msgid "Modérément irradié"
+msgstr "Modérément irradié"
+
+#: fallout/enums.py:497
+msgid "Fortement irradié"
+msgstr "Fortement irradié"
+
+#: fallout/enums.py:498
+msgid "Dangereusement irradié"
+msgstr "Dangereusement irradié"
+
+#: fallout/enums.py:499
+msgid "Mortellement irradié"
+msgstr "Mortellement irradié"
+
+#: fallout/enums.py:504
+msgid "Désaltéré"
+msgstr "Désaltéré"
+
+#: fallout/enums.py:505
+msgid "Faiblement assoiffé"
+msgstr "Faiblement assoiffé"
+
+#: fallout/enums.py:506
+msgid "Modérément assoiffé"
+msgstr "Modérément assoiffé"
+
+#: fallout/enums.py:507
+msgid "Fortement assoiffé"
+msgstr "Fortement assoiffé"
+
+#: fallout/enums.py:508
+msgid "Dangereusement assoiffé"
+msgstr "Dangereusement assoiffé"
+
+#: fallout/enums.py:509
+msgid "Mortellement assoiffé"
+msgstr "Mortellement assoiffé"
+
+#: fallout/enums.py:514
+msgid "Rassasié"
+msgstr "Rassasié"
+
+#: fallout/enums.py:515
+msgid "Faiblement affamé"
+msgstr "Faiblement affamé"
+
+#: fallout/enums.py:516
+msgid "Modérément affamé"
+msgstr "Modérément affamé"
+
+#: fallout/enums.py:517
+msgid "Fortement affamé"
+msgstr "Fortement affamé"
+
+#: fallout/enums.py:518
+msgid "Dangereusement affamé"
+msgstr "Dangereusement affamé"
+
+#: fallout/enums.py:519
+msgid "Mortellement affamé"
+msgstr "Mortellement affamé"
+
+#: fallout/enums.py:524
+msgid "Reposé"
+msgstr "Reposé"
+
+#: fallout/enums.py:525
+msgid "Faiblement fatigué"
+msgstr "Faiblement fatigué"
+
+#: fallout/enums.py:526
+msgid "Modérément fatigué"
+msgstr "Modérément fatigué"
+
+#: fallout/enums.py:527
+msgid "Fortement fatigué"
+msgstr "Fortement fatigué"
+
+#: fallout/enums.py:528
+msgid "Dangereusement fatigué"
+msgstr "Dangereusement fatigué"
+
+#: fallout/enums.py:529
+msgid "Mortellement fatigué"
+msgstr "Mortellement fatigué"
+
+#: fallout/enums.py:534
+msgid "Non chargé"
+msgstr "Non chargé"
+
+#: fallout/enums.py:535
+msgid "Légèrement encombré"
+msgstr "Légèrement encombré"
+
+#: fallout/enums.py:536
+msgid "Encombré"
+msgstr "Encombré"
+
+#: fallout/enums.py:537
+msgid "Lourdement encombré"
+msgstr "Lourdement encombré"
+
+#: fallout/enums.py:538
+msgid "Immobilisé"
+msgstr "Immobilisé"
+
+#: fallout/enums.py:542
+#: fallout/templates/fallout/character/forms/attack.html:68
+msgid "échec"
+msgstr "échec"
+
+#: fallout/enums.py:543
+msgid "réussite"
+msgstr "réussite"
+
+#: fallout/enums.py:544
+msgid "critique"
+msgstr "critique"
+
+#: fallout/forms.py:15 fallout/templates/fallout/campaign/campaign.html:59
+#: fallout/templates/fallout/campaign/forms/loots.html:13
+#: fallout/templates/fallout/campaign/panels/loots.html:17
+msgid "Campagne"
+msgstr "Campagne"
+
+#: fallout/forms.py:23 fallout/templates/fallout/campaign/panels/infos.html:95
+msgid "Nombre"
+msgstr "Nombre"
+
+#: fallout/forms.py:24 fallout/forms.py:145
+msgid "Nom"
+msgstr "Nom"
+
+#: fallout/forms.py:25
+msgid "Actif ?"
+msgstr "Actif ?"
+
+#: fallout/forms.py:33 fallout/templates/fallout/campaign/panels/rolls.html:20
+msgid "Statistique"
+msgstr "Statistique"
+
+#: fallout/forms.py:34 fallout/forms.py:45
+#: fallout/templates/fallout/campaign/panels/rolls.html:32
+msgid "Modificateur"
+msgstr "Modificateur"
+
+#: fallout/forms.py:42 fallout/templates/fallout/campaign/forms/loots.html:10
+#: fallout/templates/fallout/campaign/panels/loots.html:14
+#: fallout/templates/fallout/campaign/panels/loots.html:51
+#: fallout/templates/fallout/character/character.html:62
+#: fallout/templates/fallout/character/forms/action.html:7
+msgid "Personnage"
+msgstr "Personnage"
+
+#: fallout/forms.py:43
+msgid "Distance"
+msgstr "Distance"
+
+#: fallout/forms.py:44
+#: fallout/templates/fallout/campaign/panels/effects.html:71
+msgid "Partie du corps"
+msgstr "Partie du corps"
+
+#: fallout/forms.py:46
+msgid "Action ?"
+msgstr "Action ?"
+
+#: fallout/forms.py:47
+msgid "Aucune arme ?"
+msgstr "Aucune arme ?"
+
+#: fallout/forms.py:73
+msgid "Armure"
+msgstr "Armure"
+
+#: fallout/forms.py:75
+msgid "Condition min. armure"
+msgstr "Condition min. armure"
+
+#: fallout/forms.py:76
+msgid "Condition max. armure"
+msgstr "Condition max. armure"
+
+#: fallout/forms.py:80
+msgid "Casque"
+msgstr "Casque"
+
+#: fallout/forms.py:82
+msgid "Condition min. casque"
+msgstr "Condition min. casque"
+
+#: fallout/forms.py:83
+msgid "Condition max. casque"
+msgstr "Condition max. casque"
+
+#: fallout/forms.py:87 fallout/templates/fallout/character/forms/items.html:20
+msgid "Arme"
+msgstr "Arme"
+
+#: fallout/forms.py:89
+msgid "Condition min. arme"
+msgstr "Condition min. arme"
+
+#: fallout/forms.py:90
+msgid "Condition max. arme"
+msgstr "Condition max. arme"
+
+#: fallout/forms.py:94
+msgid "Munition"
+msgstr "Munition"
+
+#: fallout/forms.py:96
+msgid "Nombre min. de munitions"
+msgstr "Nombre min. de munitions"
+
+#: fallout/forms.py:97
+msgid "Nombre max. de munitions"
+msgstr "Nombre max. de munitions"
+
+#: fallout/forms.py:109
+#: fallout/templates/fallout/character/forms/stats.html:89
+#: fallout/templates/fallout/character/forms/stats.html:92
+msgid "Points"
+msgstr "Points"
+
+#: fallout/forms.py:110
+msgid "Ces points seront aléatoirement répartis dans le S.P.E.C.I.A.L."
+msgstr "Ces points seront aléatoirement répartis dans le S.P.E.C.I.A.L."
+
+#: fallout/forms.py:122 fallout/templates/fallout/campaign/dashboard.html:35
+#: fallout/templates/fallout/campaign/forms/infos.html:16
+#: fallout/templates/fallout/character/character.html:42
+msgid "Niveau"
+msgstr "Niveau"
+
+#: fallout/forms.py:123
+msgid ""
+"Les points de compétences seront aléatoirement répartis pour chaque montée "
+"de niveau."
+msgstr ""
+"Les points de compétences seront aléatoirement répartis pour chaque montée "
+"de niveau."
+
+#: fallout/forms.py:129
+msgid "Balance"
+msgstr "Balance"
+
+#: fallout/forms.py:130
+msgid "Pourcentage de points de compétences à répartir dans les spécialités."
+msgstr "Pourcentage de points de compétences à répartir dans les spécialités."
+
+#: fallout/forms.py:146
+msgid "Race"
+msgstr "Race"
+
+#: fallout/forms.py:147
+msgid "Force"
+msgstr "Force"
+
+#: fallout/forms.py:148
+msgid "Perception"
+msgstr "Perception"
+
+#: fallout/forms.py:149
+msgid "Endurance"
+msgstr "Endurance"
+
+#: fallout/forms.py:150
+msgid "Charisme"
+msgstr "Charisme"
+
+#: fallout/forms.py:151
+msgid "Intelligence"
+msgstr "Intelligence"
+
+#: fallout/forms.py:152
+msgid "Agilité"
+msgstr "Agilité"
+
+#: fallout/forms.py:153
+msgid "Chance"
+msgstr "Chance"
+
+#: fallout/management/commands/creature.py:37
+msgid "Importe des créatures"
+msgstr "Importe des créatures"
+
+#: fallout/management/commands/creature.py:43
+msgid "Nouvelle créature :"
+msgstr "Nouvelle créature :"
+
+#: fallout/management/commands/creature.py:60
+msgid "Nom : "
+msgstr "Nom : "
+
+#: fallout/management/commands/export.py:10
+msgid "Exporte les données de l'application vers un document Excel"
+msgstr "Exporte les données de l'application vers un document Excel"
+
+#: fallout/management/commands/export.py:14
+#: fallout/management/commands/import.py:14
+msgid "Tous les champs"
+msgstr "Tous les champs"
+
+#: fallout/management/commands/export.py:15
+#: fallout/management/commands/import.py:17
+msgid "Chemin du fichier"
+msgstr "Chemin du fichier"
+
+#: fallout/management/commands/import.py:10
+msgid "Importe les données de l'application depuis un document Excel"
+msgstr "Importe les données de l'application depuis un document Excel"
+
+#: fallout/management/commands/import.py:15
+msgid "Validation"
+msgstr "Validation"
+
+#: fallout/management/commands/import.py:16
+msgid "Forcé"
+msgstr "Forcé"
+
+#: fallout/models.py:322
+msgid "surnom"
+msgstr "surnom"
+
+#: fallout/models.py:328 fallout/models.py:685 fallout/models.py:4431
+msgid "joueur"
+msgstr "joueur"
+
+#: fallout/models.py:329
+msgid "joueurs"
+msgstr "joueurs"
+
+#: fallout/models.py:339 fallout/models.py:698 fallout/models.py:2499
+#: fallout/models.py:3080 fallout/models.py:3681
+msgid "description"
+msgstr "description"
+
+#: fallout/models.py:340 fallout/models.py:700 fallout/models.py:2500
+#: fallout/models.py:3081 fallout/models.py:3682
+msgid "image"
+msgstr "image"
+
+#: fallout/models.py:345 fallout/models.py:705 fallout/models.py:2505
+#: fallout/models.py:3085 fallout/models.py:3689
+msgid "miniature"
+msgstr "miniature"
+
+#: fallout/models.py:353
+msgid "maître du jeu"
+msgstr "maître du jeu"
+
+#: fallout/models.py:355
+msgid "date de début"
+msgstr "date de début"
+
+#: fallout/models.py:356
+msgid "date courante"
+msgstr "date courante"
+
+#: fallout/models.py:363
+msgid "personnage actif"
+msgstr "personnage actif"
+
+#: fallout/models.py:365
+msgid "rads par heure"
+msgstr "rads par heure"
+
+#: fallout/models.py:366 fallout/models.py:720
+msgid "besoins activés ?"
+msgstr "besoins activés ?"
+
+#: fallout/models.py:367
+msgid "voir les personnages joueurs"
+msgstr "voir les personnages joueurs"
+
+#: fallout/models.py:368
+msgid "voir les personnages non-joueurs"
+msgstr "voir les personnages non-joueurs"
+
+#: fallout/models.py:369
+msgid "voir les jets lancés"
+msgstr "voir les jets lancés"
+
+#: fallout/models.py:371
+msgid "argent à piller"
+msgstr "argent à piller"
+
+#: fallout/models.py:513
+msgid "campagnes"
+msgstr "campagnes"
+
+#: fallout/models.py:523
+msgid "absorption normal"
+msgstr "absorption normal"
+
+#: fallout/models.py:524
+msgid "résistance normal"
+msgstr "résistance normal"
+
+#: fallout/models.py:525
+msgid "absorption laser"
+msgstr "absorption laser"
+
+#: fallout/models.py:526
+msgid "résistance laser"
+msgstr "résistance laser"
+
+#: fallout/models.py:527
+msgid "absorption plasma"
+msgstr "absorption plasma"
+
+#: fallout/models.py:528
+msgid "résistance plasma"
+msgstr "résistance plasma"
+
+#: fallout/models.py:529
+msgid "absorption explosifs"
+msgstr "absorption explosifs"
+
+#: fallout/models.py:530
+msgid "résistance explosifs"
+msgstr "résistance explosifs"
+
+#: fallout/models.py:531
+msgid "absorption feu"
+msgstr "absorption feu"
+
+#: fallout/models.py:532
+msgid "résistance feu"
+msgstr "résistance feu"
+
+#: fallout/models.py:533
+msgid "absorption électricité"
+msgstr "absorption électricité"
+
+#: fallout/models.py:534
+msgid "résistance électricité"
+msgstr "résistance électricité"
+
+#: fallout/models.py:535
+msgid "absorption poison"
+msgstr "absorption poison"
+
+#: fallout/models.py:536
+msgid "résistance poison"
+msgstr "résistance poison"
+
+#: fallout/models.py:537
+msgid "absorption radiations"
+msgstr "absorption radiations"
+
+#: fallout/models.py:538
+msgid "résistance radiations"
+msgstr "résistance radiations"
+
+#: fallout/models.py:539
+msgid "absorption gaz (contact)"
+msgstr "absorption gaz (contact)"
+
+#: fallout/models.py:540
+msgid "résistance gaz (contact)"
+msgstr "résistance gaz (contact)"
+
+#: fallout/models.py:541
+msgid "absorption gaz (inhalé)"
+msgstr "absorption gaz (inhalé)"
+
+#: fallout/models.py:542
+msgid "résistance gaz (inhalé)"
+msgstr "résistance gaz (inhalé)"
+
+#: fallout/models.py:585 fallout/models.py:2539
+msgid "chances de critiques"
+msgstr "chances de critiques"
+
+#: fallout/models.py:586 fallout/models.py:2540
+msgid "chances de dégâts bruts"
+msgstr "chances de dégâts bruts"
+
+#: fallout/models.py:636 fallout/models.py:939
+msgid "charge"
+msgstr "charge"
+
+#: fallout/models.py:638
+msgid "obsolète"
+msgstr "obsolète"
+
+#: fallout/models.py:639 fallout/models.py:3803 fallout/models.py:3995
+#: fallout/models.py:4090 fallout/models.py:4439
+msgid "date"
+msgstr "date"
+
+#: fallout/models.py:648 fallout/models.py:649
+msgid "statistiques"
+msgstr "statistiques"
+
+#: fallout/models.py:669
+#, python-brace-format
+msgid ""
+"Armure : <strong>{armor}</strong><br>Casque : <strong>{helmet}</strong>"
+msgstr ""
+"Armure : <strong>{armor}</strong><br>Casque : <strong>{helmet}</strong>"
+
+#: fallout/models.py:670
+msgid "absent"
+msgstr "absent"
+
+#: fallout/models.py:699
+msgid "contexte"
+msgstr "contexte"
+
+#: fallout/models.py:712
+msgid "race"
+msgstr "race"
+
+#: fallout/models.py:716
+msgid "visible ?"
+msgstr "visible ?"
+
+#: fallout/models.py:717
+msgid "joueur ?"
+msgstr "joueur ?"
+
+#: fallout/models.py:719
+msgid "stats calculées ?"
+msgstr "stats calculées ?"
+
+#: fallout/models.py:721
+msgid "montée de niveau ?"
+msgstr "montée de niveau ?"
+
+#: fallout/models.py:722
+msgid "active les stats ?"
+msgstr "active les stats ?"
+
+#: fallout/models.py:723
+msgid "active le journal ?"
+msgstr "active le journal ?"
+
+#: fallout/models.py:733
+msgid "butin au décès ?"
+msgstr "butin au décès ?"
+
+#: fallout/models.py:739
+msgid "regénération"
+msgstr "regénération"
+
+#: fallout/models.py:741
+msgid "spécialités"
+msgstr "spécialités"
+
+#: fallout/models.py:743
+msgid "données complémentaires"
+msgstr "données complémentaires"
+
+#: fallout/models.py:951
+msgid " kg"
+msgstr " kg"
+
+#: fallout/models.py:965
+msgid " ¤"
+msgstr " ¤"
+
+#: fallout/models.py:967
+msgid " XP"
+msgstr " XP"
+
+#: fallout/models.py:999
+msgid " PV/j"
+msgstr " PV/j"
+
+#: fallout/models.py:1001
+msgid " PA"
+msgstr " PA"
+
+#: fallout/models.py:1166
+msgid "aucun malus"
+msgstr "aucun malus"
+
+#: fallout/models.py:1468
+msgid "environnement radioactif"
+msgstr "environnement radioactif"
+
+#: fallout/models.py:1564
+msgid "Une attaque en rafale doit cibler au moins un personnage."
+msgstr "Une attaque en rafale doit cibler au moins un personnage."
+
+#: fallout/models.py:1580 fallout/models.py:1735
+msgid "L'attaquant ne possède pas ou plus de grenade."
+msgstr "L'attaquant ne possède pas ou plus de grenade."
+
+#: fallout/models.py:1605
+msgid ""
+"L'attaquant ne possède pas d'arme ou celle-ci ne permet pas d'attaque en "
+"rafale."
+msgstr ""
+"L'attaquant ne possède pas d'arme ou celle-ci ne permet pas d'attaque en "
+"rafale."
+
+#: fallout/models.py:2079
+msgid "Les bornes de dégâts min. et max. ne sont pas correctes."
+msgstr "Les bornes de dégâts min. et max. ne sont pas correctes."
+
+#: fallout/models.py:2235
+msgid "Cette compétence ne peut être améliorée."
+msgstr "Cette compétence ne peut être améliorée."
+
+#: fallout/models.py:2238
+msgid "Ce personnage n'a pas assez de points de compétences."
+msgstr "Ce personnage n'a pas assez de points de compétences."
+
+#: fallout/models.py:2333
+msgid "valeur brute"
+msgstr "valeur brute"
+
+#: fallout/models.py:2334
+#: fallout/templates/fallout/character/forms/damage.html:64
+msgid "valeur min."
+msgstr "valeur min."
+
+#: fallout/models.py:2335
+#: fallout/templates/fallout/character/forms/damage.html:73
+msgid "valeur max."
+msgstr "valeur max."
+
+#: fallout/models.py:2507
+#: fallout/templates/fallout/character/forms/damage.html:28
+msgid "type"
+msgstr "type"
+
+#: fallout/models.py:2509
+msgid "durabilité"
+msgstr "durabilité"
+
+#: fallout/models.py:2510
+msgid "modificateur de condition"
+msgstr "modificateur de condition"
+
+#: fallout/models.py:2511
+msgid "poids"
+msgstr "poids"
+
+#: fallout/models.py:2512
+msgid "quête ?"
+msgstr "quête ?"
+
+#: fallout/models.py:2513
+msgid "jetable ?"
+msgstr "jetable ?"
+
+#: fallout/models.py:2515
+msgid "mains nécessaires"
+msgstr "mains nécessaires"
+
+#: fallout/models.py:2516
+msgid "mode d'attaque"
+msgstr "mode d'attaque"
+
+#: fallout/models.py:2518
+msgid "compétence minimale"
+msgstr "compétence minimale"
+
+#: fallout/models.py:2519
+msgid "force minimale"
+msgstr "force minimale"
+
+#: fallout/models.py:2520
+msgid "taille du chargeur"
+msgstr "taille du chargeur"
+
+#: fallout/models.py:2521
+msgid "munitions en rafale"
+msgstr "munitions en rafale"
+
+#: fallout/models.py:2522
+msgid "portée minimale"
+msgstr "portée minimale"
+
+#: fallout/models.py:2523
+msgid "portée maximale"
+msgstr "portée maximale"
+
+#: fallout/models.py:2524
+msgid "portée min. en rafale"
+msgstr "portée min. en rafale"
+
+#: fallout/models.py:2525
+msgid "portée max. en rafale"
+msgstr "portée max. en rafale"
+
+#: fallout/models.py:2526 fallout/models.py:4137
+msgid "modificateur de précision"
+msgstr "modificateur de précision"
+
+#: fallout/models.py:2527
+msgid "modificateur classe d'armure"
+msgstr "modificateur classe d'armure"
+
+#: fallout/models.py:2531
+msgid "recharge unitaire ?"
+msgstr "recharge unitaire ?"
+
+#: fallout/models.py:2533
+msgid "coût PA recharge"
+msgstr "coût PA recharge"
+
+#: fallout/models.py:2534
+msgid "coût PA normal"
+msgstr "coût PA normal"
+
+#: fallout/models.py:2535
+msgid "coût PA ciblé"
+msgstr "coût PA ciblé"
+
+#: fallout/models.py:2536
+msgid "coût PA rafale"
+msgstr "coût PA rafale"
+
+#: fallout/models.py:2541
+msgid "dégâts critiques"
+msgstr "dégâts critiques"
+
+#: fallout/models.py:2552
+msgid "types de munitions"
+msgstr "types de munitions"
+
+#: fallout/models.py:2558
+msgid "La portée minimale ne peut être plus grande que la portée maximale."
+msgstr "La portée minimale ne peut être plus grande que la portée maximale."
+
+#: fallout/models.py:2562
+msgid ""
+"En rafale, la portée minimale ne peut être plus grand que la portée "
+"maximale."
+msgstr ""
+"En rafale, la portée minimale ne peut être plus grand que la portée "
+"maximale."
+
+#: fallout/models.py:2566 fallout/models.py:3122
+msgid ""
+"Les dégâts minimums ne peuvent être plus grands que les dégâts maximums."
+msgstr ""
+"Les dégâts minimums ne peuvent être plus grands que les dégâts maximums."
+
+#: fallout/models.py:2658
+msgid "Cet objet doit être préalablement enregistré avant d'être dupliqué."
+msgstr "Cet objet doit être préalablement enregistré avant d'être dupliqué."
+
+#: fallout/models.py:2708
+msgid "objets"
+msgstr "objets"
+
+#: fallout/models.py:2726 fallout/models.py:3268
+msgid "La valeur minimale ne peut être plus grande que la valeur maximale."
+msgstr "La valeur minimale ne peut être plus grande que la valeur maximale."
+
+#: fallout/models.py:2730
+msgid "modificateur d'objet"
+msgstr "modificateur d'objet"
+
+#: fallout/models.py:2731
+msgid "modificateurs d'objets"
+msgstr "modificateurs d'objets"
+
+#: fallout/models.py:2750
+msgid "emplacement"
+msgstr "emplacement"
+
+#: fallout/models.py:2753
+msgid "munitions"
+msgstr "munitions"
+
+#: fallout/models.py:2754 fallout/models.py:3566
+msgid "état"
+msgstr "état"
+
+#: fallout/models.py:2755
+msgid "secondaire"
+msgstr "secondaire"
+
+#: fallout/models.py:2806
+msgid "Il n'est pas possible de s'équiper de ce type d'objet."
+msgstr "Il n'est pas possible de s'équiper de ce type d'objet."
+
+#: fallout/models.py:2810 fallout/models.py:3612
+msgid ""
+"Le personnage ne possède plus assez de points d'actions pour s'équiper de "
+"cet objet."
+msgstr ""
+"Le personnage ne possède plus assez de points d'actions pour s'équiper de "
+"cet objet."
+
+#: fallout/models.py:2855
+msgid "Il n'est pas possible d'utiliser ce type d'objet."
+msgstr "Il n'est pas possible d'utiliser ce type d'objet."
+
+#: fallout/models.py:2858
+msgid ""
+"Le personnage ne possède plus assez de points d'actions pour utiliser cet "
+"objet."
+msgstr ""
+"Le personnage ne possède plus assez de points d'actions pour utiliser cet "
+"objet."
+
+#: fallout/models.py:2862
+msgid ""
+"Le personnage doit posséder au moins un exemplaire de cet objet pour "
+"l'utiliser."
+msgstr ""
+"Le personnage doit posséder au moins un exemplaire de cet objet pour "
+"l'utiliser."
+
+#: fallout/models.py:2899
+msgid "Le personnage doit posséder la quantité d'objets qu'il souhaite jeter."
+msgstr ""
+"Le personnage doit posséder la quantité d'objets qu'il souhaite jeter."
+
+#: fallout/models.py:2903
+msgid ""
+"Le personnage ne possède plus assez de points d'actions pour jeter cet "
+"objet."
+msgstr ""
+"Le personnage ne possède plus assez de points d'actions pour jeter cet "
+"objet."
+
+#: fallout/models.py:2930
+msgid "Cet objet n'est pas une arme équipée ou ne peut être rechargé."
+msgstr "Cet objet n'est pas une arme équipée ou ne peut être rechargé."
+
+#: fallout/models.py:2934
+msgid ""
+"Le personnage ne possède plus assez de points d'actions pour recharger cette"
+" arme."
+msgstr ""
+"Le personnage ne possède plus assez de points d'actions pour recharger cette"
+" arme."
+
+#: fallout/models.py:2939
+msgid ""
+"Il n'y a aucun type de munition équipé ou le nombre de munitions disponibles"
+" est insuffisant."
+msgstr ""
+"Il n'y a aucun type de munition équipé ou le nombre de munitions disponibles"
+" est insuffisant."
+
+#: fallout/models.py:2943
+msgid "Cette arme est incompatible avec le type de munition équipé."
+msgstr "Cette arme est incompatible avec le type de munition équipé."
+
+#: fallout/models.py:2968
+msgid "Cet objet n'est pas réparable."
+msgstr "Cet objet n'est pas réparable."
+
+#: fallout/models.py:2971
+msgid ""
+"Le personnage ne possède plus assez de points d'actions pour réparer cet "
+"objet."
+msgstr ""
+"Le personnage ne possède plus assez de points d'actions pour réparer cet "
+"objet."
+
+#: fallout/models.py:3002
+msgid "L'emplacement doit correspondre au type d'objet."
+msgstr "L'emplacement doit correspondre au type d'objet."
+
+#: fallout/models.py:3004
+msgid "Un autre objet est déjà présent à cet emplacement."
+msgstr "Un autre objet est déjà présent à cet emplacement."
+
+#: fallout/models.py:3008
+msgid "Ces munitions sont incompatibles avec l'arme équipée."
+msgstr "Ces munitions sont incompatibles avec l'arme équipée."
+
+#: fallout/models.py:3012
+msgid "Cette arme est incompatible avec les munitions équipées."
+msgstr "Cette arme est incompatible avec les munitions équipées."
+
+#: fallout/models.py:3015
+msgid "Cet objet ne peut être considéré comme une arme secondaire."
+msgstr "Cet objet ne peut être considéré comme une arme secondaire."
+
+#: fallout/models.py:3018
+msgid ""
+"Seule une arme de corps-à-corps ne peut être utilisée comme arme secondaire."
+msgstr ""
+"Seule une arme de corps-à-corps ne peut être utilisée comme arme secondaire."
+
+#: fallout/models.py:3022
+msgid "Un autre objet de l'inventaire est déjà défini comme arme secondaire."
+msgstr "Un autre objet de l'inventaire est déjà défini comme arme secondaire."
+
+#: fallout/models.py:3060
+msgid "équipement"
+msgstr "équipement"
+
+#: fallout/models.py:3061
+msgid "équipements"
+msgstr "équipements"
+
+#: fallout/models.py:3088
+msgid "chance d'effet"
+msgstr "chance d'effet"
+
+#: fallout/models.py:3089
+msgid "durée d'effet min."
+msgstr "durée d'effet min."
+
+#: fallout/models.py:3090
+msgid "durée d'effet max."
+msgstr "durée d'effet max."
+
+#: fallout/models.py:3091
+msgid "contrôlable ?"
+msgstr "contrôlable ?"
+
+#: fallout/models.py:3093
+msgid "appliquer ?"
+msgstr "appliquer ?"
+
+#: fallout/models.py:3094
+msgid "intervalle"
+msgstr "intervalle"
+
+#: fallout/models.py:3095
+msgid "chance de dégâts"
+msgstr "chance de dégâts"
+
+#: fallout/models.py:3103
+msgid "effet suivant"
+msgstr "effet suivant"
+
+#: fallout/models.py:3111
+msgid "effet annulé"
+msgstr "effet annulé"
+
+#: fallout/models.py:3118
+msgid "La durée minimale ne peut être plus grande que la durée maximale."
+msgstr "La durée minimale ne peut être plus grande que la durée maximale."
+
+#: fallout/models.py:3199
+msgid ""
+"Le personnage doit faire partie d'une campagne pour lui appliquer un effet "
+"sur la durée."
+msgstr ""
+"Le personnage doit faire partie d'une campagne pour lui appliquer un effet "
+"sur la durée."
+
+#: fallout/models.py:3233
+msgid "Cet effet doit être préalablement enregistré avant d'être dupliqué."
+msgstr "Cet effet doit être préalablement enregistré avant d'être dupliqué."
+
+#: fallout/models.py:3272
+msgid "modificateur d'effet"
+msgstr "modificateur d'effet"
+
+#: fallout/models.py:3273
+msgid "modificateurs d'effets"
+msgstr "modificateurs d'effets"
+
+#: fallout/models.py:3282
+msgid "date d'effet"
+msgstr "date d'effet"
+
+#: fallout/models.py:3283
+msgid "date d'arrêt"
+msgstr "date d'arrêt"
+
+#: fallout/models.py:3284
+msgid "date suivante"
+msgstr "date suivante"
+
+#: fallout/models.py:3444
+msgid "effet de campagne"
+msgstr "effet de campagne"
+
+#: fallout/models.py:3445
+msgid "effets de campagne"
+msgstr "effets de campagne"
+
+#: fallout/models.py:3547
+msgid "effet de personnage"
+msgstr "effet de personnage"
+
+#: fallout/models.py:3548
+msgid "effets de personnage"
+msgstr "effets de personnage"
+
+#: fallout/models.py:3608
+msgid "Le personnage doit être dans la même campagne."
+msgstr "Le personnage doit être dans la même campagne."
+
+#: fallout/models.py:3670
+msgid "butin"
+msgstr "butin"
+
+#: fallout/models.py:3683
+msgid "argent min."
+msgstr "argent min."
+
+#: fallout/models.py:3684
+msgid "argent max."
+msgstr "argent max."
+
+#: fallout/models.py:3694
+msgid "L'argent minimal ne peut être plus grand que l'argent maximal."
+msgstr "L'argent minimal ne peut être plus grand que l'argent maximal."
+
+#: fallout/models.py:3717
+msgid ""
+"Le personnage concerné doit être dans la même campagne que le butin a créer."
+msgstr ""
+"Le personnage concerné doit être dans la même campagne que le butin a créer."
+
+#: fallout/models.py:3744
+msgid ""
+"Ce modèle de butin doit être préalablement enregistré avant d'être dupliqué."
+msgstr ""
+"Ce modèle de butin doit être préalablement enregistré avant d'être dupliqué."
+
+#: fallout/models.py:3760
+msgid "modèle de butin"
+msgstr "modèle de butin"
+
+#: fallout/models.py:3761
+msgid "modèles des butins"
+msgstr "modèles des butins"
+
+#: fallout/models.py:3773
+msgid "modèle"
+msgstr "modèle"
+
+#: fallout/models.py:3777
+msgid "nombre min."
+msgstr "nombre min."
+
+#: fallout/models.py:3778
+msgid "nombre max."
+msgstr "nombre max."
+
+#: fallout/models.py:3779
+msgid "état min."
+msgstr "état min."
+
+#: fallout/models.py:3780
+msgid "état max."
+msgstr "état max."
+
+#: fallout/models.py:3785
+msgid ""
+"La quantité minimale ne peut être plus grande que la quantité maximale."
+msgstr ""
+"La quantité minimale ne peut être plus grande que la quantité maximale."
+
+#: fallout/models.py:3788
+msgid "L'état minimum ne peut être plus grand que l'état maximum."
+msgstr "L'état minimum ne peut être plus grand que l'état maximum."
+
+#: fallout/models.py:3794
+msgid "objet de butin"
+msgstr "objet de butin"
+
+#: fallout/models.py:3795
+msgid "objets des butins"
+msgstr "objets des butins"
+
+#: fallout/models.py:3804 fallout/models.py:3996 fallout/models.py:4091
+#: fallout/models.py:4440
+msgid "date en jeu"
+msgstr "date en jeu"
+
+#: fallout/models.py:3815
+msgid "jet"
+msgstr "jet"
+
+#: fallout/models.py:3819 fallout/models.py:4153
+msgid "niveau+ ?"
+msgstr "niveau+ ?"
+
+#: fallout/models.py:3956
+#, python-brace-format
+msgid "🎲 {character}"
+msgstr "🎲 {character}"
+
+#: fallout/models.py:3970
+#, python-brace-format
+msgid "{label} du jet de {stats} : {roll} pour {value}"
+msgstr "{label} du jet de {stats} : {roll} pour {value}"
+
+#: fallout/models.py:3972
+#, python-brace-format
+msgid "{label} du jet de {stats} : {roll} pour {total} ({value}{modifier:+d})"
+msgstr ""
+"{label} du jet de {stats} : {roll} pour {total} ({value}{modifier:+d})"
+
+#: fallout/models.py:3986
+msgid "historique de jet"
+msgstr "historique de jet"
+
+#: fallout/models.py:3987
+msgid "historiques des jets"
+msgstr "historiques des jets"
+
+#: fallout/models.py:4004
+msgid "dégâts de base"
+msgstr "dégâts de base"
+
+#: fallout/models.py:4012
+msgid "protection"
+msgstr "protection"
+
+#: fallout/models.py:4014
+msgid "absorption armure"
+msgstr "absorption armure"
+
+#: fallout/models.py:4015
+msgid "résistance armure"
+msgstr "résistance armure"
+
+#: fallout/models.py:4016
+msgid "dégâts armure"
+msgstr "dégâts armure"
+
+#: fallout/models.py:4017
+msgid "absorption dégâts"
+msgstr "absorption dégâts"
+
+#: fallout/models.py:4018
+msgid "résistance dégâts"
+msgstr "résistance dégâts"
+
+#: fallout/models.py:4019
+msgid "dégâts réels"
+msgstr "dégâts réels"
+
+#: fallout/models.py:4020
+msgid "taux de dégâts"
+msgstr "taux de dégâts"
+
+#: fallout/models.py:4021
+msgid "source"
+msgstr "source"
+
+#: fallout/models.py:4050
+#, python-brace-format
+msgid "{icon} {character}"
+msgstr "{icon} {character}"
+
+#: fallout/models.py:4065
+#, python-brace-format
+msgid "{real_damage} points de {type} ({body_part})"
+msgstr "{real_damage} points de {type} ({body_part})"
+
+#: fallout/models.py:4071
+#, python-brace-format
+msgid "{real_damage} points de {type}"
+msgstr "{real_damage} points de {type}"
+
+#: fallout/models.py:4075
+#, python-brace-format
+msgid "{label} - source : {source}"
+msgstr "{label} - source : {source}"
+
+#: fallout/models.py:4081
+msgid "historique de dégâts"
+msgstr "historique de dégâts"
+
+#: fallout/models.py:4082
+msgid "historiques des dégâts"
+msgstr "historiques des dégâts"
+
+#: fallout/models.py:4098
+msgid "niveau de l'attaquant"
+msgstr "niveau de l'attaquant"
+
+#: fallout/models.py:4105
+msgid "niveau du défenseur"
+msgstr "niveau du défenseur"
+
+#: fallout/models.py:4113
+msgid "arme de l'attaquant"
+msgstr "arme de l'attaquant"
+
+#: fallout/models.py:4122
+msgid "munitions de l'attaquant"
+msgstr "munitions de l'attaquant"
+
+#: fallout/models.py:4131
+msgid "protection du défenseur"
+msgstr "protection du défenseur"
+
+#: fallout/models.py:4135
+msgid "tir en rafale ?"
+msgstr "tir en rafale ?"
+
+#: fallout/models.py:4136
+msgid "compteur de coups"
+msgstr "compteur de coups"
+
+#: fallout/models.py:4138
+msgid "précision"
+msgstr "précision"
+
+#: fallout/models.py:4139
+msgid "jet de précision"
+msgstr "jet de précision"
+
+#: fallout/models.py:4140
+msgid "touché ?"
+msgstr "touché ?"
+
+#: fallout/models.py:4142
+msgid "status"
+msgstr "status"
+
+#: fallout/models.py:4150
+msgid "historique des dégâts"
+msgstr "historique des dégâts"
+
+#: fallout/models.py:4341
+#, python-brace-format
+msgid "🗡️️ {attacker} vs. {defender}"
+msgstr "🗡️️ {attacker} vs. {defender}"
+
+#: fallout/models.py:4356
+#, python-brace-format
+msgid "{label} : {status}"
+msgstr "{label} : {status}"
+
+#: fallout/models.py:4357
+#, python-brace-format
+msgid "{label} : {status} - {damage}"
+msgstr "{label} : {status} - {damage}"
+
+#: fallout/models.py:4370
+#, python-brace-format
+msgid "{real_damage} {damage_type} infligés ({body_part}) sur {base_damage}"
+msgstr "{real_damage} {damage_type} infligés ({body_part}) sur {base_damage}"
+
+#: fallout/models.py:4390
+msgid "Combat à mains nues"
+msgstr "Combat à mains nues"
+
+#: fallout/models.py:4394
+#, python-brace-format
+msgid "{weapon} ({skill_name} = {skill}%)"
+msgstr "{weapon} ({skill_name} = {skill}%)"
+
+#: fallout/models.py:4395
+#, python-brace-format
+msgid "{status} - {label} : {hit_roll} pour {hit_chance} ({hit_modifier})"
+msgstr "{status} - {label} : {hit_roll} pour {hit_chance} ({hit_modifier})"
+
+#: fallout/models.py:4402
+#, python-brace-format
+msgid ""
+"{attacker} vs. {defender}\n"
+"{weapon_label}\n"
+"{hit_label}"
+msgstr ""
+"{attacker} vs. {defender}\n"
+"{weapon_label}\n"
+"{hit_label}"
+
+#: fallout/models.py:4410
+#, python-brace-format
+msgid ""
+"{base}\n"
+"{damage}"
+msgstr ""
+"{base}\n"
+"{damage}"
+
+#: fallout/models.py:4416
+msgid "historique de combat"
+msgstr "historique de combat"
+
+#: fallout/models.py:4417
+msgid "historiques des combats"
+msgstr "historiques des combats"
+
+#: fallout/models.py:4441
+msgid "texte"
+msgstr "texte"
+
+#: fallout/models.py:4442
+msgid "privé ?"
+msgstr "privé ?"
+
+#: fallout/models.py:4449
+#, python-brace-format
+msgid "{character} ({date})"
+msgstr "{character} ({date})"
+
+#: fallout/models.py:4452
+msgid "journal"
+msgstr "journal"
+
+#: fallout/models.py:4453
+msgid "journaux"
+msgstr "journaux"
+
+#: fallout/templates/fallout/base.html:26
+msgid "Menu"
+msgstr "Menu"
+
+#: fallout/templates/fallout/base.html:36
+#: fallout/templates/fallout/character/character.html:79
+msgid "Actions"
+msgstr "Actions"
+
+#: fallout/templates/fallout/base.html:39
+msgid "Administration"
+msgstr "Administration"
+
+#: fallout/templates/fallout/base.html:40
+msgid "Miniatures"
+msgstr "Miniatures"
+
+#: fallout/templates/fallout/base.html:53
+#: fallout/templates/fallout/base.html:67
+#: fallout/templates/fallout/base.html:89
+#: fallout/templates/fallout/campaign/includes/rolls.html:5
+msgid "Fermer"
+msgstr "Fermer"
+
+#: fallout/templates/fallout/base.html:66
+msgid "Lancer les dés"
+msgstr "Lancer les dés"
+
+#: fallout/templates/fallout/base.html:74
+msgid "Formule"
+msgstr "Formule"
+
+#: fallout/templates/fallout/base.html:79
+msgid "Notation standard des lancers de dé"
+msgstr "Notation standard des lancers de dé"
+
+#: fallout/templates/fallout/base.html:83
+msgid "Résultat"
+msgstr "Résultat"
+
+#: fallout/templates/fallout/base.html:90
+#: fallout/templates/fallout/campaign/panels/rolls.html:44
+msgid "Lancer"
+msgstr "Lancer"
+
+#: fallout/templates/fallout/campaign/campaign.html:10
+#: fallout/templates/fallout/campaign/dashboard.html:10
+msgid "Ajouter une campagne"
+msgstr "Ajouter une campagne"
+
+#: fallout/templates/fallout/campaign/campaign.html:12
+#: fallout/templates/fallout/campaign/dashboard.html:12
+msgid "Modifier la campagne"
+msgstr "Modifier la campagne"
+
+#: fallout/templates/fallout/campaign/campaign.html:13
+#: fallout/templates/fallout/campaign/campaign.html:16
+#: fallout/templates/fallout/campaign/dashboard.html:14
+#: fallout/templates/fallout/character/character.html:12
+msgid "Ajouter un personnage"
+msgstr "Ajouter un personnage"
+
+#: fallout/templates/fallout/campaign/campaign.html:14
+#: fallout/templates/fallout/campaign/campaign.html:17
+msgid "Créer un PNJ rapide"
+msgstr "Créer un PNJ rapide"
+
+#: fallout/templates/fallout/campaign/campaign.html:44
+#: fallout/templates/fallout/navbar.html:19
+#: fallout/templates/fallout/navbar.html:22
+msgid "Aucune campagne"
+msgstr "Aucune campagne"
+
+#: fallout/templates/fallout/campaign/campaign.html:47
+msgid ""
+"\n"
+"Vous êtes actuellement sur la réserve de personnages qui ne sont associés à aucune campagne\n"
+"particulière ainsi la plupart des actions liées à une campagne (comme la gestion du temps et les\n"
+"effets) sont désactivés.\n"
+"                "
+msgstr ""
+"\n"
+"Vous êtes actuellement sur la réserve de personnages qui ne sont associés à aucune campagne\n"
+"particulière ainsi la plupart des actions liées à une campagne (comme la gestion du temps et les\n"
+"effets) sont désactivés.\n"
+"                "
+
+#: fallout/templates/fallout/campaign/campaign.html:64
+#: fallout/templates/fallout/campaign/panels/loots.html:64
+msgid "Butins"
+msgstr "Butins"
+
+#: fallout/templates/fallout/campaign/campaign.html:77
+msgid "Jets"
+msgstr "Jets"
+
+#: fallout/templates/fallout/campaign/dashboard.html:31
+#: fallout/templates/fallout/campaign/forms/infos.html:12
+#: fallout/templates/fallout/campaign/panels/effects.html:53
+#: fallout/templates/fallout/campaign/panels/infos.html:14
+#: fallout/templates/fallout/campaign/panels/rolls.html:14
+#: fallout/templates/fallout/character/character.html:38
+#: fallout/templates/fallout/navbar.html:64
+msgid "PJ"
+msgstr "PJ"
+
+#: fallout/templates/fallout/campaign/dashboard.html:33
+#: fallout/templates/fallout/campaign/forms/infos.html:14
+#: fallout/templates/fallout/campaign/panels/effects.html:54
+#: fallout/templates/fallout/campaign/panels/infos.html:15
+#: fallout/templates/fallout/campaign/panels/infos.html:81
+#: fallout/templates/fallout/campaign/panels/rolls.html:15
+#: fallout/templates/fallout/character/character.html:40
+#: fallout/templates/fallout/navbar.html:66
+msgid "PNJ"
+msgstr "PNJ"
+
+#: fallout/templates/fallout/campaign/dashboard.html:37
+#: fallout/templates/fallout/campaign/forms/infos.html:18
+#: fallout/templates/fallout/character/character.html:44
+#: fallout/templates/fallout/navbar.html:70
+msgid "KO"
+msgstr "KO"
+
+#: fallout/templates/fallout/campaign/dashboard.html:39
+#: fallout/templates/fallout/campaign/forms/infos.html:20
+#: fallout/templates/fallout/character/character.html:46
+#: fallout/templates/fallout/navbar.html:72
+msgid "Actif"
+msgstr "Actif"
+
+#: fallout/templates/fallout/campaign/dashboard.html:45
+#: fallout/templates/fallout/campaign/panels/infos.html:60
+#: fallout/templates/fallout/campaign/panels/infos.html:62
+#: fallout/templates/fallout/character/character.html:48
+#: fallout/templates/fallout/navbar.html:74
+msgid "Repos"
+msgstr "Repos"
+
+#: fallout/templates/fallout/campaign/forms/effects.html:31
+#: fallout/templates/fallout/character/forms/effects.html:31
+msgid "Actif depuis"
+msgstr "Actif depuis"
+
+#: fallout/templates/fallout/campaign/forms/effects.html:32
+#: fallout/templates/fallout/character/forms/effects.html:32
+msgid "Activable dans"
+msgstr "Activable dans"
+
+#: fallout/templates/fallout/campaign/forms/effects.html:32
+#: fallout/templates/fallout/character/forms/effects.html:32
+msgid "Actif encore"
+msgstr "Actif encore"
+
+#: fallout/templates/fallout/campaign/forms/effects.html:59
+#: fallout/templates/fallout/character/forms/effects.html:59
+msgid "dans"
+msgstr "dans"
+
+#: fallout/templates/fallout/campaign/forms/effects.html:72
+#: fallout/templates/fallout/character/forms/effects.html:72
+msgid "Activer"
+msgstr "Activer"
+
+#: fallout/templates/fallout/campaign/forms/effects.html:75
+#: fallout/templates/fallout/character/forms/effects.html:79
+#: fallout/templates/fallout/character/panels/journal.html:53
+msgid "Supprimer"
+msgstr "Supprimer"
+
+#: fallout/templates/fallout/campaign/forms/loots.html:26
+#: fallout/templates/fallout/campaign/forms/loots.html:31
+#: fallout/templates/fallout/campaign/forms/loots.html:84
+#: fallout/templates/fallout/campaign/panels/loots.html:30
+#: fallout/templates/fallout/campaign/panels/loots.html:141
+#: fallout/templates/fallout/character/forms/items.html:38
+#: fallout/templates/fallout/character/panels/items.html:17
+#: fallout/templates/fallout/character/panels/items.html:87
+#: fallout/templates/fallout/items.html:36
+msgid "¤"
+msgstr "¤"
+
+#: fallout/templates/fallout/campaign/forms/loots.html:39
+#: fallout/templates/fallout/character/forms/attack.html:201
+#: fallout/templates/fallout/character/forms/items.html:205
+msgid "Points d'action"
+msgstr "Points d'action"
+
+#: fallout/templates/fallout/campaign/forms/loots.html:39
+#: fallout/templates/fallout/character/forms/items.html:205
+msgid "PA"
+msgstr "PA"
+
+#: fallout/templates/fallout/campaign/forms/loots.html:45
+#: fallout/templates/fallout/campaign/forms/loots.html:202
+msgid "Prendre"
+msgstr "Prendre"
+
+#: fallout/templates/fallout/campaign/forms/loots.html:48
+msgid "Vider"
+msgstr "Vider"
+
+#: fallout/templates/fallout/campaign/forms/loots.html:51
+msgid "Inclure l'argent"
+msgstr "Inclure l'argent"
+
+#: fallout/templates/fallout/campaign/forms/loots.html:81
+#: fallout/templates/fallout/character/forms/items.html:35
+#: fallout/templates/fallout/items.html:33
+msgid "kg"
+msgstr "kg"
+
+#: fallout/templates/fallout/campaign/forms/loots.html:108
+#: fallout/templates/fallout/character/forms/items.html:67
+msgid "incassable"
+msgstr "incassable"
+
+#: fallout/templates/fallout/campaign/forms/loots.html:126
+#: fallout/templates/fallout/character/forms/items.html:85
+#: fallout/templates/fallout/items.html:61
+msgid "PA recharge"
+msgstr "PA recharge"
+
+#: fallout/templates/fallout/campaign/forms/loots.html:131
+#: fallout/templates/fallout/character/forms/items.html:90
+#: fallout/templates/fallout/items.html:66
+msgid "PA attaque"
+msgstr "PA attaque"
+
+#: fallout/templates/fallout/campaign/forms/loots.html:136
+#: fallout/templates/fallout/character/forms/items.html:95
+#: fallout/templates/fallout/items.html:71
+msgid "PA ciblé"
+msgstr "PA ciblé"
+
+#: fallout/templates/fallout/campaign/forms/loots.html:141
+#: fallout/templates/fallout/character/forms/items.html:100
+#: fallout/templates/fallout/items.html:76
+msgid "PA rafale"
+msgstr "PA rafale"
+
+#: fallout/templates/fallout/campaign/forms/loots.html:154
+#: fallout/templates/fallout/character/forms/items.html:113
+#: fallout/templates/fallout/items.html:89
+msgid "CA"
+msgstr "CA"
+
+#: fallout/templates/fallout/campaign/forms/loots.html:191
+#: fallout/templates/fallout/campaign/panels/loots.html:92
+#: fallout/templates/fallout/character/forms/items.html:168
+#: fallout/templates/fallout/character/panels/items.html:38
+msgid "Quantité"
+msgstr "Quantité"
+
+#: fallout/templates/fallout/campaign/forms/loots.html:204
+msgid "Détruire"
+msgstr "Détruire"
+
+#: fallout/templates/fallout/campaign/panels/effects.html:7
+msgid "Niveau de radioactivité"
+msgstr "Niveau de radioactivité"
+
+#: fallout/templates/fallout/campaign/panels/effects.html:8
+msgid "(en rad/h)"
+msgstr "(en rad/h)"
+
+#: fallout/templates/fallout/campaign/panels/effects.html:15
+msgid "rad/h"
+msgstr "rad/h"
+
+#: fallout/templates/fallout/campaign/panels/effects.html:20
+#: fallout/templates/fallout/campaign/panels/loots.html:35
+#: fallout/templates/fallout/character/panels/items.html:22
+#: fallout/templates/fallout/character/panels/journal.html:12
+#: fallout/templates/fallout/character/panels/journal.html:47
+msgid "Modifier"
+msgstr "Modifier"
+
+#: fallout/templates/fallout/campaign/panels/effects.html:48
+msgid "Infliger des dégâts :"
+msgstr "Infliger des dégâts :"
+
+#: fallout/templates/fallout/campaign/panels/effects.html:51
+#: fallout/templates/fallout/campaign/panels/infos.html:12
+#: fallout/templates/fallout/campaign/panels/rolls.html:12
+msgid "Type de personnage"
+msgstr "Type de personnage"
+
+#: fallout/templates/fallout/campaign/panels/effects.html:55
+#: fallout/templates/fallout/campaign/panels/infos.html:16
+#: fallout/templates/fallout/campaign/panels/rolls.html:16
+msgid "Tous"
+msgstr "Tous"
+
+#: fallout/templates/fallout/campaign/panels/effects.html:59
+msgid "Type de dégâts"
+msgstr "Type de dégâts"
+
+#: fallout/templates/fallout/campaign/panels/effects.html:73
+#: fallout/templates/fallout/character/forms/attack.html:97
+#: fallout/templates/fallout/character/forms/damage.html:46
+msgid "aléatoire"
+msgstr "aléatoire"
+
+#: fallout/templates/fallout/campaign/panels/effects.html:99
+msgid "Infliger"
+msgstr "Infliger"
+
+#: fallout/templates/fallout/campaign/panels/effects.html:110
+#: fallout/templates/fallout/character/panels/effects.html:10
+msgid "Affecter un effet :"
+msgstr "Affecter un effet :"
+
+#: fallout/templates/fallout/campaign/panels/effects.html:126
+#: fallout/templates/fallout/character/panels/effects.html:26
+msgid "Affecter"
+msgstr "Affecter"
+
+#: fallout/templates/fallout/campaign/panels/infos.html:9
+msgid "Gagner de l'expérience :"
+msgstr "Gagner de l'expérience :"
+
+#: fallout/templates/fallout/campaign/panels/infos.html:20
+#: fallout/templates/fallout/campaign/panels/infos.html:22
+#: fallout/templates/fallout/campaign/panels/rolls.html:37
+msgid "Expérience"
+msgstr "Expérience"
+
+#: fallout/templates/fallout/campaign/panels/infos.html:26
+msgid "Gagner"
+msgstr "Gagner"
+
+#: fallout/templates/fallout/campaign/panels/infos.html:37
+msgid "Avancer dans le temps :"
+msgstr "Avancer dans le temps :"
+
+#: fallout/templates/fallout/campaign/panels/infos.html:42
+#: fallout/templates/fallout/campaign/panels/infos.html:45
+msgid "h"
+msgstr "h"
+
+#: fallout/templates/fallout/campaign/panels/infos.html:52
+#: fallout/templates/fallout/campaign/panels/infos.html:55
+msgid "m"
+msgstr "m"
+
+#: fallout/templates/fallout/campaign/panels/infos.html:67
+msgid "Avancer"
+msgstr "Avancer"
+
+#: fallout/templates/fallout/campaign/panels/infos.html:78
+msgid "Ajouter un PNJ :"
+msgstr "Ajouter un PNJ :"
+
+#: fallout/templates/fallout/campaign/panels/infos.html:83
+msgid "PNJs"
+msgstr "PNJs"
+
+#: fallout/templates/fallout/campaign/panels/infos.html:87
+msgid "nv."
+msgstr "nv."
+
+#: fallout/templates/fallout/campaign/panels/infos.html:98
+msgid "Nb"
+msgstr "Nb"
+
+#: fallout/templates/fallout/campaign/panels/infos.html:103
+#: fallout/templates/fallout/campaign/panels/infos.html:105
+msgid "Nom du PNJ"
+msgstr "Nom du PNJ"
+
+#: fallout/templates/fallout/campaign/panels/infos.html:109
+#: fallout/templates/fallout/campaign/panels/loots.html:128
+#: fallout/templates/fallout/character/forms/effects.html:76
+#: fallout/templates/fallout/character/panels/items.html:74
+#: fallout/templates/fallout/character/panels/journal.html:18
+msgid "Ajouter"
+msgstr "Ajouter"
+
+#: fallout/templates/fallout/campaign/panels/loots.html:9
+#: fallout/templates/fallout/character/panels/items.html:9
+msgid "Modifier l'argent :"
+msgstr "Modifier l'argent :"
+
+#: fallout/templates/fallout/campaign/panels/loots.html:46
+msgid "Ouvrir un contenant :"
+msgstr "Ouvrir un contenant :"
+
+#: fallout/templates/fallout/campaign/panels/loots.html:54
+msgid "Aucun"
+msgstr "Aucun"
+
+#: fallout/templates/fallout/campaign/panels/loots.html:62
+msgid "Butin"
+msgstr "Butin"
+
+#: fallout/templates/fallout/campaign/panels/loots.html:75
+msgid "Ouvrir"
+msgstr "Ouvrir"
+
+#: fallout/templates/fallout/campaign/panels/loots.html:87
+msgid "Ajouter un butin :"
+msgstr "Ajouter un butin :"
+
+#: fallout/templates/fallout/campaign/panels/loots.html:95
+#: fallout/templates/fallout/character/panels/items.html:41
+msgid "Qte"
+msgstr "Qte"
+
+#: fallout/templates/fallout/campaign/panels/loots.html:102
+#: fallout/templates/fallout/campaign/panels/loots.html:105
+#: fallout/templates/fallout/character/panels/items.html:48
+#: fallout/templates/fallout/character/panels/items.html:51
+msgid "État"
+msgstr "État"
+
+#: fallout/templates/fallout/campaign/panels/loots.html:110
+#: fallout/templates/fallout/character/panels/items.html:56
+msgid "Objet"
+msgstr "Objet"
+
+#: fallout/templates/fallout/campaign/panels/loots.html:112
+#: fallout/templates/fallout/character/panels/items.html:58
+msgid "Objets"
+msgstr "Objets"
+
+#: fallout/templates/fallout/campaign/panels/loots.html:140
+msgid "Argent total :"
+msgstr "Argent total :"
+
+#: fallout/templates/fallout/campaign/panels/rolls.html:9
+msgid "Faire un lancer :"
+msgstr "Faire un lancer :"
+
+#: fallout/templates/fallout/campaign/panels/rolls.html:34
+msgid "Mod"
+msgstr "Mod"
+
+#: fallout/templates/fallout/campaign/panels/rolls.html:39
+msgid "XP"
+msgstr "XP"
+
+#: fallout/templates/fallout/character.html:178
+msgid "Equipement"
+msgstr "Equipement"
+
+#: fallout/templates/fallout/character.html:195
+msgid "Condition d'arme"
+msgstr "Condition d'arme"
+
+#: fallout/templates/fallout/character.html:217
+msgid "Nombre de munitions"
+msgstr "Nombre de munitions"
+
+#: fallout/templates/fallout/character.html:239
+msgid "Condition d'armure"
+msgstr "Condition d'armure"
+
+#: fallout/templates/fallout/character.html:261
+msgid "Condition de casque"
+msgstr "Condition de casque"
+
+#: fallout/templates/fallout/character.html:274
+#: fallout/templates/fallout/character/forms/action.html:121
+#: fallout/templates/fallout/character/forms/attack.html:209
+#: fallout/templates/fallout/character/forms/damage.html:84
+msgid "OK"
+msgstr "OK"
+
+#: fallout/templates/fallout/character/admin/damage.html:5
+msgid "Infliger des dégâts à des personnages"
+msgstr "Infliger des dégâts à des personnages"
+
+#: fallout/templates/fallout/character/admin/damage.html:6
+msgid "Les personnages suivants vont subir des dégâts :"
+msgstr "Les personnages suivants vont subir des dégâts :"
+
+#: fallout/templates/fallout/character/admin/damage.html:19
+#: fallout/templates/fallout/character/admin/duplicate.html:19
+#: fallout/templates/fallout/character/admin/equip.html:19
+#: fallout/templates/fallout/character/admin/fight.html:19
+#: fallout/templates/fallout/character/admin/move.html:19
+#: fallout/templates/fallout/character/admin/randomize.html:19
+#: fallout/templates/fallout/character/admin/randomize_special.html:19
+#: fallout/templates/fallout/character/admin/randomize_stats.html:19
+#: fallout/templates/fallout/character/admin/roll.html:19
+msgid "Valider"
+msgstr "Valider"
+
+#: fallout/templates/fallout/character/admin/duplicate.html:5
+msgid "Dupliquer des personnages"
+msgstr "Dupliquer des personnages"
+
+#: fallout/templates/fallout/character/admin/duplicate.html:6
+msgid "Les personnages suivants vont être dupliqués :"
+msgstr "Les personnages suivants vont être dupliqués :"
+
+#: fallout/templates/fallout/character/admin/equip.html:5
+msgid "Equiper les personnages"
+msgstr "Equiper les personnages"
+
+#: fallout/templates/fallout/character/admin/equip.html:6
+msgid "Les personnages suivants vont être équipés :"
+msgstr "Les personnages suivants vont être équipés :"
+
+#: fallout/templates/fallout/character/admin/fight.html:6
+msgid "Les personnages suivants vont attaquer :"
+msgstr "Les personnages suivants vont attaquer :"
+
+#: fallout/templates/fallout/character/admin/move.html:5
+msgid "Déplacer les personnages"
+msgstr "Déplacer les personnages"
+
+#: fallout/templates/fallout/character/admin/move.html:6
+msgid "Les personnages suivants seront déplacés :"
+msgstr "Les personnages suivants seront déplacés :"
+
+#: fallout/templates/fallout/character/admin/randomize.html:5
+msgid "Générer aléatoirement les personnages"
+msgstr "Générer aléatoirement les personnages"
+
+#: fallout/templates/fallout/character/admin/randomize.html:6
+#: fallout/templates/fallout/character/admin/randomize_special.html:6
+#: fallout/templates/fallout/character/admin/randomize_stats.html:6
+#: fallout/templates/fallout/character/admin/roll.html:6
+msgid "Les personnages suivants seront affectés :"
+msgstr "Les personnages suivants seront affectés :"
+
+#: fallout/templates/fallout/character/character.html:14
+msgid "Modifier le personnage"
+msgstr "Modifier le personnage"
+
+#: fallout/templates/fallout/character/character.html:67
+#: fallout/templates/fallout/character/panels/items.html:98
+msgid "Inventaire"
+msgstr "Inventaire"
+
+#: fallout/templates/fallout/character/character.html:85
+msgid "Statistiques"
+msgstr "Statistiques"
+
+#: fallout/templates/fallout/character/character.html:91
+msgid "Journal"
+msgstr "Journal"
+
+#: fallout/templates/fallout/character/forms/action.html:13
+msgid "points de vie"
+msgstr "points de vie"
+
+#: fallout/templates/fallout/character/forms/action.html:109
+#: fallout/templates/fallout/character/forms/action.html:111
+msgid "Se repose ?"
+msgstr "Se repose ?"
+
+#: fallout/templates/fallout/character/forms/attack.html:9
+msgid "Attaque en rafale"
+msgstr "Attaque en rafale"
+
+#: fallout/templates/fallout/character/forms/attack.html:9
+msgid "Attaque simple"
+msgstr "Attaque simple"
+
+#: fallout/templates/fallout/character/forms/attack.html:19
+#: fallout/templates/fallout/character/forms/attack.html:50
+#: fallout/templates/fallout/character/forms/attack.html:73
+msgid "Joueurs"
+msgstr "Joueurs"
+
+#: fallout/templates/fallout/character/forms/attack.html:19
+#: fallout/templates/fallout/character/forms/attack.html:57
+#: fallout/templates/fallout/character/forms/attack.html:80
+msgid "Non joueurs"
+msgstr "Non joueurs"
+
+#: fallout/templates/fallout/character/forms/attack.html:37
+msgid "dst."
+msgstr "dst."
+
+#: fallout/templates/fallout/character/forms/attack.html:124
+#: fallout/templates/fallout/character/forms/attack.html:138
+#: fallout/templates/fallout/character/forms/attack.html:140
+msgid "Arme secondaire"
+msgstr "Arme secondaire"
+
+#: fallout/templates/fallout/character/forms/attack.html:126
+msgid "Arme principale"
+msgstr "Arme principale"
+
+#: fallout/templates/fallout/character/forms/attack.html:153
+#: fallout/templates/fallout/character/forms/attack.html:155
+msgid "Grenade"
+msgstr "Grenade"
+
+#: fallout/templates/fallout/character/forms/attack.html:166
+msgid "À mains nues"
+msgstr "À mains nues"
+
+#: fallout/templates/fallout/character/forms/attack.html:168
+msgid "Attaque à mains nues"
+msgstr "Attaque à mains nues"
+
+#: fallout/templates/fallout/character/forms/attack.html:177
+#: fallout/templates/fallout/character/forms/attack.html:179
+msgid "Succès"
+msgstr "Succès"
+
+#: fallout/templates/fallout/character/forms/attack.html:183
+#: fallout/templates/fallout/character/forms/attack.html:185
+msgid "Critique"
+msgstr "Critique"
+
+#: fallout/templates/fallout/character/forms/attack.html:189
+#: fallout/templates/fallout/character/forms/attack.html:191
+msgid "Dégâts bruts"
+msgstr "Dégâts bruts"
+
+#: fallout/templates/fallout/character/forms/attack.html:203
+msgid "Action"
+msgstr "Action"
+
+#: fallout/templates/fallout/character/forms/attack.html:207
+msgid "Simuler"
+msgstr "Simuler"
+
+#: fallout/templates/fallout/character/forms/damage.html:55
+msgid "valeur fixe"
+msgstr "valeur fixe"
+
+#: fallout/templates/fallout/character/forms/items.html:13
+msgid "vide"
+msgstr "vide"
+
+#: fallout/templates/fallout/character/forms/items.html:152
+msgid "Retirer"
+msgstr "Retirer"
+
+#: fallout/templates/fallout/character/forms/items.html:155
+msgid "Recharger"
+msgstr "Recharger"
+
+#: fallout/templates/fallout/character/forms/items.html:158
+#: fallout/templates/fallout/character/forms/items.html:179
+msgid "Etat"
+msgstr "Etat"
+
+#: fallout/templates/fallout/character/forms/items.html:164
+#: fallout/templates/fallout/character/forms/items.html:185
+msgid "Réparer"
+msgstr "Réparer"
+
+#: fallout/templates/fallout/character/forms/items.html:177
+msgid "Lâcher"
+msgstr "Lâcher"
+
+#: fallout/templates/fallout/character/forms/items.html:189
+msgid "Remplacer"
+msgstr "Remplacer"
+
+#: fallout/templates/fallout/character/forms/items.html:192
+msgid "Equiper"
+msgstr "Equiper"
+
+#: fallout/templates/fallout/character/forms/items.html:195
+msgid "Utiliser"
+msgstr "Utiliser"
+
+#: fallout/templates/fallout/character/forms/items.html:199
+msgid "Armer"
+msgstr "Armer"
+
+#: fallout/templates/fallout/character/forms/stats.html:53
+#: fallout/templates/fallout/character/forms/stats.html:66
+msgid "Coût :"
+msgstr "Coût :"
+
+#: fallout/templates/fallout/character/forms/stats.html:53
+#: fallout/templates/fallout/character/forms/stats.html:66
+msgid "PS"
+msgstr "PS"
+
+#: fallout/templates/fallout/character/forms/stats.html:54
+#: fallout/templates/fallout/character/forms/stats.html:67
+msgid "+"
+msgstr "+"
+
+#: fallout/templates/fallout/character/forms/stats.html:98
+#: fallout/templates/fallout/character/forms/stats.html:100
+msgid "Stats"
+msgstr "Stats"
+
+#: fallout/templates/fallout/character/forms/stats.html:108
+#: fallout/templates/fallout/character/forms/stats.html:111
+msgid "Nv."
+msgstr "Nv."
+
+#: fallout/templates/fallout/character/forms/stats.html:118
+msgid "Taux"
+msgstr "Taux"
+
+#: fallout/templates/fallout/character/forms/stats.html:121
+#, python-format
+msgid "%%"
+msgstr "%%"
+
+#: fallout/templates/fallout/character/forms/stats.html:127
+msgid "Générer"
+msgstr "Générer"
+
+#: fallout/templates/fallout/character/panels/effects.html:38
+msgid "Talents activables"
+msgstr "Talents activables"
+
+#: fallout/templates/fallout/character/panels/effects.html:47
+msgid "Effets globaux"
+msgstr "Effets globaux"
+
+#: fallout/templates/fallout/character/panels/effects.html:56
+msgid "Effets de personnage"
+msgstr "Effets de personnage"
+
+#: fallout/templates/fallout/character/panels/infos.html:10
+msgid "Attaques données"
+msgstr "Attaques données"
+
+#: fallout/templates/fallout/character/panels/infos.html:12
+msgid "Attaques reçues"
+msgstr "Attaques reçues"
+
+#: fallout/templates/fallout/character/panels/infos.html:17
+#, python-format
+msgid ""
+"\n"
+"(%(count)s attaques pour %(rate)s%% de succès et %(damage)s dégâts infligés en moyenne)\n"
+"                            "
+msgstr ""
+"\n"
+"(%(count)s attaques pour %(rate)s%% de succès et %(damage)s dégâts infligés en moyenne)\n"
+"                            "
+
+#: fallout/templates/fallout/character/panels/infos.html:21
+msgid "(aucune attaque)"
+msgstr "(aucune attaque)"
+
+#: fallout/templates/fallout/character/panels/infos.html:33
+#: fallout/templates/fallout/character/panels/infos.html:104
+msgid "total"
+msgstr "total"
+
+#: fallout/templates/fallout/character/panels/infos.html:48
+#: fallout/templates/fallout/character/panels/infos.html:54
+#: fallout/templates/fallout/character/panels/infos.html:119
+#: fallout/templates/fallout/character/panels/infos.html:125
+msgid "niveau précédent"
+msgstr "niveau précédent"
+
+#: fallout/templates/fallout/character/panels/infos.html:66
+#: fallout/templates/fallout/character/panels/infos.html:72
+#: fallout/templates/fallout/character/panels/infos.html:139
+#: fallout/templates/fallout/character/panels/infos.html:145
+msgid "niveau actuel"
+msgstr "niveau actuel"
+
+#: fallout/templates/fallout/character/panels/infos.html:88
+#, python-format
+msgid ""
+"\n"
+"(%(count)s jets pour %(rate)s%% de succès)\n"
+"                            "
+msgstr ""
+"\n"
+"(%(count)s jets pour %(rate)s%% de succès)\n"
+"                            "
+
+#: fallout/templates/fallout/character/panels/infos.html:92
+msgid "(aucun jet)"
+msgstr "(aucun jet)"
+
+#: fallout/templates/fallout/character/panels/items.html:33
+msgid "Ajouter un objet :"
+msgstr "Ajouter un objet :"
+
+#: fallout/templates/fallout/character/panels/items.html:86
+msgid "Argent en poche :"
+msgstr "Argent en poche :"
+
+#: fallout/templates/fallout/character/panels/items.html:91
+msgid "Equipé"
+msgstr "Equipé"
+
+#: fallout/templates/fallout/character/panels/journal.html:15
+#: fallout/templates/fallout/navbar.html:142
+msgid "Annuler"
+msgstr "Annuler"
+
+#: fallout/templates/fallout/character/panels/journal.html:21
+#: fallout/templates/fallout/character/panels/journal.html:23
+msgid "Privé"
+msgstr "Privé"
+
+#: fallout/templates/fallout/character/panels/journal.html:40
+msgid "Il y a"
+msgstr "Il y a"
+
+#: fallout/templates/fallout/character/panels/journal.html:41
+msgid "le"
+msgstr "le"
+
+#: fallout/templates/fallout/character/panels/journal.html:42
+#: fallout/templates/fallout/character/panels/journal.html:43
+msgid "Le"
+msgstr "Le"
+
+#: fallout/templates/fallout/character/panels/journal.html:42
+msgid "par"
+msgstr "par"
+
+#: fallout/templates/fallout/items.html:40
+msgid "coups"
+msgstr "coups"
+
+#: fallout/templates/fallout/login.html:53
+msgid "Connectez-vous !"
+msgstr "Connectez-vous !"
+
+#: fallout/templates/fallout/login.html:54
+#: fallout/templates/fallout/login.html:56
+msgid "Nom d'utilisateur"
+msgstr "Nom d'utilisateur"
+
+#: fallout/templates/fallout/login.html:57
+#: fallout/templates/fallout/login.html:59
+msgid "Mot de passe"
+msgstr "Mot de passe"
+
+#: fallout/templates/fallout/login.html:60
+msgid "Connexion"
+msgstr "Connexion"
+
+#: fallout/templates/fallout/navbar.html:6
+#: fallout/templates/fallout/navbar.html:9
+msgid "Campagne courante"
+msgstr "Campagne courante"
+
+#: fallout/templates/fallout/navbar.html:56
+msgid "Personnages"
+msgstr "Personnages"
+
+#: fallout/templates/fallout/navbar.html:97
+msgid "Tableau de bord"
+msgstr "Tableau de bord"
+
+#: fallout/templates/fallout/navbar.html:104
+msgid "Se déconnecter"
+msgstr "Se déconnecter"
+
+#: fallout/templates/fallout/navbar.html:129
+msgid "0 s"
+msgstr "0 s"
+
+#: fallout/templates/fallout/navbar.html:130
+msgid "30 s"
+msgstr "30 s"
+
+#: fallout/templates/fallout/navbar.html:131
+msgid "1 mn"
+msgstr "1 mn"
+
+#: fallout/templates/fallout/navbar.html:132
+msgid "2 mn"
+msgstr "2 mn"
+
+#: fallout/templates/fallout/navbar.html:133
+msgid "5 mn"
+msgstr "5 mn"
+
+#: fallout/templates/fallout/navbar.html:134
+msgid "10 mn"
+msgstr "10 mn"
+
+#: fallout/templates/fallout/navbar.html:135
+msgid "20 mn"
+msgstr "20 mn"
+
+#: fallout/templates/fallout/navbar.html:136
+msgid "30 mn"
+msgstr "30 mn"
+
+#: fallout/templates/fallout/navbar.html:137
+msgid "1 h"
+msgstr "1 h"
+
+#: fallout/templates/fallout/navbar.html:139
+msgid "Passer"
+msgstr "Passer"
+
+#: fallout/templates/fallout/navbar.html:140
+msgid "Suivant"
+msgstr "Suivant"
+
+#: fallout/templates/fallout/thumbnails.html:10
+msgid "Fil d’Ariane"
+msgstr "Fil d’Ariane"
+
+#: fallout/templates/fallout/thumbnails.html:13
+#: fallout/templates/fallout/thumbnails.html:16
+msgid "Base"
+msgstr "Base"
+
+#: fallout/views.py:95 fallout/views.py:247 fallout/views.py:262
+#: fallout/views.py:286 fallout/views.py:313 fallout/views.py:332
+#: fallout/views.py:500 fallout/views.py:542 fallout/views.py:552
+#: fallout/views.py:575 fallout/views.py:617 fallout/views.py:651
+#: fallout/views.py:661 fallout/views.py:682 fallout/views.py:706
+#: fallout/views.py:806
+#, python-brace-format
+msgid "<strong>{pre_label}</strong> {label}"
+msgstr "<strong>{pre_label}</strong> {label}"
+
+#: fallout/views.py:106 fallout/views.py:395 fallout/views.py:397
+#: fallout/views.py:746 fallout/views.py:748
+#, python-brace-format
+msgid "<strong>Erreur</strong> {error}"
+msgstr "<strong>Erreur</strong> {error}"
+
+#: fallout/views.py:187
+#, python-brace-format
+msgid "<strong>{money} ¤</strong> ont été trouvé dans le butin."
+msgstr "<strong>{money} ¤</strong> ont été trouvé dans le butin."
+
+#: fallout/views.py:350
+#, python-brace-format
+msgid ""
+"<strong>{character}</strong> vient de passer au niveau "
+"<strong>{level}</strong> et a besoin de <strong>{experience}</strong> points"
+" d'expérience pour passer au niveau suivant."
+msgstr ""
+"<strong>{character}</strong> vient de passer au niveau "
+"<strong>{level}</strong> et a besoin de <strong>{experience}</strong> points"
+" d'expérience pour passer au niveau suivant."
+
+#: fallout/views.py:364
+#, python-brace-format
+msgid ""
+"<strong>{character}</strong> a encore besoin de "
+"<strong>{experience}</strong> points d'expérience pour passer au niveau "
+"suivant."
+msgstr ""
+"<strong>{character}</strong> a encore besoin de "
+"<strong>{experience}</strong> points d'expérience pour passer au niveau "
+"suivant."
+
+#: fallout/views.py:598
+#, python-brace-format
+msgid ""
+"<strong>{attacker} vs {defender}</strong> {fail} coups ratés et {success} "
+"coups au but pour {damage} dégâts"
+msgstr ""
+"<strong>{attacker} vs {defender}</strong> {fail} coups ratés et {success} "
+"coups au but pour {damage} dégâts"
+
+#: fallout/views.py:890
+#, python-brace-format
+msgid "Erreur : {error}"
+msgstr "Erreur : {error}"

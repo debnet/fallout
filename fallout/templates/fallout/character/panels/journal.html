@@ -42,11 +42,16 @@
                         <small class="float-right">{% trans "Le" %} {{ log.date }} {% trans "par" %} {{ log.player }}</small>
                     {% else %}{% trans "Le" %} {{ log.game_date|default:log.date }}{% endif %}
                 </div>
-                {% if authorized or log.player == character.player %}
+                {% if authorized or log.player == request.user %}
                     <div class="collapse-form collapse show">
                         <a href="?edit={{ log.id }}">{% trans "Modifier" %}</a>
                         &ndash;
-                        <a href="?delete={{ log.id }}">{% trans "Supprimer" %}</a>
+                        <form method="post" action="{{ request.path }}" class="d-inline">
+                            {% csrf_token %}
+                            <input type="hidden" name="type" value="log" />
+                            <input type="hidden" name="log" value="{{ log.id }}" />
+                            <button type="submit" name="method" value="delete" class="btn btn-link p-0 align-baseline">{% trans "Supprimer" %}</button>
+                        </form>
                     </div>
                 {% endif %}
                 <div class="markdown">

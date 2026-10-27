@@ -41,7 +41,7 @@
             {% endwith %}
         </div>
     </li>
-    {% else %}
+    {% elif campaign %}
     <li class="nav-item">
         <a class="nav-link{% if page == 'campaign' %} active{% endif %}"
            href="{% url 'fallout:campaign' campaign.id %}">

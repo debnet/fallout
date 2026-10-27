@@ -1,8 +1,11 @@
 # coding: utf-8
 import dataclasses
-from collections import OrderedDict as odict, Counter
+from collections import Counter
+from collections import OrderedDict as odict
 from collections import namedtuple
 from datetime import datetime, timedelta
+from functools import wraps
+from inspect import signature
 from operator import add
 from random import choice, randint
 from typing import Dict, Iterable, List, Optional, Tuple, Union
@@ -14,7 +17,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
-from django.db import models
+from django.db import models, transaction
 from django.db.models import Case, Count, F, Prefetch, Q, Sum, Value, When
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
@@ -23,8 +26,23 @@ from multiselectfield import MultiSelectField
 from fallout.constants import *  # noqa
 from fallout.enums import *  # noqa
 
-
 gv, sv = getattr, setattr
+
+
+def simulation_only(function):
+    """Annule aussi les écritures indirectes (caches calculés) d'une simulation."""
+    parameters = signature(function)
+
+    @wraps(function)
+    def wrapped(*args, **kwargs):
+        if not parameters.bind(*args, **kwargs).arguments.get("simulation", False):
+            return function(*args, **kwargs)
+        with transaction.atomic():
+            result = function(*args, **kwargs)
+            transaction.set_rollback(True)
+            return result
+
+    return wrapped
 
 
 def _assert(condition, message: str = None) -> None:
@@ -380,11 +398,16 @@ class Campaign(CommonModel):
         )
         return self._effects
 
-    def clear_loot(self):
+    def clear_loot(self, include_money: bool = False):
         """
         Supprime les butins non réclamés de la campagne
+        :param include_money: Supprime également l'argent non réclamé
         """
-        return self.loots.all().delete()
+        result = self.loots.all().delete()
+        if include_money:
+            self.money_loot = 0
+            self.save(update_fields=("money_loot",))
+        return result
 
     def next_turn(
         self,
@@ -452,20 +475,24 @@ class Campaign(CommonModel):
         super().save(*args, **kwargs)
         if hours <= 0:
             return
+        characters = list(self.characters.filter(is_active=True).exclude(health__lte=0).order_by("pk"))
+        self._effects = None
         self.damages = []
-        for effect in self.effects:
-            self.damages.extend(effect.apply_all(save=False))
-        for character in self.characters.filter(is_active=True).exclude(health__lte=0):
-            self.damages.extend(
-                character.update_needs(
-                    hours=hours,
-                    radiation=self.radiation,
-                    resting=resting,
-                    needs=self.needs,
-                    save=False,
+        for effect in self.effects.order_by("start_date", "pk"):
+            if effect.pk and self.active_effects.filter(pk=effect.pk).exists():
+                self.damages.extend(effect.apply_all(save=False, characters=characters))
+        for character in characters:
+            if character.is_active and character.health > 0:
+                self.damages.extend(
+                    character.update_needs(
+                        hours=hours,
+                        radiation=self.radiation,
+                        resting=resting,
+                        needs=self.needs,
+                        save=False,
+                    )
                 )
-            )
-            self.damages.extend(character.apply_effects(save=False))
+                self.damages.extend(character.apply_effects(save=False))
             character.save()
 
     def get_absolute_url(self):
@@ -1345,7 +1372,7 @@ class Character(Entity, BaseStatistics):
                 item=item,
                 slot=slot,
                 quantity=1,
-                condition=round(randint(mini, maxi) / 100.0, 0),
+                condition=round(randint(mini, maxi) / 100.0, 2),
             )
             if slot == ITEM_WEAPON:
                 equiped_weapon = equipment
@@ -1513,6 +1540,7 @@ class Character(Entity, BaseStatistics):
                 self.save(update_fields=("money",))
         return loots
 
+    @simulation_only
     def burst(
         self,
         targets: List[Tuple[Union["Character", int], int]],
@@ -1565,6 +1593,8 @@ class Character(Entity, BaseStatistics):
                     **kwargs,
                 )
                 histories.append(history)
+            if not simulation:
+                attacker_weapon_equipment.save()
         else:
             attacker_weapon_equipment = self.get_from_inventory(slot=ITEM_WEAPON)
             attacker_weapon = gv(attacker_weapon_equipment, "item", None)
@@ -1601,12 +1631,11 @@ class Character(Entity, BaseStatistics):
                     break
                 target = None
 
-            attacker_remaining_ammo = attacker_weapon.burst_count - hit_count + 1
+            attacker_remaining_ammo = attacker_weapon.burst_count - (hit_count + 1)
             if attacker_remaining_ammo > 0:
-                attacker_remaining_ammo = min(attacker_ammo_equipment.quantity, attacker_remaining_ammo)
-                attacker_ammo_equipment.quantity -= attacker_remaining_ammo
-                if not simulation:
-                    attacker_ammo_equipment.save()
+                attacker_remaining_ammo = min(attacker_weapon_equipment.clip_count or 0, attacker_remaining_ammo)
+                if attacker_remaining_ammo:
+                    attacker_weapon_equipment.clip_count -= attacker_remaining_ammo
                 if attacker_weapon.durability:
                     attacker_weapon_damage = (
                         attacker_remaining_ammo
@@ -1616,7 +1645,7 @@ class Character(Entity, BaseStatistics):
                             - add(
                                 gv(attacker_weapon, "condition_modifier", 0.0),
                                 gv(attacker_ammo, "condition_modifier", 0.0),
-                            ),
+                            )
                         )
                     )
                     attacker_weapon_equipment.condition -= attacker_weapon_damage
@@ -1635,6 +1664,7 @@ class Character(Entity, BaseStatistics):
             self.save()
         return histories
 
+    @simulation_only
     def fight(
         self,
         target: Union["Character", int],
@@ -1957,7 +1987,7 @@ class Character(Entity, BaseStatistics):
                     for effect in item.effects.all():
                         character_effect = effect.affect(target)
                         if character_effect:
-                            damages.extend(character_effect)
+                            damages.extend(character_effect.damages)
                 damages.extend(target.apply_effects())  # Apply effects immediatly
         # If critical fail and secondary target defined
         if not history.success and history.critical and fail_target:
@@ -1977,7 +2007,10 @@ class Character(Entity, BaseStatistics):
             if is_grenade and (not is_burst or not hit_count):
                 attacker_weapon_equipment.quantity -= 1
             elif not is_grenade and attacker_weapon.is_throwable:
-                attacker_weapon_equipment.drop(quantity=1, save=False)
+                if simulation:
+                    attacker_weapon_equipment.quantity -= 1
+                else:
+                    attacker_weapon_equipment.drop(quantity=1, save=False)
             elif attacker_weapon.clip_size:
                 attacker_weapon_equipment.clip_count -= 1
             if attacker_weapon.durability and attacker_weapon.is_repairable:
@@ -2007,6 +2040,7 @@ class Character(Entity, BaseStatistics):
                 history.save()
         return history
 
+    @simulation_only
     def damage(
         self,
         raw_damage: float = 0.0,
@@ -2108,7 +2142,7 @@ class Character(Entity, BaseStatistics):
                 damage_threshold += self.stats.damage_threshold
                 damage_resistance += self.stats.damage_resistance
             damage_threshold += threshold_modifier
-            damage_threshold = round(damage_threshold * threshold_rate_modifier, 2)
+            damage_threshold = round(damage_threshold * max(1.0 + threshold_rate_modifier, 0.0), 2)
             damage_resistance *= 1.0 + (resistance_modifier / 100.0)
             damage_resistance = round(min(max(0, damage_resistance), MAX_DAMAGE_RESISTANCE), 2)
         total_damage = max(total_damage - max(damage_threshold, 0), 0)
@@ -2148,18 +2182,12 @@ class Character(Entity, BaseStatistics):
         :param save: Sauvegarde les données relatives aux personnages
         :return: Liste des dégâts éventuellement subis
         """
-        damages, next_effects = [], []
-        for effect in self.effects:
-            damages.extend(effect.apply(self, save=save))
-            next_effects.extend(effect.next_effects)
-            effect.next_effects.clear()
-        while next_effects:
-            effects = next_effects[:]
-            next_effects.clear()
-            for effect in effects:
+        damages = []
+        self._effects = None
+        # affect() applique déjà les successeurs lors de l'expiration ; ne pas les rejouer.
+        for effect in self.effects.order_by("start_date", "pk"):
+            if effect.pk and self.active_effects.filter(pk=effect.pk).exists():
                 damages.extend(effect.apply(self, save=save))
-                next_effects.extend(effect.next_effects)
-                effect.next_effects.clear()
         return damages
 
     def duplicate(
@@ -2206,7 +2234,7 @@ class Character(Entity, BaseStatistics):
         """
         _assert(stats in LIST_SKILLS, _("Cette compétence ne peut être améliorée."))
         _assert(
-            self.skill_points + (value * (2, 1)[stats in self.tag_skills]) >= self.used_skill_points,
+            self.used_skill_points + (value * (2, 1)[stats in self.tag_skills]) <= self.skill_points,
             _("Ce personnage n'a pas assez de points de compétences."),
         )
         self.modify_value(stats, value)
@@ -2263,7 +2291,10 @@ class Character(Entity, BaseStatistics):
         self.money = max(self.money, 0)
         super().save(*args, **kwargs)
         if newly_created:
-            self.heal()
+            is_active = self.is_active
+            self.heal(save=False)
+            self.is_active = is_active
+            self.save(reset=False)
 
     def get_absolute_url(self):
         """
@@ -2628,6 +2659,7 @@ class Item(Entity, Resistance, Damage):
         )
         item_id = self.pk
         effects, ammunitions = self.effects.values_list("id", flat=True), self.ammunitions.values_list("id", flat=True)
+        self.pk = None
         self.name = name or f"* {self.name.replace('* ', '')}"
         self.save(force_insert=True)
         for modifier in ItemModifier.objects.filter(item_id=item_id):
@@ -2952,7 +2984,8 @@ class Equipment(CommonModel):
         Permet de définir un équipement libre de l'inventaire comme arme secondaire
         :return: Equipement
         """
-        old_equipment = self.character.equipments.filter(secondary=True)
+        old_equipment_ids = list(self.character.equipments.filter(secondary=True).values_list("pk", flat=True))
+        old_equipment = self.character.equipments.filter(pk__in=old_equipment_ids)
         old_equipment.update(secondary=False)
         self.secondary = True
         try:
@@ -3125,31 +3158,43 @@ class Effect(Entity, Damage):
         target: Union["Campaign", "Character"],
         date: datetime = None,
         force: bool = False,
+        characters: Optional[List["Character"]] = None,
+        save: bool = True,
     ) -> Optional[Union["CampaignEffect", "CharacterEffect"]]:
         """
         Applique l'effet à un personnage ou une campagne
         :param target: Personnage ou campagne
         :param date: Date de début de l'effet
         :param force: Force l'application de l'effet
+        :param characters: Instances partagées pour les effets de campagne différés
+        :param save: Sauvegarde les personnages affectés ?
         :return: Effect actif ou rien si l'effet ne s'applique pas
         """
         effect = None
+        self.damages = []
         if isinstance(target, Campaign):
             if not force and randint(1, 100) > self.chance:
                 return None
             if self.cancel_effect_id:
                 CampaignEffect.objects.filter(campaign=target, effect_id=self.cancel_effect_id).delete()
-            effect, created = CampaignEffect.objects.update_or_create(
-                campaign=target,
-                effect=self,
-                defaults=dict(
-                    start_date=date or target.current_game_date,
-                    end_date=None,
-                    next_date=None,
-                ),
-            )
+            if characters is None:
+                effect, created = CampaignEffect.objects.update_or_create(
+                    campaign=target,
+                    effect=self,
+                    defaults=dict(start_date=date or target.current_game_date, end_date=None, next_date=None),
+                )
+            else:
+                # Initialiser les dates sans lancer le successeur avant les dégâts de cet effet.
+                with transaction.atomic():
+                    try:
+                        effect = CampaignEffect.objects.select_for_update().get(campaign=target, effect=self)
+                    except CampaignEffect.DoesNotExist:
+                        effect = CampaignEffect(campaign=target, effect=self)
+                    effect.campaign = target
+                    effect.start_date, effect.end_date, effect.next_date = date or target.current_game_date, None, None
+                    effect.save(characters=characters, expire=False)
             if effect:
-                self.damages.extend(effect.apply_all())
+                self.damages.extend(effect.apply_all(save=save, characters=characters))
         elif isinstance(target, Character):
             _assert(
                 (self.duration is None and self.interval is None) or target.campaign is not None,
@@ -3160,13 +3205,23 @@ class Effect(Entity, Damage):
             if self.cancel_effect_id:
                 CharacterEffect.objects.filter(character=target, effect_id=self.cancel_effect_id).delete()
             current_game_date = gv(target.campaign, "current_game_date", None)
-            effect, created = CharacterEffect.objects.update_or_create(
-                character=target,
-                effect=self,
-                defaults=dict(start_date=date or current_game_date, end_date=None, next_date=None),
-            )
+            if save:
+                effect, created = CharacterEffect.objects.update_or_create(
+                    character=target,
+                    effect=self,
+                    defaults=dict(start_date=date or current_game_date, end_date=None, next_date=None),
+                )
+            else:
+                with transaction.atomic():
+                    try:
+                        effect = CharacterEffect.objects.select_for_update().get(character=target, effect=self)
+                    except CharacterEffect.DoesNotExist:
+                        effect = CharacterEffect(character=target, effect=self)
+                    effect.character = target
+                    effect.start_date, effect.end_date, effect.next_date = date or current_game_date, None, None
+                    effect.save(expire=False)
             if effect:
-                self.damages.extend(effect.apply(target))
+                self.damages.extend(effect.apply(target, save=save))
         return effect
 
     def duplicate(self, name: str = None) -> "Effect":
@@ -3180,6 +3235,7 @@ class Effect(Entity, Damage):
             _("Cet effet doit être préalablement enregistré avant d'être dupliqué."),
         )
         effect_id = self.pk
+        self.pk = None
         self.name = name or f"* {self.name.replace('* ', '')}"
         self.save(force_insert=True)
         for modifier in EffectModifier.objects.filter(effect_id=effect_id):
@@ -3304,42 +3360,46 @@ class CampaignEffect(ActiveEffect):
         self.damages = self.damages
         return self.damages
 
-    def apply_all(self, save: bool = True) -> List["DamageHistory"]:
+    def apply_all(self, save: bool = True, characters: Optional[List["Character"]] = None) -> List["DamageHistory"]:
         """
         Applique l'effet aux personnages de la campagne
         :param save: Sauvegarde les données relatives aux personnages ?
+        :param characters: Instances déjà chargées, réutilisées jusqu'à la sauvegarde finale
         :return: Dégâts potentiels infligés
         """
         self.damages = []
+        self.next_effects = []
         if not self.campaign:
             return self.damages
         game_date = self.campaign.current_game_date
         if self.effect.damage_config:
-            characters = self.campaign.characters.filter(is_active=True).exclude(health__lte=0)
+            if characters is None:
+                characters = list(self.campaign.characters.filter(is_active=True).exclude(health__lte=0))
             while self.next_date and self.next_date <= game_date:
                 if self.start_date != game_date and not self.effect.interval:
                     break
                 if self.end_date and self.next_date > self.end_date:
                     break
                 for character in characters:
+                    if not character.is_active or character.health <= 0:
+                        continue
                     damage = character.damage(save=save, **self.effect.damage_config)
                     damage.source = self.effect
                     self.damages.append(damage)
                 if not self.effect.interval:
                     break
                 self.next_date += self.effect.interval
-                if not self.end_date or game_date <= self.end_date:
-                    break
         if self.damages or (self.end_date and self.end_date <= game_date):
-            self.save()
+            self.save(characters=characters, save_characters=save)
         return self.damages
 
-    def save(self, *args, **kwargs):
+    def save(self, *args, characters=None, save_characters=True, expire=True, **kwargs):
         """
         Sauvegarde de l'effet actif
         """
-        for character_id in self.campaign.characters.values_list("pk", flat=True):
-            Character.reset_stats(character_id)
+        targets = characters if characters is not None else self.campaign.characters.values_list("pk", flat=True)
+        for character in targets:
+            Character.reset_stats(character)
         if not self.start_date:
             self.start_date = self.campaign.current_game_date
         if not self.end_date and self.start_date and self.effect.duration:
@@ -3351,22 +3411,28 @@ class CampaignEffect(ActiveEffect):
                 self.next_date = self.start_date + self.effect.interval
             if self.next_date and self.end_date and self.next_date > self.end_date:
                 self.next_date = None
-        if self.end_date and self.end_date <= self.campaign.current_game_date and not self.effect.controlled:
+        if expire and self.end_date and self.end_date <= self.campaign.current_game_date and not self.effect.controlled:
             if self.effect.next_effect:
-                effect = self.effect.next_effect.affect(self.campaign, self.end_date)
+                effect = self.effect.next_effect.affect(
+                    self.campaign,
+                    self.end_date,
+                    characters=characters,
+                    save=save_characters,
+                )
                 if effect:
                     self.next_effects.append(effect)
                     self.damages.extend(effect.damages)
             kwargs = {k: v for k, v in kwargs.items() if k.startswith("_")}
-            return self.delete(**kwargs)
+            return self.delete(characters=characters, **kwargs)
         super().save(*args, **kwargs)
 
-    def delete(self, *args, **kwargs):
+    def delete(self, *args, characters=None, **kwargs):
         """
         Suppression de l'effet actif
         """
-        for character_id in self.campaign.characters.values_list("pk", flat=True):
-            Character.reset_stats(character_id)
+        targets = characters if characters is not None else self.campaign.characters.values_list("pk", flat=True)
+        for character in targets:
+            Character.reset_stats(character)
         if self.pk:
             return super().delete(*args, **kwargs)
 
@@ -3404,7 +3470,9 @@ class CharacterEffect(ActiveEffect):
         :return: Liste des dégâts éventuellement subis
         """
         self.damages = []
+        self.next_effects = []
         character = character or self.character
+        self.character = character
         if not character.campaign:
             return self.damages
         game_date = character.campaign.current_game_date
@@ -3421,7 +3489,7 @@ class CharacterEffect(ActiveEffect):
                     break
                 self.next_date += self.effect.interval
         if self.damages or (self.end_date and self.end_date <= game_date):
-            self.save()
+            self.save(save_character=save)
         return self.damages
 
     def reset_character_stats(self):
@@ -3431,7 +3499,7 @@ class CharacterEffect(ActiveEffect):
         character = self._state.fields_cache.get("character")
         Character.reset_stats(character or self.character_id)
 
-    def save(self, *args, **kwargs):
+    def save(self, *args, save_character=True, expire=True, **kwargs):
         """
         Sauvegarde de l'effet actif
         """
@@ -3449,12 +3517,13 @@ class CharacterEffect(ActiveEffect):
                 if self.next_date and self.end_date and self.next_date > self.end_date:
                     self.next_date = None
             if (
-                self.end_date
+                expire
+                and self.end_date
                 and self.end_date <= self.character.campaign.current_game_date
                 and not self.effect.controlled
             ):
                 if self.effect.next_effect:
-                    effect = self.effect.next_effect.affect(self.character, self.end_date)
+                    effect = self.effect.next_effect.affect(self.character, self.end_date, save=save_character)
                     if effect:
                         self.next_effects.append(effect)
                         self.damages.extend(effect.damages)
@@ -3674,6 +3743,7 @@ class LootTemplate(CommonModel):
             _("Ce modèle de butin doit être préalablement enregistré avant d'être dupliqué."),
         )
         template_id = self.pk
+        self.pk = None
         self.name = name or f"* {self.name.replace('* ', '')}"
         self.save(force_insert=True)
         for item in LootTemplateItem.objects.filter(template_id=template_id):
@@ -4109,9 +4179,9 @@ class FightHistory(CommonModel):
             :return: Rien
             """
             self.total_count += count
-            self.count_by_level[level] += 1
+            self.count_by_level[level] += count
             self.total_damage += damage
-            self.damage_by_level[level] += 1
+            self.damage_by_level[level] += damage
             value = self.stats[success, critical]
             value[0] += count
             value[1] += damage

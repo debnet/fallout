@@ -1,18 +1,19 @@
 # coding: utf-8
 from common.api.serializers import BaseCustomSerializer, CommonModelSerializer
 from common.api.utils import (
-    api_view_with_serializer,
     create_api,
     create_model_serializer,
     disable_relation_fields,
     to_model_serializer,
 )
-from django.urls import path
+from django.db.models import Q
+from django.urls import include, path
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.generics import get_object_or_404
 
+from fallout.api_utils import api_view_with_serializer
 from fallout.enums import *  # noqa
 from fallout.models import *  # noqa
 
@@ -54,6 +55,19 @@ def is_authorized(request, campaign):
     return authorized
 
 
+def visible_characters(user):
+    """Personnages consultables par les endpoints métier, sans modifier le CRUD."""
+    queryset = Character.objects.all()
+    if user.is_superuser:
+        return queryset
+    visible = (
+        Q(is_visible=True) | Q(is_player=True, campaign__view_pc=True) | Q(is_player=False, campaign__view_npc=True)
+    )
+    return queryset.filter(
+        Q(player=user) | Q(campaign__game_master=user) | Q(campaign__characters__player=user, is_active=True) & visible
+    ).distinct()
+
+
 class RecursiveField(serializers.Serializer):
     """
     Serializer permettant d'utiliser le serializer parent en tant que champ
@@ -64,17 +78,22 @@ class RecursiveField(serializers.Serializer):
         return serializer.data
 
 
-@api_view_with_serializer(["POST"])
+class ClearLootInputSerializer(BaseCustomSerializer):
+    include_money = serializers.BooleanField(
+        default=False,
+        initial=False,
+        label=_("Inclure les capsules"),
+    )
+
+
+@api_view_with_serializer(["POST"], input_serializer=ClearLootInputSerializer)
 def campaign_clear_loot(request, campaign_id):
     """
     API pour supprimer tous les butins de la campagne
     """
     campaign = get_object_or_404(Campaign, pk=campaign_id)
     is_authorized(request, campaign)
-    try:
-        return campaign.clear_loot()
-    except Exception as exception:
-        raise ValidationError(str(exception))
+    return campaign.clear_loot(**request.validated_data)
 
 
 class RollInputSerializer(BaseCustomSerializer):
@@ -140,11 +159,9 @@ def campaign_roll(request, campaign_id):
     if group:
         filters.update(is_player=(group == 1))
     characters = Character.objects.select_related("campaign", "statistics").filter(**filters)
-    any(is_authorized(request, character.campaign) for character in characters)
-    try:
-        return [character.roll(**request.validated_data) for character in characters]
-    except Exception as exception:
-        raise ValidationError(str(exception))
+    campaign = get_object_or_404(Campaign, pk=campaign_id) if campaign_id else None
+    is_authorized(request, campaign)
+    return [character.roll(**request.validated_data) for character in characters]
 
 
 class EffectAffectInputSerializer(BaseCustomSerializer):
@@ -153,6 +170,15 @@ class EffectAffectInputSerializer(BaseCustomSerializer):
     """
 
     effect = serializers.PrimaryKeyRelatedField(queryset=Effect.objects.order_by("name"), label=_("effet"))
+    force = serializers.BooleanField(default=False, initial=False, label=_("Forcer l’application"))
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        request = self.context.get("request")
+        if request and not request.user.is_superuser:
+            self.fields["effect"].queryset = self.fields["effect"].queryset.filter(
+                Q(character__isnull=True) | Q(character__in=visible_characters(request.user)),
+            )
 
 
 @to_model_serializer(CampaignEffect)
@@ -178,10 +204,7 @@ def campaign_effect(request, campaign_id):
     campaign = get_object_or_404(Campaign, pk=campaign_id)
     is_authorized(request, campaign)
     effect = request.validated_data.get("effect")
-    try:
-        return effect.affect(campaign)
-    except Exception as exception:
-        raise ValidationError(str(exception))
+    return effect.affect(campaign, force=request.validated_data["force"])
 
 
 class ExperienceInputSerializer(BaseCustomSerializer):
@@ -211,11 +234,39 @@ def character_xp(request, character_id):
     """
     character = get_object_or_404(Character.objects.select_related("campaign", "statistics"), pk=character_id)
     is_authorized(request, character.campaign)
-    try:
-        level, required_xp, character.level_up = character.add_experience(**request.validated_data)
-        return character
-    except Exception as exception:
-        raise ValidationError(str(exception))
+    level, required_xp, character.level_up = character.add_experience(**request.validated_data)
+    return character
+
+
+class LevelupInputSerializer(BaseCustomSerializer):
+    stats = serializers.ChoiceField(choices=SKILLS, label=_("compétence"))
+    value = serializers.IntegerField(default=1, min_value=1, label=_("augmentation"))
+
+
+class LevelupSerializer(BaseCustomSerializer):
+    stats = serializers.CharField(label=_("compétence"))
+    value = serializers.IntegerField(label=_("valeur"))
+    skill_points = serializers.IntegerField(label=_("budget total"))
+    used_skill_points = serializers.IntegerField(label=_("points utilisés"))
+
+
+@api_view_with_serializer(
+    ["POST"],
+    input_serializer=LevelupInputSerializer,
+    serializer=LevelupSerializer,
+)
+def character_levelup(request, character_id):
+    """Améliore une compétence, avec les mêmes autorisations que la fiche HTML."""
+    character = get_object_or_404(Character.objects.select_related("campaign", "statistics"), pk=character_id)
+    if not (character.player_id == request.user.pk and character.enable_levelup):
+        is_authorized(request, character.campaign)
+    value = character.levelup(**request.validated_data)
+    return dict(
+        stats=request.validated_data["stats"],
+        value=value,
+        skill_points=character.skill_points,
+        used_skill_points=character.used_skill_points,
+    )
 
 
 @api_view_with_serializer(
@@ -229,10 +280,7 @@ def character_roll(request, character_id):
     """
     character = get_object_or_404(Character.objects.select_related("campaign", "statistics"), pk=character_id)
     is_authorized(request, character.campaign)
-    try:
-        return character.roll(**request.validated_data)
-    except Exception as exception:
-        raise ValidationError(str(exception))
+    return character.roll(**request.validated_data)
 
 
 class BaseFightInputSerializer(BaseCustomSerializer):
@@ -241,7 +289,7 @@ class BaseFightInputSerializer(BaseCustomSerializer):
     """
 
     target = serializers.PrimaryKeyRelatedField(queryset=Character.objects.order_by("name"), label=_("cible"))
-    target_range = serializers.IntegerField(initial=1, required=False, label=_("distance"))
+    target_range = serializers.IntegerField(default=1, initial=1, required=False, label=_("distance"))
 
     def __init__(self, *args, **kwargs):
         """
@@ -249,11 +297,32 @@ class BaseFightInputSerializer(BaseCustomSerializer):
         """
         super().__init__(*args, **kwargs)
         character_id = int(getattr(self.context.get("view"), "kwargs", {}).get("character_id", 0))
-        if character_id:
-            target_field = self.fields["target"]
-            target_field.queryset = target_field.queryset.exclude(id=character_id).filter(
-                campaign_id=Character.objects.values_list("campaign_id", flat=True).get(id=character_id)
+        if not character_id:
+            character_id = (
+                self.context.get("request").parser_context.get("kwargs", {}).get("character_id")
+                if self.context.get("request")
+                else None
             )
+        if character_id:
+            attacker = get_object_or_404(Character, pk=character_id)
+            for name in ("target", "fail_target"):
+                if name in self.fields:
+                    queryset = self.fields[name].queryset.filter(campaign_id=attacker.campaign_id)
+                    self.fields[name].queryset = queryset.exclude(id=character_id) if name == "target" else queryset
+
+    def validate(self, data):
+        # Les serializers imbriqués d'une rafale reçoivent le contexte après leur __init__.
+        request = self.context.get("request")
+        character_id = request.parser_context.get("kwargs", {}).get("character_id") if request else None
+        if character_id:
+            attacker = get_object_or_404(Character, pk=character_id)
+            for name in ("target", "fail_target"):
+                target = data.get(name)
+                if target and (
+                    target.campaign_id != attacker.campaign_id or (name == "target" and target.pk == attacker.pk)
+                ):
+                    raise ValidationError({name: _("Cible non autorisée dans cette campagne.")})
+        return data
 
 
 class FightInputSerializer(BaseFightInputSerializer):
@@ -383,10 +452,7 @@ def character_fight(request, character_id):
     """
     attacker = get_object_or_404(Character.objects.select_related("campaign", "statistics"), pk=character_id)
     is_authorized(request, attacker.campaign)
-    try:
-        return attacker.fight(**request.validated_data)
-    except Exception as exception:
-        raise ValidationError(str(exception))
+    return attacker.fight(**request.validated_data)
 
 
 @api_view_with_serializer(
@@ -401,10 +467,7 @@ def character_burst(request, character_id):
     attacker = get_object_or_404(Character.objects.select_related("campaign", "statistics"), pk=character_id)
     is_authorized(request, attacker.campaign)
     targets = [(t.get("target"), t.get("target_range")) for t in request.validated_data.pop("targets", {})]
-    try:
-        return attacker.burst(targets=targets, **request.validated_data)
-    except Exception as exception:
-        raise ValidationError(str(exception))
+    return attacker.burst(targets=targets, **request.validated_data)
 
 
 class DamageInputSerializer(BaseCustomSerializer):
@@ -505,14 +568,10 @@ def campaign_damage(request, campaign_id):
     """
     API permettant d'infliger des dégâts à plusieurs personnages de la campagne
     """
-    characters = Character.objects.select_related("campaign", "statistics").filter(
-        pk__in=request.validated_data.pop("characters", [])
-    )
-    any(is_authorized(request, character.campaign) for character in characters)
-    try:
-        return [character.damage(**request.validated_data) for character in characters]
-    except Exception as exception:
-        raise ValidationError(str(exception))
+    campaign = get_object_or_404(Campaign, pk=campaign_id) if campaign_id else None
+    is_authorized(request, campaign)
+    characters = request.validated_data.pop("characters", [])
+    return [character.damage(**request.validated_data) for character in characters]
 
 
 @api_view_with_serializer(
@@ -526,10 +585,7 @@ def character_damage(request, character_id):
     """
     character = get_object_or_404(Character.objects.select_related("campaign", "statistics"), pk=character_id)
     is_authorized(request, character.campaign)
-    try:
-        return character.damage(**request.validated_data)
-    except Exception as exception:
-        raise ValidationError(str(exception))
+    return character.damage(**request.validated_data)
 
 
 class CharacterCopyInputSerializer(BaseCustomSerializer):
@@ -543,12 +599,14 @@ class CharacterCopyInputSerializer(BaseCustomSerializer):
     )
     name = serializers.CharField(
         allow_blank=True,
-        required=False,
+        default="",
         label=_("nom"),
     )
     count = serializers.IntegerField(
         initial=1,
-        required=False,
+        default=1,
+        min_value=1,
+        max_value=100,
         label=_("nombre"),
     )
     equipments = serializers.BooleanField(
@@ -577,20 +635,20 @@ def character_copy(request, character_id):
     """
     API permettant de copier un personnage dans une campagne
     """
-    character = get_object_or_404(Character, pk=character_id)
+    characters = visible_characters(request.user)
+    if request.user.is_superuser or Campaign.objects.filter(game_master=request.user).exists():
+        characters = Character.objects.filter(Q(pk__in=characters) | Q(campaign__isnull=True, is_player=False))
+    character = get_object_or_404(characters, pk=character_id)
     is_authorized(request, request.validated_data.get("campaign"))
-    name, count = request.validated_data.pop("name"), request.validated_data.pop("count")
-    try:
-        character_name = character.name
-        characters = []
-        for nb in range(count):
-            new_name = f"{name or character_name} {nb + 1}" if count > 1 else name
-            characters.append(character.duplicate(name=new_name, **request.validated_data))
-            if count > 1:  # Recharge le personnage d'origine
-                character = Character.objects.get(pk=character_id)
-        return characters
-    except Exception as exception:
-        raise ValidationError(str(exception))
+    name, count = request.validated_data.pop("name", ""), request.validated_data.pop("count", 1)
+    character_name = character.name
+    characters = []
+    for nb in range(count):
+        new_name = f"{name or character_name} {nb + 1}" if count > 1 else name
+        characters.append(character.duplicate(name=new_name, **request.validated_data))
+        if count > 1:  # Recharge le personnage d'origine
+            character = Character.objects.get(pk=character_id)
+    return characters
 
 
 class CharacterRandomizeSpecialSerializer(BaseCustomSerializer):
@@ -612,11 +670,8 @@ def character_randomize_special(request, character_id):
     """
     character = get_object_or_404(Character.objects.select_related("campaign", "statistics"), pk=character_id)
     is_authorized(request, character.campaign)
-    try:
-        character.randomize_special(**request.validated_data)
-        return character
-    except Exception as exception:
-        raise ValidationError(str(exception))
+    character.randomize_special(**request.validated_data)
+    return character
 
 
 class CharacterRandomizeStatsSerializer(BaseCustomSerializer):
@@ -640,11 +695,8 @@ def character_randomize_stats(request, character_id):
     """
     character = get_object_or_404(Character.objects.select_related("campaign", "statistics"), pk=character_id)
     is_authorized(request, character.campaign)
-    try:
-        character.randomize_stats(**request.validated_data)
-        return character
-    except Exception as exception:
-        raise ValidationError(str(exception))
+    character.randomize_stats(**request.validated_data)
+    return character
 
 
 @to_model_serializer(CharacterEffect)
@@ -670,10 +722,7 @@ def character_effect(request, character_id):
     character = get_object_or_404(Character.objects.select_related("campaign", "statistics"), pk=character_id)
     is_authorized(request, character.campaign)
     effect = request.validated_data.get("effect")
-    try:
-        return effect.affect(character)
-    except Exception as exception:
-        raise ValidationError(str(exception))
+    return effect.affect(character, force=request.validated_data["force"])
 
 
 @to_model_serializer(Equipment)
@@ -692,8 +741,15 @@ class ItemGiveInputSerializer(BaseCustomSerializer):
     """
 
     item = serializers.PrimaryKeyRelatedField(queryset=Item.objects.order_by("name"), label=_("objet"))
-    quantity = serializers.IntegerField(initial=1, required=False, label=_("quantité"))
-    condition = serializers.IntegerField(initial=100, required=False, label=_("état"))
+    quantity = serializers.IntegerField(default=1, initial=1, min_value=1, label=_("quantité"))
+    condition = serializers.IntegerField(
+        default=100,
+        initial=100,
+        min_value=0,
+        max_value=100,
+        label=_("État (%)"),
+        help_text=_("État en pourcentage (0 à 100)."),
+    )
 
 
 @api_view_with_serializer(
@@ -708,10 +764,8 @@ def character_item(request, character_id):
     character = get_object_or_404(Character.objects.select_related("campaign", "statistics"), pk=character_id)
     is_authorized(request, character.campaign)
     item = request.validated_data.pop("item")
-    try:
-        return item.give(character=character, **request.validated_data)
-    except Exception as exception:
-        raise ValidationError(str(exception))
+    request.validated_data["condition"] /= 100.0
+    return item.give(character=character, **request.validated_data)
 
 
 class ActionInputSerializer(BaseCustomSerializer):
@@ -733,10 +787,7 @@ def equipment_equip(request, equipment_id):
     """
     equipment = get_object_or_404(Equipment.objects.select_related("character__campaign"), pk=equipment_id)
     is_authorized(request, equipment.character.campaign)
-    try:
-        return equipment.equip(**request.validated_data)
-    except Exception as exception:
-        raise ValidationError(str(exception))
+    return equipment.equip(**request.validated_data)
 
 
 @to_model_serializer(ItemModifier)
@@ -768,11 +819,8 @@ def equipment_use(request, equipment_id):
     """
     equipment = get_object_or_404(Equipment.objects.select_related("character__campaign"), pk=equipment_id)
     is_authorized(request, equipment.character.campaign)
-    try:
-        effects, modifiers = equipment.use(**request.validated_data)
-        return dict(effects=effects, modifiers=modifiers)
-    except Exception as exception:
-        raise ValidationError(str(exception))
+    effects, modifiers = equipment.use(**request.validated_data)
+    return dict(effects=effects, modifiers=modifiers)
 
 
 @api_view_with_serializer(
@@ -786,10 +834,7 @@ def equipment_reload(request, equipment_id):
     """
     equipment = get_object_or_404(Equipment.objects.select_related("character__campaign"), pk=equipment_id)
     is_authorized(request, equipment.character.campaign)
-    try:
-        return equipment.reload(**request.validated_data)
-    except Exception as exception:
-        raise ValidationError(str(exception))
+    return equipment.reload(**request.validated_data)
 
 
 class ActionWithQuantityInputSerializer(ActionInputSerializer):
@@ -797,7 +842,7 @@ class ActionWithQuantityInputSerializer(ActionInputSerializer):
     Serializer d'entrée pour effectuer une action impliquant une quantité
     """
 
-    quantity = serializers.IntegerField(initial=1, required=False, label=_("quantité"))
+    quantity = serializers.IntegerField(default=1, initial=1, min_value=1, label=_("quantité"))
 
 
 @to_model_serializer(Loot)
@@ -821,10 +866,7 @@ def equipment_drop(request, equipment_id):
     """
     equipment = get_object_or_404(Equipment.objects.select_related("character__campaign"), pk=equipment_id)
     is_authorized(request, equipment.character.campaign)
-    try:
-        return equipment.drop(**request.validated_data)
-    except Exception as exception:
-        raise ValidationError(str(exception))
+    return equipment.drop(**request.validated_data)
 
 
 class LootTakeInputSerializer(ActionInputSerializer):
@@ -836,7 +878,7 @@ class LootTakeInputSerializer(ActionInputSerializer):
         queryset=Character.objects.order_by("name"),
         label=_("personnage"),
     )
-    count = serializers.IntegerField(initial=1, required=False, label=_("nombre"))
+    quantity = serializers.IntegerField(default=1, initial=1, min_value=1, label=_("quantité"))
 
     def __init__(self, *args, **kwargs):
         """
@@ -860,10 +902,7 @@ def loot_take(request, loot_id):
     """
     loot = get_object_or_404(Loot.objects.select_related("campaign"), pk=loot_id)
     is_authorized(request, loot.campaign)
-    try:
-        return loot.take(**request.validated_data)
-    except Exception as exception:
-        raise ValidationError(str(exception))
+    return loot.take(**request.validated_data)
 
 
 class LootTemplateOpenInputSerializer(BaseCustomSerializer):
@@ -904,11 +943,8 @@ def loottemplate_open(request, template_id):
     """
     loot_template = get_object_or_404(LootTemplate, pk=template_id)
     is_authorized(request, request.validated_data.get("campaign"))
-    try:
-        loots, money = loot_template.create(**request.validated_data)
-        return {"loots": loots, "money": money}
-    except Exception as exception:
-        raise ValidationError(str(exception))
+    loots, money = loot_template.create(**request.validated_data)
+    return {"loots": loots, "money": money}
 
 
 class NextTurnInputSerializer(BaseCustomSerializer):
@@ -943,11 +979,8 @@ def campaign_next_turn(request, campaign_id):
     """
     campaign = get_object_or_404(Campaign, pk=campaign_id)
     is_authorized(request, campaign)
-    try:
-        character, damages = campaign.next_turn(**request.validated_data)
-        return dict(campaign=campaign, character=character, damages=damages)
-    except Exception as exception:
-        raise ValidationError(str(exception))
+    character, damages = campaign.next_turn(**request.validated_data)
+    return dict(campaign=campaign, character=character, damages=damages)
 
 
 class StatInfoSerializer(BaseCustomSerializer):
@@ -968,12 +1001,11 @@ class StatInfoSerializer(BaseCustomSerializer):
 
 @api_view_with_serializer(["GET"], serializer=StatInfoSerializer)
 def character_stats(request, character_id):
-    character = get_object_or_404(Character.objects.select_related("campaign", "statistics"), pk=character_id)
-    is_authorized(request, character.campaign)
-    try:
-        return [stats._asdict() for stats in character.all_stats]
-    except Exception as exception:
-        raise ValidationError(str(exception))
+    character = get_object_or_404(
+        visible_characters(request.user).select_related("campaign", "statistics"),
+        pk=character_id,
+    )
+    return [stats._asdict() for stats in character.all_stats]
 
 
 namespace = "fallout-api"
@@ -1008,6 +1040,11 @@ urlpatterns = [
         "character/<int:character_id>/xp/",
         character_xp,
         name="character_xp",
+    ),
+    path(
+        "character/<int:character_id>/levelup/",
+        character_levelup,
+        name="character_levelup",
     ),
     path(
         "character/<int:character_id>/roll/",
