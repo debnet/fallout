@@ -1,0 +1,11 @@
+#!/bin/sh
+set -eu
+umask 0022
+set -a
+. /etc/fallout/environment
+set +a
+cd '{{ fallout_home }}'
+'{{ release_dir }}/venv/bin/fallout-rpg' migrate --noinput
+'{{ release_dir }}/venv/bin/fallout-rpg' bootstrap
+'{{ release_dir }}/venv/bin/fallout-rpg' collectstatic --noinput
+'{{ release_dir }}/venv/bin/fallout-rpg' check --deploy --fail-level ERROR

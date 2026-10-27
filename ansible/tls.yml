@@ -1,0 +1,146 @@
+---
+- name: Create ACME challenge directory
+  ansible.builtin.file:
+    path: /var/www/letsencrypt/.well-known/acme-challenge
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Inspect existing certificate
+  ansible.builtin.stat:
+    path: '/etc/letsencrypt/live/{{ fallout_domain }}/fullchain.pem'
+  register: tls_cert
+
+- name: Allow Nginx upstream connections on SELinux hosts
+  ansible.posix.seboolean:
+    name: httpd_can_network_connect
+    state: true
+    persistent: true
+  when: ansible_facts.selinux.status | default('disabled') == 'enabled'
+
+- name: Label public static files for SELinux
+  community.general.sefcontext:
+    target: '{{ fallout_home }}/static(/.*)?'
+    setype: httpd_sys_content_t
+    state: present
+  when: ansible_facts.selinux.status | default('disabled') == 'enabled'
+
+- name: Label instance root for Nginx traversal on SELinux
+  community.general.sefcontext:
+    target: '{{ fallout_home }}'
+    setype: httpd_sys_content_t
+    state: present
+  when: ansible_facts.selinux.status | default('disabled') == 'enabled'
+
+- name: Restore SELinux labels
+  ansible.builtin.command:
+    argv: [restorecon, -R, '{{ fallout_home }}']
+  changed_when: false
+  when: ansible_facts.selinux.status | default('disabled') == 'enabled'
+
+- name: Install HTTP challenge virtual host (keep existing HTTPS if present)
+  ansible.builtin.template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/conf.d/fallout.conf
+    mode: '0644'
+
+- name: Validate Nginx configuration
+  ansible.builtin.command: nginx -t
+  changed_when: false
+
+- name: Enable Nginx
+  ansible.builtin.systemd_service:
+    name: nginx
+    enabled: true
+    state: started
+
+- name: Reload challenge configuration
+  ansible.builtin.systemd_service:
+    name: nginx
+    state: reloaded
+
+- name: Obtain or retain a production Let's Encrypt certificate
+  ansible.builtin.command:
+    argv:
+      - certbot
+      - certonly
+      - --non-interactive
+      - --agree-tos
+      - --webroot
+      - --webroot-path=/var/www/letsencrypt
+      - --email
+      - '{{ fallout_acme_email }}'
+      - --cert-name
+      - '{{ fallout_domain }}'
+      - --domain
+      - '{{ fallout_domain }}'
+      - --keep-until-expiring
+  register: certbot_result
+  changed_when: "'no action taken' not in (certbot_result.stdout | lower)"
+
+- name: Enable HTTPS rendering
+  ansible.builtin.set_fact:
+    tls_cert: {stat: {exists: true}}
+
+- name: Install HTTPS virtual host
+  ansible.builtin.template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/conf.d/fallout.conf
+    mode: '0644'
+
+- name: Validate final HTTPS configuration
+  ansible.builtin.command: nginx -t
+  changed_when: false
+
+- name: Reload HTTPS configuration
+  ansible.builtin.systemd_service:
+    name: nginx
+    state: reloaded
+
+- name: Create Certbot deploy hook directory
+  ansible.builtin.file:
+    path: /etc/letsencrypt/renewal-hooks/deploy
+    state: directory
+    mode: '0755'
+
+- name: Reload Nginx only after successful certificate renewal
+  ansible.builtin.copy:
+    dest: /etc/letsencrypt/renewal-hooks/deploy/fallout-nginx
+    mode: '0755'
+    content: |
+      #!/bin/sh
+      set -eu
+      /usr/sbin/nginx -t
+      /usr/bin/systemctl reload nginx
+
+- name: Install dedicated certificate renewal service and timer
+  ansible.builtin.copy:
+    dest: '/etc/systemd/system/{{ item.name }}'
+    mode: '0644'
+    content: '{{ item.content }}'
+  loop:
+    - name: fallout-certbot.service
+      content: |
+        [Unit]
+        Description=Renew Fallout Let's Encrypt certificate
+        [Service]
+        Type=oneshot
+        ExecStart=/usr/bin/certbot renew --quiet --cert-name {{ fallout_domain }}
+    - name: fallout-certbot.timer
+      content: |
+        [Unit]
+        Description=Check Fallout certificate twice daily
+        [Timer]
+        OnCalendar=*-*-* 03,15:00:00
+        RandomizedDelaySec=3600
+        Persistent=true
+        [Install]
+        WantedBy=timers.target
+
+- name: Enable renewal timer
+  ansible.builtin.systemd_service:
+    name: fallout-certbot.timer
+    daemon_reload: true
+    enabled: true
+    state: started

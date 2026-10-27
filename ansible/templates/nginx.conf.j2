@@ -1,0 +1,53 @@
+server {
+    listen 80;
+    listen [::]:80;
+    server_name {{ fallout_domain }};
+
+    location ^~ /.well-known/acme-challenge/ {
+        root /var/www/letsencrypt;
+        default_type text/plain;
+        try_files $uri =404;
+    }
+    location / {
+{% if tls_cert.stat.exists %}
+        return 301 https://{{ fallout_domain }}$request_uri;
+{% else %}
+        return 503;
+{% endif %}
+    }
+}
+{% if tls_cert.stat.exists %}
+
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    server_name {{ fallout_domain }};
+    ssl_certificate /etc/letsencrypt/live/{{ fallout_domain }}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/{{ fallout_domain }}/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_session_cache shared:FalloutTLS:10m;
+    ssl_session_tickets off;
+    client_max_body_size 10m;
+    add_header Strict-Transport-Security "max-age=31536000" always;
+    add_header X-Content-Type-Options nosniff always;
+
+    location /static/ {
+        alias {{ fallout_home }}/static/;
+        expires 7d;
+        add_header X-Content-Type-Options nosniff always;
+        add_header Strict-Transport-Security "max-age=31536000" always;
+    }
+    # Do not bypass application permissions for uploaded media.
+    location /medias/ {
+        return 404;
+    }
+    location / {
+        proxy_pass http://127.0.0.1:{{ fallout_gunicorn_port }};
+        proxy_set_header Host {{ fallout_domain }};
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_set_header X-Forwarded-For $remote_addr;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_redirect off;
+    }
+}
+{% endif %}

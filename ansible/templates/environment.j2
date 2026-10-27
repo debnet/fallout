@@ -1,0 +1,12 @@
+# Managed by Ansible. Shared shell/systemd EnvironmentFile syntax.
+DJANGO_SETTINGS_MODULE="rpg.settings"
+DJANGO_CONFIGURATION="Prod"
+DJANGO_SECRET_KEY="{{ fallout_secret_key }}"
+DJANGO_ALLOWED_HOSTS="{{ fallout_domain }}"
+DJANGO_CSRF_TRUSTED_ORIGINS="https://{{ fallout_domain }}"
+DJANGO_CORS_ORIGIN_ALLOW_ALL="False"
+DATABASE_URL="postgresql://fallout:{{ fallout_db_password }}@127.0.0.1:5432/fallout"
+DJANGO_REDIS_CACHE="redis://127.0.0.1:{{ fallout_redis_port }}/1"
+DJANGO_CELERY_BROKER_URL="redis://127.0.0.1:{{ fallout_redis_port }}/0"
+DJANGO_CELERY_RESULT_BACKEND="redis://127.0.0.1:{{ fallout_redis_port }}/2"
+FALLOUT_HOME="{{ fallout_home }}"

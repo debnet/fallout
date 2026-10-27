@@ -1,0 +1,24 @@
+[Unit]
+Description=Fallout RPG Gunicorn
+After=network.target {{ fallout_postgres_service }}.service fallout-redis.service
+Requires=fallout-redis.service
+
+[Service]
+User=fallout
+Group=fallout
+WorkingDirectory={{ fallout_home }}
+EnvironmentFile=/etc/fallout/environment
+ExecStart={{ fallout_root }}/current/venv/bin/gunicorn rpg.wsgi:application --bind=127.0.0.1:{{ fallout_gunicorn_port }} --workers={{ fallout_web_workers }} --timeout=60 --access-logfile=- --error-logfile=-
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=90
+UMask=0022
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths={{ fallout_home }}
+CapabilityBoundingSet=
+
+[Install]
+WantedBy=multi-user.target

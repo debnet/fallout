@@ -1,0 +1,28 @@
+---
+- name: Configure dedicated Redis under enforcing SELinux
+  when: ansible_facts.selinux.status | default('disabled') == 'enabled'
+  block:
+    - name: Label Redis data
+      community.general.sefcontext:
+        target: /var/lib/fallout-redis(/.*)?
+        setype: redis_var_lib_t
+        state: present
+
+    - name: Label Redis configuration
+      community.general.sefcontext:
+        target: /etc/fallout/redis.conf
+        setype: redis_conf_t
+        state: present
+
+    - name: Permit dedicated Redis port
+      community.general.seport:
+        ports: '{{ fallout_redis_port }}'
+        proto: tcp
+        setype: redis_port_t
+        state: present
+
+    - name: Restore Redis labels
+      ansible.builtin.command:
+        argv: [restorecon, -R, '{{ item }}']
+      loop: [/var/lib/fallout-redis, /etc/fallout/redis.conf]
+      changed_when: false

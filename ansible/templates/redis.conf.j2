@@ -1,0 +1,9 @@
+bind 127.0.0.1
+protected-mode yes
+port {{ fallout_redis_port }}
+daemonize no
+logfile ""
+dir /var/lib/fallout-redis
+appendonly yes
+appendfsync everysec
+maxmemory-policy noeviction

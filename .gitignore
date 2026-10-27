@@ -97,3 +97,8 @@ db.sqlite3
 
 # Mac specific
 .DS_Store
+
+# Local Ansible deployment configuration / secrets
+ansible/inventory.ini
+ansible/vars.yml
+ansible/vault.yml

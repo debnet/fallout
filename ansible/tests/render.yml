@@ -1,0 +1,86 @@
+---
+- name: Validate deployment templates without changing host services
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  become: false
+  vars:
+    fallout_domain: rpg.example.org
+    fallout_root: /opt/fallout
+    fallout_home: /var/lib/fallout
+    release_dir: /opt/fallout/releases/test-release
+    fallout_postgres_service: postgresql
+    fallout_gunicorn_port: 8000
+    fallout_redis_port: 6380
+    fallout_web_workers: 3
+    fallout_celery_concurrency: 2
+    fallout_secret_key: test-secret-not-used-in-production
+    fallout_db_password: test-password-not-used-in-production
+    tls_cert: {stat: {exists: false}}
+  tasks:
+    - name: Create isolated rendering directory
+      ansible.builtin.tempfile:
+        state: directory
+        path: "{{ lookup('env', 'TMPDIR') | default('/tmp', true) }}"
+        prefix: fallout-ansible-render-
+      register: render_dir
+
+    - name: Render and inspect templates
+      block:
+        - name: Render all configuration templates
+          ansible.builtin.template:
+            src: '{{ playbook_dir | dirname }}/templates/{{ item }}.j2'
+            dest: '{{ render_dir.path }}/{{ item }}'
+            mode: '0600'
+          loop:
+            - environment
+            - initialize.sh
+            - web.service
+            - worker.service
+            - redis.service
+            - redis.conf
+            - nginx.conf
+
+        - name: Check initialization shell syntax without executing it
+          ansible.builtin.command:
+            argv: [sh, -n, '{{ render_dir.path }}/initialize.sh']
+          changed_when: false
+
+        - name: Read HTTP-only challenge configuration
+          ansible.builtin.slurp:
+            src: '{{ render_dir.path }}/nginx.conf'
+          register: challenge_config
+
+        - name: Check no certificate is referenced before issuance
+          ansible.builtin.assert:
+            that:
+              - "'ssl_certificate ' not in (challenge_config.content | b64decode)"
+              - "'return 503;' in (challenge_config.content | b64decode)"
+              - "'/.well-known/acme-challenge/' in (challenge_config.content | b64decode)"
+
+        - name: Render HTTPS after certificate issuance
+          ansible.builtin.template:
+            src: '{{ playbook_dir | dirname }}/templates/nginx.conf.j2'
+            dest: '{{ render_dir.path }}/nginx-https.conf'
+            mode: '0600'
+          vars:
+            tls_cert: {stat: {exists: true}}
+
+        - name: Read HTTPS configuration
+          ansible.builtin.slurp:
+            src: '{{ render_dir.path }}/nginx-https.conf'
+          register: https_config
+
+        - name: Check HTTPS proxy and redirect
+          ansible.builtin.assert:
+            that:
+              - "'listen 443 ssl;' in (https_config.content | b64decode)"
+              - "'return 301 https://rpg.example.org$request_uri;' in (https_config.content | b64decode)"
+              - "'proxy_pass http://127.0.0.1:8000;' in (https_config.content | b64decode)"
+              - "'proxy_set_header X-Forwarded-Proto https;' in (https_config.content | b64decode)"
+              - "'location /medias/' in (https_config.content | b64decode)"
+      always:
+        - name: Remove only this test's temporary directory
+          ansible.builtin.file:
+            path: '{{ render_dir.path }}'
+            state: absent

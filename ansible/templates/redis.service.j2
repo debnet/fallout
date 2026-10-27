@@ -1,0 +1,20 @@
+[Unit]
+Description=Dedicated Fallout Redis broker and cache
+After=network.target
+
+[Service]
+User=fallout-redis
+Group=fallout-redis
+ExecStart=/usr/bin/redis-server /etc/fallout/redis.conf
+Restart=on-failure
+RestartSec=5
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths=/var/lib/fallout-redis
+CapabilityBoundingSet=
+
+[Install]
+WantedBy=multi-user.target

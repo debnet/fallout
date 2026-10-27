@@ -1,0 +1,389 @@
+---
+- name: Deploy Fallout RPG natively with HTTPS
+  hosts: fallout
+  become: true
+  serial: 1
+  vars:
+    fallout_root: /opt/fallout
+    fallout_home: /var/lib/fallout
+    fallout_python: /usr/bin/python3
+    fallout_postgres_service: postgresql
+    fallout_postgres_data: /var/lib/pgsql/data
+    fallout_postgres_init: /usr/bin/postgresql-setup
+    fallout_redis_port: 6380
+    fallout_gunicorn_port: 8000
+    fallout_web_workers: 3
+    fallout_celery_concurrency: 2
+    fallout_gunicorn_version: '26.2.0'
+    distro_packages:
+      Debian:
+        - nginx
+        - certbot
+        - postgresql
+        - postgresql-client
+        - python3-psycopg2
+        - redis-server
+        - acl
+      RedHat:
+        - nginx
+        - certbot
+        - postgresql-server
+        - postgresql
+        - python3-psycopg2
+        - redis
+        - acl
+        - policycoreutils-python-utils
+    python_packages:
+      Debian: [python3, python3-venv]
+      RedHat: [python3, python3-pip]
+  pre_tasks:
+    - name: Validate platform and public configuration
+      ansible.builtin.assert:
+        that:
+          - ansible_facts.os_family in ['Debian', 'RedHat']
+          - ansible_facts.service_mgr == 'systemd'
+          - fallout_domain is defined
+          - fallout_domain is match('^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)+$')
+          - fallout_acme_email is defined
+          - fallout_acme_email is match('^[^\s@]+@[^\s@]+\.[^\s@]+$')
+          - fallout_wheel is defined
+          - fallout_redis_port | int != fallout_gunicorn_port | int
+        fail_msg: Configure a domain, ACME email, local wheel and a supported systemd host.
+
+    - name: Validate required secrets without displaying them
+      ansible.builtin.assert:
+        that:
+          - fallout_secret_key | default('') is match('^[A-Za-z0-9_-]{50,}$')
+          - fallout_db_password | default('') is match('^[A-Za-z0-9_-]{32,}$')
+        fail_msg: Supply independent URL-safe Django and database secrets using Ansible Vault.
+      no_log: true
+
+    - name: Inspect controller wheel
+      ansible.builtin.stat:
+        path: '{{ fallout_wheel }}'
+        checksum_algorithm: sha256
+      delegate_to: localhost
+      become: false
+      register: wheel
+
+    - name: Require a built wheel
+      ansible.builtin.assert:
+        that:
+          - wheel.stat.exists
+          - wheel.stat.isreg
+          - fallout_wheel is match('.*\.whl$')
+
+    - name: Identify immutable release by wheel and server version
+      ansible.builtin.set_fact:
+        release_dir: '{{ fallout_root }}/releases/{{ wheel.stat.checksum[:16] }}-gunicorn-{{ fallout_gunicorn_version }}'
+
+  tasks:
+    - name: Install distribution packages from configured repositories
+      ansible.builtin.package:
+        name: '{{ distro_packages[ansible_facts.os_family] + (fallout_python_packages | default(python_packages[ansible_facts.os_family])) }}'
+        state: present
+
+    - name: Check application Python version
+      ansible.builtin.command:
+        argv: ['{{ fallout_python }}', '-c', 'import sys; assert sys.version_info >= (3, 13), "Python >= 3.13 required"']
+      changed_when: false
+
+    - name: Create application group
+      ansible.builtin.group:
+        name: fallout
+        system: true
+
+    - name: Create application account
+      ansible.builtin.user:
+        name: fallout
+        group: fallout
+        system: true
+        home: '{{ fallout_home }}'
+        create_home: false
+        shell: /usr/sbin/nologin
+
+    - name: Create private configuration directory
+      ansible.builtin.file:
+        path: /etc/fallout
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Create instance and media directories
+      ansible.builtin.file:
+        path: '{{ item }}'
+        state: directory
+        owner: fallout
+        group: fallout
+        mode: '0750'
+      loop:
+        - '{{ fallout_home }}'
+        - '{{ fallout_home }}/medias'
+
+    - name: Allow Nginx to traverse instance root without exposing media
+      ansible.builtin.file:
+        path: '{{ fallout_home }}'
+        mode: '0751'
+
+    - name: Create public static directory
+      ansible.builtin.file:
+        path: '{{ fallout_home }}/static'
+        state: directory
+        owner: fallout
+        group: fallout
+        mode: '0755'
+
+    - name: Inspect RHEL database cluster
+      ansible.builtin.stat:
+        path: '{{ fallout_postgres_data }}/PG_VERSION'
+      register: pg_cluster
+      when: ansible_facts.os_family == 'RedHat'
+
+    - name: Initialize a new RHEL cluster only when absent
+      ansible.builtin.command:
+        argv: ['{{ fallout_postgres_init }}', '--initdb']
+        creates: '{{ fallout_postgres_data }}/PG_VERSION'
+      when:
+        - ansible_facts.os_family == 'RedHat'
+        - not pg_cluster.stat.exists
+
+    - name: Enable PostgreSQL
+      ansible.builtin.systemd_service:
+        name: '{{ fallout_postgres_service }}'
+        enabled: true
+        state: started
+
+    - name: Inspect database version and authentication file
+      community.postgresql.postgresql_query:
+        login_db: postgres
+        query: "SELECT current_setting('server_version_num')::int AS version, current_setting('hba_file') AS hba_file"
+      become_user: postgres
+      become: true
+      register: pg_settings
+
+    - name: Require PostgreSQL supported by Django 6
+      ansible.builtin.assert:
+        that: pg_settings.query_result[0].version | int >= 140000
+        fail_msg: Install PostgreSQL >= 14 from an approved repository; no automatic major upgrade is performed.
+
+    - name: Create restricted application database role
+      community.postgresql.postgresql_user:
+        name: fallout
+        password: '{{ fallout_db_password }}'
+        role_attr_flags: LOGIN,NOSUPERUSER,NOCREATEDB,NOCREATEROLE
+      become_user: postgres
+      become: true
+      environment:
+        PGOPTIONS: '-c password_encryption=scram-sha-256'
+      no_log: true
+
+    - name: Create application database
+      community.postgresql.postgresql_db:
+        name: fallout
+        owner: fallout
+        encoding: UTF8
+        template: template0
+      become_user: postgres
+      become: true
+
+    - name: Permit only the application role over loopback with SCRAM
+      ansible.builtin.blockinfile:
+        path: '{{ pg_settings.query_result[0].hba_file }}'
+        insertbefore: BOF
+        marker: '# {mark} ANSIBLE FALLOUT'
+        block: 'host fallout fallout 127.0.0.1/32 scram-sha-256'
+      register: pg_hba
+      notify: Reload PostgreSQL authentication
+
+    - name: Apply authentication changes before connecting as application
+      ansible.builtin.meta: flush_handlers
+
+    - name: Create dedicated Redis group
+      ansible.builtin.group:
+        name: fallout-redis
+        system: true
+
+    - name: Create dedicated Redis account
+      ansible.builtin.user:
+        name: fallout-redis
+        group: fallout-redis
+        system: true
+        home: /var/lib/fallout-redis
+        create_home: false
+        shell: /usr/sbin/nologin
+
+    - name: Create dedicated Redis data directory
+      ansible.builtin.file:
+        path: /var/lib/fallout-redis
+        state: directory
+        owner: fallout-redis
+        group: fallout-redis
+        mode: '0700'
+
+    - name: Configure application Redis
+      ansible.builtin.template:
+        src: redis.conf.j2
+        dest: /etc/fallout/redis.conf
+        mode: '0644'
+      register: redis_config
+
+    - name: Install Redis service
+      ansible.builtin.template:
+        src: redis.service.j2
+        dest: /etc/systemd/system/fallout-redis.service
+        mode: '0644'
+      register: redis_unit
+
+    - name: Enable dedicated Redis
+      ansible.builtin.include_tasks: redis-selinux.yml
+
+    - name: Start dedicated Redis
+      ansible.builtin.systemd_service:
+        name: fallout-redis
+        daemon_reload: true
+        enabled: true
+        state: "{{ 'restarted' if redis_config.changed or redis_unit.changed else 'started' }}"
+
+    - name: Wait for Redis broker readiness
+      ansible.builtin.command:
+        argv: [redis-cli, -h, 127.0.0.1, -p, '{{ fallout_redis_port }}', ping]
+      changed_when: false
+      register: redis_ping
+      retries: 12
+      delay: 2
+      until: redis_ping.stdout | trim == 'PONG'
+
+    - name: Create release directory
+      ansible.builtin.file:
+        path: '{{ release_dir }}'
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Upload wheel
+      ansible.builtin.copy:
+        src: '{{ fallout_wheel }}'
+        dest: '{{ release_dir }}/{{ fallout_wheel | basename }}'
+        mode: '0644'
+
+    - name: Create release virtual environment
+      ansible.builtin.command:
+        argv: ['{{ fallout_python }}', '-m', 'venv', '{{ release_dir }}/venv']
+        creates: '{{ release_dir }}/venv/bin/python'
+
+    - name: Install packaged application and production server
+      ansible.builtin.pip:
+        executable: '{{ release_dir }}/venv/bin/pip'
+        name:
+          - '{{ release_dir }}/{{ fallout_wheel | basename }}[postgresql]'
+          - 'gunicorn=={{ fallout_gunicorn_version }}'
+
+    - name: Write runtime environment (not the initial administrator password)
+      ansible.builtin.template:
+        src: environment.j2
+        dest: /etc/fallout/environment
+        owner: root
+        group: fallout
+        mode: '0640'
+      no_log: true
+      diff: false
+
+    - name: Configure Nginx, ACME issuance and certificate renewal
+      ansible.builtin.include_tasks: tls.yml
+
+    - name: Find existing application services
+      ansible.builtin.service_facts:
+
+    - name: Stop writers before backup and schema changes
+      ansible.builtin.systemd_service:
+        name: '{{ item }}'
+        state: stopped
+      when: item in ansible_facts.services
+      loop: [fallout-web.service, fallout-worker.service]
+
+    - name: Create private backup directory
+      ansible.builtin.file:
+        path: /var/backups/fallout
+        state: directory
+        owner: postgres
+        group: postgres
+        mode: '0700'
+
+    - name: Back up database before migrations
+      ansible.builtin.command:
+        argv:
+          - pg_dump
+          - --format=custom
+          - '--file=/var/backups/fallout/pre-deploy-{{ ansible_facts.date_time.iso8601_basic_short }}.dump'
+          - fallout
+      become_user: postgres
+      become: true
+      changed_when: true
+
+    - name: Install private initialization script
+      ansible.builtin.template:
+        src: initialize.sh.j2
+        dest: '{{ release_dir }}/initialize.sh'
+        owner: root
+        group: fallout
+        mode: '0750'
+
+    - name: Initialize application as unprivileged user
+      ansible.builtin.command:
+        argv: ['{{ release_dir }}/initialize.sh']
+      become_user: fallout
+      become: true
+      environment:
+        FALLOUT_ADMIN_PASSWORD: '{{ fallout_admin_password | default("") }}'
+      no_log: true
+      changed_when: true
+
+    - name: Switch active release after successful initialization
+      ansible.builtin.file:
+        src: '{{ release_dir }}'
+        dest: '{{ fallout_root }}/current'
+        state: link
+
+    - name: Install web and worker service units
+      ansible.builtin.template:
+        src: '{{ item }}.service.j2'
+        dest: '/etc/systemd/system/fallout-{{ item }}.service'
+        mode: '0644'
+      loop: [web, worker]
+
+    - name: Start application services
+      ansible.builtin.systemd_service:
+        name: 'fallout-{{ item }}'
+        daemon_reload: true
+        enabled: true
+        state: started
+      loop: [web, worker]
+
+    - name: Verify Gunicorn responds through Django
+      ansible.builtin.uri:
+        url: 'http://127.0.0.1:{{ fallout_gunicorn_port }}/login/'
+        headers:
+          Host: '{{ fallout_domain }}'
+          X-Forwarded-Proto: https
+        status_code: 200
+      register: web_check
+      retries: 12
+      delay: 5
+      until: web_check.status | default(0) == 200
+
+    - name: Verify public HTTPS virtual host locally
+      ansible.builtin.uri:
+        url: 'https://{{ fallout_domain }}/login/'
+        status_code: 200
+      register: https_check
+      retries: 6
+      delay: 5
+      until: https_check.status | default(0) == 200
+
+  handlers:
+    - name: Reload PostgreSQL authentication
+      ansible.builtin.systemd_service:
+        name: '{{ fallout_postgres_service }}'
+        state: reloaded

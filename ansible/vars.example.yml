@@ -1,0 +1,22 @@
+fallout_domain: rpg.example.org
+fallout_acme_email: admin@example.org
+# Path on the Ansible controller, not on the target host.
+fallout_wheel: ../dist/fallout_rpg-2026.10.27-py3-none-any.whl
+# Must already provide Python >= 3.13 (no third-party repositories added).
+fallout_python: /usr/bin/python3
+
+# Define these variables in an encrypted vault file, NOT here:
+# fallout_secret_key: <random URL-safe secret, at least 50 characters>
+# fallout_db_password: <independent random URL-safe secret, at least 32 characters>
+# fallout_admin_password: <strong initial password; omit after first deployment>
+
+# Optional overrides (distribution package names and paths can vary):
+# fallout_python_packages: [python3, python3-venv]
+# fallout_postgres_service: postgresql
+# fallout_postgres_data: /var/lib/pgsql/data
+# fallout_postgres_init: /usr/bin/postgresql-setup
+# fallout_redis_port: 6380
+# fallout_gunicorn_port: 8000
+# fallout_web_workers: 3
+# fallout_celery_concurrency: 2
+# fallout_gunicorn_version: '26.2.0'

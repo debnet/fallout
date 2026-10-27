@@ -6,8 +6,14 @@ from configurations import Configuration, values
 from django.contrib import messages
 from django.utils.translation import gettext_lazy as _
 
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# Source checkouts keep shared resources at the repository root; wheels store
+# them next to this module. Writable data must never default to site-packages.
+PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+PACKAGE_DIR = os.path.dirname(os.path.abspath(__file__))
+RESOURCE_DIR = PACKAGE_DIR if os.path.isdir(os.path.join(PACKAGE_DIR, "statics")) else PROJECT_DIR
+BASE_DIR = os.path.abspath(
+    os.environ.get("FALLOUT_HOME") or (os.getcwd() if RESOURCE_DIR == PACKAGE_DIR else PROJECT_DIR)
+)
 
 
 class Base(Configuration):
@@ -15,6 +21,7 @@ class Base(Configuration):
     DEBUG = values.BooleanValue(False)
     INTERNAL_IPS = ["127.0.0.1"]
     ALLOWED_HOSTS = values.ListValue(["*"])
+    CSRF_TRUSTED_ORIGINS = values.ListValue([])
 
     # Site
     SITE_ID = values.IntegerValue(1)
@@ -68,7 +75,7 @@ class Base(Configuration):
 
     # Database
     # https://docs.djangoproject.com/en/2.0/ref/settings/#databases
-    DATABASES = values.DatabaseURLValue("sqlite://./db.sqlite3")
+    DATABASES = values.DatabaseURLValue(f"sqlite:///{os.path.join(BASE_DIR, 'db.sqlite3')}")
     DATABASE_ROUTERS = values.ListValue(("common.router.DatabaseOverrideRouter",))
 
     # URL router
@@ -80,7 +87,9 @@ class Base(Configuration):
     TEMPLATES = [
         {
             "BACKEND": "django.template.backends.django.DjangoTemplates",
-            "DIRS": ("templates",),
+            "DIRS": tuple(
+                dict.fromkeys((os.path.join(BASE_DIR, "templates"), os.path.join(RESOURCE_DIR, "templates")))
+            ),
             "APP_DIRS": True,
             "OPTIONS": {
                 "context_processors": [
@@ -128,8 +137,8 @@ class Base(Configuration):
     )
 
     LOCALE_PATHS = (
-        os.path.join(BASE_DIR, "locale"),
-        os.path.join(BASE_DIR, "fallout/locale"),
+        os.path.join(RESOURCE_DIR, "locale"),
+        os.path.join(PROJECT_DIR, "fallout/locale"),
     )
 
     # Static files (CSS, JavaScript, Images)
@@ -137,7 +146,7 @@ class Base(Configuration):
     STATIC_URL = values.Value("/static/")
     STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
-    STATICFILES_DIRS = (os.path.join(BASE_DIR, "statics"),)
+    STATICFILES_DIRS = (os.path.join(RESOURCE_DIR, "statics"),)
 
     STATICFILES_FINDERS = (
         "django.contrib.staticfiles.finders.AppDirectoriesFinder",
@@ -284,7 +293,7 @@ class Base(Configuration):
             "file": {
                 "level": "WARNING",
                 "class": "logging.FileHandler",
-                "filename": "rpg.log",
+                "filename": os.path.join(BASE_DIR, "rpg.log"),
                 "formatter": "simple",
             },
         },
@@ -342,7 +351,7 @@ class Prod(Base):
         "default": {
             "BACKEND": "django_redis.cache.RedisCache",
             "LOCATION": [
-                values.Value("127.0.0.1:6379:1", environ_name="REDIS_CACHE"),
+                values.Value("redis://127.0.0.1:6379/1", environ_name="REDIS_CACHE"),
             ],
             "KEY_PREFIX": "cache",
             "TIMEOUT": 3600,
@@ -368,10 +377,10 @@ class Prod(Base):
         "fanout_prefix": True,
         "fanout_patterns": True,
     }
-    CELERY_ACCEPT_CONTENT = ["json", "msgpack", "yaml", "pickle"]
-    CELERY_RESULT_SERIALIZER = "pickle"
-    CELERY_RESULT_BACKEND = values.Value("redis")
-    CELERY_TASK_SERIALIZER = "pickle"
+    CELERY_ACCEPT_CONTENT = ["json"]
+    CELERY_RESULT_SERIALIZER = "json"
+    CELERY_RESULT_BACKEND = values.Value("redis://localhost:6379/2")
+    CELERY_TASK_SERIALIZER = "json"
     CELERY_TASK_RESULT_EXPIRES = 3600
     CELERY_DISABLE_RATE_LIMITS = True
     CELERY_TASK_ALWAYS_EAGER = values.BooleanValue(False, environ_name="CELERY_TASK_ALWAYS_EAGER")
