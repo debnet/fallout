@@ -1,38 +1,53 @@
 # Fallout RPG
 
-This project aims to provide tools to a Fallout RPG (or Pen & Paper) gamemaster.
+**A web-based companion for running tabletop adventures in the Fallout wasteland.**
 
-The game system is **not** a copy of the Fallout PnP by J. Sawyer, I changed many things 
-I found very odd and which can broke the gameplay and/or the immersion. 
-View this as my own and personal interpretation of the Fallout game system.
+Fallout RPG brings campaign management, character sheets and game mechanics
+together in one place. It helps gamemasters keep track of the world and its
+inhabitants, resolve encounters and follow the consequences of play — leaving
+more room at the table for exploration, difficult choices and questionable loot.
 
-By the way, I'm still working of this system and I don't really care about the
-retro-compatibility with existing or running projects (especially with database migrations),
-so don't be surprised if a newer versions does not work above an older one.
+The project implements a **homebrew game system**, built around S.P.E.C.I.A.L.
+and a personal interpretation of the Fallout universe. It is not a direct
+implementation of J. Sawyer's Fallout PnP rules: combat, progression and other
+mechanics have been adapted to suit this system's approach to gameplay.
 
-Currenty the project includes:
+Originally built for a personal table, it has grown into a Django application
+with a tested rules engine, a REST API, French and English translations, and
+documented packaging and deployment options. It remains an independent project
+rather than an official Fallout product.
 
-* Campaigns
-  * Time management
-  * Loot management
-  * Global effects
-  * Radiation level
-  * Turn sequence
-* Characters and creatures
-  * Primary and derived statistics
-  * Health and actions
-  * Single, targetted ou burst attacks
-  * Damage management
-  * Inventory and equipment management
-  * Effects (malus, bonus, perks, traits)
-  * S.P.E.C.I.A.L. and skills rolls
-  * Rolls and fight history
-* Items management (weapons, armors, consumables)
-* Random loots
+## Features
 
-## How to use it?
+- **Campaign management** — track in-game time, turn order, radiation levels,
+  campaign-wide effects and loot.
+- **Characters and creatures** — manage S.P.E.C.I.A.L., skills, derived
+  statistics, progression, health and action points.
+- **Combat resolution** — handle single shots, targeted attacks and bursts,
+  armor protection, damage, healing and critical hits.
+- **Inventory and equipment** — maintain weapons, armor, ammunition and
+  consumables, including reloading, durability and repairs.
+- **Effects and survival** — apply bonuses, penalties, perks, traits and
+  ongoing effects, with mechanics for needs and radiation.
+- **Rolls and history** — resolve skill checks and keep a record of rolls and
+  combat outcomes.
+- **Item catalogues and loot** — use the bundled item and creature fixtures
+  and generate random loot.
 
-#### With docker
+## Project status
+
+The application and its homebrew rules continue to evolve. Automated tests cover
+the rules engine, API transactions and access permissions, alongside deployment
+initialization. Compatibility across releases is not guaranteed, particularly
+when the rules or database schema change: back up campaign data and test upgrades
+on a separate instance before updating a running game.
+
+## Installation and deployment
+
+Choose Docker Compose for a containerized setup, Ansible for a native server
+installation, or a Python environment for local development.
+
+### Docker Compose
 
 The production-oriented Compose stack includes Gunicorn, a Celery worker,
 PostgreSQL, Redis and Nginx for static files. Copy `.env.example` to `.env`,
@@ -51,19 +66,18 @@ The HTTP listener is bound to `127.0.0.1:8080` and requires a trusted HTTPS
 reverse proxy in front of it. See [DOCKER.md](DOCKER.md) for deployment,
 persistence, upgrades and media access limitations.
 
-#### From Python
+### Native deployment with Ansible
 
 For a native systemd deployment with PostgreSQL, Redis, Celery and Nginx HTTPS
 (Let's Encrypt), see [ansible/README.md](ansible/README.md).
 
-Like any Django project, you can start a development webserver with this command line:
+### Local development
 
-`python manage.py runserver`
+Install the dependencies in a dedicated virtual environment with
+`python -m pip install -r requirements.txt`. Django's development server can
+then be started with `python manage.py runserver`.
 
-You have to install the requirements first with: `pip install -r requirements.txt`.
-Don't hesitate to install them in a dedicated virtualenv.
-
-#### From an installed package
+### From an installed package
 
 The `fallout-rpg` distribution includes both the `fallout` Django application and
 the `rpg` project, migrations, fixtures, source static assets, templates and
@@ -100,9 +114,11 @@ For production, configure `DJANGO_CONFIGURATION=Prod`, a stable
 `rpg.wsgi:application`. Serve collected static files and uploaded media
 separately. See [PACKAGING.md](PACKAGING.md) for build and release instructions.
 
-## Any questions?
+## Feedback and contributions
 
-Feel free to provide any feedback or anomalies through an issue or an email.
+Bug reports, suggestions and feedback from your own games are welcome. Open an
+issue to describe a problem or discuss an idea; for rules-related changes,
+please explain the gameplay intent as well as the proposed implementation.
 
 ## License
 
