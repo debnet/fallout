@@ -1,6 +1,6 @@
 celery==5.6.2
 coreapi==2.3.3
-common-framework==2026.10.25
+common-framework==2026.10.27
 coverage==7.17.0
 dj-database-url==3.1.0
 django==6.0.1
